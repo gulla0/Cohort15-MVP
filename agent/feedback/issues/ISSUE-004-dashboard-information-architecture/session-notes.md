@@ -24,3 +24,24 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/session-notes.md`
 - `agent/feedback/issues/ISSUE-004-dashboard-information-architecture/*`
+
+### 2026-05-30 10:06 EDT
+
+User Feedback:
+- Resolve the available feedback issues.
+
+Issue Mapping:
+- Existing ISSUE-004 resolved.
+
+Reasoning:
+- ISSUE-004 was the only open feedback issue.
+- The fix stayed in dashboard presentation and test coverage. Ledger refund semantics and token summary data remain intact, but dashboard UI no longer renders Returned or repeated per-row token summaries.
+- The combined dashboard now follows the requested content model: account tokens, active cohorts and schedule, created cohorts, and interested cohorts.
+
+Artifacts Updated:
+- `src/ui/dashboards.mjs`
+- `src/ui/styles.css`
+- `src/ui/home.mjs`
+- `tests/dashboards.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- ISSUE-004 tracking files

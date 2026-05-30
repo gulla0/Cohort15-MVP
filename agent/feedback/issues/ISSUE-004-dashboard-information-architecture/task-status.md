@@ -4,7 +4,7 @@
 
 | Task ID | Title | Status | Dependencies Satisfied | Evidence | Notes |
 |---|---|---|---|---|---|
-| ISSUE-004-T01 | Remove repeated dashboard token details | not_started | yes | Pending. | Row-level token summaries currently duplicate dashboard balance state. |
-| ISSUE-004-T02 | Simplify dashboard token summary states | not_started | no | Pending. | Depends on T01; dashboard should show Available, In use, and Used only. |
-| ISSUE-004-T03 | Rename dashboard sections around user intent | not_started | no | Pending. | Depends on T01; preferred direction is content-based labels like Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts. |
-| ISSUE-004-T04 | Review dashboard user flow hierarchy | not_started | no | Pending. | Depends on T01-T03; should validate active schedule hierarchy, empty states, and next actions together. |
+| ISSUE-004-T01 | Remove repeated dashboard token details | done | yes | `npm test`, `npm run lint`, and browser smoke passed. | Removed per-row creator/participant token summaries while preserving status, schedule, quorum, and access context. |
+| ISSUE-004-T02 | Simplify dashboard token summary states | done | yes | `npm test`, `npm run lint`, and browser smoke passed. | Dashboard token summaries now render Available, In use, and Used only; refund accounting remains internal. |
+| ISSUE-004-T03 | Rename dashboard sections around user intent | done | yes | `npm test`, `npm run lint`, and browser smoke passed. | Replaced role-heavy dashboard labels with My Cohorts, My Events, Account Tokens, Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts. |
+| ISSUE-004-T04 | Review dashboard user flow hierarchy | done | yes | `npm test`, `npm run lint`, and browser smoke passed. | Combined dashboard now reads from account token state to active schedule, created cohorts, and interested cohorts with clearer empty states. |

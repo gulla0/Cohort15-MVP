@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-004-T01",
       "title": "Remove repeated dashboard token details",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Audit dashboard content and remove repeated token information where row-level copy duplicates the balance summary.",
       "inputs": [
@@ -43,12 +43,13 @@
         "dashboard route rendering",
         "MVP verification assertions"
       ],
-      "stop_condition": "Stop when duplicated dashboard token copy is removed and tests cover the revised content."
+      "stop_condition": "Stop when duplicated dashboard token copy is removed and tests cover the revised content.",
+      "evidence": "2026-05-30 10:06 EDT: Removed row-level creator/participant token copy from dashboard cards while preserving topic, schedule, quorum, status, and link context. Covered by dashboard and MVP verification tests."
     },
     {
       "id": "ISSUE-004-T02",
       "title": "Simplify dashboard token summary states",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-004-T01"
       ],
@@ -86,12 +87,13 @@
       "shared_dependencies": [
         "token ledger balance shape"
       ],
-      "stop_condition": "Stop when Returned is removed from dashboard presentation while internal refund semantics remain untouched."
+      "stop_condition": "Stop when Returned is removed from dashboard presentation while internal refund semantics remain untouched.",
+      "evidence": "2026-05-30 10:06 EDT: Dashboard token panels now render only Available, In use, and Used. Ledger refund accounting remains unchanged and tests assert Returned is absent from dashboard output."
     },
     {
       "id": "ISSUE-004-T03",
       "title": "Rename dashboard sections around user intent",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-004-T01"
       ],
@@ -141,12 +143,13 @@
         "topbar/dashboard copy",
         "legacy dashboard route tests"
       ],
-      "stop_condition": "Stop when dashboard wording is consistently updated without breaking legacy route compatibility."
+      "stop_condition": "Stop when dashboard wording is consistently updated without breaking legacy route compatibility.",
+      "evidence": "2026-05-30 10:06 EDT: Replaced Creator/Participant dashboard presentation labels with My Cohorts, My Events, My Cohorts & Events, Account Tokens, Created Cohorts, and Interested Cohorts. Legacy routes remain covered by tests."
     },
     {
       "id": "ISSUE-004-T04",
       "title": "Review dashboard user flow hierarchy",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-004-T01",
         "ISSUE-004-T02",
@@ -191,7 +194,8 @@
         "dashboard content hierarchy",
         "responsive dashboard styles"
       ],
-      "stop_condition": "Stop when the dashboard flow review changes are implemented and verified."
+      "stop_condition": "Stop when the dashboard flow review changes are implemented and verified.",
+      "evidence": "2026-05-30 10:06 EDT: Combined dashboard now leads with account token state, then Active Cohorts & Schedule, then Created Cohorts and Interested Cohorts with clearer empty states and next-action copy. Verified by tests, lint, and browser smoke."
     }
   ]
 }

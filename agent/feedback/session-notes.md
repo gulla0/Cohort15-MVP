@@ -103,3 +103,25 @@ Reasoning:
 Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-004-dashboard-information-architecture/*`
+
+### 2026-05-30 10:06
+
+User Feedback:
+- Assume the role of feedback resolver and resolve the available issues.
+
+Issue Mapping:
+- Existing ISSUE-004 resolved.
+
+Reasoning:
+- ISSUE-004 was the only issue still marked not_started in the feedback index.
+- The changes are presentation-focused: dashboard UI now avoids duplicated token details and role-heavy labels while preserving ledger refund accounting and existing route compatibility.
+- The combined dashboard hierarchy now leads with account token state, then active cohorts and schedule, then created cohorts and interested cohorts.
+
+Artifacts Updated:
+- `src/ui/dashboards.mjs`
+- `src/ui/styles.css`
+- `src/ui/home.mjs`
+- `tests/dashboards.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-004-dashboard-information-architecture/*`

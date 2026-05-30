@@ -17,3 +17,7 @@ graph TD
 ## Order Rationale
 
 Start by removing duplicate token detail so the remaining dashboard content is easier to reason about. Then simplify the summary states and rename the dashboard sections. Finish with a broader flow review once the content and vocabulary are stable.
+
+## Resolution
+
+All ISSUE-004 tasks were completed on 2026-05-30. The dashboard now leads with account token state, renders only Available/In use/Used, removes repeated row-level token details, and uses content-based sections for Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts.

@@ -115,7 +115,7 @@ test('participant dashboard lists interested cohorts and respects link authoriza
   });
 });
 
-test('dashboard routes render creator and participant views', async () => {
+test('dashboard routes render content-based cohort and event views', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
   const activeEvent = state.repositories.events.save(eventFixture({ status: 'active' }));
@@ -134,22 +134,32 @@ test('dashboard routes render creator and participant views', async () => {
 
   const creator = await invoke(handler, { url: '/dashboard/creator?userId=user-creator', method: 'GET' });
   assert.equal(creator.status, 200);
-  assert.match(creator.body, /Creator dashboard/);
+  assert.match(creator.body, /My Cohorts/);
+  assert.match(creator.body, /My Tokens/);
   assert.match(creator.body, /Open Source Pairing Cohort/);
   assert.match(creator.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(creator.body, /https:\/\/meet\.example\/private-dashboard/);
-  assert.match(creator.body, /creator tokens: 2 in use \/ 2 used \/ 0 returned/);
+  assert.match(creator.body, /Available/);
+  assert.match(creator.body, /In use/);
+  assert.match(creator.body, /Used/);
+  assert.doesNotMatch(creator.body, /Returned/);
+  assert.doesNotMatch(creator.body, /creator tokens:/);
 
   const participant = await invoke(handler, { url: '/dashboard/participant?userId=user-participant', method: 'GET' });
   assert.equal(participant.status, 200);
-  assert.match(participant.body, /Participant dashboard/);
+  assert.match(participant.body, /My Events/);
+  assert.match(participant.body, /My Tokens/);
   assert.match(participant.body, /Seat confirmed/);
   assert.match(participant.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(participant.body, /https:\/\/meet\.example\/private-dashboard/);
-  assert.match(participant.body, /participant tokens: 1 in use \/ 1 used \/ 0 returned/);
+  assert.match(participant.body, /Available/);
+  assert.match(participant.body, /In use/);
+  assert.match(participant.body, /Used/);
+  assert.doesNotMatch(participant.body, /Returned/);
+  assert.doesNotMatch(participant.body, /participant tokens:/);
 });
 
-test('combined dashboard route shows creator and participant dashboards together', async () => {
+test('combined dashboard route shows token summary, active schedule, created cohorts, and interested cohorts', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
   const activeEvent = state.repositories.events.save(eventFixture({ status: 'active' }));
@@ -169,10 +179,21 @@ test('combined dashboard route shows creator and participant dashboards together
   const response = await invoke(handler, { url: '/dashboard', method: 'GET' });
 
   assert.equal(response.status, 200);
-  assert.match(response.body, /Creator dashboard/);
-  assert.match(response.body, /Participant dashboard/);
-  assert.match(response.body, /creator tokens: 2 in use \/ 2 used \/ 0 returned/);
-  assert.match(response.body, /participant tokens: 1 in use \/ 1 used \/ 0 returned/);
+  assert.match(response.body, /My Cohorts &amp; Events/);
+  assert.match(response.body, /Account Tokens/);
+  assert.match(response.body, /Active Cohorts &amp; Schedule/);
+  assert.match(response.body, /Created Cohorts/);
+  assert.match(response.body, /Interested Cohorts/);
+  assert.match(response.body, /Available/);
+  assert.match(response.body, /In use/);
+  assert.match(response.body, /Used/);
+  assert.match(response.body, /Demo Creator started this cohort/);
+  assert.match(response.body, /Demo Participant has a confirmed seat/);
+  assert.doesNotMatch(response.body, /Returned/);
+  assert.doesNotMatch(response.body, /creator tokens:/);
+  assert.doesNotMatch(response.body, /participant tokens:/);
+  assert.doesNotMatch(response.body, /Creator dashboard/);
+  assert.doesNotMatch(response.body, /Participant dashboard/);
   assert.match(response.body, /<a class="brand-link" href="\/">Cohort15<\/a>/);
   assert.match(response.body, /<div class="topbar-links">/);
   assert.doesNotMatch(response.body, /dashboard\/creator">Creator dashboard/);

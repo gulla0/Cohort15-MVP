@@ -114,12 +114,18 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
     method: 'GET'
   });
   assert.equal(combinedDashboard.status, 200);
-  assert.match(combinedDashboard.body, /Creator dashboard/);
-  assert.match(combinedDashboard.body, /Participant dashboard/);
+  assert.match(combinedDashboard.body, /My Cohorts &amp; Events/);
+  assert.match(combinedDashboard.body, /Account Tokens/);
+  assert.match(combinedDashboard.body, /Active Cohorts &amp; Schedule/);
+  assert.match(combinedDashboard.body, /Created Cohorts/);
+  assert.match(combinedDashboard.body, /Interested Cohorts/);
   assert.match(combinedDashboard.body, /Practical AI Build Cohort/);
   assert.match(combinedDashboard.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(combinedDashboard.body, /Seat confirmed/);
   assert.match(combinedDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
+  assert.doesNotMatch(combinedDashboard.body, /Returned/);
+  assert.doesNotMatch(combinedDashboard.body, /creator tokens:/);
+  assert.doesNotMatch(combinedDashboard.body, /participant tokens:/);
 });
 
 test('MVP expiry path refunds held creator and participant tokens and removes expired cohorts from public discovery', async () => {

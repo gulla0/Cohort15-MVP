@@ -33,11 +33,11 @@ export function renderHomePage() {
       <section class="grid" aria-label="MVP actions">
         <article>
           <h2>For creators</h2>
-          <p>Publish a cohort, track quorum, and open your creator dashboard after launch.</p>
+          <p>Publish a cohort, track quorum, and follow created cohorts from your dashboard.</p>
         </article>
         <article>
           <h2>For participants</h2>
-          <p>Browse cohorts, use 1 token to show interest, and return to your participant dashboard.</p>
+          <p>Browse cohorts, use 1 token to show interest, and follow your events from your dashboard.</p>
         </article>
         <article>
           <h2>Token return</h2>
