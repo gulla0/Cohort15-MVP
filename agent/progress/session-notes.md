@@ -2,6 +2,31 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:18 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `docs/cohort15-mvp-spec-v3.md`
+- `src/domain/constants.mjs`
+- `tests/foundation.test.mjs`
+
+Decided:
+- Classified the user request as approved main implementation work.
+- Selected T002 as the next wave because T001 was done and T002 was the only unblocked critical-path task.
+- Kept the wave scoped to dependency-free domain modules and focused tests, with no persistence or UI integration.
+
+Assumptions Made:
+- With no TypeScript toolchain in the dependency-free scaffold, typed domain concepts are represented with JSDoc typedefs and frozen enum constants.
+- Locked links should remain hidden for open events and should be visible after activation only to the creator or viewers already associated with interest.
+
+Next Recommended Step:
+- Execute T003: add persistence schema/repositories and token ledger primitives using the domain validators from T002.
+
 ### 2026-05-30 00:13 EDT
 
 Read:

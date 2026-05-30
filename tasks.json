@@ -49,7 +49,7 @@
     {
       "id": "T002",
       "title": "Implement domain types and validation rules",
-      "status": "not_started",
+      "status": "done",
       "phase": "Product Scaffold And Domain Foundation",
       "dependencies": [
         "T001"
@@ -80,8 +80,8 @@
         "Run type checks if available"
       ],
       "stop_condition": "Stop before persistence or UI integration.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:18 EDT: Added JSDoc domain model typedefs, spec-aligned enum constants, event and related-object validators, 14-day expiry defaulting, and locked-link viewer serialization policy. `npm run check` passed.",
+      "notes": "Private links remain hidden for open events; active-event links are visible only to the creator or interested viewers supplied to the serializer."
     },
     {
       "id": "T003",

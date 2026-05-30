@@ -2,6 +2,32 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:18 EDT
+
+Task:
+- T002 Implement domain types and validation rules
+
+Files Changed:
+- `src/domain/constants.mjs`
+- `src/domain/models.mjs`
+- `src/domain/validation.mjs`
+- `tests/domain-validation.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added spec-aligned domain constants for event categories, statuses, recurrence, social post status, interest status, token transaction type, and social platform values.
+- Added JSDoc domain model typedefs for Event, EventInterest, TokenTransaction, and SocialPost.
+- Added domain validators, 14-day default expiry calculation, event builder defaults, and a locked-link serializer that hides private links for open events.
+- Added focused domain tests for enum alignment, event validation, expiry defaults, link visibility, and related object validators.
+- Marked T002 done and unblocked T003.
+
+Verification:
+- `npm run check` passed.
+
 ### 2026-05-30 00:13 EDT
 
 Task:
