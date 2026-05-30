@@ -2,6 +2,37 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:28 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `atomic-task-graph.md`
+- `agent/progress/blockers.md`
+- `agent/progress/change-log.md`
+- `docs/cohort15-mvp-spec-v3.md`
+- `src/domain/constants.mjs`
+- `src/domain/models.mjs`
+- `src/domain/validation.mjs`
+- `tests/domain-validation.test.mjs`
+
+Decided:
+- Classified the user request as approved main implementation work.
+- Selected T003 as the next wave because T001 and T002 were done and T003 was the only unblocked critical-path task.
+- Kept persistence dependency-free by adding in-memory repositories plus explicit schema metadata instead of introducing a database package.
+- Implemented token balances as values derived from auditable grant, hold, consume, refund, and future purchase transaction records.
+
+Assumptions Made:
+- MVP persistence can start as in-memory storage because the selected scaffold is dependency-free and later database migration can follow the schema metadata.
+- Token transaction amounts are positive; ledger semantics derive held, consumed, refunded, and available balances by transaction type.
+
+Next Recommended Step:
+- Execute T004: build the create cohort flow using the repository and token ledger APIs from T003.
+
 ### 2026-05-30 00:18 EDT
 
 Read:

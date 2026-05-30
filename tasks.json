@@ -86,7 +86,7 @@
     {
       "id": "T003",
       "title": "Add persistence schema and token ledger primitives",
-      "status": "not_started",
+      "status": "done",
       "phase": "Product Scaffold And Domain Foundation",
       "dependencies": [
         "T002"
@@ -120,8 +120,8 @@
         "Run migration/schema validation if available"
       ],
       "stop_condition": "Stop before user-facing create/interest flows.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:28 EDT: Added dependency-free in-memory persistence schema/repositories for users, events, interests, token transactions, and social posts; demo seed grants; and token ledger primitives for grant, hold, consume, refund, and derived balances. `npm run check` passed.",
+      "notes": "Schema module records a future purchase source path without implementing USD token sales."
     },
     {
       "id": "T004",

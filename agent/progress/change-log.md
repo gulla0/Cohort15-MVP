@@ -2,6 +2,34 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:28 EDT
+
+Task:
+- T003 Add persistence schema and token ledger primitives
+
+Files Changed:
+- `src/persistence/schema.mjs`
+- `src/persistence/store.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/token-ledger.mjs`
+- `src/persistence/seeds.mjs`
+- `tests/persistence-ledger.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added explicit persistence schema metadata for users, events, event interests, token transactions, and social posts, including a future purchase source path.
+- Added dependency-free in-memory repositories that validate domain records and enforce unique event interest per user/event.
+- Added token ledger primitives for grants, holds, consumes, refunds, insufficient-token checks, and derived available/held balances.
+- Added demo seed users with starting tokens issued through grant transactions.
+- Marked T003 done and unblocked T004.
+
+Verification:
+- `npm run check` passed.
+
 ### 2026-05-30 00:18 EDT
 
 Task:
