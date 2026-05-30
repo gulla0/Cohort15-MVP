@@ -185,6 +185,7 @@ test('show interest route unlocks the private link for the participant when quor
   assert.equal(response.status, 200);
   assert.match(response.body, /Quorum met/);
   assert.match(response.body, /Private link unlocked/);
-  assert.match(response.body, /Open participant dashboard/);
+  assert.match(response.body, /Open dashboard/);
+  assert.match(response.body, /href="\/dashboard\?participantUserId=user-participant"/);
   assert.match(response.body, /https:\/\/meet\.example\/private-open-source/);
 });

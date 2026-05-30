@@ -64,3 +64,20 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-001-mvp-flow-ux-repair/*`
 - `agent/feedback/issues/ISSUE-002-event-images/*`
+
+### 2026-05-30 09:10
+
+User Feedback:
+- Both dashboards should be on the same page instead of split across two dashboard destinations.
+- Navigation options should be on the other end of the page because their current placement beside the app name is confusing.
+
+Issue Mapping:
+- New ISSUE-003: Combine Dashboards and Separate Navigation.
+
+Reasoning:
+- This is a distinct dashboard/navigation usability issue, not a duplicate of the earlier dashboard availability feedback.
+- The implementation touches shared topbar markup and dashboard route/rendering behavior, so it should be tracked as one issue with two local tasks.
+
+Artifacts Updated:
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-003-combined-dashboard-navigation/*`

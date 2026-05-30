@@ -75,7 +75,9 @@ button {
 .topbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
   margin-bottom: 24px;
 }
 
@@ -83,6 +85,17 @@ button {
   color: #146c5c;
   font-weight: 800;
   text-decoration: none;
+}
+
+.brand-link {
+  margin-right: auto;
+}
+
+.topbar-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 18px;
 }
 
 .page-heading {
@@ -156,6 +169,26 @@ article p {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.dashboard-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.dashboard-panel-heading h2 {
+  margin-bottom: 4px;
+  font-size: 1.35rem;
+}
+
+.dashboard-panel-heading p {
+  margin: 0;
+  color: #4d5c53;
 }
 
 .dashboard-summary article {

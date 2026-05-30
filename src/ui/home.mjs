@@ -12,11 +12,12 @@ export function renderHomePage() {
   <body>
     <main class="shell">
       <nav class="topbar">
-        <a href="/">Cohort15</a>
-        <a href="/cohorts">Cohorts</a>
-        <a href="/cohorts/new">Create</a>
-        <a href="/dashboard/creator">Creator dashboard</a>
-        <a href="/dashboard/participant">Participant dashboard</a>
+        <a class="brand-link" href="/">Cohort15</a>
+        <div class="topbar-links">
+          <a href="/cohorts">Cohorts</a>
+          <a href="/cohorts/new">Create</a>
+          <a href="/dashboard">Dashboard</a>
+        </div>
       </nav>
 
       <section class="hero" aria-labelledby="page-title">

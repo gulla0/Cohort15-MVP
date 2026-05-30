@@ -33,11 +33,12 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
   <body>
     <main class="shell">
       <nav class="topbar">
-        <a href="/">${APP_NAME}</a>
-        <a href="/cohorts">Cohorts</a>
-        <a href="/cohorts/new">Create</a>
-        <a href="/dashboard/creator">Creator dashboard</a>
-        <a href="/dashboard/participant">Participant dashboard</a>
+        <a class="brand-link" href="/">${APP_NAME}</a>
+        <div class="topbar-links">
+          <a href="/cohorts">Cohorts</a>
+          <a href="/cohorts/new">Create</a>
+          <a href="/dashboard">Dashboard</a>
+        </div>
       </nav>
 
       <section class="page-heading" aria-labelledby="page-title">
@@ -135,7 +136,7 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
       <ul>${interestErrors.map((error) => `<li>${escapeHtml(error)}</li>`).join('')}</ul>
     </div>` : ''}
     ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} used ${escapeHtml(interestResult.tokenHoldAmount)} token to show interest. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'If quorum is not met, this token is returned.'}</p>
-      <p><a href="/dashboard/participant?userId=${encodeURIComponent(interestResult.participant.id)}">Open participant dashboard</a></p>` : ''}
+      <p><a href="/dashboard?participantUserId=${encodeURIComponent(interestResult.participant.id)}">Open dashboard</a></p>` : ''}
     ${event.status === 'open' ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
       <label>
         Demo participant

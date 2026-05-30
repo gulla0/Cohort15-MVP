@@ -61,7 +61,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(createResponse.status, 201);
   assert.match(createResponse.body, /Cohort created/);
-  assert.match(createResponse.body, /Creator dashboard/);
+  assert.match(createResponse.body, /href="\/dashboard\?creatorUserId=user-creator"/);
   assert.doesNotMatch(createResponse.body, /private-ai-build/);
 
   const [event] = state.repositories.events.list();
@@ -93,7 +93,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(interestResponse.status, 200);
   assert.match(interestResponse.body, /Quorum met/);
-  assert.match(interestResponse.body, /Open participant dashboard/);
+  assert.match(interestResponse.body, /Open dashboard/);
   assert.match(interestResponse.body, /https:\/\/meet\.example\/private-ai-build/);
 
   assert.equal(state.repositories.events.findById(event.id).status, 'active');
@@ -109,22 +109,17 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   assert.match(anonymousActiveDetail.body, /Private link unlocked for members/);
   assert.doesNotMatch(anonymousActiveDetail.body, /private-ai-build/);
 
-  const creatorDashboard = await invoke(handler, {
-    url: '/dashboard/creator?userId=user-creator',
+  const combinedDashboard = await invoke(handler, {
+    url: '/dashboard?creatorUserId=user-creator&participantUserId=user-participant',
     method: 'GET'
   });
-  assert.equal(creatorDashboard.status, 200);
-  assert.match(creatorDashboard.body, /Practical AI Build Cohort/);
-  assert.match(creatorDashboard.body, /src="\/assets\/default-cohort\.png"/);
-  assert.match(creatorDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
-
-  const participantDashboard = await invoke(handler, {
-    url: '/dashboard/participant?userId=user-participant',
-    method: 'GET'
-  });
-  assert.equal(participantDashboard.status, 200);
-  assert.match(participantDashboard.body, /Seat confirmed/);
-  assert.match(participantDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
+  assert.equal(combinedDashboard.status, 200);
+  assert.match(combinedDashboard.body, /Creator dashboard/);
+  assert.match(combinedDashboard.body, /Participant dashboard/);
+  assert.match(combinedDashboard.body, /Practical AI Build Cohort/);
+  assert.match(combinedDashboard.body, /src="\/assets\/default-cohort\.png"/);
+  assert.match(combinedDashboard.body, /Seat confirmed/);
+  assert.match(combinedDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
 });
 
 test('MVP expiry path refunds held creator and participant tokens and removes expired cohorts from public discovery', async () => {

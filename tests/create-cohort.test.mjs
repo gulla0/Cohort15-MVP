@@ -158,6 +158,6 @@ test('create cohort page renders form errors and success without exposing privat
   assert.equal(valid.status, 201);
   assert.match(valid.body, /Cohort created/);
   assert.match(valid.body, /Private link status: locked until quorum/);
-  assert.match(valid.body, /Creator dashboard/);
+  assert.match(valid.body, /href="\/dashboard\?creatorUserId=user-creator"/);
   assert.doesNotMatch(valid.body, /zoom\.example/);
 });

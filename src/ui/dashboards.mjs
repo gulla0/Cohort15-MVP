@@ -25,11 +25,12 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
   <body>
     <main class="shell">
       <nav class="topbar">
-        <a href="/">${APP_NAME}</a>
-        <a href="/cohorts">Cohorts</a>
-        <a href="/cohorts/new">Create</a>
-        <a href="/dashboard/creator">Creator dashboard</a>
-        <a href="/dashboard/participant">Participant dashboard</a>
+        <a class="brand-link" href="/">${APP_NAME}</a>
+        <div class="topbar-links">
+          <a href="/cohorts">Cohorts</a>
+          <a href="/cohorts/new">Create</a>
+          <a href="/dashboard">Dashboard</a>
+        </div>
       </nav>
 
       <section class="page-heading" aria-labelledby="page-title">
@@ -66,6 +67,16 @@ function balancePanel(balance) {
       <h2>Returned</h2>
       <p>${escapeHtml(balance.refunded)} token(s)</p>
     </article>
+  </section>`;
+}
+
+function dashboardPanel({ title, description, children }) {
+  return `<section class="dashboard-panel" aria-labelledby="${escapeHtml(title.toLowerCase().replaceAll(' ', '-'))}">
+    <div class="dashboard-panel-heading">
+      <h2 id="${escapeHtml(title.toLowerCase().replaceAll(' ', '-'))}">${escapeHtml(title)}</h2>
+      <p>${escapeHtml(description)}</p>
+    </div>
+    ${children}
   </section>`;
 }
 
@@ -153,5 +164,32 @@ export function renderParticipantDashboardPage({ dashboard }) {
       ${dashboard.interests.length === 0
         ? emptyState('Show interest in a cohort to see participant activity here.')
         : `<section class="event-list">${dashboard.interests.map(participantInterestRow).join('')}</section>`}`
+  });
+}
+
+export function renderDashboardPage({ creatorDashboard, participantDashboard }) {
+  return pageShell({
+    title: 'Dashboard',
+    eyebrow: 'Dashboard',
+    heading: 'Demo account activity',
+    lede: 'Creator and participant activity are shown together so the MVP account states are easier to compare.',
+    body: `<div class="dashboard-grid">
+      ${dashboardPanel({
+        title: 'Creator dashboard',
+        description: `${creatorDashboard.user.displayName} owned cohorts, token summaries, and unlocked cohort links.`,
+        children: `${balancePanel(creatorDashboard.balance)}
+          ${creatorDashboard.cohorts.length === 0
+            ? emptyState('Create a cohort to see creator activity here.')
+            : `<section class="event-list">${creatorDashboard.cohorts.map(creatorCohortRow).join('')}</section>`}`
+      })}
+      ${dashboardPanel({
+        title: 'Participant dashboard',
+        description: `${participantDashboard.user.displayName} interested cohorts, token summaries, and access status.`,
+        children: `${balancePanel(participantDashboard.balance)}
+          ${participantDashboard.interests.length === 0
+            ? emptyState('Show interest in a cohort to see participant activity here.')
+            : `<section class="event-list">${participantDashboard.interests.map(participantInterestRow).join('')}</section>`}`
+      })}
+    </div>`
   });
 }

@@ -52,7 +52,7 @@ The app seeds two demo users every time the in-memory app state starts:
 | Demo Creator | `user-creator` | 6 tokens |
 | Demo Participant | `user-participant` | 6 tokens |
 
-Seed tokens are recorded as grant transactions, not mutable balance fields. The temporary MVP auth path uses these user IDs in forms and query parameters, for example `/dashboard/creator?userId=user-creator` and `/dashboard/participant?userId=user-participant`.
+Seed tokens are recorded as grant transactions, not mutable balance fields. The temporary MVP auth path uses these user IDs in forms and query parameters, for example `/dashboard?creatorUserId=user-creator&participantUserId=user-participant`.
 
 ## MVP Flow
 
@@ -62,7 +62,7 @@ Seed tokens are recorded as grant transactions, not mutable balance fields. The 
 4. Show interest as `user-participant`; this uses 1 participant token while quorum is pending.
 5. When interest reaches quorum, the event becomes active, creator and participant tokens are used, and the private link is visible only to the creator and committed participants.
 6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry returns creator and participant tokens through refund transactions.
-7. Check `/dashboard/creator` and `/dashboard/participant` for cohort status, token summaries, and authorized unlocked links.
+7. Check `/dashboard` for creator and participant cohort status, token summaries, and authorized unlocked links.
 
 Creators can optionally provide an event image URL/path. Blank image fields use the local default image at `/assets/default-cohort.png`.
 

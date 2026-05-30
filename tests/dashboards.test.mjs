@@ -148,3 +148,33 @@ test('dashboard routes render creator and participant views', async () => {
   assert.match(participant.body, /https:\/\/meet\.example\/private-dashboard/);
   assert.match(participant.body, /participant tokens: 1 in use \/ 1 used \/ 0 returned/);
 });
+
+test('combined dashboard route shows creator and participant dashboards together', async () => {
+  const state = createDemoRepositories();
+  const handler = createRequestHandler(state);
+  const activeEvent = state.repositories.events.save(eventFixture({ status: 'active' }));
+  state.ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
+  state.ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
+  state.ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  state.ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  state.repositories.eventInterests.save({
+    id: 'interest-dashboard',
+    eventId: activeEvent.id,
+    userId: 'user-participant',
+    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    status: 'consumed',
+    createdAt: now
+  });
+
+  const response = await invoke(handler, { url: '/dashboard', method: 'GET' });
+
+  assert.equal(response.status, 200);
+  assert.match(response.body, /Creator dashboard/);
+  assert.match(response.body, /Participant dashboard/);
+  assert.match(response.body, /creator tokens: 2 in use \/ 2 used \/ 0 returned/);
+  assert.match(response.body, /participant tokens: 1 in use \/ 1 used \/ 0 returned/);
+  assert.match(response.body, /<a class="brand-link" href="\/">Cohort15<\/a>/);
+  assert.match(response.body, /<div class="topbar-links">/);
+  assert.doesNotMatch(response.body, /dashboard\/creator">Creator dashboard/);
+  assert.doesNotMatch(response.body, /dashboard\/participant">Participant dashboard/);
+});

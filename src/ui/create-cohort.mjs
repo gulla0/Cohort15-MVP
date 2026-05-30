@@ -63,7 +63,7 @@ function successNotice(result) {
     <p>Private link status: locked until quorum.</p>
     <p class="button-row">
       <a class="button-link" href="/cohorts/${encodeURIComponent(result.event.id)}">View cohort</a>
-      <a class="button-link secondary" href="/dashboard/creator?userId=${encodeURIComponent(result.event.creatorId)}">Creator dashboard</a>
+      <a class="button-link secondary" href="/dashboard?creatorUserId=${encodeURIComponent(result.event.creatorId)}">Dashboard</a>
     </p>
   </section>`;
 }
@@ -84,11 +84,12 @@ export function renderCreateCohortPage({ users, values = {}, errors = [], result
   <body>
     <main class="shell">
       <nav class="topbar">
-        <a href="/">Cohort15</a>
-        <a href="/cohorts">Cohorts</a>
-        <a href="/cohorts/new">Create</a>
-        <a href="/dashboard/creator">Creator dashboard</a>
-        <a href="/dashboard/participant">Participant dashboard</a>
+        <a class="brand-link" href="/">Cohort15</a>
+        <div class="topbar-links">
+          <a href="/cohorts">Cohorts</a>
+          <a href="/cohorts/new">Create</a>
+          <a href="/dashboard">Dashboard</a>
+        </div>
       </nav>
 
       <section class="page-heading" aria-labelledby="page-title">

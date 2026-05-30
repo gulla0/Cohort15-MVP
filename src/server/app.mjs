@@ -11,7 +11,7 @@ import { createExpireCohortsService } from '../services/expire-cohorts.mjs';
 import { createShowInterestService } from '../services/show-interest.mjs';
 import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
-import { renderCreatorDashboardPage, renderParticipantDashboardPage } from '../ui/dashboards.mjs';
+import { renderCreatorDashboardPage, renderDashboardPage, renderParticipantDashboardPage } from '../ui/dashboards.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -112,6 +112,21 @@ export function createRequestHandler(state = createState()) {
           values,
           errors: [error.message]
         }));
+      }
+      return;
+    }
+
+    if (url.pathname === '/dashboard' && (req.method ?? 'GET') === 'GET') {
+      const creatorUserId = url.searchParams.get('creatorUserId') ?? 'user-creator';
+      const participantUserId = url.searchParams.get('participantUserId') ?? 'user-participant';
+
+      try {
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderDashboardPage({
+          creatorDashboard: dashboardService.getCreatorDashboard(creatorUserId),
+          participantDashboard: dashboardService.getParticipantDashboard(participantUserId)
+        }));
+      } catch (error) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
       }
       return;
     }
