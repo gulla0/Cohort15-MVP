@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-002",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-002-T01",
+      "title": "Add event image field and default asset path",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Represent an optional event image in the domain and default it to the attached cohort illustration when creators do not provide one.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-002-event-images/issue.md",
+        "ChatGPT Image May 30, 2026, 08_33_01 AM.png",
+        "src/domain/models.mjs",
+        "src/domain/validation.mjs",
+        "src/persistence/schema.mjs",
+        "src/services/create-cohort.mjs",
+        "tests/domain-validation.test.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "write_scope": [
+        "public or src asset location",
+        "src/domain/models.mjs",
+        "src/domain/validation.mjs",
+        "src/persistence/schema.mjs",
+        "src/services/create-cohort.mjs",
+        "tests/domain-validation.test.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "authority": [
+        "Use URL/path-based image support for the MVP unless binary upload is explicitly requested.",
+        "Keep the default image local and served by the app.",
+        "Do not add external storage dependencies."
+      ],
+      "acceptance_criteria": [
+        "Event objects include an image field.",
+        "Creating a cohort without an image assigns the default image.",
+        "Creating a cohort with a valid custom image URL/path preserves that image.",
+        "Invalid image values are rejected or normalized according to existing validation style.",
+        "Persistence schema metadata documents the image field."
+      ],
+      "verification": [
+        "Run domain validation tests.",
+        "Run create cohort tests.",
+        "Run npm run check."
+      ],
+      "files_expected": [
+        "public or src asset location",
+        "src/domain/models.mjs",
+        "src/domain/validation.mjs",
+        "src/persistence/schema.mjs",
+        "src/services/create-cohort.mjs",
+        "tests/domain-validation.test.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "area": "event-model",
+      "risk": "medium",
+      "shared_dependencies": [
+        "event validation",
+        "create cohort flow",
+        "asset serving"
+      ],
+      "stop_condition": "Stop once image data is stored consistently and defaulted for new events."
+    },
+    {
+      "id": "ISSUE-002-T02",
+      "title": "Render event images across MVP surfaces",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-002-T01"
+      ],
+      "objective": "Display event images in the public feed, event detail page, and relevant dashboard rows with responsive styling.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-002-event-images/issue.md",
+        "src/ui/cohorts.mjs",
+        "src/ui/dashboards.mjs",
+        "src/ui/styles.css",
+        "src/services/event-browsing.mjs",
+        "src/services/dashboards.mjs",
+        "tests/event-browsing.test.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/cohorts.mjs",
+        "src/ui/dashboards.mjs",
+        "src/ui/styles.css",
+        "src/services/event-browsing.mjs",
+        "src/services/dashboards.mjs",
+        "tests/event-browsing.test.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "authority": [
+        "Keep layout responsive and avoid oversized decorative cards.",
+        "Use the event image as meaningful event content.",
+        "Preserve private link hiding behavior."
+      ],
+      "acceptance_criteria": [
+        "Feed cards show the event image or default image.",
+        "Detail page shows the event image prominently without hiding core action controls.",
+        "Dashboard rows include image treatment or intentionally omit it with documented reason.",
+        "Images have stable dimensions and alt text.",
+        "Mobile layout remains readable."
+      ],
+      "verification": [
+        "Run feed/detail/dashboard tests.",
+        "Run npm run check.",
+        "Browser screenshot check of feed and detail pages."
+      ],
+      "files_expected": [
+        "src/ui/cohorts.mjs",
+        "src/ui/dashboards.mjs",
+        "src/ui/styles.css",
+        "src/services/event-browsing.mjs",
+        "src/services/dashboards.mjs",
+        "tests/event-browsing.test.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "visual-ui",
+      "risk": "medium",
+      "shared_dependencies": [
+        "event serialization",
+        "dashboard rendering",
+        "CSS layout"
+      ],
+      "stop_condition": "Stop once image rendering is visible and verified on core MVP surfaces."
+    },
+    {
+      "id": "ISSUE-002-T03",
+      "title": "Add creator image input",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-002-T01"
+      ],
+      "objective": "Let creators provide an image URL/path when creating a cohort while keeping the default image path when the field is blank.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-002-event-images/issue.md",
+        "src/ui/create-cohort.mjs",
+        "src/services/create-cohort.mjs",
+        "tests/create-cohort.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/create-cohort.mjs",
+        "src/services/create-cohort.mjs",
+        "tests/create-cohort.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "authority": [
+        "Use a simple URL/path input for the MVP.",
+        "Do not implement binary upload unless the user explicitly expands scope.",
+        "The field should be optional."
+      ],
+      "acceptance_criteria": [
+        "Create form includes an optional event image field.",
+        "Blank field uses the default image.",
+        "Custom image value is saved and rendered.",
+        "Validation errors are shown in the existing form error area."
+      ],
+      "verification": [
+        "Run create cohort tests.",
+        "Run MVP verification tests.",
+        "Browser smoke test create with blank and custom image values."
+      ],
+      "files_expected": [
+        "src/ui/create-cohort.mjs",
+        "src/services/create-cohort.mjs",
+        "tests/create-cohort.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "create-flow-ui",
+      "risk": "low",
+      "shared_dependencies": [
+        "create form validation",
+        "event image model"
+      ],
+      "stop_condition": "Stop once creators can optionally provide image data and default behavior remains intact."
+    }
+  ]
+}
