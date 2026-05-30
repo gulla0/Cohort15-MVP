@@ -27,7 +27,7 @@ It is advisory. Code, verified behavior, and canonical ledgers override this ind
 | Main planning artifacts | `plan.md`, `atomic-task-graph.md`, `tasks.json` | Initialized for Cohort15 MVP. `tasks.json` is canonical. | high |
 | Progress tracking | `agent/progress/*.md` | Tracks task status, session decisions, blockers, and changes. | high |
 | Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists but no product feedback issues are currently defined. | medium |
-| Product application code | To be created by T001 | No app source, package manifest, framework config, database schema, or test harness exists yet. | high |
+| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/server`, `src/ui`, `tests`, `scripts` | T001 created a dependency-free Node.js HTTP + ES modules foundation with lint/test scripts and a static rendered shell. | high |
 
 ## Context Routes
 
@@ -38,7 +38,7 @@ Use these routes to avoid broad rediscovery.
 | Setup/bootstrap | `start.txt`, `agent-starters/startSetupManager.txt`, `docs/cohort15-mvp-spec-v3.md` | `plan.md`, `tasks.json`, `atomic-task-graph.md`, progress files | product source until T001 creates it |
 | Main implementation task | `tasks.json`, `agent/progress/task-status.md`, this index | Files listed in the task `inputs` and `write_scope`; `docs/cohort15-mvp-spec-v3.md` for product behavior | unrelated future tasks and feedback issue folders |
 | Stack/scaffold task | T001 in `tasks.json`, `plan.md`, `README.md`, `USAGE.md` | Current repo tree; selected framework docs if needed | implementing domain flows beyond scaffold |
-| Domain model/validation | T002 in `tasks.json`, `docs/cohort15-mvp-spec-v3.md` sections for Event, validation, related objects | Source modules created by T001 | UI routes and dashboards |
+| Domain model/validation | T002 in `tasks.json`, `docs/cohort15-mvp-spec-v3.md` sections for Event, validation, related objects | `src/domain/constants.mjs`, `tests/foundation.test.mjs`; add focused domain modules/tests under existing structure | UI routes and dashboards |
 | Persistence/token ledger | T003 in `tasks.json`, spec sections for EventInterest and TokenTransaction | Domain modules from T002, selected database/schema files | social posting UI unless tied to schema |
 | Create cohort flow | T004 in `tasks.json`, creator flow in spec | Token ledger and event persistence modules | participant interest, expiry, dashboards |
 | Feed/detail/link visibility | T005 in `tasks.json`, online-only and locked link sections in spec | Event creation and visibility/data-loader modules | social posting and expiry services |
@@ -53,7 +53,7 @@ Use these routes to avoid broad rediscovery.
 
 - The repo began as an agent architecture starter kit, not a product implementation.
 - The Cohort15 spec is comprehensive enough to initialize implementation tasks without blocking clarification.
-- The first implementation task should create a runnable product app and choose a stack because no product stack is declared.
+- T001 chose a dependency-free Node.js HTTP + ES modules foundation with scripts: `npm run dev`, `npm run check`, `npm test`, and `npm run lint`.
 - Social promotion should start as a local/mock outbox unless official channels and credentials are provided.
 - Token purchase is post-MVP; seed/admin grant transactions are part of MVP.
 - Initial post-MVP token packages are `$6` for 6 tokens and `$12` for 14 tokens.
@@ -72,7 +72,7 @@ Use these routes to avoid broad rediscovery.
 
 Before trusting this index, check:
 
-- Has T001 created or moved product source directories?
+- Has the dependency-free Node scaffold been replaced by a framework or moved from `src/*`?
 - Do task write scopes reference files that no longer exist?
 - Do progress notes mention architecture changes not reflected here?
 - Did a recent task add or move canonical modules?
@@ -81,4 +81,5 @@ Before trusting this index, check:
 ## Last Updated
 
 - 2026-05-30 00:02 EDT: Clarified MVP boundary: build all core cohort behavior now, keep token sales and real social posting post-MVP, and record `$6`/6-token and `$12`/14-token package assumptions.
+- 2026-05-30 00:13 EDT: T001 created the dependency-free Node.js app foundation, README commands, lint/test scripts, and initial `src/*` layout.
 - 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.

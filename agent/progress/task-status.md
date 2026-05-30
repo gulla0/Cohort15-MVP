@@ -4,8 +4,8 @@
 
 | Task ID | Title | Status | Dependencies Satisfied | Evidence | Notes |
 |---|---|---|---|---|---|
-| T001 | Scaffold runnable app foundation | not_started | yes |  | First implementation task; repo currently has no product code or declared stack. |
-| T002 | Implement domain types and validation rules | not_started | no |  | Depends on T001. |
+| T001 | Scaffold runnable app foundation | done | yes | `npm run check` passed; dev server started at `http://localhost:3000`; browser verified title/H1/scaffold sections. | Selected dependency-free Node.js HTTP + ES modules foundation. |
+| T002 | Implement domain types and validation rules | not_started | yes |  | Depends on T001. |
 | T003 | Add persistence schema and token ledger primitives | not_started | no |  | Depends on T002. |
 | T004 | Build create cohort flow | not_started | no |  | Depends on T003. |
 | T005 | Build public event feed and detail visibility | not_started | no |  | Depends on T004. |

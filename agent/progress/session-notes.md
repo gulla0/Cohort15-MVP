@@ -2,6 +2,30 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:13 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `plan.md`
+- `docs/cohort15-mvp-spec-v3.md`
+
+Decided:
+- Classified the user request as approved main implementation work.
+- Selected T001 as the first wave because it was the only unblocked implementation task.
+- Chose a dependency-free Node.js HTTP + ES modules scaffold so the app, lint, and tests can run locally without package downloads.
+
+Assumptions Made:
+- A dependency-free Node app is the pragmatic starting stack until product needs justify a larger framework.
+- T001 should stop at a runnable foundation and not implement domain validation or product flows.
+
+Next Recommended Step:
+- Execute T002: implement Cohort15 domain models and validation rules in `src/domain` with focused tests.
+
 ### 2026-05-30 00:02 EDT
 
 Read:

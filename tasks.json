@@ -11,7 +11,7 @@
     {
       "id": "T001",
       "title": "Scaffold runnable app foundation",
-      "status": "not_started",
+      "status": "done",
       "phase": "Product Scaffold And Domain Foundation",
       "dependencies": [],
       "objective": "Choose a pragmatic web app stack for this empty product repo and create the minimal runnable application, lint/test scripts, and README setup notes.",
@@ -43,8 +43,8 @@
         "Start the app locally or run a framework-provided smoke check"
       ],
       "stop_condition": "Stop once the foundation is runnable and ready for domain work.",
-      "evidence": "",
-      "notes": "This repo currently contains planning artifacts only, so stack selection belongs here."
+      "evidence": "2026-05-30 00:13 EDT: Added dependency-free Node.js app scaffold with src/domain, src/persistence, src/server, src/ui, scripts/lint.mjs, tests/foundation.test.mjs, and README commands. `npm run check` passed. Dev server started at http://localhost:3000 and in-app browser verified title/H1/scaffold sections.",
+      "notes": "Selected dependency-free Node.js HTTP + ES modules foundation to keep the scaffold runnable without network dependency installation."
     },
     {
       "id": "T002",

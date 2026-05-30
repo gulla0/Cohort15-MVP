@@ -2,6 +2,38 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:13 EDT
+
+Task:
+- T001 Scaffold runnable app foundation
+
+Files Changed:
+- `package.json`
+- `README.md`
+- `src/domain/constants.mjs`
+- `src/persistence/README.md`
+- `src/server/app.mjs`
+- `src/ui/home.mjs`
+- `src/ui/styles.css`
+- `scripts/lint.mjs`
+- `tests/foundation.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added a runnable dependency-free Node.js web app foundation with clear domain, persistence, server, and UI directories.
+- Added baseline lint and Node test runner scripts.
+- Replaced the starter README with Cohort15 setup, run, verification, source layout, and MVP boundary notes.
+- Marked T001 done and unblocked T002.
+
+Verification:
+- `npm run check` passed.
+- `npm run dev` started at `http://localhost:3000`.
+- In-app browser verified the page title, H1, and scaffold sections.
+
 ### 2026-05-30 00:02 EDT
 
 Task:
