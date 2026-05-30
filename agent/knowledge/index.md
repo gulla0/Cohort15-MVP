@@ -26,7 +26,7 @@ It is advisory. Code, verified behavior, and canonical ledgers override this ind
 | Product specification | `docs/cohort15-mvp-spec-v3.md` | Defines Cohort15 MVP rules, fields, validation, lifecycle, flows, and scope. | high |
 | Main planning artifacts | `plan.md`, `atomic-task-graph.md`, `tasks.json` | Initialized for Cohort15 MVP. `tasks.json` is canonical. | high |
 | Progress tracking | `agent/progress/*.md` | Tracks task status, session decisions, blockers, and changes. | high |
-| Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists. ISSUE-001, ISSUE-002, ISSUE-003, and ISSUE-004 were resolved on 2026-05-30. | high |
+| Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists. ISSUE-001, ISSUE-002, ISSUE-003, and ISSUE-004 were resolved on 2026-05-30. ISSUE-005 is open for unifying the combined dashboard token account presentation. | high |
 | Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts`, `public/assets/default-cohort.png` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives; T004 added the create cohort service and demo-backed create route; T005 added public cohort feed/detail routes and visibility service; T006 added show-interest/quorum activation; T007-T009 added expiry/refunds, local social outbox, and dashboards; T010 added MVP end-to-end verification coverage and README handoff docs. Feedback resolution added event images, clearer navigation/copy, participant-default interest flow, first-meeting validation, and a combined `/dashboard` route with legacy dashboard URLs preserved. T011-T015 are planned post-MVP tasks for durable persistence, auth, purchases, social publishing, and lifecycle controls. | high |
 
 ## Context Routes
@@ -84,6 +84,7 @@ Use these routes to avoid broad rediscovery.
 - The cohort detail interest form should prefer a non-creator demo participant. Creator self-interest remains rejected in the service.
 - Primary navigation now consistently exposes cohorts, create, creator dashboard, and participant dashboard.
 - Feedback resolution on 2026-05-30 completed ISSUE-004: dashboard UI now avoids repeated row-level token summaries, renders only Available/In use/Used token states, and uses content-based dashboard sections: Account Tokens, Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts. Legacy dashboard routes remain supported.
+- Feedback intake on 2026-05-30 created ISSUE-005: the combined dashboard still splits Account Tokens into separate demo creator and participant panels, but the product has one token type and should present one token account.
 - The next planned task wave is T011-T015. T011 is first because durable persistence should precede regular auth, token purchases, and external social publishing. T012 removes demo query/default-user identity from protected flows. T013 and T014 depend on durable/auth foundations. T015 can follow the auth boundary and uses already-modeled `cancelled` and `completed` statuses.
 
 ## Assumptions And Uncertainty
@@ -124,4 +125,5 @@ Before trusting this index, check:
 - 2026-05-30: Feedback resolution completed ISSUE-003: combined creator and participant dashboards at `/dashboard`, kept legacy dashboard URLs, separated navigation links from the app name in the topbar, and verified with dashboard tests.
 - 2026-05-30 09:51 EDT: Feedback intake created ISSUE-004 for dashboard information architecture and language: duplicate token information, Available/In use/Used summary states, content-based labels like Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts, and dashboard user-flow review.
 - 2026-05-30 10:06 EDT: Feedback resolution completed ISSUE-004: removed repeated dashboard token row copy, removed Returned from dashboard token presentation, changed dashboard labels to My Cohorts/My Events and content-based combined sections, and verified with tests, lint, and browser smoke.
+- 2026-05-30 10:13 EDT: Feedback intake created ISSUE-005 for unifying the combined dashboard Account Tokens presentation so it no longer implies separate creator and participant token buckets.
 - 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.
