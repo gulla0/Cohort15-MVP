@@ -2,6 +2,39 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 07:50 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startSetupManager.txt`
+- `README.md`
+- `USAGE.md`
+- `schemas/main-task.schema.json`
+- `agent/router/intent-router.md`
+- `plan.md`
+- `tasks.json`
+- `atomic-task-graph.md`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
+- `agent/progress/change-log.md`
+- `docs/cohort15-mvp-spec-v3.md`
+
+Decided:
+- Classified the user request as approved setup/bootstrap work because the user explicitly asked to activate the setup manager and add the next atomic task graph set.
+- Preserved T001-T010 as the completed MVP ledger and added T011-T015 as the next post-MVP task wave.
+- Ordered the next wave as durable persistence first, then auth, then token purchases/social publishing/lifecycle controls.
+- Updated the plan, atomic task graph, task ledger, readable task status, knowledge index, and progress logs.
+
+Assumptions Made:
+- The next set should target urgent post-MVP gaps already recorded in the plan and knowledge index rather than adding speculative features.
+- Durable persistence should precede auth, purchase, and external publishing work because those flows need stable user, ledger, and outbox records.
+- Payment provider, auth provider, durable store, official social channels, and social credentials remain unspecified and should be handled as documented implementation assumptions during their tasks.
+
+Next Recommended Step:
+- Execute T011 with `agent-starters/startNewManager.txt`: add durable persistence behind the existing repository boundary.
+
 ### 2026-05-30 07:42 EDT
 
 Read:

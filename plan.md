@@ -87,6 +87,47 @@ Exit criteria:
 - Cohort creation produces a local social-promotion record with public-safe content.
 - Core lifecycle paths are covered by tests or documented manual verification.
 
+### Phase 4 - Post-MVP Hardening
+
+Goal:
+- Replace the demo-only parts of the completed MVP with durable persistence and a regular auth boundary.
+
+Tasks:
+- T011
+- T012
+
+Exit criteria:
+- Cohort, user, token, interest, and social outbox records can survive app restart in a local durable store.
+- Protected flows no longer trust demo query parameters or default user ids.
+- Private-link authorization remains scoped to the authenticated creator or committed participants.
+
+### Phase 5 - Post-MVP Monetization And Distribution
+
+Goal:
+- Add the first token purchase path and make social promotion publish through safe adapter boundaries.
+
+Tasks:
+- T013
+- T014
+
+Exit criteria:
+- Authenticated users can buy the documented `$6`/6-token and `$12`/14-token packages through a documented local/mock or provider-backed mode.
+- Successful purchases create auditable purchase transactions.
+- Pending social outbox posts can be processed by configured adapters without leaking private event links.
+
+### Phase 6 - Post-MVP Lifecycle Controls
+
+Goal:
+- Implement lifecycle actions for statuses already modeled but not yet user-accessible.
+
+Tasks:
+- T015
+
+Exit criteria:
+- Authorized creators or admins can cancel open cohorts with refunds.
+- Authorized creators or admins can complete active cohorts without refunding consumed tokens.
+- Cancelled and completed cohorts behave correctly in discovery, dashboards, token accounting, and private-link visibility.
+
 ## MVP Boundary
 
 Build now:
@@ -106,9 +147,12 @@ Build now:
 
 Post-MVP / urgent-next:
 
+- Durable persistence beyond the current in-memory store.
+- Regular auth boundary replacing demo query/default-user identity selection.
 - USD token sales.
 - Payment packages: `$6` for 6 tokens and `$12` for 14 tokens.
 - Real automated posting from the social outbox to official external channels.
+- Cancelled/completed lifecycle controls for the statuses already represented in the domain.
 
 ## Recommended MVP Cut
 
@@ -135,17 +179,18 @@ Do not cut:
 3. Official social channels are post-MVP. Initial implementation should create a platform-neutral social outbox/mock post and avoid real API integration until channels and credentials are known.
 4. Initial token balances should come from admin/demo grant transactions. USD purchase grants are post-MVP and should initially use `$6` for 6 tokens and `$12` for 14 tokens.
 5. Deployment target is not specified. Initial implementation should keep deployment assumptions out of core domain logic.
+6. Durable persistence technology is not specified. T011 may choose a pragmatic local store if it preserves the repository boundary and documented commands.
+7. Payment provider is not specified. T013 should start with a local/mock payment confirmation unless the user selects a real provider.
+8. Official social channels and credentials are not specified. T014 should keep a dry-run/mock adapter path and avoid hard-coded secrets.
 
 ## Suggested First Sprint
 
 Sprint target:
-- Get from planning-only repo to a runnable MVP foundation with the core domain and persistence contracts in place.
+- Harden the completed MVP so user and ledger data survive restart and protected flows use a real auth boundary.
 
 Suggested task subset:
-- T001
-- T002
-- T003
-- T004
+- T011
+- T012
 
 Sprint success definition:
-- The app runs locally, automated checks pass, and a signed-in/demo creator can create an open cohort with 2 held tokens and a hidden private link.
+- The app runs locally, automated checks pass, records persist in durable mode, and authenticated users can complete the create/interest/dashboard flow without demo query parameters.

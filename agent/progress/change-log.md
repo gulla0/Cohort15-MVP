@@ -2,6 +2,30 @@
 
 Append-only implementation log.
 
+### 2026-05-30 07:50 EDT
+
+Task:
+- Setup manager planning update
+
+Files Changed:
+- `plan.md`
+- `atomic-task-graph.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added post-MVP task wave T011-T015 for durable persistence, regular auth boundary, token purchase packages, external social publishing adapters, and cancellation/completion lifecycle controls.
+- Updated the human-readable atomic graph and compact adjacency view.
+- Updated the plan with new post-MVP phases, urgent-next items, open implementation questions, and the new suggested first sprint.
+- Updated task status and knowledge routes so the next manager can start with T011 without rediscovering the current MVP state.
+
+Verification:
+- `tasks.json` parsed successfully as JSON.
+- `npm run check` passed with 36 tests.
+
 ### 2026-05-30 07:42 EDT
 
 Task:

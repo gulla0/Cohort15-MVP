@@ -100,6 +100,52 @@ Each executable task should define or tightly imply:
   - Validation: automated checks pass and README describes setup, run, test, seed/demo data, and known assumptions
   - Stop: stop once the MVP can be handed to user testing
 
+### Phase 4 - Post-MVP Hardening
+
+- T011 Add durable persistence adapter
+  - Depends on: T010
+  - Objective: Replace or augment the in-memory repositories with a durable local persistence adapter while preserving repository contracts and token ledger semantics.
+  - Inputs: persistence schema/repositories, token ledger, seed data, persistence tests, MVP verification tests
+  - Authority: add durable local database adapter, schema/migrations, initialization wiring, and tests; do not implement auth, payment, or social API behavior
+  - Validation: users, events, interests, token transactions, and social posts persist across app restarts; existing token accounting still passes
+  - Stop: stop once durable persistence is available behind the repository boundary and documented
+
+- T012 Replace demo user selection with regular auth boundary
+  - Depends on: T011
+  - Objective: Add a regular authentication boundary so protected flows use the signed-in user instead of demo query parameters or default users.
+  - Inputs: server routes, create/interest/dashboard/event-browsing services, README auth assumptions
+  - Authority: add local/session auth modules, route guards, sign-in/out UI, and auth tests; do not add OAuth provider integrations unless specified
+  - Validation: unauthenticated mutations and dashboards are rejected; signed-in users can create, show interest, view scoped dashboards, and see only authorized private links
+  - Stop: stop once user identity is resolved through the auth boundary for all protected MVP flows
+
+### Phase 5 - Post-MVP Monetization And Distribution
+
+- T013 Add token purchase package flow
+  - Depends on: T011, T012
+  - Objective: Add the first token purchase flow for the documented packages, recording purchase transactions without breaking grant or hold accounting.
+  - Inputs: plan token package assumptions, token ledger, persistence schema, dashboards, server routes
+  - Authority: add token package constants/services, purchase route/UI, purchase tests, and payment-mode docs; do not store card data or hard-code provider credentials
+  - Validation: authenticated users can select `$6`/6-token or `$12`/14-token packages; successful local/mock purchases create auditable purchase transactions
+  - Stop: stop once package purchase accounting works and payment-provider limitations are documented
+
+- T014 Publish social outbox to configured external channels
+  - Depends on: T011, T012
+  - Objective: Turn the local social-promotion outbox into a publishable channel adapter flow for configured official channels.
+  - Inputs: social promotion service, create flow integration, social post persistence, social promotion spec
+  - Authority: add social adapter boundary, outbox processor, configuration docs, status handling, and tests; do not hard-code secrets
+  - Validation: pending posts process through a configured adapter, posted/failed status is recorded, dry-run remains available, and private links are never sent
+  - Stop: stop once external-channel publishing is adapter-backed, testable, and safely configurable
+
+### Phase 6 - Post-MVP Lifecycle Controls
+
+- T015 Add cohort completion and cancellation lifecycle handling
+  - Depends on: T012
+  - Objective: Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving token accounting and link visibility rules.
+  - Inputs: domain statuses, expiry/token refund behavior, dashboard surfaces, server routes
+  - Authority: add lifecycle services, creator/admin route handlers, dashboard actions, and lifecycle tests; do not add broad moderation tooling
+  - Validation: authorized users can cancel open cohorts with refunds and complete active cohorts without refunds; unauthorized lifecycle actions are rejected
+  - Stop: stop once cancelled and completed lifecycle paths are implemented with tests and documented behavior
+
 ## Compact Adjacency View
 
 ```text
@@ -112,4 +158,7 @@ T006 -> T007, T009
 T007 -> T010
 T008 -> T010
 T009 -> T010
+T010 -> T011
+T011 -> T012, T013, T014
+T012 -> T013, T014, T015
 ```

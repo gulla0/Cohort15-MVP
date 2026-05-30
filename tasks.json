@@ -398,6 +398,230 @@
       "stop_condition": "Stop once the MVP can be handed to user testing.",
       "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, post-MVP token package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
       "notes": "Manual browser feed/unlock follow-up was stopped by the browser URL policy after creation; the new automated verification test covers feed, detail, quorum unlock, dashboards, and expiry/refund end to end."
+    },
+    {
+      "id": "T011",
+      "title": "Add durable persistence adapter",
+      "status": "not_started",
+      "phase": "Post-MVP Hardening",
+      "dependencies": [
+        "T010"
+      ],
+      "objective": "Replace or augment the in-memory repositories with a durable local persistence adapter while preserving the existing repository contracts and token ledger semantics.",
+      "inputs": [
+        "src/persistence/schema.mjs",
+        "src/persistence/repositories.mjs",
+        "src/persistence/token-ledger.mjs",
+        "src/persistence/seeds.mjs",
+        "tests/persistence-ledger.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "persistence adapter modules",
+        "schema or migration files",
+        "app initialization wiring",
+        "persistence tests",
+        "README persistence notes"
+      ],
+      "authority": [
+        "May introduce a durable local database dependency if needed",
+        "Must keep token balances derived from transaction records",
+        "Must keep existing service-level behavior compatible with current tests",
+        "Do not implement auth, payment, or social API behavior in this task"
+      ],
+      "acceptance_criteria": [
+        "Users, events, interests, token transactions, and social posts persist across app restarts when durable mode is enabled",
+        "Existing in-memory test setup remains available or tests are updated to use an isolated durable store",
+        "Token hold, consume, refund, grant, and future purchase transaction semantics remain auditable",
+        "README documents how local persistence is configured and reset"
+      ],
+      "verification": [
+        "Run persistence tests covering restart/reload behavior",
+        "Run the full documented verification suite"
+      ],
+      "stop_condition": "Stop once durable persistence is available behind the repository boundary and documented.",
+      "notes": "Durable persistence is the first post-MVP hardening task because later auth and purchases need stable user and ledger records."
+    },
+    {
+      "id": "T012",
+      "title": "Replace demo user selection with regular auth boundary",
+      "status": "not_started",
+      "phase": "Post-MVP Hardening",
+      "dependencies": [
+        "T011"
+      ],
+      "objective": "Add a regular authentication boundary so create, interest, dashboard, and private-link authorization use the signed-in user instead of demo query parameters or default users.",
+      "inputs": [
+        "docs/cohort15-mvp-spec-v3.md",
+        "src/server/app.mjs",
+        "src/services/create-cohort.mjs",
+        "src/services/show-interest.mjs",
+        "src/services/event-browsing.mjs",
+        "src/services/dashboards.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "auth/session modules",
+        "server route guards",
+        "UI sign-in/sign-out affordances",
+        "service call-site user resolution",
+        "auth and authorization tests",
+        "README auth notes"
+      ],
+      "authority": [
+        "May choose the simplest local auth/session approach that fits the dependency-free app unless the user specifies a provider",
+        "Must remove user-controlled query/default-user paths from protected mutations and dashboards",
+        "Must preserve conservative private-link authorization",
+        "Do not implement OAuth provider integrations unless explicitly chosen"
+      ],
+      "acceptance_criteria": [
+        "Unauthenticated users cannot create cohorts, show interest, or view dashboards",
+        "Authenticated users can create cohorts and show interest using their own user id",
+        "Creator and participant dashboards are scoped to the signed-in user",
+        "Private links remain visible only to authorized signed-in creators or committed participants",
+        "Demo users remain available only through an explicit local development path if retained"
+      ],
+      "verification": [
+        "Run auth route and service integration tests",
+        "Run the full documented verification suite"
+      ],
+      "stop_condition": "Stop once user identity is resolved through the auth boundary for all protected MVP flows.",
+      "notes": "Provider choice is still open; this task should document any local/session assumption instead of pretending it is production identity."
+    },
+    {
+      "id": "T013",
+      "title": "Add token purchase package flow",
+      "status": "not_started",
+      "phase": "Post-MVP Monetization",
+      "dependencies": [
+        "T011",
+        "T012"
+      ],
+      "objective": "Add the first token purchase flow for the documented post-MVP packages, recording purchase transactions without breaking grant or hold accounting.",
+      "inputs": [
+        "plan.md",
+        "src/persistence/token-ledger.mjs",
+        "src/persistence/schema.mjs",
+        "src/services/dashboards.mjs",
+        "src/server/app.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "token package constants or service modules",
+        "purchase route/controller",
+        "purchase UI",
+        "token transaction schema fields if needed",
+        "purchase tests",
+        "README payment-mode notes"
+      ],
+      "authority": [
+        "Use initial packages of $6 for 6 tokens and $12 for 14 tokens",
+        "May implement a local/mock payment confirmation unless a real payment provider is specified",
+        "Must record successful purchases as auditable purchase token transactions",
+        "Do not store real card data or implement unrequested payment-provider credentials"
+      ],
+      "acceptance_criteria": [
+        "Authenticated users can select one of the two documented token packages",
+        "Successful purchase creates a purchase transaction and updates derived available balance",
+        "Cancelled or failed local/mock purchases do not grant tokens",
+        "Dashboards or token summary surfaces reflect purchased token balance",
+        "README clearly labels whether payment is local/mock or provider-backed"
+      ],
+      "verification": [
+        "Run purchase flow tests",
+        "Run token ledger tests",
+        "Run the full documented verification suite"
+      ],
+      "stop_condition": "Stop once package purchase accounting works and payment-provider limitations are documented.",
+      "notes": "A real provider is not specified, so local/mock purchase mode is acceptable if clearly documented."
+    },
+    {
+      "id": "T014",
+      "title": "Publish social outbox to configured external channels",
+      "status": "not_started",
+      "phase": "Post-MVP Distribution",
+      "dependencies": [
+        "T011",
+        "T012"
+      ],
+      "objective": "Turn the local social-promotion outbox into a publishable channel adapter flow that can post public-safe cohort content to configured official channels.",
+      "inputs": [
+        "src/services/social-promotion.mjs",
+        "src/services/create-cohort.mjs",
+        "src/persistence/repositories.mjs",
+        "docs/cohort15-mvp-spec-v3.md",
+        "README.md"
+      ],
+      "write_scope": [
+        "social channel adapter modules",
+        "outbox processing service",
+        "configuration documentation",
+        "social post status handling",
+        "social publishing tests"
+      ],
+      "authority": [
+        "Must keep private event links out of all generated and published social content",
+        "May implement dry-run/mock adapters if official channels or credentials are absent",
+        "Must record posted or failed status per SocialPost",
+        "Do not hard-code secrets or require credentials for normal test runs"
+      ],
+      "acceptance_criteria": [
+        "Pending social posts can be processed through a configured adapter boundary",
+        "Successful publishes record platform post URLs when available and mark posts posted",
+        "Failed publishes capture failure state without losing the outbox record",
+        "Dry-run or mock mode remains available for local development and tests",
+        "Tests prove private links are never sent to adapters"
+      ],
+      "verification": [
+        "Run social publishing tests with a mock adapter",
+        "Run the full documented verification suite"
+      ],
+      "stop_condition": "Stop once external-channel publishing is adapter-backed, testable, and safely configurable.",
+      "notes": "Official channels and credentials are still unknown; adapter boundaries and dry-run behavior should come before real API credentials."
+    },
+    {
+      "id": "T015",
+      "title": "Add cohort completion and cancellation lifecycle handling",
+      "status": "not_started",
+      "phase": "Post-MVP Lifecycle Controls",
+      "dependencies": [
+        "T012"
+      ],
+      "objective": "Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving token accounting and link visibility rules.",
+      "inputs": [
+        "docs/cohort15-mvp-spec-v3.md",
+        "src/domain/constants.mjs",
+        "src/domain/validation.mjs",
+        "src/services/expire-cohorts.mjs",
+        "src/services/dashboards.mjs",
+        "src/server/app.mjs"
+      ],
+      "write_scope": [
+        "lifecycle service modules",
+        "creator/admin route handlers",
+        "dashboard lifecycle actions",
+        "lifecycle tests",
+        "README lifecycle notes"
+      ],
+      "authority": [
+        "May support cancelled and completed statuses already defined in the domain",
+        "Cancelling open cohorts must refund held creator and participant tokens through refund transactions",
+        "Completing active cohorts must not refund already consumed tokens",
+        "Do not add broad moderation tooling in this task"
+      ],
+      "acceptance_criteria": [
+        "Authorized creators or admins can cancel open cohorts",
+        "Cancellation refunds held creator and participant tokens and removes the cohort from public discovery",
+        "Authorized creators or admins can mark active cohorts completed",
+        "Completed cohorts keep historical dashboard visibility without exposing links to unauthorized users",
+        "Unauthorized lifecycle actions are rejected"
+      ],
+      "verification": [
+        "Run lifecycle service and route tests",
+        "Run the full documented verification suite"
+      ],
+      "stop_condition": "Stop once cancelled and completed lifecycle paths are implemented with tests and documented behavior.",
+      "notes": "This uses existing domain statuses that were modeled but not implemented in the MVP."
     }
   ]
 }
