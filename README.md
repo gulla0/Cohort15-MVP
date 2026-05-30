@@ -87,3 +87,5 @@ Post-MVP: USD token sales, real external social posting, chat, profiles, reputat
 The repo still includes the bounded agent workflow files. Use `start.txt` for routed work, `tasks.json` as the canonical task ledger, and `agent/progress/task-status.md` as the readable status view.
 
 `npm run check` also verifies that resolved feedback issues in `agent/feedback/issue-index.md` are reflected in `agent/knowledge/index.md`. If that guardrail fails after issue resolution, update the knowledge index with the reusable context before handoff.
+
+Agent managers should commit successful completed task or issue waves after verification and tracker updates. Worker agents should not commit unless the manager explicitly assigns that responsibility.

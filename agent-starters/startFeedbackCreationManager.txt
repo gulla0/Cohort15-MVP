@@ -34,6 +34,7 @@ Rules:
 - Infer dependencies from actual code and current product flow, not guesswork.
 - If feedback intake changes issue status or reusable context, keep `agent/feedback/issue-index.md` and `agent/knowledge/index.md` consistent.
 - Run `npm run check` when practical before handoff. Its workflow guardrail fails if feedback issues marked `done` are missing from `agent/knowledge/index.md`.
+- If feedback intake completes successfully, create a git commit after verification. Stage only feedback intake artifacts and any intentionally updated shared context files.
 
 Issue folders must contain:
 
@@ -49,4 +50,4 @@ Task IDs should be issue-scoped, for example `ISSUE-004-T01`.
 
 Each issue task should include objective, inputs, write scope, authority, acceptance criteria, verification, risk, and dependencies.
 
-Before reporting completion, summarize whether `npm run check` was run. If the workflow guardrail fails during intake, fix stale tracker/index context unless the failure is unrelated to the intake work; in that case, report it clearly.
+Before reporting completion, summarize whether `npm run check` was run and include the commit hash if committed. If the workflow guardrail fails during intake, fix stale tracker/index context unless the failure is unrelated to the intake work; in that case, report it clearly.

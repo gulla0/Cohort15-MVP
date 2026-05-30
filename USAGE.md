@@ -32,6 +32,8 @@ Workers are internal executors. They should not be the user-facing entry point.
 
 In normal use, the same user-facing agent transitions from router role into the selected manager role. Separate worker agents or sessions are only needed when that manager delegates bounded tasks.
 
+Managers should commit successful completed task waves after verification and tracker updates. Workers should not commit unless the manager explicitly assigns commit responsibility.
+
 ## Starting Feedback Intake
 
 Use:
@@ -53,6 +55,8 @@ agent-starters/startFeedbackResolutionManager.txt
 This resolves issue-local task graphs and updates feedback trackers.
 
 Before handoff, feedback resolution should run `npm run check` and fix any agent workflow guardrail failure. The guardrail checks that issues marked `done` in `agent/feedback/issue-index.md` are reflected in `agent/knowledge/index.md`.
+
+After successful feedback intake or resolution, the manager should commit the completed issue wave and include the commit hash in the handoff report.
 
 In normal use, `start.txt` should route by role transition into these managers. Directly starting a manager is useful when the intent is already known.
 

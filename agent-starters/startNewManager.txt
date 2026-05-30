@@ -47,4 +47,5 @@ Wave closeout:
 8. Update `agent/knowledge/index.md` if reusable context changed.
 9. Run `npm run check` when practical before handoff. This includes the agent workflow guardrail for stale feedback-to-knowledge handoffs.
 10. If the workflow guardrail fails, reconcile `agent/feedback/issue-index.md` and `agent/knowledge/index.md` or report why the mismatch is outside the task scope.
-11. Report completed tasks, verification, next task, and blockers.
+11. If the task wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for this task wave and exclude unrelated user changes.
+12. Report completed tasks, verification, commit hash, next task, and blockers.

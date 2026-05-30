@@ -71,6 +71,7 @@ messy user request
 -> structured routed work request
 -> same agent assumes selected planner/manager role
 -> manager verifies with `npm run check` when practical before handoff
+-> manager commits successful completed work before reporting
 ```
 
 ## User Approval Rule
@@ -132,3 +133,5 @@ While acting as the router, the agent does not own:
 Those belong to the selected manager role after approval.
 
 Managers should know that `npm run check` includes the agent workflow guardrail. It fails when a feedback issue marked `done` in `agent/feedback/issue-index.md` is not reflected in `agent/knowledge/index.md`; manager closeout should fix or report that mismatch.
+
+Managers should commit successful completed work after verification and tracker updates. Commits must include only the files changed for the completed task or issue wave, not unrelated user work.

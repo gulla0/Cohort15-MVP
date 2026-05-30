@@ -59,8 +59,9 @@ SETUP RULES
 9. Keep `agent/progress/task-status.md` aligned with `tasks.json`.
 10. Populate `agent/knowledge/index.md` with concrete context routes from the actual repo, not generic advice.
 11. If the repository has `npm run check`, use it after setup artifact changes when practical; it includes the agent workflow guardrail for stale feedback-to-knowledge handoffs.
-12. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
-13. Stop after setup artifacts are ready. Report the next recommended starter prompt.
+12. After successful setup verification, create a git commit containing only the setup artifacts changed by this setup wave.
+13. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
+14. Stop after setup artifacts are ready. Report the next recommended starter prompt.
 
 ==================================================
 SETUP LOOP
@@ -131,11 +132,18 @@ STEP 7 - Verify
 - If the workflow guardrail fails, reconcile `agent/feedback/issue-index.md` and `agent/knowledge/index.md` before handoff.
 - If verification cannot run, explain why in the report.
 
-STEP 8 - Report
+STEP 8 - Commit
+- If setup completed successfully and verification passed or was explicitly non-applicable, commit the setup changes.
+- Stage only files changed for this setup wave.
+- Use a concise message that describes the setup artifact outcome.
+- If committing is impossible, report the reason and leave the working tree state clear.
+
+STEP 9 - Report
 Produce a concise setup summary:
 - artifacts initialized
 - assumptions made
 - blocking questions, if any
 - verification result
+- commit hash, if committed
 - first ready task
 - whether to continue with `start.txt` for user-facing routing or `agent-starters/startNewManager.txt` for direct manager execution

@@ -24,7 +24,8 @@ WORKER RULES
 8. If implementation requires a decision outside the task contract, stop and report the blocker to the manager.
 9. Run the narrowest meaningful verification available for the task. Use `npm run check` only when assigned or when your scoped changes affect shared workflow artifacts.
 10. If `npm run check` fails because of the workflow guardrail, report the stale feedback/index mismatch to the manager; do not expand tracker edits unless authorized.
-11. Return concrete evidence, not broad claims.
+11. Do not create git commits unless the manager explicitly includes commit responsibility in the task contract.
+12. Return concrete evidence, not broad claims.
 
 ==================================================
 REQUIRED TASK CONTRACT
@@ -71,6 +72,7 @@ Return:
 - implementation summary
 - files changed
 - verification command/result
+- commit hash, only if commit responsibility was explicitly assigned
 - acceptance criteria status
 - assumptions made
 - blockers or follow-up risks
