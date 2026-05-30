@@ -44,4 +44,5 @@ After each wave:
 5. Append issue notes and change log.
 6. Update `agent/feedback/issue-index.md`.
 7. Update `agent/knowledge/index.md` if reusable context changed.
-8. Report completed issues/tasks, verification, next issue, and blockers.
+8. Cross-check `agent/feedback/issue-index.md` against `agent/knowledge/index.md` so resolved issue IDs and reusable behavior summaries are not stale.
+9. Report completed issues/tasks, verification, next issue, and blockers.
