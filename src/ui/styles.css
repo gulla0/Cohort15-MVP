@@ -43,6 +43,38 @@ h1 {
   font-size: 1.25rem;
 }
 
+.button-link,
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #146c5c;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.topbar {
+  margin-bottom: 24px;
+}
+
+.topbar a {
+  color: #146c5c;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.page-heading {
+  max-width: 760px;
+  padding: 24px 0 28px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -68,6 +100,75 @@ article p {
   color: #4d5c53;
 }
 
+.notice {
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border: 1px solid #cbd8d2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.notice h2 {
+  margin: 0 0 8px;
+}
+
+.notice p,
+.notice ul {
+  margin: 0;
+}
+
+.notice.error {
+  border-color: #d99a9a;
+  background: #fff7f7;
+}
+
+.notice.success {
+  border-color: #91bfaa;
+  background: #f4fff9;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 920px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #33433b;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cfc8bc;
+  border-radius: 8px;
+  background: #fffdf8;
+  color: #17211c;
+  font: inherit;
+}
+
+input,
+select {
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+textarea {
+  min-height: 104px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 760px) {
   .shell {
     width: min(100% - 24px, 640px);
@@ -79,6 +180,10 @@ article p {
   }
 
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -2,6 +2,33 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:33 EDT
+
+Task:
+- T004 Build create cohort flow
+
+Files Changed:
+- `src/services/create-cohort.mjs`
+- `src/server/app.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/home.mjs`
+- `src/ui/styles.css`
+- `tests/create-cohort.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added a create cohort service that builds valid open events, requires an existing creator, and records a 2-token creator hold through the ledger.
+- Added a demo-backed `GET/POST /cohorts/new` route with form rendering, validation error surfacing, and success rendering that does not expose the private link.
+- Added create-flow tests for token holds, default expiry, insufficient-token rejection, validation failures, and UI response behavior.
+- Marked T004 done and unblocked T005 and T008.
+
+Verification:
+- `npm run check` passed.
+
 ### 2026-05-30 00:28 EDT
 
 Task:

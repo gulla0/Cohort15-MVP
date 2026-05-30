@@ -2,6 +2,38 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:33 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
+- `docs/cohort15-mvp-spec-v3.md`
+- `src/domain/constants.mjs`
+- `src/domain/validation.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/token-ledger.mjs`
+- `src/persistence/seeds.mjs`
+- `src/server/app.mjs`
+- `src/ui/home.mjs`
+
+Decided:
+- Classified the user request as approved main implementation work.
+- Selected T004 as the next wave because T003 was done and T004 was the critical-path unblocked task.
+- Implemented create cohort behavior through a small service layer and demo-backed HTTP form route.
+- Kept the route scoped to creation, validation, and creator token holds; feed/detail, participant interest, quorum, and social outbox remain separate tasks.
+
+Assumptions Made:
+- Demo seed users are the temporary auth path for this wave because regular auth provider remains unspecified.
+- The create success page should not display the private event link; it reports the link remains locked until quorum.
+
+Next Recommended Step:
+- Execute T005: build public event feed and detail visibility using the created events and existing locked-link serializer.
+
 ### 2026-05-30 00:28 EDT
 
 Read:

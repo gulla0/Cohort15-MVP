@@ -126,7 +126,7 @@
     {
       "id": "T004",
       "title": "Build create cohort flow",
-      "status": "not_started",
+      "status": "done",
       "phase": "Core Cohort Flow",
       "dependencies": [
         "T003"
@@ -159,8 +159,8 @@
         "Manually smoke test the create flow if a UI exists"
       ],
       "stop_condition": "Stop before participant interest and quorum handling.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:33 EDT: Added create cohort service, demo-backed create form route, UI rendering for creation errors/success, and tests for 2-token creator holds, default expiry, insufficient tokens, validation errors, and hidden private links. `npm run check` passed.",
+      "notes": "Create flow uses demo users from seed data as the temporary auth path and stops before feed/detail, participant interest, and quorum handling."
     },
     {
       "id": "T005",

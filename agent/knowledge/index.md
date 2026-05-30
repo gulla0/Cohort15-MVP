@@ -27,7 +27,7 @@ It is advisory. Code, verified behavior, and canonical ledgers override this ind
 | Main planning artifacts | `plan.md`, `atomic-task-graph.md`, `tasks.json` | Initialized for Cohort15 MVP. `tasks.json` is canonical. | high |
 | Progress tracking | `agent/progress/*.md` | Tracks task status, session decisions, blockers, and changes. | high |
 | Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists but no product feedback issues are currently defined. | medium |
-| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/server`, `src/ui`, `tests`, `scripts` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives. | high |
+| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives; T004 added the create cohort service and demo-backed create route. | high |
 
 ## Context Routes
 
@@ -41,7 +41,7 @@ Use these routes to avoid broad rediscovery.
 | Domain model/validation | T002 in `tasks.json`, `docs/cohort15-mvp-spec-v3.md` sections for Event, validation, related objects | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs`, `tests/domain-validation.test.mjs` | UI routes and dashboards |
 | Persistence/token ledger | T003 in `tasks.json`, spec sections for EventInterest and TokenTransaction | `src/persistence/schema.mjs`, `src/persistence/repositories.mjs`, `src/persistence/token-ledger.mjs`, `src/persistence/seeds.mjs`, `tests/persistence-ledger.test.mjs` | social posting UI unless tied to schema |
 | Create cohort flow | T004 in `tasks.json`, creator flow in spec | `src/persistence/repositories.mjs`, `src/persistence/token-ledger.mjs`, `src/persistence/seeds.mjs`, event validation modules | participant interest, expiry, dashboards |
-| Feed/detail/link visibility | T005 in `tasks.json`, online-only and locked link sections in spec | Event creation and visibility/data-loader modules | social posting and expiry services |
+| Feed/detail/link visibility | T005 in `tasks.json`, online-only and locked link sections in spec | `src/services/create-cohort.mjs`, `src/server/app.mjs`, `src/ui/create-cohort.mjs`, and visibility/data-loader modules | social posting and expiry services |
 | Interest/quorum flow | T006 in `tasks.json`, participant and quorum flows in spec | Token ledger, event detail route, interest modules | dashboards except where needed for test setup |
 | Expiry/refund processing | T007 in `tasks.json`, expiry and quorum-not-met sections in spec | Token ledger and interest modules | social channel integration |
 | Social promotion outbox | T008 in `tasks.json`, automated social promotion section in spec, MVP boundary in `plan.md` | Event creation flow and social post outbox persistence | real external API clients during MVP |
@@ -63,6 +63,8 @@ Use these routes to avoid broad rediscovery.
 - Token purchase is post-MVP; seed/admin grant transactions are part of MVP.
 - Initial post-MVP token packages are `$6` for 6 tokens and `$12` for 14 tokens.
 - Real automated social posting is post-MVP; MVP should generate local public-safe outbox content.
+- Create cohort currently uses demo seed users as the temporary auth path and `GET/POST /cohorts/new` as the creation surface.
+- The create success view intentionally reports that the private link is locked and does not render `lockedEventLink`.
 
 ## Assumptions And Uncertainty
 
@@ -89,4 +91,5 @@ Before trusting this index, check:
 - 2026-05-30 00:13 EDT: T001 created the dependency-free Node.js app foundation, README commands, lint/test scripts, and initial `src/*` layout.
 - 2026-05-30 00:18 EDT: T002 added JSDoc domain models, spec enums, event/related-object validators, expiry defaulting, and locked-link visibility serialization.
 - 2026-05-30 00:28 EDT: T003 added in-memory persistence schema/repositories, demo seed grants, token ledger helpers, and persistence/ledger tests.
+- 2026-05-30 00:33 EDT: T004 added `src/services/create-cohort.mjs`, demo-backed `GET/POST /cohorts/new`, create form UI, hidden-link success rendering, and create-flow tests.
 - 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.
