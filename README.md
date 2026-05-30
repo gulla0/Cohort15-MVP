@@ -41,7 +41,7 @@ Run the baseline project verification:
 npm run check
 ```
 
-This executes the repository lint check and the Node test suite.
+This executes the repository lint check, the agent workflow guardrail, and the Node test suite.
 
 ## Local Demo Data
 
@@ -85,3 +85,5 @@ Post-MVP: USD token sales, real external social posting, chat, profiles, reputat
 ## Agent Workflow
 
 The repo still includes the bounded agent workflow files. Use `start.txt` for routed work, `tasks.json` as the canonical task ledger, and `agent/progress/task-status.md` as the readable status view.
+
+`npm run check` also verifies that resolved feedback issues in `agent/feedback/issue-index.md` are reflected in `agent/knowledge/index.md`. If that guardrail fails after issue resolution, update the knowledge index with the reusable context before handoff.

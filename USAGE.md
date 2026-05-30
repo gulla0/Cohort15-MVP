@@ -52,6 +52,8 @@ agent-starters/startFeedbackResolutionManager.txt
 
 This resolves issue-local task graphs and updates feedback trackers.
 
+Before handoff, feedback resolution should run `npm run check` and fix any agent workflow guardrail failure. The guardrail checks that issues marked `done` in `agent/feedback/issue-index.md` are reflected in `agent/knowledge/index.md`.
+
 In normal use, `start.txt` should route by role transition into these managers. Directly starting a manager is useful when the intent is already known.
 
 ## Updating The Knowledge Index
@@ -65,6 +67,8 @@ Update `agent/knowledge/index.md` when an agent learns reusable context such as:
 - files that should be avoided unless relevant
 
 Do not treat the index as proof. Verify against code before marking work done.
+
+Resolved feedback issues are checked by `npm run check`: every `done` issue in `agent/feedback/issue-index.md` must be mentioned in `agent/knowledge/index.md`.
 
 ## Adding A Main Task
 
