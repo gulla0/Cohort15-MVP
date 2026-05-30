@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-000",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-000-T01",
+      "title": "Investigate issue root cause",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Identify the smallest verified cause of the reported issue.",
+      "inputs": [
+        "issue.md",
+        "relevant code/files"
+      ],
+      "write_scope": [],
+      "authority": [
+        "Read/investigate only unless user asked for implementation"
+      ],
+      "acceptance_criteria": [
+        "Root cause or next blocking unknown is recorded"
+      ],
+      "verification": [
+        "Evidence is linked to code or reproducible behavior"
+      ],
+      "files_expected": [],
+      "area": "TODO",
+      "risk": "low",
+      "shared_dependencies": [],
+      "stop_condition": "Stop after root cause is understood enough to define fix tasks."
+    }
+  ]
+}

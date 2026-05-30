@@ -1,0 +1,403 @@
+{
+  "schema_version": "1.0",
+  "source_of_truth": "tasks.json",
+  "status_values": [
+    "not_started",
+    "in_progress",
+    "blocked",
+    "done"
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Scaffold runnable app foundation",
+      "status": "not_started",
+      "phase": "Product Scaffold And Domain Foundation",
+      "dependencies": [],
+      "objective": "Choose a pragmatic web app stack for this empty product repo and create the minimal runnable application, lint/test scripts, and README setup notes.",
+      "inputs": [
+        "docs/cohort15-mvp-spec-v3.md",
+        "plan.md",
+        "repository tree"
+      ],
+      "write_scope": [
+        "product source files",
+        "package and dependency manifests",
+        "framework config files",
+        "test harness files",
+        "README.md"
+      ],
+      "authority": [
+        "May choose the initial product stack because no stack is specified in the repo",
+        "Keep the scaffold minimal and runnable",
+        "Do not implement full product flows in this task"
+      ],
+      "acceptance_criteria": [
+        "A local development app can start successfully",
+        "Baseline lint/type/test or equivalent checks are configured",
+        "README.md documents install, run, and verification commands",
+        "The app has a clear source directory structure for domain, persistence, and UI work"
+      ],
+      "verification": [
+        "Run the documented baseline verification command",
+        "Start the app locally or run a framework-provided smoke check"
+      ],
+      "stop_condition": "Stop once the foundation is runnable and ready for domain work.",
+      "evidence": "",
+      "notes": "This repo currently contains planning artifacts only, so stack selection belongs here."
+    },
+    {
+      "id": "T002",
+      "title": "Implement domain types and validation rules",
+      "status": "not_started",
+      "phase": "Product Scaffold And Domain Foundation",
+      "dependencies": [
+        "T001"
+      ],
+      "objective": "Add typed Cohort15 domain models and validation for event fields, recurrence, quorum, participant cap, expiry default, and link visibility policy.",
+      "inputs": [
+        "docs/cohort15-mvp-spec-v3.md",
+        "app source from T001"
+      ],
+      "write_scope": [
+        "domain/model modules",
+        "validation modules",
+        "focused domain tests"
+      ],
+      "authority": [
+        "Implement only behavior specified in the MVP spec",
+        "Record any non-blocking product assumptions in code comments or docs",
+        "Do not add persistence or UI integration in this task"
+      ],
+      "acceptance_criteria": [
+        "Event, EventInterest, TokenTransaction, and SocialPost concepts are represented in typed code",
+        "Allowed enum values match the spec",
+        "Participant cap, recurrence, meeting count, required link, and expiry defaults are validated",
+        "Private link visibility policy is represented without leaking links for open events"
+      ],
+      "verification": [
+        "Run focused domain validation tests",
+        "Run type checks if available"
+      ],
+      "stop_condition": "Stop before persistence or UI integration.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T003",
+      "title": "Add persistence schema and token ledger primitives",
+      "status": "not_started",
+      "phase": "Product Scaffold And Domain Foundation",
+      "dependencies": [
+        "T002"
+      ],
+      "objective": "Create storage for users, events, event interests, token transactions, and social posts, with auditable token balance helpers.",
+      "inputs": [
+        "domain model from T002",
+        "selected persistence layer from T001"
+      ],
+      "write_scope": [
+        "database schema or migrations",
+        "seed/demo data",
+        "repository/data-access modules",
+        "token ledger service",
+        "persistence tests"
+      ],
+      "authority": [
+        "Token balances must be derived from auditable transaction records or kept consistent with them",
+        "Do not silently mutate balances without transaction records",
+        "Do not implement user-facing create or interest flows in this task"
+      ],
+      "acceptance_criteria": [
+        "Users, events, interests, token transactions, and social posts can be persisted",
+        "Hold, consume, refund, and grant transaction types are supported for MVP",
+        "The schema leaves a clear path for a later purchase transaction source without requiring USD payments now",
+        "Balance helpers correctly account for held and available tokens",
+        "Seed/demo users can receive starting tokens through grant transactions"
+      ],
+      "verification": [
+        "Run persistence or repository tests for token hold/consume/refund behavior",
+        "Run migration/schema validation if available"
+      ],
+      "stop_condition": "Stop before user-facing create/interest flows.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T004",
+      "title": "Build create cohort flow",
+      "status": "not_started",
+      "phase": "Core Cohort Flow",
+      "dependencies": [
+        "T003"
+      ],
+      "objective": "Let an authenticated or demo user create a cohort event by holding 2 tokens and creating an open event with expiresAt equal to createdAt plus 14 days.",
+      "inputs": [
+        "event form requirements from docs/cohort15-mvp-spec-v3.md",
+        "token ledger primitives from T003"
+      ],
+      "write_scope": [
+        "create-event UI",
+        "create-event route/action/controller",
+        "event creation service",
+        "create-flow tests"
+      ],
+      "authority": [
+        "Require enough available tokens before event creation",
+        "Hide lockedEventLink from public outputs",
+        "Do not implement participant interest or expiry automation in this task"
+      ],
+      "acceptance_criteria": [
+        "Creator with fewer than 2 available tokens cannot create an event",
+        "Creator with at least 2 available tokens creates an open event",
+        "Creation records a 2-token hold transaction",
+        "Event expiry defaults to 14 days after creation",
+        "Validation errors are surfaced for invalid event inputs"
+      ],
+      "verification": [
+        "Run create-flow unit/integration tests",
+        "Manually smoke test the create flow if a UI exists"
+      ],
+      "stop_condition": "Stop before participant interest and quorum handling.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T005",
+      "title": "Build public event feed and detail visibility",
+      "status": "not_started",
+      "phase": "Core Cohort Flow",
+      "dependencies": [
+        "T004"
+      ],
+      "objective": "Show open and active cohort events in a public feed and event detail page while hiding lockedEventLink until quorum unlocks it for authorized users.",
+      "inputs": [
+        "event fields from docs/cohort15-mvp-spec-v3.md",
+        "create flow from T004"
+      ],
+      "write_scope": [
+        "event feed UI/routes",
+        "event detail UI/routes",
+        "event visibility serializers or data loaders",
+        "visibility tests"
+      ],
+      "authority": [
+        "Do not expose private online links for open events",
+        "Keep filtering/search minimal unless required by existing UI",
+        "Do not implement interest mutation behavior in this task"
+      ],
+      "acceptance_criteria": [
+        "Feed lists public event fields for open and active events",
+        "Detail page shows complete public cohort information",
+        "Open events show a locked-link placeholder instead of the private link",
+        "Active events reveal the private link only according to the chosen authorization policy"
+      ],
+      "verification": [
+        "Run visibility tests",
+        "Manually inspect feed/detail pages if a UI exists"
+      ],
+      "stop_condition": "Stop before interest mutation behavior.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T006",
+      "title": "Build show-interest and quorum unlock flow",
+      "status": "not_started",
+      "phase": "Core Cohort Flow",
+      "dependencies": [
+        "T005"
+      ],
+      "objective": "Let participants hold 1 token to show interest, prevent duplicate or over-capacity interest, and activate the cohort when active interest count reaches minQuorum.",
+      "inputs": [
+        "EventInterest rules from docs/cohort15-mvp-spec-v3.md",
+        "TokenTransaction rules from docs/cohort15-mvp-spec-v3.md",
+        "event detail flow from T005"
+      ],
+      "write_scope": [
+        "interest action/controller/service",
+        "quorum service",
+        "token ledger integration",
+        "event detail interest UI",
+        "interest and quorum tests"
+      ],
+      "authority": [
+        "Participants must have at least 1 available token to show interest",
+        "Do not allow duplicate active interest for the same user and event",
+        "Do not exceed maxParticipants",
+        "Consume held creator and participant tokens only when quorum is met"
+      ],
+      "acceptance_criteria": [
+        "Showing interest records a 1-token hold and active interest",
+        "Duplicate and over-capacity interest attempts are rejected",
+        "When active interest count reaches minQuorum, event status becomes active",
+        "Quorum consumes held creator and participant tokens",
+        "Private event link becomes visible only after activation"
+      ],
+      "verification": [
+        "Run interest/quorum tests",
+        "Manually smoke test interest and unlock if a UI exists"
+      ],
+      "stop_condition": "Stop before expiry automation.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T007",
+      "title": "Build expiry and refund processing",
+      "status": "not_started",
+      "phase": "Core Cohort Flow",
+      "dependencies": [
+        "T006"
+      ],
+      "objective": "Expire open events past expiresAt that have not met quorum and refund all held creator and participant tokens.",
+      "inputs": [
+        "expiry rule from docs/cohort15-mvp-spec-v3.md",
+        "token ledger from T003",
+        "interest flow from T006"
+      ],
+      "write_scope": [
+        "expiry job/service",
+        "manual admin/dev trigger if needed",
+        "token refund logic",
+        "expiry tests"
+      ],
+      "authority": [
+        "Only open events past expiresAt should be expired",
+        "Active events must not be refunded by expiry processing",
+        "Refund all held tokens through refund transaction records"
+      ],
+      "acceptance_criteria": [
+        "Expired events change status to expired",
+        "Creator and participant holds are refunded",
+        "Interest records become refunded or otherwise clearly non-active",
+        "Private event link remains hidden after expiry"
+      ],
+      "verification": [
+        "Run expiry/refund tests",
+        "Run a manual expiry trigger against seeded data if available"
+      ],
+      "stop_condition": "Stop before dashboards and social promotion outbox.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T008",
+      "title": "Build social promotion outbox",
+      "status": "not_started",
+      "phase": "MVP Surfaces And Promotion Outbox",
+      "dependencies": [
+        "T004"
+      ],
+      "objective": "Generate a public-safe local social post/outbox record when a cohort is created, containing required public fields and excluding the private link.",
+      "inputs": [
+        "social promotion section from docs/cohort15-mvp-spec-v3.md",
+        "event creation flow from T004"
+      ],
+      "write_scope": [
+        "social post outbox model/service",
+        "create flow integration",
+        "social promotion tests",
+        "optional local outbox UI or dev view"
+      ],
+      "authority": [
+        "Do not add real external social API posting in MVP",
+        "Social content must never include lockedEventLink",
+        "Status may be pending, posted, or failed according to local/mock behavior"
+      ],
+      "acceptance_criteria": [
+        "New events create a local social-promotion outbox record",
+        "Post text includes event title, topic, target skill level, short description, quorum needed, and public event page link",
+        "Post text excludes private event links",
+        "Event socialPostStatus is kept consistent with local/mock posting result"
+      ],
+      "verification": [
+        "Run social promotion tests",
+        "Inspect generated post content for a seeded or newly created event"
+      ],
+      "stop_condition": "Stop after local/mock promotion is represented and verifiable.",
+      "evidence": "",
+      "notes": "Real social APIs are post-MVP. The outbox should make later channel posting straightforward."
+    },
+    {
+      "id": "T009",
+      "title": "Build creator and participant dashboards",
+      "status": "not_started",
+      "phase": "MVP Surfaces And Promotion Outbox",
+      "dependencies": [
+        "T006"
+      ],
+      "objective": "Provide dashboard views for creators and participants showing relevant cohorts, statuses, token holds, and unlocked links where allowed.",
+      "inputs": [
+        "event data from T004",
+        "interest data from T006",
+        "token data from T003"
+      ],
+      "write_scope": [
+        "creator dashboard UI/routes",
+        "participant dashboard UI/routes",
+        "dashboard data loaders",
+        "dashboard tests"
+      ],
+      "authority": [
+        "Keep dashboards focused on MVP status and token visibility",
+        "Do not add analytics beyond what is needed to understand cohort state",
+        "Respect private link visibility rules"
+      ],
+      "acceptance_criteria": [
+        "Creator dashboard lists owned cohorts and statuses",
+        "Creator dashboard shows relevant token hold/consume/refund state",
+        "Participant dashboard lists cohorts where the user showed interest",
+        "Unlocked links appear only when the event is active and the user is authorized"
+      ],
+      "verification": [
+        "Run dashboard tests",
+        "Manually inspect dashboards with seeded creator and participant data if a UI exists"
+      ],
+      "stop_condition": "Stop before broad polish or analytics.",
+      "evidence": "",
+      "notes": ""
+    },
+    {
+      "id": "T010",
+      "title": "Add MVP verification pass and docs",
+      "status": "not_started",
+      "phase": "MVP Surfaces And Promotion Outbox",
+      "dependencies": [
+        "T007",
+        "T008",
+        "T009"
+      ],
+      "objective": "Add final coverage and documentation for the core success path, expiry path, token accounting, and local operation.",
+      "inputs": [
+        "completed MVP tasks",
+        "README.md",
+        "docs/cohort15-mvp-spec-v3.md"
+      ],
+      "write_scope": [
+        "tests",
+        "README.md",
+        "developer docs",
+        "small defects found during verification"
+      ],
+      "authority": [
+        "May fix small defects discovered while verifying existing MVP behavior",
+        "Do not add new product feature scope",
+        "Document unresolved assumptions rather than silently broadening scope"
+      ],
+      "acceptance_criteria": [
+        "Core success path is covered by automated tests or documented manual verification",
+        "Expiry/refund path is covered by automated tests or documented manual verification",
+        "Token ledger behavior is covered by tests",
+        "README documents setup, run, test, seed/demo data, MVP boundary, post-MVP USD token packages, and known assumptions"
+      ],
+      "verification": [
+        "Run the full documented verification suite",
+        "Manually exercise the MVP flow if UI automation is not available"
+      ],
+      "stop_condition": "Stop once the MVP can be handed to user testing.",
+      "evidence": "",
+      "notes": ""
+    }
+  ]
+}
