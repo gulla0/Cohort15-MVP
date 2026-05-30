@@ -22,8 +22,9 @@ WORKER RULES
 6. Inspect only files needed for the assigned task.
 7. Do not make product, architecture, or workflow decisions.
 8. If implementation requires a decision outside the task contract, stop and report the blocker to the manager.
-9. Run the narrowest meaningful verification available for the task.
-10. Return concrete evidence, not broad claims.
+9. Run the narrowest meaningful verification available for the task. Use `npm run check` only when assigned or when your scoped changes affect shared workflow artifacts.
+10. If `npm run check` fails because of the workflow guardrail, report the stale feedback/index mismatch to the manager; do not expand tracker edits unless authorized.
+11. Return concrete evidence, not broad claims.
 
 ==================================================
 REQUIRED TASK CONTRACT

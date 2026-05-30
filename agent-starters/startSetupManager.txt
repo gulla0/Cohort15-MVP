@@ -58,8 +58,9 @@ SETUP RULES
 8. Keep `atomic-task-graph.md` aligned with `tasks.json`.
 9. Keep `agent/progress/task-status.md` aligned with `tasks.json`.
 10. Populate `agent/knowledge/index.md` with concrete context routes from the actual repo, not generic advice.
-11. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
-12. Stop after setup artifacts are ready. Report the next recommended starter prompt.
+11. If the repository has `npm run check`, use it after setup artifact changes when practical; it includes the agent workflow guardrail for stale feedback-to-knowledge handoffs.
+12. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
+13. Stop after setup artifacts are ready. Report the next recommended starter prompt.
 
 ==================================================
 SETUP LOOP
@@ -125,10 +126,16 @@ Update:
 - `agent/progress/change-log.md` if setup changed artifacts
 - `agent/progress/blockers.md` if setup found blockers
 
-STEP 7 - Report
+STEP 7 - Verify
+- Run `npm run check` if available and practical.
+- If the workflow guardrail fails, reconcile `agent/feedback/issue-index.md` and `agent/knowledge/index.md` before handoff.
+- If verification cannot run, explain why in the report.
+
+STEP 8 - Report
 Produce a concise setup summary:
 - artifacts initialized
 - assumptions made
 - blocking questions, if any
+- verification result
 - first ready task
 - whether to continue with `start.txt` for user-facing routing or `agent-starters/startNewManager.txt` for direct manager execution

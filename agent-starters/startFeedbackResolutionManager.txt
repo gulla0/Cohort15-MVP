@@ -45,4 +45,5 @@ After each wave:
 6. Update `agent/feedback/issue-index.md`.
 7. Update `agent/knowledge/index.md` if reusable context changed.
 8. Cross-check `agent/feedback/issue-index.md` against `agent/knowledge/index.md` so resolved issue IDs and reusable behavior summaries are not stale.
-9. Report completed issues/tasks, verification, next issue, and blockers.
+9. Run `npm run check` when practical. This includes the automated workflow guardrail for the same feedback-to-knowledge consistency check.
+10. Report completed issues/tasks, verification, next issue, and blockers.

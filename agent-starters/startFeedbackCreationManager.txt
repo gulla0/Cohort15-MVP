@@ -32,6 +32,8 @@ Rules:
 - Every distinct product issue belongs in its own folder under `agent/feedback/issues/`.
 - If new feedback maps to an existing issue, update that issue instead of creating a duplicate.
 - Infer dependencies from actual code and current product flow, not guesswork.
+- If feedback intake changes issue status or reusable context, keep `agent/feedback/issue-index.md` and `agent/knowledge/index.md` consistent.
+- Run `npm run check` when practical before handoff. Its workflow guardrail fails if feedback issues marked `done` are missing from `agent/knowledge/index.md`.
 
 Issue folders must contain:
 
@@ -46,3 +48,5 @@ Issue folders must contain:
 Task IDs should be issue-scoped, for example `ISSUE-004-T01`.
 
 Each issue task should include objective, inputs, write scope, authority, acceptance criteria, verification, risk, and dependencies.
+
+Before reporting completion, summarize whether `npm run check` was run. If the workflow guardrail fails during intake, fix stale tracker/index context unless the failure is unrelated to the intake work; in that case, report it clearly.

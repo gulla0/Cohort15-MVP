@@ -70,6 +70,7 @@ messy user request
 -> user correction or approval
 -> structured routed work request
 -> same agent assumes selected planner/manager role
+-> manager verifies with `npm run check` when practical before handoff
 ```
 
 ## User Approval Rule
@@ -129,3 +130,5 @@ While acting as the router, the agent does not own:
 - validation
 
 Those belong to the selected manager role after approval.
+
+Managers should know that `npm run check` includes the agent workflow guardrail. It fails when a feedback issue marked `done` in `agent/feedback/issue-index.md` is not reflected in `agent/knowledge/index.md`; manager closeout should fix or report that mismatch.
