@@ -121,8 +121,26 @@ article p {
 }
 
 .event-card,
-.event-detail {
+.event-detail,
+.dashboard-row {
   min-height: auto;
+}
+
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dashboard-summary article {
+  min-height: auto;
+}
+
+.dashboard-summary p {
+  color: #17211c;
+  font-size: 1.5rem;
+  font-weight: 800;
 }
 
 .event-card-header {
@@ -296,6 +314,7 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-summary,
   .meta-grid,
   .detail-layout {
     grid-template-columns: 1fr;

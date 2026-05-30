@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { CREATE_EVENT_TOKEN_COST } from '../domain/constants.mjs';
 import { buildEvent } from '../domain/validation.mjs';
+import { createSocialPromotionService } from './social-promotion.mjs';
 
 function parseInteger(value) {
   if (typeof value === 'number') {
@@ -53,6 +54,14 @@ function normalizeCreateInput(input, options) {
 export function createCohortService({ repositories, ledger, options = {} }) {
   const now = options.now ?? (() => new Date());
   const createEventId = options.createEventId ?? (() => `event-${randomUUID()}`);
+  const socialPromotionService = options.socialPromotionService ?? createSocialPromotionService({
+    repositories,
+    options: {
+      now,
+      createPostId: options.createSocialPostId,
+      publicBaseUrl: options.publicBaseUrl
+    }
+  });
 
   function create(input) {
     const event = buildEvent(normalizeCreateInput(input, { now, createEventId }));
@@ -64,10 +73,12 @@ export function createCohortService({ repositories, ledger, options = {} }) {
 
     ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
     const savedEvent = repositories.events.save(event);
+    const promotion = socialPromotionService.enqueueForEvent(savedEvent);
 
     return {
-      event: savedEvent,
+      event: promotion.event,
       creator,
+      socialPost: promotion.post,
       tokenHoldAmount: CREATE_EVENT_TOKEN_COST,
       balance: ledger.balanceForUser(event.creatorId)
     };

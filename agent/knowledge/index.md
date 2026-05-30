@@ -27,7 +27,7 @@ It is advisory. Code, verified behavior, and canonical ledgers override this ind
 | Main planning artifacts | `plan.md`, `atomic-task-graph.md`, `tasks.json` | Initialized for Cohort15 MVP. `tasks.json` is canonical. | high |
 | Progress tracking | `agent/progress/*.md` | Tracks task status, session decisions, blockers, and changes. | high |
 | Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists but no product feedback issues are currently defined. | medium |
-| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives; T004 added the create cohort service and demo-backed create route; T005 added public cohort feed/detail routes and visibility service; T006 added show-interest/quorum activation. | high |
+| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives; T004 added the create cohort service and demo-backed create route; T005 added public cohort feed/detail routes and visibility service; T006 added show-interest/quorum activation; T007-T009 added expiry/refunds, local social outbox, and dashboards. | high |
 
 ## Context Routes
 
@@ -68,6 +68,9 @@ Use these routes to avoid broad rediscovery.
 - Public discovery is implemented through `src/services/event-browsing.mjs`, `GET /cohorts`, and `GET /cohorts/:id`; it lists open/active events and keeps locked links hidden unless an active event is viewed by an authorized demo `viewerId`.
 - Show interest is implemented through `src/services/show-interest.mjs` and `POST /cohorts/:id/interest`; it uses demo users, records a 1-token participant hold, rejects duplicate active/consumed interest and cap overflow, and activates the event at quorum.
 - Quorum activation consumes the creator's 2-token hold and each active participant's 1-token hold, then marks active interests `consumed`; consumed participants remain authorized to view active private links.
+- Expiry processing lives in `src/services/expire-cohorts.mjs` and is exposed for local/dev use at `POST /admin/expire-cohorts`; it only processes open events past `expiresAt`, refunds held creator/participant tokens, and marks active interests `refunded`.
+- Social promotion is local/mock in `src/services/social-promotion.mjs`; create cohort enqueues a pending `x` outbox post with public event fields and a public cohort URL, never the private link.
+- Creator and participant dashboards live at `/dashboard/creator` and `/dashboard/participant`; they use the existing demo `userId` query/default-user path and existing locked-link serializer for authorization.
 
 ## Assumptions And Uncertainty
 
@@ -97,4 +100,5 @@ Before trusting this index, check:
 - 2026-05-30 00:33 EDT: T004 added `src/services/create-cohort.mjs`, demo-backed `GET/POST /cohorts/new`, create form UI, hidden-link success rendering, and create-flow tests.
 - 2026-05-30 00:41 EDT: T005 added `src/services/event-browsing.mjs`, public `GET /cohorts` and `GET /cohorts/:id` routes, feed/detail UI, and visibility tests for locked/authorized private links.
 - 2026-05-30 00:48 EDT: T006 added `src/services/show-interest.mjs`, `POST /cohorts/:id/interest`, detail interest UI, quorum activation with token consumption, consumed-participant link authorization, and interest/quorum tests.
+- 2026-05-30 00:59 EDT: T007-T009 added `src/services/expire-cohorts.mjs`, `src/services/social-promotion.mjs`, `src/services/dashboards.mjs`, local expiry trigger, social outbox integration, dashboard UI/routes, and focused tests.
 - 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.

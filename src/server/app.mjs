@@ -5,10 +5,13 @@ import { dirname, join } from 'node:path';
 import { getFoundationSummary } from '../domain/constants.mjs';
 import { createDemoRepositories } from '../persistence/seeds.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
+import { createDashboardService } from '../services/dashboards.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
+import { createExpireCohortsService } from '../services/expire-cohorts.mjs';
 import { createShowInterestService } from '../services/show-interest.mjs';
 import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
+import { renderCreatorDashboardPage, renderParticipantDashboardPage } from '../ui/dashboards.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -50,7 +53,9 @@ const defaultState = createState();
 
 export function createRequestHandler(state = createState()) {
   const cohortService = createCohortService(state);
+  const dashboardService = createDashboardService(state);
   const eventBrowsingService = createEventBrowsingService(state);
+  const expireCohortsService = createExpireCohortsService(state);
   const showInterestService = createShowInterestService(state);
 
   return async function handleRequest(req, res) {
@@ -102,6 +107,54 @@ export function createRequestHandler(state = createState()) {
           errors: [error.message]
         }));
       }
+      return;
+    }
+
+    if (url.pathname === '/dashboard/creator' && (req.method ?? 'GET') === 'GET') {
+      const userId = url.searchParams.get('userId') ?? 'user-creator';
+
+      try {
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatorDashboardPage({
+          dashboard: dashboardService.getCreatorDashboard(userId)
+        }));
+      } catch (error) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
+      }
+      return;
+    }
+
+    if (url.pathname === '/dashboard/participant' && (req.method ?? 'GET') === 'GET') {
+      const userId = url.searchParams.get('userId') ?? 'user-participant';
+
+      try {
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderParticipantDashboardPage({
+          dashboard: dashboardService.getParticipantDashboard(userId)
+        }));
+      } catch (error) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
+      }
+      return;
+    }
+
+    if (url.pathname === '/admin/expire-cohorts' && req.method === 'POST') {
+      const nowParam = url.searchParams.get('now');
+      const processedAt = nowParam ? new Date(nowParam) : new Date();
+
+      if (Number.isNaN(processedAt.getTime())) {
+        send(res, 400, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
+          error: 'now must be an ISO date when provided.'
+        }));
+        return;
+      }
+
+      const result = expireCohortsService.expireDueCohorts(processedAt);
+      send(res, 200, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
+        processedAt: result.processedAt.toISOString(),
+        expiredCount: result.expiredCount,
+        expiredEventIds: result.results
+          .filter((item) => item.expired)
+          .map((item) => item.event.id)
+      }));
       return;
     }
 

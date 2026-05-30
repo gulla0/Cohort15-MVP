@@ -245,7 +245,7 @@
     {
       "id": "T007",
       "title": "Build expiry and refund processing",
-      "status": "not_started",
+      "status": "done",
       "phase": "Core Cohort Flow",
       "dependencies": [
         "T006"
@@ -278,13 +278,13 @@
         "Run a manual expiry trigger against seeded data if available"
       ],
       "stop_condition": "Stop before dashboards and social promotion outbox.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:59 EDT: Added expiry processing service, dev/admin POST trigger, and tests for overdue open event expiry, creator/participant refund transactions, refunded interests, active/future event exclusion, and expired cohorts staying non-public. `npm run check` passed; browser smoke confirmed local app still renders.",
+      "notes": "Expiry processing is idempotent by only selecting currently open events whose expiresAt is at or before the processing time."
     },
     {
       "id": "T008",
       "title": "Build social promotion outbox",
-      "status": "not_started",
+      "status": "done",
       "phase": "MVP Surfaces And Promotion Outbox",
       "dependencies": [
         "T004"
@@ -316,13 +316,13 @@
         "Inspect generated post content for a seeded or newly created event"
       ],
       "stop_condition": "Stop after local/mock promotion is represented and verifiable.",
-      "evidence": "",
-      "notes": "Real social APIs are post-MVP. The outbox should make later channel posting straightforward."
+      "evidence": "2026-05-30 00:59 EDT: Added local social promotion service, integrated create cohort with pending social post creation, and tests confirming required public fields and public page URL are included while private links are excluded. `npm run check` passed.",
+      "notes": "Real social APIs remain post-MVP. The MVP creates a pending local outbox record on cohort creation and keeps event socialPostStatus consistent with the post status."
     },
     {
       "id": "T009",
       "title": "Build creator and participant dashboards",
-      "status": "not_started",
+      "status": "done",
       "phase": "MVP Surfaces And Promotion Outbox",
       "dependencies": [
         "T006"
@@ -355,8 +355,8 @@
         "Manually inspect dashboards with seeded creator and participant data if a UI exists"
       ],
       "stop_condition": "Stop before broad polish or analytics.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:59 EDT: Added dashboard data service, creator and participant dashboard routes/UI, and tests for owned/interested cohorts, token held/consume/refund summaries, and authorized unlocked links. `npm run check` passed; browser smoke checked `/dashboard/creator` and `/dashboard/participant`.",
+      "notes": "Dashboards use demo query-param user selection until regular auth is specified, matching existing create/detail MVP assumptions."
     },
     {
       "id": "T010",

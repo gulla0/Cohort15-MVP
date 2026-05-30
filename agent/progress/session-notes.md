@@ -2,6 +2,33 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:59 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
+- `docs/cohort15-mvp-spec-v3.md`
+- existing service, persistence, server, UI, and test modules touched by T007-T009
+
+Decided:
+- Classified the user request as approved main implementation work and selected the remaining unblocked implementation wave: T007, T008, and T009.
+- Added expiry/refund processing for overdue open cohorts, with a dev/admin POST trigger and refund transactions rather than balance mutation.
+- Added local social promotion outbox generation on cohort creation, keeping real social APIs post-MVP and excluding private links from post text.
+- Added creator and participant dashboards with MVP token summaries and private-link visibility routed through the existing authorization serializer.
+
+Assumptions Made:
+- The admin expiry route is a local/dev trigger for MVP verification, not a production scheduler or auth model.
+- The local social outbox uses a pending post on platform `x` as the first official-channel placeholder.
+- Dashboard user selection continues the existing demo query/default-user auth path until regular auth is specified.
+
+Next Recommended Step:
+- Execute T010: final MVP verification pass and docs update now that T007, T008, and T009 are complete.
+
 ### 2026-05-30 00:48 EDT
 
 Read:

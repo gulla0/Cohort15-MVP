@@ -2,6 +2,41 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:59 EDT
+
+Task:
+- T007 Build expiry and refund processing
+- T008 Build social promotion outbox
+- T009 Build creator and participant dashboards
+
+Files Changed:
+- `src/services/expire-cohorts.mjs`
+- `src/services/social-promotion.mjs`
+- `src/services/dashboards.mjs`
+- `src/services/create-cohort.mjs`
+- `src/server/app.mjs`
+- `src/ui/dashboards.mjs`
+- `src/ui/styles.css`
+- `tests/expire-cohorts.test.mjs`
+- `tests/social-promotion.test.mjs`
+- `tests/dashboards.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added expiry processing for overdue open cohorts that marks events expired, refunds creator and participant holds through token transactions, and marks active interests refunded.
+- Added `POST /admin/expire-cohorts` as a local/dev manual expiry trigger with optional ISO `now` parameter.
+- Added a social promotion outbox service and create-flow integration that creates pending local posts with public cohort details and no private links.
+- Added creator and participant dashboard services, routes, renderers, and responsive dashboard summary styling.
+- Marked T007, T008, and T009 done, unblocking T010.
+
+Verification:
+- `npm run check` passed.
+- In-app browser smoke checked `/dashboard/creator?userId=user-creator` and `/dashboard/participant?userId=user-participant` on `http://localhost:3000`.
+
 ### 2026-05-30 00:48 EDT
 
 Task:
