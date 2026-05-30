@@ -2,6 +2,43 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:48 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
+- `docs/cohort15-mvp-spec-v3.md`
+- `src/domain/constants.mjs`
+- `src/domain/validation.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/token-ledger.mjs`
+- `src/persistence/seeds.mjs`
+- `src/services/create-cohort.mjs`
+- `src/services/event-browsing.mjs`
+- `src/server/app.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/styles.css`
+- existing tests
+
+Decided:
+- Selected T006 as the next wave because it is the critical-path task after T005 and unlocks expiry/refund plus dashboards.
+- Added a dedicated show-interest service that validates open cohorts, existing participants, duplicate active/consumed interest, participant caps, and token availability before recording the interest hold.
+- Kept quorum activation in the interest service: when active interest count reaches `minQuorum`, the event becomes active, creator and participant holds are consumed, and active interests become consumed.
+- Updated event browsing so consumed participants remain authorized to view active private links.
+
+Assumptions Made:
+- Demo user selection on the detail page remains the temporary auth path for interest actions.
+- Once quorum is met, consumed interests still represent committed participants for active-link authorization.
+- Creators cannot show interest in their own cohort.
+
+Next Recommended Step:
+- Execute T007: build expiry and refund processing for open events past `expiresAt`, refunding creator and participant holds and keeping expired private links hidden.
+
 ### 2026-05-30 00:41 EDT
 
 Read:

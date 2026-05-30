@@ -203,7 +203,7 @@
     {
       "id": "T006",
       "title": "Build show-interest and quorum unlock flow",
-      "status": "not_started",
+      "status": "done",
       "phase": "Core Cohort Flow",
       "dependencies": [
         "T005"
@@ -239,8 +239,8 @@
         "Manually smoke test interest and unlock if a UI exists"
       ],
       "stop_condition": "Stop before expiry automation.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:48 EDT: Added show-interest/quorum service, POST interest route, event detail interest UI, consumed-interest link authorization, and tests for 1-token holds, duplicate/cap rejection, quorum activation, token consumption, and unlocked private link rendering. `npm run check` passed. Browser smoke tested create -> detail -> stake interest -> quorum unlock on `http://localhost:3001`.",
+      "notes": "Quorum activation consumes creator and participant holds, changes active interests to consumed, and keeps consumed participants authorized to view active private links."
     },
     {
       "id": "T007",

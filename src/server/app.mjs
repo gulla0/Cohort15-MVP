@@ -6,6 +6,7 @@ import { getFoundationSummary } from '../domain/constants.mjs';
 import { createDemoRepositories } from '../persistence/seeds.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
+import { createShowInterestService } from '../services/show-interest.mjs';
 import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
@@ -50,6 +51,7 @@ const defaultState = createState();
 export function createRequestHandler(state = createState()) {
   const cohortService = createCohortService(state);
   const eventBrowsingService = createEventBrowsingService(state);
+  const showInterestService = createShowInterestService(state);
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -105,9 +107,10 @@ export function createRequestHandler(state = createState()) {
 
     const cohortDetailMatch = url.pathname.match(/^\/cohorts\/([^/]+)$/);
     if (cohortDetailMatch && (req.method ?? 'GET') === 'GET') {
+      const viewerId = url.searchParams.get('viewerId') ?? undefined;
       const event = eventBrowsingService.getPublicEvent(
         decodeURIComponent(cohortDetailMatch[1]),
-        url.searchParams.get('viewerId') ?? undefined
+        viewerId
       );
 
       if (!event) {
@@ -115,7 +118,43 @@ export function createRequestHandler(state = createState()) {
         return;
       }
 
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({ event }));
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
+        event,
+        users: state.repositories.users.list(),
+        viewerId
+      }));
+      return;
+    }
+
+    const showInterestMatch = url.pathname.match(/^\/cohorts\/([^/]+)\/interest$/);
+    if (showInterestMatch && req.method === 'POST') {
+      const eventId = decodeURIComponent(showInterestMatch[1]);
+      const values = parseFormBody(await readBody(req));
+      const viewerId = values.userId;
+
+      try {
+        const result = showInterestService.showInterest({ eventId, userId: viewerId });
+        const event = eventBrowsingService.getPublicEvent(eventId, viewerId);
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
+          event,
+          users: state.repositories.users.list(),
+          viewerId,
+          interestResult: result
+        }));
+      } catch (error) {
+        const event = eventBrowsingService.getPublicEvent(eventId, viewerId);
+        if (!event) {
+          send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Cohort not found');
+          return;
+        }
+
+        send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
+          event,
+          users: state.repositories.users.list(),
+          viewerId,
+          interestErrors: [error.message]
+        }));
+      }
       return;
     }
 

@@ -2,6 +2,35 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:48 EDT
+
+Task:
+- T006 Build show-interest and quorum unlock flow
+
+Files Changed:
+- `src/services/show-interest.mjs`
+- `src/services/event-browsing.mjs`
+- `src/server/app.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/styles.css`
+- `tests/show-interest.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added a show-interest service that records 1-token participant holds, rejects duplicate active/consumed interest, rejects participant-cap overflow, and activates cohorts when quorum is met.
+- Added quorum activation behavior that consumes held creator and participant tokens, marks active interests consumed, and updates event status to active.
+- Added a POST interest route and detail-page interest UI using the existing demo-user auth path.
+- Updated active-link authorization so consumed participants can still view unlocked private links.
+- Marked T006 done and unblocked T007 and T009.
+
+Verification:
+- `npm run check` passed.
+- Browser smoke tested create -> detail -> stake interest -> quorum unlock on `http://localhost:3001`.
+
 ### 2026-05-30 00:41 EDT
 
 Task:

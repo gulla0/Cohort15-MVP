@@ -2,14 +2,14 @@ import { serializeEventForViewer } from '../domain/validation.mjs';
 
 const PUBLIC_FEED_STATUSES = new Set(['open', 'active']);
 
-function activeInterestedUserIds(interests) {
+function eligibleLinkViewerIds(interests) {
   return interests
-    .filter((interest) => interest.status === 'active')
+    .filter((interest) => interest.status === 'active' || interest.status === 'consumed')
     .map((interest) => interest.userId);
 }
 
 function serializeWithInterest(repositories, event, viewerId) {
-  const interestedUserIds = activeInterestedUserIds(repositories.eventInterests.listByEvent(event.id));
+  const interestedUserIds = eligibleLinkViewerIds(repositories.eventInterests.listByEvent(event.id));
 
   return serializeEventForViewer(event, {
     userId: viewerId,

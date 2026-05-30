@@ -107,7 +107,39 @@ function linkPanel(event) {
   </section>`;
 }
 
-function eventDetail(event) {
+function selectedAttribute(left, right) {
+  return left === right ? ' selected' : '';
+}
+
+function interestPanel({ event, users = [], viewerId, interestResult, interestErrors = [] }) {
+  if (event.status !== 'open' && !interestResult && interestErrors.length === 0) {
+    return '';
+  }
+
+  const options = users.map((user) => (
+    `<option value="${escapeHtml(user.id)}"${selectedAttribute(user.id, viewerId)}>${escapeHtml(user.displayName)}</option>`
+  )).join('');
+
+  return `<section class="notice interest-panel">
+    <h2>Show interest</h2>
+    ${interestErrors.length > 0 ? `<div class="form-errors">
+      <p>Interest was not recorded.</p>
+      <ul>${interestErrors.map((error) => `<li>${escapeHtml(error)}</li>`).join('')}</ul>
+    </div>` : ''}
+    ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} staked ${escapeHtml(interestResult.tokenHoldAmount)} token. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'The token is held while quorum is pending.'}</p>` : ''}
+    ${event.status === 'open' ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
+      <label>
+        Demo participant
+        <select name="userId" required>
+          ${options}
+        </select>
+      </label>
+      <button type="submit">Stake 1 token</button>
+    </form>` : ''}
+  </section>`;
+}
+
+function eventDetail({ event, users, viewerId, interestResult, interestErrors }) {
   return `<section class="detail-layout">
     <article class="event-detail">
       <div class="event-card-header">
@@ -155,7 +187,10 @@ function eventDetail(event) {
         <p>${escapeHtml(event.additionalDetails)}</p>
       </section>` : ''}
     </article>
-    ${linkPanel(event)}
+    <aside>
+      ${linkPanel(event)}
+      ${interestPanel({ event, users, viewerId, interestResult, interestErrors })}
+    </aside>
   </section>`;
 }
 
@@ -169,12 +204,12 @@ export function renderCohortFeedPage({ events }) {
   });
 }
 
-export function renderCohortDetailPage({ event }) {
+export function renderCohortDetailPage({ event, users = [], viewerId, interestResult, interestErrors = [] }) {
   return pageShell({
     title: event.title,
     eyebrow: 'Cohort detail',
     heading: event.title,
     lede: `${event.topic} for ${event.targetAudience}`,
-    body: eventDetail(event)
+    body: eventDetail({ event, users, viewerId, interestResult, interestErrors })
   });
 }
