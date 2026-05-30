@@ -5,6 +5,8 @@ import { dirname, join } from 'node:path';
 import { getFoundationSummary } from '../domain/constants.mjs';
 import { createDemoRepositories } from '../persistence/seeds.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
+import { createEventBrowsingService } from '../services/event-browsing.mjs';
+import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 
@@ -47,6 +49,7 @@ const defaultState = createState();
 
 export function createRequestHandler(state = createState()) {
   const cohortService = createCohortService(state);
+  const eventBrowsingService = createEventBrowsingService(state);
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -70,6 +73,13 @@ export function createRequestHandler(state = createState()) {
       return;
     }
 
+    if (url.pathname === '/cohorts' && (req.method ?? 'GET') === 'GET') {
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortFeedPage({
+        events: eventBrowsingService.listPublicEvents()
+      }));
+      return;
+    }
+
     if (url.pathname === '/cohorts/new' && (req.method ?? 'GET') === 'GET') {
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state));
       return;
@@ -90,6 +100,22 @@ export function createRequestHandler(state = createState()) {
           errors: [error.message]
         }));
       }
+      return;
+    }
+
+    const cohortDetailMatch = url.pathname.match(/^\/cohorts\/([^/]+)$/);
+    if (cohortDetailMatch && (req.method ?? 'GET') === 'GET') {
+      const event = eventBrowsingService.getPublicEvent(
+        decodeURIComponent(cohortDetailMatch[1]),
+        url.searchParams.get('viewerId') ?? undefined
+      );
+
+      if (!event) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Cohort not found');
+        return;
+      }
+
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({ event }));
       return;
     }
 

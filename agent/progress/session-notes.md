@@ -2,6 +2,37 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 00:41 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `docs/cohort15-mvp-spec-v3.md`
+- `src/domain/validation.mjs`
+- `src/persistence/repositories.mjs`
+- `src/server/app.mjs`
+- `src/ui/home.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/styles.css`
+- existing tests
+
+Decided:
+- Classified the user request as approved main implementation work.
+- Selected T005 as the next wave because it was the critical-path unblocked task after T004.
+- Added a dedicated event browsing service so public feed/detail visibility can be tested without embedding rules directly in routes.
+- Kept mutation behavior out of scope; participant interest and quorum unlock remain T006.
+
+Assumptions Made:
+- Until full auth is implemented, detail routes can accept a demo `viewerId` query parameter to exercise the existing creator/interested-user link visibility policy.
+- The public feed should list only `open` and `active` events; expired/cancelled/completed cohorts are not public discovery items for this MVP surface.
+
+Next Recommended Step:
+- Execute T006: build show-interest and quorum unlock flow on top of the new detail page and existing token ledger.
+
 ### 2026-05-30 00:33 EDT
 
 Read:

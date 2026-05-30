@@ -2,6 +2,34 @@
 
 Append-only implementation log.
 
+### 2026-05-30 00:41 EDT
+
+Task:
+- T005 Build public event feed and detail visibility
+
+Files Changed:
+- `src/services/event-browsing.mjs`
+- `src/server/app.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/home.mjs`
+- `src/ui/styles.css`
+- `tests/event-browsing.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added a public event browsing service that lists open/active cohorts and serializes detail views through the locked-link visibility policy.
+- Added `GET /cohorts` and `GET /cohorts/:id` routes with feed/detail renderers and navigation updates.
+- Added tests confirming public feed/detail pages do not leak locked links and active links are visible to authorized viewers.
+- Marked T005 done and unblocked T006.
+
+Verification:
+- `npm run check` passed.
+
 ### 2026-05-30 00:33 EDT
 
 Task:

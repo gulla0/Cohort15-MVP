@@ -15,7 +15,10 @@ export function renderHomePage() {
         <p class="eyebrow">MVP foundation</p>
         <h1 id="page-title">${APP_NAME}</h1>
         <p class="lede">Online cohort events where creators and participants stake tokens until quorum unlocks the private link.</p>
-        <p><a class="button-link" href="/cohorts/new">Create a cohort</a></p>
+        <p class="button-row">
+          <a class="button-link" href="/cohorts">Browse cohorts</a>
+          <a class="button-link secondary" href="/cohorts/new">Create a cohort</a>
+        </p>
       </section>
 
       <section class="grid" aria-label="Implementation areas">

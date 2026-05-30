@@ -8,8 +8,8 @@
 | T002 | Implement domain types and validation rules | done | yes | `npm run check` passed with focused domain validation tests. | Added JSDoc models, spec enums, validators, expiry defaulting, and locked-link visibility serialization. |
 | T003 | Add persistence schema and token ledger primitives | done | yes | `npm run check` passed with persistence and token ledger tests. | Added dependency-free in-memory repositories, schema metadata, demo grants, and auditable ledger helpers. |
 | T004 | Build create cohort flow | done | yes | `npm run check` passed with create-flow service and route tests. | Added demo-backed create form, 2-token creator hold, default expiry, validation surfacing, and hidden-link success rendering. |
-| T005 | Build public event feed and detail visibility | not_started | yes |  | Depends on T004. |
-| T006 | Build show-interest and quorum unlock flow | not_started | no |  | Depends on T005. |
+| T005 | Build public event feed and detail visibility | done | yes | `npm run check` passed with event browsing service and route visibility tests. | Added public feed/detail routes, hidden locked links for open events, and active-link reveal for authorized viewers. |
+| T006 | Build show-interest and quorum unlock flow | not_started | yes |  | Depends on T005. |
 | T007 | Build expiry and refund processing | not_started | no |  | Depends on T006. |
 | T008 | Build social promotion outbox | not_started | yes |  | Depends on T004. |
 | T009 | Build creator and participant dashboards | not_started | no |  | Depends on T006. |

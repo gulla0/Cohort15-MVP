@@ -69,6 +69,7 @@ export function renderCreateCohortPage({ users, values = {}, errors = [], result
     <main class="shell">
       <nav class="topbar">
         <a href="/">Cohort15</a>
+        <a href="/cohorts">Cohorts</a>
       </nav>
 
       <section class="page-heading" aria-labelledby="page-title">

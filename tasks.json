@@ -165,7 +165,7 @@
     {
       "id": "T005",
       "title": "Build public event feed and detail visibility",
-      "status": "not_started",
+      "status": "done",
       "phase": "Core Cohort Flow",
       "dependencies": [
         "T004"
@@ -197,8 +197,8 @@
         "Manually inspect feed/detail pages if a UI exists"
       ],
       "stop_condition": "Stop before interest mutation behavior.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 00:41 EDT: Added event browsing service, public `GET /cohorts` feed, `GET /cohorts/:id` detail route, feed/detail UI rendering, and visibility tests for open/active events, hidden locked links, and authorized active-link viewers. `npm run check` passed.",
+      "notes": "Active event links are revealed through the existing conservative authorization policy when `viewerId` identifies the creator or an active interested participant; interest mutation remains T006."
     },
     {
       "id": "T006",
