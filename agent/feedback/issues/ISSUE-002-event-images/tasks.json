@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-002-T01",
       "title": "Add event image field and default asset path",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Represent an optional event image in the domain and default it to the attached cohort illustration when creators do not provide one.",
       "inputs": [
@@ -61,12 +61,13 @@
         "create cohort flow",
         "asset serving"
       ],
-      "stop_condition": "Stop once image data is stored consistently and defaulted for new events."
+      "stop_condition": "Stop once image data is stored consistently and defaulted for new events.",
+      "evidence": "2026-05-30 08:51 EDT: Events now include imageUrl, blank image values default to /assets/default-cohort.png, custom http(s)/app-relative image values are preserved, and schema metadata includes imageUrl."
     },
     {
       "id": "ISSUE-002-T02",
       "title": "Render event images across MVP surfaces",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-002-T01"
       ],
@@ -126,12 +127,13 @@
         "dashboard rendering",
         "CSS layout"
       ],
-      "stop_condition": "Stop once image rendering is visible and verified on core MVP surfaces."
+      "stop_condition": "Stop once image rendering is visible and verified on core MVP surfaces.",
+      "evidence": "2026-05-30 08:51 EDT: Feed cards, detail pages, and dashboard rows render stable event images with alt text; browser smoke verified default image rendering."
     },
     {
       "id": "ISSUE-002-T03",
       "title": "Add creator image input",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-002-T01"
       ],
@@ -177,7 +179,8 @@
         "create form validation",
         "event image model"
       ],
-      "stop_condition": "Stop once creators can optionally provide image data and default behavior remains intact."
+      "stop_condition": "Stop once creators can optionally provide image data and default behavior remains intact.",
+      "evidence": "2026-05-30 08:51 EDT: Create form includes optional image URL/path input; tests cover blank default and custom image persistence."
     }
   ]
 }

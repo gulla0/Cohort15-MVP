@@ -107,12 +107,14 @@ test('cohort feed and detail routes render public fields without leaking locked 
   assert.equal(feed.status, 200);
   assert.match(feed.body, /Open Source Pairing Cohort/);
   assert.match(feed.body, /Open source/);
+  assert.match(feed.body, /src="\/assets\/default-cohort\.png"/);
   assert.doesNotMatch(feed.body, /private-open-source/);
 
   const detail = await invoke(handler, { url: '/cohorts/event-open', method: 'GET' });
   assert.equal(detail.status, 200);
   assert.match(detail.body, /Private link locked/);
-  assert.match(detail.body, /Location unlocks when quorum is met/);
+  assert.match(detail.body, /tokens are returned/);
+  assert.match(detail.body, /src="\/assets\/default-cohort\.png"/);
   assert.doesNotMatch(detail.body, /private-open-source/);
 });
 

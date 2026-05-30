@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CREATE_EVENT_TOKEN_COST } from '../src/domain/constants.mjs';
+import { CREATE_EVENT_TOKEN_COST, DEFAULT_COHORT_IMAGE_PATH } from '../src/domain/constants.mjs';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
 import { createCohortService } from '../src/services/create-cohort.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
@@ -78,6 +78,7 @@ test('create cohort holds 2 creator tokens and saves an open event with default 
   assert.equal(result.event.id, 'event-created');
   assert.equal(result.event.status, 'open');
   assert.equal(result.event.creatorId, 'user-creator');
+  assert.equal(result.event.imageUrl, DEFAULT_COHORT_IMAGE_PATH);
   assert.equal(result.event.expiresAt.toISOString(), '2026-06-15T12:00:00.000Z');
   assert.equal(repositories.events.findById('event-created').title, 'Beginner TypeScript Build Cohort');
 
@@ -86,6 +87,14 @@ test('create cohort holds 2 creator tokens and saves an open event with default 
   assert.equal(transactions[0].type, 'hold');
   assert.equal(transactions[0].amount, CREATE_EVENT_TOKEN_COST);
   assert.equal(ledger.balanceForUser('user-creator').held, CREATE_EVENT_TOKEN_COST);
+});
+
+test('create cohort preserves a custom event image URL', () => {
+  const { service } = createServiceFixture();
+
+  const result = service.create(validInput({ imageUrl: 'https://images.example/typescript.png' }));
+
+  assert.equal(result.event.imageUrl, 'https://images.example/typescript.png');
 });
 
 test('create cohort rejects creators with fewer than 2 available tokens', () => {
@@ -111,6 +120,17 @@ test('create cohort surfaces validation errors before saving', () => {
   assert.equal(repositories.events.list().length, 0);
 });
 
+test('create cohort rejects first meetings before the quorum window closes', () => {
+  const { repositories, service } = createServiceFixture();
+
+  assert.throws(
+    () => service.create(validInput({ firstMeetingAt: '2026-06-10T18:00:00.000Z' })),
+    /firstMeetingAt must be after the 14-day quorum window/
+  );
+
+  assert.equal(repositories.events.list().length, 0);
+});
+
 test('create cohort page renders form errors and success without exposing private link', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
@@ -118,6 +138,8 @@ test('create cohort page renders form errors and success without exposing privat
   const form = await invoke(handler, { url: '/cohorts/new', method: 'GET' });
   assert.equal(form.status, 200);
   assert.match(form.body, /Create cohort/);
+  assert.match(form.body, /name="firstMeetingAt" type="datetime-local" min="/);
+  assert.match(form.body, /name="imageUrl"/);
 
   const invalid = await invoke(handler, {
     url: '/cohorts/new',
@@ -136,5 +158,6 @@ test('create cohort page renders form errors and success without exposing privat
   assert.equal(valid.status, 201);
   assert.match(valid.body, /Cohort created/);
   assert.match(valid.body, /Private link status: locked until quorum/);
+  assert.match(valid.body, /Creator dashboard/);
   assert.doesNotMatch(valid.body, /zoom\.example/);
 });

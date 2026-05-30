@@ -136,13 +136,15 @@ test('dashboard routes render creator and participant views', async () => {
   assert.equal(creator.status, 200);
   assert.match(creator.body, /Creator dashboard/);
   assert.match(creator.body, /Open Source Pairing Cohort/);
+  assert.match(creator.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(creator.body, /https:\/\/meet\.example\/private-dashboard/);
-  assert.match(creator.body, /creator tokens: 2 held \/ 2 consumed \/ 0 refunded/);
+  assert.match(creator.body, /creator tokens: 2 in use \/ 2 used \/ 0 returned/);
 
   const participant = await invoke(handler, { url: '/dashboard/participant?userId=user-participant', method: 'GET' });
   assert.equal(participant.status, 200);
   assert.match(participant.body, /Participant dashboard/);
-  assert.match(participant.body, /Interest consumed/);
+  assert.match(participant.body, /Seat confirmed/);
+  assert.match(participant.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(participant.body, /https:\/\/meet\.example\/private-dashboard/);
-  assert.match(participant.body, /participant tokens: 1 held \/ 1 consumed \/ 0 refunded/);
+  assert.match(participant.body, /participant tokens: 1 in use \/ 1 used \/ 0 returned/);
 });

@@ -31,4 +31,4 @@ ISSUE-002-T03
 
 ## Next Unblocked Tasks
 
-- ISSUE-002-T01
+- None. All issue tasks are done.

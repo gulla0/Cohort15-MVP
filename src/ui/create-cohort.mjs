@@ -1,4 +1,5 @@
 import {
+  DEFAULT_EXPIRY_DAYS,
   EVENT_CATEGORIES,
   RECURRENCE_VALUES,
   TARGET_SKILL_LEVELS
@@ -42,6 +43,15 @@ function errorList(errors) {
   </section>`;
 }
 
+function formatDateTimeLocal(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toISOString().slice(0, 16);
+}
+
 function successNotice(result) {
   if (!result) {
     return '';
@@ -49,13 +59,19 @@ function successNotice(result) {
 
   return `<section class="notice success" aria-live="polite">
     <h2>Cohort created</h2>
-    <p>${escapeHtml(result.event.title)} is open. ${result.tokenHoldAmount} creator tokens are now held until quorum or expiry.</p>
+    <p>${escapeHtml(result.event.title)} is open. You used ${result.tokenHoldAmount} creator tokens to start it.</p>
     <p>Private link status: locked until quorum.</p>
+    <p class="button-row">
+      <a class="button-link" href="/cohorts/${encodeURIComponent(result.event.id)}">View cohort</a>
+      <a class="button-link secondary" href="/dashboard/creator?userId=${encodeURIComponent(result.event.creatorId)}">Creator dashboard</a>
+    </p>
   </section>`;
 }
 
 export function renderCreateCohortPage({ users, values = {}, errors = [], result } = {}) {
   const selectedUserId = values.creatorId ?? users?.[0]?.id;
+  const earliestFirstMeeting = new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+  const minimumFirstMeetingValue = formatDateTimeLocal(earliestFirstMeeting);
 
   return `<!doctype html>
 <html lang="en">
@@ -70,12 +86,15 @@ export function renderCreateCohortPage({ users, values = {}, errors = [], result
       <nav class="topbar">
         <a href="/">Cohort15</a>
         <a href="/cohorts">Cohorts</a>
+        <a href="/cohorts/new">Create</a>
+        <a href="/dashboard/creator">Creator dashboard</a>
+        <a href="/dashboard/participant">Participant dashboard</a>
       </nav>
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">Creator flow</p>
         <h1 id="page-title">Create cohort</h1>
-        <p class="lede">Publish an online cohort by holding 2 creator tokens until quorum unlocks the private link.</p>
+        <p class="lede">Use 2 tokens to start a cohort. If quorum is not met by the two-week deadline, all tokens are returned.</p>
       </section>
 
       ${successNotice(result)}
@@ -135,7 +154,7 @@ export function renderCreateCohortPage({ users, values = {}, errors = [], result
 
         <label>
           First meeting
-          <input name="firstMeetingAt" type="datetime-local" value="${inputValue(values, 'firstMeetingAt')}" required>
+          <input name="firstMeetingAt" type="datetime-local" min="${escapeHtml(minimumFirstMeetingValue)}" value="${inputValue(values, 'firstMeetingAt')}" required>
         </label>
 
         <label>
@@ -158,6 +177,11 @@ export function renderCreateCohortPage({ users, values = {}, errors = [], result
         <label class="span-2">
           Private online link
           <input name="lockedEventLink" type="url" value="${inputValue(values, 'lockedEventLink')}" required>
+        </label>
+
+        <label class="span-2">
+          Event image URL or path
+          <input name="imageUrl" value="${inputValue(values, 'imageUrl')}" placeholder="/assets/default-cohort.png">
         </label>
 
         <label class="span-2">

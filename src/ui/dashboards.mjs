@@ -55,22 +55,38 @@ function balancePanel(balance) {
       <p>${escapeHtml(balance.available)} token(s)</p>
     </article>
     <article>
-      <h2>Held</h2>
+      <h2>In use</h2>
       <p>${escapeHtml(balance.held)} token(s)</p>
     </article>
     <article>
-      <h2>Consumed</h2>
+      <h2>Used</h2>
       <p>${escapeHtml(balance.consumed)} token(s)</p>
     </article>
     <article>
-      <h2>Refunded</h2>
+      <h2>Returned</h2>
       <p>${escapeHtml(balance.refunded)} token(s)</p>
     </article>
   </section>`;
 }
 
 function tokenText(summary) {
-  return `${summary.held} held / ${summary.consumed} consumed / ${summary.refunded} refunded`;
+  return `${summary.held} in use / ${summary.consumed} used / ${summary.refunded} returned`;
+}
+
+function interestStatusText(status) {
+  if (status === 'active') {
+    return 'Interest recorded';
+  }
+
+  if (status === 'consumed') {
+    return 'Seat confirmed';
+  }
+
+  if (status === 'refunded') {
+    return 'Tokens returned';
+  }
+
+  return formatEnum(status);
 }
 
 function privateLink(event) {
@@ -90,6 +106,7 @@ function emptyState(copy) {
 
 function creatorCohortRow(item) {
   return `<article class="dashboard-row">
+    <img class="dashboard-event-image" src="${escapeHtml(item.event.imageUrl)}" alt="${escapeHtml(item.event.title)} cohort image">
     <div class="event-card-header">
       ${statusBadge(item.event.status)}
       <span>${escapeHtml(item.interestCount)} participant interest(s)</span>
@@ -102,9 +119,10 @@ function creatorCohortRow(item) {
 
 function participantInterestRow(item) {
   return `<article class="dashboard-row">
+    <img class="dashboard-event-image" src="${escapeHtml(item.event.imageUrl)}" alt="${escapeHtml(item.event.title)} cohort image">
     <div class="event-card-header">
       ${statusBadge(item.event.status)}
-      <span>Interest ${formatEnum(item.interest.status)}</span>
+      <span>${escapeHtml(interestStatusText(item.interest.status))}</span>
     </div>
     <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}?viewerId=${encodeURIComponent(item.interest.userId)}">${escapeHtml(item.event.title)}</a></h2>
     <p>${escapeHtml(item.event.topic)} - participant tokens: ${escapeHtml(tokenText(item.tokenSummary))}</p>
@@ -117,7 +135,7 @@ export function renderCreatorDashboardPage({ dashboard }) {
     title: 'Creator dashboard',
     eyebrow: 'Creator dashboard',
     heading: dashboard.user.displayName,
-    lede: 'Owned cohorts, status, token accounting, and unlocked cohort links.',
+    lede: 'Owned cohorts, status, token summaries, and unlocked cohort links.',
     body: `${balancePanel(dashboard.balance)}
       ${dashboard.cohorts.length === 0
         ? emptyState('Create a cohort to see creator activity here.')

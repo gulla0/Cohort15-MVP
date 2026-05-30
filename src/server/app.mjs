@@ -75,6 +75,12 @@ export function createRequestHandler(state = createState()) {
       return;
     }
 
+    if (url.pathname === '/assets/default-cohort.png') {
+      const image = await readFile(join(rootDir, 'public', 'assets', 'default-cohort.png'));
+      send(res, 200, { 'content-type': 'image/png' }, image);
+      return;
+    }
+
     if (url.pathname === '/') {
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage());
       return;

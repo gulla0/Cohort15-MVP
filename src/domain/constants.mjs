@@ -69,6 +69,7 @@ export const CREATE_EVENT_TOKEN_COST = 2;
 export const SHOW_INTEREST_TOKEN_COST = 1;
 export const MAX_PARTICIPANTS = 15;
 export const DEFAULT_EXPIRY_DAYS = 14;
+export const DEFAULT_COHORT_IMAGE_PATH = '/assets/default-cohort.png';
 
 export function getFoundationSummary() {
   return {

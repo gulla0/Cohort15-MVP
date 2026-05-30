@@ -61,10 +61,12 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(createResponse.status, 201);
   assert.match(createResponse.body, /Cohort created/);
+  assert.match(createResponse.body, /Creator dashboard/);
   assert.doesNotMatch(createResponse.body, /private-ai-build/);
 
   const [event] = state.repositories.events.list();
   assert.equal(event.status, 'open');
+  assert.equal(event.imageUrl, '/assets/default-cohort.png');
   assert.equal(event.socialPostStatus, 'pending');
   assert.equal(state.ledger.balanceForUser('user-creator').held, 2);
 
@@ -80,6 +82,8 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(publicDetail.status, 200);
   assert.match(publicDetail.body, /Private link locked/);
+  assert.match(publicDetail.body, /<option value="user-participant" selected>Demo Participant<\/option>/);
+  assert.match(publicDetail.body, /src="\/assets\/default-cohort\.png"/);
   assert.doesNotMatch(publicDetail.body, /private-ai-build/);
 
   const interestResponse = await invoke(handler, {
@@ -89,6 +93,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(interestResponse.status, 200);
   assert.match(interestResponse.body, /Quorum met/);
+  assert.match(interestResponse.body, /Open participant dashboard/);
   assert.match(interestResponse.body, /https:\/\/meet\.example\/private-ai-build/);
 
   assert.equal(state.repositories.events.findById(event.id).status, 'active');
@@ -110,6 +115,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(creatorDashboard.status, 200);
   assert.match(creatorDashboard.body, /Practical AI Build Cohort/);
+  assert.match(creatorDashboard.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(creatorDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
 
   const participantDashboard = await invoke(handler, {
@@ -117,7 +123,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
     method: 'GET'
   });
   assert.equal(participantDashboard.status, 200);
-  assert.match(participantDashboard.body, /Interest consumed/);
+  assert.match(participantDashboard.body, /Seat confirmed/);
   assert.match(participantDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
 });
 

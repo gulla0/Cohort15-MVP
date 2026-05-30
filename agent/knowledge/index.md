@@ -26,8 +26,8 @@ It is advisory. Code, verified behavior, and canonical ledgers override this ind
 | Product specification | `docs/cohort15-mvp-spec-v3.md` | Defines Cohort15 MVP rules, fields, validation, lifecycle, flows, and scope. | high |
 | Main planning artifacts | `plan.md`, `atomic-task-graph.md`, `tasks.json` | Initialized for Cohort15 MVP. `tasks.json` is canonical. | high |
 | Progress tracking | `agent/progress/*.md` | Tracks task status, session decisions, blockers, and changes. | high |
-| Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists but no product feedback issues are currently defined. | medium |
-| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives; T004 added the create cohort service and demo-backed create route; T005 added public cohort feed/detail routes and visibility service; T006 added show-interest/quorum activation; T007-T009 added expiry/refunds, local social outbox, and dashboards; T010 added MVP end-to-end verification coverage and README handoff docs. T011-T015 are planned post-MVP tasks for durable persistence, auth, purchases, social publishing, and lifecycle controls. | high |
+| Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists. ISSUE-001 and ISSUE-002 were resolved on 2026-05-30. | high |
+| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts`, `public/assets/default-cohort.png` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and token ledger primitives; T004 added the create cohort service and demo-backed create route; T005 added public cohort feed/detail routes and visibility service; T006 added show-interest/quorum activation; T007-T009 added expiry/refunds, local social outbox, and dashboards; T010 added MVP end-to-end verification coverage and README handoff docs. Feedback resolution added event images, clearer navigation/copy, participant-default interest flow, and first-meeting validation. T011-T015 are planned post-MVP tasks for durable persistence, auth, purchases, social publishing, and lifecycle controls. | high |
 
 ## Context Routes
 
@@ -78,6 +78,11 @@ Use these routes to avoid broad rediscovery.
 - Creator and participant dashboards live at `/dashboard/creator` and `/dashboard/participant`; they use the existing demo `userId` query/default-user path and existing locked-link serializer for authorization.
 - MVP handoff verification lives in `tests/mvp-verification.test.mjs`; it covers create/promote/privacy/quorum/dashboard success behavior and create/interest/expiry/refund behavior across the HTTP handler and in-memory repositories.
 - README now documents local demo users, seed token grants, MVP flow, manual expiry trigger, local social outbox behavior, post-MVP token package assumptions, and known MVP assumptions.
+- Feedback resolution on 2026-05-30 added `imageUrl` to events, defaulting blank images to `/assets/default-cohort.png` and allowing custom http(s) or app-relative image values.
+- Visible MVP UI copy should use plain token wording: creators use 2 tokens to start a cohort, participants use 1 token to show interest, and tokens are returned if quorum is not met.
+- The create flow now enforces firstMeetingAt after the 14-day quorum window in backend validation and renders a `datetime-local` min value in the form.
+- The cohort detail interest form should prefer a non-creator demo participant. Creator self-interest remains rejected in the service.
+- Primary navigation now consistently exposes cohorts, create, creator dashboard, and participant dashboard.
 - The next planned task wave is T011-T015. T011 is first because durable persistence should precede regular auth, token purchases, and external social publishing. T012 removes demo query/default-user identity from protected flows. T013 and T014 depend on durable/auth foundations. T015 can follow the auth boundary and uses already-modeled `cancelled` and `completed` statuses.
 
 ## Assumptions And Uncertainty
@@ -114,4 +119,5 @@ Before trusting this index, check:
 - 2026-05-30 00:59 EDT: T007-T009 added `src/services/expire-cohorts.mjs`, `src/services/social-promotion.mjs`, `src/services/dashboards.mjs`, local expiry trigger, social outbox integration, dashboard UI/routes, and focused tests.
 - 2026-05-30 07:42 EDT: T010 added `tests/mvp-verification.test.mjs`, expanded README handoff docs, and completed the current MVP task ledger after `npm run check` passed with 36 tests.
 - 2026-05-30 07:50 EDT: Setup manager added the next atomic task wave T011-T015 for post-MVP durable persistence, auth, token purchases, social publishing, and lifecycle controls; updated plan, task graph, task status, and progress notes.
+- 2026-05-30 08:51 EDT: Feedback resolution completed ISSUE-001 and ISSUE-002: repaired participant interest defaults, token copy, date validation, navigation, event image model/default asset/input/rendering, and verified with `npm run check` plus browser smoke.
 - 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.

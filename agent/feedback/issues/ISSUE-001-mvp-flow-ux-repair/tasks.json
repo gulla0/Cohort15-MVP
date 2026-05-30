@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-001-T01",
       "title": "Repair participant interest defaults and success path",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Make the cohort detail interest form default to a valid participant user and guide users through showing interest without first hitting creator-only errors.",
       "inputs": [
@@ -51,12 +51,13 @@
         "demo user identity path",
         "event detail rendering"
       ],
-      "stop_condition": "Stop once the default participant path works and creator rejection is still enforced."
+      "stop_condition": "Stop once the default participant path works and creator rejection is still enforced.",
+      "evidence": "2026-05-30 08:51 EDT: Detail interest form now defaults to a non-creator participant, creator rejection remains tested, and browser smoke verified create -> detail -> show interest -> quorum unlock."
     },
     {
       "id": "ISSUE-001-T02",
       "title": "Simplify token wording and refund messaging",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Replace internal staking and ledger wording with simple user-facing token copy across MVP pages.",
       "inputs": [
@@ -103,12 +104,13 @@
       "shared_dependencies": [
         "token ledger display semantics"
       ],
-      "stop_condition": "Stop once visible MVP copy uses simple token language and tests reflect the new wording."
+      "stop_condition": "Stop once visible MVP copy uses simple token language and tests reflect the new wording.",
+      "evidence": "2026-05-30 08:51 EDT: UI and README now use plain token language, refund reassurance is shown on create/feed/detail, and dashboard summaries use available/in use/used/returned wording."
     },
     {
       "id": "ISSUE-001-T03",
       "title": "Enforce first meeting after quorum window",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Prevent creators from selecting or submitting first meeting dates before the two-week quorum window has passed.",
       "inputs": [
@@ -156,12 +158,13 @@
         "DEFAULT_EXPIRY_DAYS",
         "create cohort validation"
       ],
-      "stop_condition": "Stop once both UI and backend reject dates before the two-week quorum window."
+      "stop_condition": "Stop once both UI and backend reject dates before the two-week quorum window.",
+      "evidence": "2026-05-30 08:51 EDT: Create form renders a first-meeting min value and backend validation rejects firstMeetingAt at or before createdAt + 14 days."
     },
     {
       "id": "ISSUE-001-T04",
       "title": "Clarify MVP navigation and dashboard access",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-001-T01",
         "ISSUE-001-T02"
@@ -218,7 +221,8 @@
         "page shell duplication",
         "dashboard route visibility"
       ],
-      "stop_condition": "Stop once the dashboard routes are discoverable and the MVP end-to-end journey has clear next steps."
+      "stop_condition": "Stop once the dashboard routes are discoverable and the MVP end-to-end journey has clear next steps.",
+      "evidence": "2026-05-30 08:51 EDT: Navigation consistently exposes cohorts/create/creator dashboard/participant dashboard; create and interest success states link to next-step dashboards."
     }
   ]
 }

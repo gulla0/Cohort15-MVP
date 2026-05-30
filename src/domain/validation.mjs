@@ -1,4 +1,5 @@
 import {
+  DEFAULT_COHORT_IMAGE_PATH,
   DEFAULT_EXPIRY_DAYS,
   EVENT_CATEGORIES,
   EVENT_STATUSES,
@@ -56,6 +57,31 @@ export function computeDefaultExpiresAt(createdAt) {
   return new Date(createdAt.getTime() + DEFAULT_EXPIRY_DAYS * MS_PER_DAY);
 }
 
+export function computeEarliestFirstMeetingAt(createdAt) {
+  return computeDefaultExpiresAt(createdAt);
+}
+
+function normalizeImageUrl(value) {
+  return normalizeOptionalText(value) ?? DEFAULT_COHORT_IMAGE_PATH;
+}
+
+function isAllowedImageUrl(value) {
+  if (!hasText(value)) {
+    return false;
+  }
+
+  if (value.startsWith('/')) {
+    return !value.startsWith('//') && !value.includes('..');
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
 export function validateEvent(event) {
   const errors = [];
 
@@ -69,6 +95,7 @@ export function validateEvent(event) {
   assertEnum(event?.targetSkillLevel, TARGET_SKILL_LEVELS, 'targetSkillLevel', errors);
   assertEnum(event?.status, EVENT_STATUSES, 'status', errors);
   assertText(event?.lockedEventLink, 'lockedEventLink', errors);
+  assertText(event?.imageUrl, 'imageUrl', errors);
   assertDate(event?.firstMeetingAt, 'firstMeetingAt', errors);
   assertEnum(event?.recurrence, RECURRENCE_VALUES, 'recurrence', errors);
   assertDate(event?.expiresAt, 'expiresAt', errors);
@@ -94,6 +121,20 @@ export function validateEvent(event) {
 
   if (!isWholeNumber(event?.meetingDurationMinutes) || event.meetingDurationMinutes <= 0) {
     errors.push('meetingDurationMinutes must be a whole number greater than 0.');
+  }
+
+  if (hasText(event?.imageUrl) && !isAllowedImageUrl(event.imageUrl)) {
+    errors.push('imageUrl must be an http(s) URL or an app-relative path.');
+  }
+
+  if (
+    event?.firstMeetingAt instanceof Date
+    && !Number.isNaN(event.firstMeetingAt.getTime())
+    && event?.expiresAt instanceof Date
+    && !Number.isNaN(event.expiresAt.getTime())
+    && event.firstMeetingAt.getTime() <= event.expiresAt.getTime()
+  ) {
+    errors.push('firstMeetingAt must be after the 14-day quorum window.');
   }
 
   if (!isWholeNumber(event?.meetingCount)) {
@@ -138,6 +179,7 @@ export function buildEvent(input) {
     maxParticipants: input.maxParticipants,
     status: input.status ?? 'open',
     lockedEventLink: normalizeRequiredText(input.lockedEventLink),
+    imageUrl: normalizeImageUrl(input.imageUrl),
     firstMeetingAt: input.firstMeetingAt,
     meetingDurationMinutes: input.meetingDurationMinutes,
     recurrence: input.recurrence,

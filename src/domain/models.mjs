@@ -24,6 +24,7 @@
  * @property {number} maxParticipants
  * @property {EventStatus} status
  * @property {string} lockedEventLink
+ * @property {string} imageUrl
  * @property {Date} firstMeetingAt
  * @property {number} meetingDurationMinutes
  * @property {Recurrence} recurrence

@@ -22,3 +22,16 @@ Observed:
 Decision:
 - Create this as a UX repair feedback issue rather than main implementation work.
 - Keep issue tasks local to the feedback issue.
+
+### 2026-05-30 08:51 EDT
+
+Resolved:
+- Updated the cohort detail interest form to prefer a non-creator demo participant, even when reaching the detail page from create success.
+- Replaced visible staking/ledger wording with simple token language and refund reassurance.
+- Enforced first meeting dates after the 14-day quorum window in backend validation and added a create-form minimum.
+- Added consistent navigation to cohorts, create, creator dashboard, and participant dashboard.
+- Added next-step links from create success and interest success.
+
+Verification:
+- `npm run check` passed with 41 tests.
+- Browser smoke on `http://localhost:3001` verified create -> detail -> participant interest -> quorum unlock -> private link.

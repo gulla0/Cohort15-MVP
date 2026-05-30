@@ -83,6 +83,24 @@ test('show interest records a 1-token hold and active interest', () => {
   assert.equal(ledger.balanceForUser('user-participant').held, SHOW_INTEREST_TOKEN_COST);
 });
 
+test('show interest rejects creators without changing the UI default participant path', async () => {
+  const { repositories, ledger, service } = createFixture();
+  const event = repositories.events.save(eventFixture());
+  ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+
+  assert.throws(
+    () => service.showInterest({ eventId: event.id, userId: 'user-creator' }),
+    /Creators cannot show interest/
+  );
+
+  const handler = createRequestHandler({ repositories, ledger });
+  const detail = await invoke(handler, { url: `/cohorts/${event.id}`, method: 'GET' });
+
+  assert.equal(detail.status, 200);
+  assert.match(detail.body, /<option value="user-participant" selected>Demo Participant<\/option>/);
+  assert.doesNotMatch(detail.body, /<option value="user-creator" selected>Demo Creator<\/option>/);
+});
+
 test('show interest rejects duplicate active interest and participant cap overflow', () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
@@ -167,5 +185,6 @@ test('show interest route unlocks the private link for the participant when quor
   assert.equal(response.status, 200);
   assert.match(response.body, /Quorum met/);
   assert.match(response.body, /Private link unlocked/);
+  assert.match(response.body, /Open participant dashboard/);
   assert.match(response.body, /https:\/\/meet\.example\/private-open-source/);
 });

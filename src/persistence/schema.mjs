@@ -21,6 +21,7 @@ export const TABLES = Object.freeze({
       'maxParticipants',
       'status',
       'lockedEventLink',
+      'imageUrl',
       'firstMeetingAt',
       'meetingDurationMinutes',
       'recurrence',

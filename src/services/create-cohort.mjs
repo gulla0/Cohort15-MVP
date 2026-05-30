@@ -43,6 +43,7 @@ function normalizeCreateInput(input, options) {
     minQuorum: parseInteger(input.minQuorum),
     maxParticipants: parseInteger(input.maxParticipants),
     lockedEventLink: input.lockedEventLink,
+    imageUrl: input.imageUrl,
     firstMeetingAt: parseDate(input.firstMeetingAt),
     meetingDurationMinutes: parseInteger(input.meetingDurationMinutes),
     recurrence: input.recurrence,

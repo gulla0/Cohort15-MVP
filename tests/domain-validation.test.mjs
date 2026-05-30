@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   DEFAULT_EXPIRY_DAYS,
+  DEFAULT_COHORT_IMAGE_PATH,
   EVENT_CATEGORIES,
   EVENT_STATUSES,
   RECURRENCE_VALUES,
@@ -12,6 +13,7 @@ import {
   buildEvent,
   canViewLockedEventLink,
   computeDefaultExpiresAt,
+  computeEarliestFirstMeetingAt,
   serializeEventForViewer,
   validateEvent,
   validateEventInterest,
@@ -64,8 +66,24 @@ test('buildEvent applies default lifecycle and expiry values', () => {
 
   assert.equal(event.status, 'open');
   assert.equal(event.socialPostStatus, 'pending');
+  assert.equal(event.imageUrl, DEFAULT_COHORT_IMAGE_PATH);
   assert.equal(event.expiresAt.toISOString(), '2026-06-15T12:00:00.000Z');
   assert.equal(event.expiresAt.getTime() - createdAt.getTime(), DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+});
+
+test('event image supports custom URLs and rejects invalid values', () => {
+  assert.equal(
+    buildEvent(eventInput({ imageUrl: 'https://images.example/cohort.png' })).imageUrl,
+    'https://images.example/cohort.png'
+  );
+  assert.equal(
+    buildEvent(eventInput({ imageUrl: '/assets/custom-cohort.png' })).imageUrl,
+    '/assets/custom-cohort.png'
+  );
+  assert.throws(
+    () => buildEvent(eventInput({ imageUrl: 'javascript:alert(1)' })),
+    /imageUrl must be an http\(s\) URL or an app-relative path/
+  );
 });
 
 test('event validation enforces participant cap, recurrence, and required link rules', () => {
@@ -90,6 +108,10 @@ test('event validation enforces participant cap, recurrence, and required link r
   assert.throws(
     () => buildEvent(eventInput({ lockedEventLink: '' })),
     /lockedEventLink is required/
+  );
+  assert.throws(
+    () => buildEvent(eventInput({ firstMeetingAt: new Date('2026-06-15T12:00:00.000Z') })),
+    /firstMeetingAt must be after the 14-day quorum window/
   );
 });
 
@@ -156,4 +178,8 @@ test('related object validators represent interest, token, and social post rules
 
 test('expiry helper rejects invalid dates', () => {
   assert.throws(() => computeDefaultExpiresAt(new Date('invalid')), /createdAt must be a valid Date/);
+});
+
+test('earliest first meeting helper follows the quorum window', () => {
+  assert.equal(computeEarliestFirstMeetingAt(createdAt).toISOString(), '2026-06-15T12:00:00.000Z');
 });

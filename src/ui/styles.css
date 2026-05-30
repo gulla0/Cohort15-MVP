@@ -126,6 +126,31 @@ article p {
   min-height: auto;
 }
 
+.event-image,
+.event-hero-image,
+.dashboard-event-image {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #e7ebe7;
+}
+
+.event-image {
+  aspect-ratio: 16 / 9;
+  margin-bottom: 16px;
+}
+
+.event-hero-image {
+  aspect-ratio: 16 / 10;
+  margin-bottom: 18px;
+}
+
+.dashboard-event-image {
+  aspect-ratio: 5 / 2;
+  margin-bottom: 14px;
+}
+
 .dashboard-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

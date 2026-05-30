@@ -44,3 +44,23 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-001-mvp-flow-ux-repair/*`
 - `agent/feedback/issues/ISSUE-002-event-images/*`
+
+### 2026-05-30 08:51
+
+User Feedback:
+- Resolve all issues in the feedback section.
+
+Issue Mapping:
+- Existing ISSUE-001 resolved.
+- Existing ISSUE-002 resolved.
+
+Reasoning:
+- The two issues overlapped on create/detail/feed/dashboard surfaces, so they were resolved in one sequential wave.
+- ISSUE-001 changes keep backend ledger semantics intact while simplifying user-facing token language.
+- ISSUE-002 uses URL/path image support and the provided local PNG as the default, avoiding upload/storage scope expansion.
+
+Artifacts Updated:
+- Product source and tests for validation, create, feed/detail, dashboards, styles, README, and asset serving.
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-001-mvp-flow-ux-repair/*`
+- `agent/feedback/issues/ISSUE-002-event-images/*`

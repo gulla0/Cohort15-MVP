@@ -1,6 +1,6 @@
 # Cohort15 MVP
 
-Cohort15 is an online cohort-event platform. Creators stake 2 tokens to publish a cohort, participants stake 1 token to show interest, and quorum unlocks the private online link.
+Cohort15 is an online cohort-event platform. Creators use 2 tokens to start a cohort, participants use 1 token to show interest, and quorum unlocks the private online link.
 
 This repository currently uses a dependency-free Node.js web app foundation so the MVP can run and verify locally without package downloads. Product work is tracked in `tasks.json`; `docs/cohort15-mvp-spec-v3.md` is the product behavior source.
 
@@ -59,10 +59,12 @@ Seed tokens are recorded as grant transactions, not mutable balance fields. The 
 1. Start the app with `npm run dev`.
 2. Open `/cohorts/new` and create a cohort as `user-creator`.
 3. Confirm `/cohorts` and `/cohorts/:id` show public cohort details but hide the private online link while the event is open.
-4. Show interest as `user-participant`; this holds 1 participant token.
-5. When interest reaches quorum, the event becomes active, held creator and participant tokens are consumed, and the private link is visible only to the creator and committed participants.
-6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry refunds held creator and participant tokens through refund transactions.
+4. Show interest as `user-participant`; this uses 1 participant token while quorum is pending.
+5. When interest reaches quorum, the event becomes active, creator and participant tokens are used, and the private link is visible only to the creator and committed participants.
+6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry returns creator and participant tokens through refund transactions.
 7. Check `/dashboard/creator` and `/dashboard/participant` for cohort status, token summaries, and authorized unlocked links.
+
+Creators can optionally provide an event image URL/path. Blank image fields use the local default image at `/assets/default-cohort.png`.
 
 Creating a cohort also writes a local social-promotion outbox record with public-safe content. It includes public event fields and the public cohort URL, and it excludes the private online link.
 

@@ -36,6 +36,8 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
         <a href="/">${APP_NAME}</a>
         <a href="/cohorts">Cohorts</a>
         <a href="/cohorts/new">Create</a>
+        <a href="/dashboard/creator">Creator dashboard</a>
+        <a href="/dashboard/participant">Participant dashboard</a>
       </nav>
 
       <section class="page-heading" aria-labelledby="page-title">
@@ -63,6 +65,7 @@ function emptyFeed() {
 
 function eventCard(event) {
   return `<article class="event-card">
+    <img class="event-image" src="${escapeHtml(event.imageUrl)}" alt="${escapeHtml(event.title)} cohort image">
     <div class="event-card-header">
       ${statusBadge(event.status)}
       <span>${escapeHtml(event.minQuorum)} needed</span>
@@ -103,7 +106,7 @@ function linkPanel(event) {
 
   return `<section class="notice">
     <h2>Private link locked</h2>
-    <p>Location unlocks when quorum is met.</p>
+    <p>Location unlocks when quorum is met. If quorum is not met by the deadline, all tokens are returned.</p>
   </section>`;
 }
 
@@ -116,8 +119,13 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
     return '';
   }
 
+  const selectedUserId = viewerId
+    && viewerId !== event.creatorId
+    ? viewerId
+    : users.find((user) => user.id !== event.creatorId)?.id
+    ?? users[0]?.id;
   const options = users.map((user) => (
-    `<option value="${escapeHtml(user.id)}"${selectedAttribute(user.id, viewerId)}>${escapeHtml(user.displayName)}</option>`
+    `<option value="${escapeHtml(user.id)}"${selectedAttribute(user.id, selectedUserId)}>${escapeHtml(user.displayName)}</option>`
   )).join('');
 
   return `<section class="notice interest-panel">
@@ -126,7 +134,8 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
       <p>Interest was not recorded.</p>
       <ul>${interestErrors.map((error) => `<li>${escapeHtml(error)}</li>`).join('')}</ul>
     </div>` : ''}
-    ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} staked ${escapeHtml(interestResult.tokenHoldAmount)} token. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'The token is held while quorum is pending.'}</p>` : ''}
+    ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} used ${escapeHtml(interestResult.tokenHoldAmount)} token to show interest. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'If quorum is not met, this token is returned.'}</p>
+      <p><a href="/dashboard/participant?userId=${encodeURIComponent(interestResult.participant.id)}">Open participant dashboard</a></p>` : ''}
     ${event.status === 'open' ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
       <label>
         Demo participant
@@ -134,7 +143,7 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
           ${options}
         </select>
       </label>
-      <button type="submit">Stake 1 token</button>
+      <button type="submit">Use 1 token</button>
     </form>` : ''}
   </section>`;
 }
@@ -142,6 +151,7 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
 function eventDetail({ event, users, viewerId, interestResult, interestErrors }) {
   return `<section class="detail-layout">
     <article class="event-detail">
+      <img class="event-hero-image" src="${escapeHtml(event.imageUrl)}" alt="${escapeHtml(event.title)} cohort image">
       <div class="event-card-header">
         ${statusBadge(event.status)}
         <span>${escapeHtml(event.minQuorum)} of ${escapeHtml(event.maxParticipants)} quorum</span>
@@ -199,7 +209,7 @@ export function renderCohortFeedPage({ events }) {
     title: 'Cohorts',
     eyebrow: 'Public feed',
     heading: 'Cohorts',
-    lede: 'Browse open and active online cohorts. Private links stay hidden until quorum unlocks them.',
+    lede: 'Browse open and active online cohorts. Use 1 token to show interest; tokens are returned if quorum is not met.',
     body: events.length === 0 ? emptyFeed() : `<section class="event-list">${events.map(eventCard).join('')}</section>`
   });
 }
