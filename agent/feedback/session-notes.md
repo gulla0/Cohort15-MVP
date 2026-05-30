@@ -81,3 +81,25 @@ Reasoning:
 Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-003-combined-dashboard-navigation/*`
+
+### 2026-05-30 09:51
+
+User Feedback:
+- The dashboard repeats token information and does not need that repetition.
+- Token sections should be Available, In use, and Used; Returned should not be shown.
+- `Creator dashboard` and `user dashboard` wording is not user-friendly.
+- Dashboard page needs a general user-flow review.
+- User confirmed content-based naming direction: `My Cohorts`, `My Events`, or `Dashboard` depending on what the page contains.
+- User proposed created cohorts, interested cohorts, and active cohorts with schedules as a clearer content model.
+
+Issue Mapping:
+- New ISSUE-004: Improve Dashboard Information Architecture and Language.
+
+Reasoning:
+- This feedback builds on ISSUE-003's combined dashboard but is not a duplicate. ISSUE-003 addressed route/navigation structure; this issue addresses the combined dashboard's content hierarchy, labels, and token presentation.
+- The requested token presentation is UI copy/presentation work. Internal ledger refund accounting should remain intact.
+- Active cohorts and schedules should likely come first because they are more time-sensitive than passive created/interested lists.
+
+Artifacts Updated:
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-004-dashboard-information-architecture/*`

@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-004",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-004-T01",
+      "title": "Remove repeated dashboard token details",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Audit dashboard content and remove repeated token information where row-level copy duplicates the balance summary.",
+      "inputs": [
+        "issue.md",
+        "src/ui/dashboards.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/dashboards.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "authority": [
+        "Remove duplicate presentation copy without changing ledger calculations or event status behavior."
+      ],
+      "acceptance_criteria": [
+        "Dashboard balance information is not repeated in each cohort/event row when the summary already communicates it.",
+        "Cohort/event rows still show enough status context to explain access, quorum, and participation state.",
+        "Tests no longer assert duplicated row-level token summaries."
+      ],
+      "verification": [
+        "npm test",
+        "npm run lint"
+      ],
+      "files_expected": [
+        "src/ui/dashboards.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "dashboard",
+      "risk": "low",
+      "shared_dependencies": [
+        "dashboard route rendering",
+        "MVP verification assertions"
+      ],
+      "stop_condition": "Stop when duplicated dashboard token copy is removed and tests cover the revised content."
+    },
+    {
+      "id": "ISSUE-004-T02",
+      "title": "Simplify dashboard token summary states",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-004-T01"
+      ],
+      "objective": "Update dashboard token summary presentation to show only Available, In use, and Used.",
+      "inputs": [
+        "issue.md",
+        "src/ui/dashboards.mjs",
+        "src/services/dashboards.mjs",
+        "tests/dashboards.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/dashboards.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "authority": [
+        "Keep refund/returned values available in the ledger and services, but do not render a Returned dashboard summary section."
+      ],
+      "acceptance_criteria": [
+        "Dashboard token summary contains Available, In use, and Used sections.",
+        "Dashboard token summary does not render a Returned section.",
+        "Refunded token accounting remains unchanged in persistence and ledger tests."
+      ],
+      "verification": [
+        "npm test",
+        "npm run lint"
+      ],
+      "files_expected": [
+        "src/ui/dashboards.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "dashboard, token copy",
+      "risk": "low",
+      "shared_dependencies": [
+        "token ledger balance shape"
+      ],
+      "stop_condition": "Stop when Returned is removed from dashboard presentation while internal refund semantics remain untouched."
+    },
+    {
+      "id": "ISSUE-004-T03",
+      "title": "Rename dashboard sections around user intent",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-004-T01"
+      ],
+      "objective": "Replace labels like Creator dashboard and Participant dashboard with friendlier section names based on what the page contains.",
+      "inputs": [
+        "issue.md",
+        "src/ui/dashboards.mjs",
+        "src/ui/home.mjs",
+        "src/ui/create-cohort.mjs",
+        "src/ui/cohorts.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/dashboards.mjs",
+        "src/ui/home.mjs",
+        "src/ui/create-cohort.mjs",
+        "src/ui/cohorts.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "authority": [
+        "Prefer user-facing labels such as My Cohorts and My Events when they match the displayed content.",
+        "Consider Created Cohorts, Interested Cohorts, and Active Cohorts & Schedule as the preferred content model.",
+        "Preserve existing routes unless a separate navigation issue explicitly changes them."
+      ],
+      "acceptance_criteria": [
+        "Combined dashboard no longer presents its main panels as Creator dashboard and Participant dashboard.",
+        "Dashboard labels communicate created cohorts, interested cohorts, and active cohorts/schedules in user-friendly terms.",
+        "Entry links and post-action links use consistent dashboard wording."
+      ],
+      "verification": [
+        "npm test",
+        "npm run lint"
+      ],
+      "files_expected": [
+        "src/ui/dashboards.mjs",
+        "src/ui/home.mjs",
+        "src/ui/create-cohort.mjs",
+        "src/ui/cohorts.mjs",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "dashboard, copy, navigation wording",
+      "risk": "medium",
+      "shared_dependencies": [
+        "topbar/dashboard copy",
+        "legacy dashboard route tests"
+      ],
+      "stop_condition": "Stop when dashboard wording is consistently updated without breaking legacy route compatibility."
+    },
+    {
+      "id": "ISSUE-004-T04",
+      "title": "Review dashboard user flow hierarchy",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-004-T01",
+        "ISSUE-004-T02",
+        "ISSUE-004-T03"
+      ],
+      "objective": "Review the dashboard page flow and adjust hierarchy, empty states, and next actions so the page reads clearly from account state to cohort/event activity.",
+      "inputs": [
+        "issue.md",
+        "src/ui/dashboards.mjs",
+        "src/ui/styles.css",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/dashboards.mjs",
+        "src/ui/styles.css",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "authority": [
+        "Adjust dashboard layout and copy to improve scan order while preserving MVP functionality."
+      ],
+      "acceptance_criteria": [
+        "The dashboard has a clear first-read hierarchy.",
+        "Users can distinguish token availability, active cohorts/schedules, created cohorts, interested cohorts, and available next actions.",
+        "Empty states point to the appropriate next action without using internal role labels."
+      ],
+      "verification": [
+        "npm test",
+        "npm run lint",
+        "Browser smoke test `/dashboard` if a dev server is already running or can be started"
+      ],
+      "files_expected": [
+        "src/ui/dashboards.mjs",
+        "src/ui/styles.css",
+        "tests/dashboards.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "dashboard UX flow",
+      "risk": "medium",
+      "shared_dependencies": [
+        "dashboard content hierarchy",
+        "responsive dashboard styles"
+      ],
+      "stop_condition": "Stop when the dashboard flow review changes are implemented and verified."
+    }
+  ]
+}
