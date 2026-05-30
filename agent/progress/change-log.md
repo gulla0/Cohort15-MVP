@@ -2,6 +2,31 @@
 
 Append-only implementation log.
 
+### 2026-05-30 07:42 EDT
+
+Task:
+- T010 Add MVP verification pass and docs
+
+Files Changed:
+- `tests/mvp-verification.test.mjs`
+- `README.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added full MVP verification coverage for the create/promote/privacy/quorum/dashboard success path.
+- Added full MVP verification coverage for the create/interest/expiry/refund path, including public discovery removal and private-link non-leakage.
+- Expanded README handoff documentation for local demo users, token grants, MVP flow, expiry trigger, local social outbox, post-MVP token packages, and known assumptions.
+- Marked T010 done, completing the current main MVP task ledger.
+
+Verification:
+- `npm run check` passed with 36 tests.
+- `npm run dev` started at `http://localhost:3000` after sandbox escalation.
+- In-app browser smoke verified the create page and successful cohort creation state without exposing the private link. Browser feed/unlock follow-up was blocked by browser URL policy; automated tests cover that flow end to end.
+
 ### 2026-05-30 00:59 EDT
 
 Task:

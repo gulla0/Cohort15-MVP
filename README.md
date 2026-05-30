@@ -43,11 +43,42 @@ npm run check
 
 This executes the repository lint check and the Node test suite.
 
+## Local Demo Data
+
+The app seeds two demo users every time the in-memory app state starts:
+
+| User | ID | Starting grant |
+|---|---|---|
+| Demo Creator | `user-creator` | 6 tokens |
+| Demo Participant | `user-participant` | 6 tokens |
+
+Seed tokens are recorded as grant transactions, not mutable balance fields. The temporary MVP auth path uses these user IDs in forms and query parameters, for example `/dashboard/creator?userId=user-creator` and `/dashboard/participant?userId=user-participant`.
+
+## MVP Flow
+
+1. Start the app with `npm run dev`.
+2. Open `/cohorts/new` and create a cohort as `user-creator`.
+3. Confirm `/cohorts` and `/cohorts/:id` show public cohort details but hide the private online link while the event is open.
+4. Show interest as `user-participant`; this holds 1 participant token.
+5. When interest reaches quorum, the event becomes active, held creator and participant tokens are consumed, and the private link is visible only to the creator and committed participants.
+6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry refunds held creator and participant tokens through refund transactions.
+7. Check `/dashboard/creator` and `/dashboard/participant` for cohort status, token summaries, and authorized unlocked links.
+
+Creating a cohort also writes a local social-promotion outbox record with public-safe content. It includes public event fields and the public cohort URL, and it excludes the private online link.
+
 ## MVP Boundary
 
 Build now: demo/auth path, token ledger, admin/demo token grants, create cohort, show interest, quorum unlock, expiry/refund, hidden private links before unlock, feed/detail pages, dashboards, and a local social-promotion outbox.
 
-Post-MVP: USD token sales, real external social posting, chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events.
+Post-MVP: USD token sales, real external social posting, chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events. The first documented token package assumptions are `$6` for 6 tokens and `$12` for 14 tokens.
+
+## Known Assumptions
+
+- Persistence is in-memory for the MVP. Restarting the dev server resets demo data.
+- Auth is represented by demo user IDs until a real provider is selected.
+- The admin expiry endpoint is a local/dev trigger, not a production scheduler or authorization model.
+- Private links stay hidden for open cohorts. Active cohort links are visible only to the creator and committed participants.
+- Social promotion is local outbox generation only; real external posting is intentionally out of scope for this MVP.
 
 ## Agent Workflow
 

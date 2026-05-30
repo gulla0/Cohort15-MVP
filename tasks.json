@@ -361,7 +361,7 @@
     {
       "id": "T010",
       "title": "Add MVP verification pass and docs",
-      "status": "not_started",
+      "status": "done",
       "phase": "MVP Surfaces And Promotion Outbox",
       "dependencies": [
         "T007",
@@ -396,8 +396,8 @@
         "Manually exercise the MVP flow if UI automation is not available"
       ],
       "stop_condition": "Stop once the MVP can be handed to user testing.",
-      "evidence": "",
-      "notes": ""
+      "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, post-MVP token package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
+      "notes": "Manual browser feed/unlock follow-up was stopped by the browser URL policy after creation; the new automated verification test covers feed, detail, quorum unlock, dashboards, and expiry/refund end to end."
     }
   ]
 }

@@ -2,6 +2,30 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-30 07:42 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- current service, server, UI, README, and test modules needed for T010
+
+Decided:
+- Classified the user request as approved main implementation work and selected T010 as the only remaining unblocked task.
+- Added one focused MVP verification test file covering both handoff-critical paths: creation through social outbox, feed/detail privacy, quorum activation, dashboards, and expiry/refund processing.
+- Expanded README handoff documentation with demo users, local flow steps, manual expiry trigger, local social outbox behavior, MVP boundary, post-MVP token packages, and known assumptions.
+- Marked T010 done after full verification passed.
+
+Assumptions Made:
+- The README should document the current in-memory/demo-auth MVP honestly instead of implying production persistence, scheduler, auth, or social API behavior.
+- The browser policy block during feed/unlock smoke does not block T010 because the new automated verification covers the feed, detail, quorum unlock, dashboard, and expiry/refund behavior end to end.
+
+Next Recommended Step:
+- Hand the MVP to user testing or begin post-MVP planning for real auth, durable persistence, USD token purchases, and external social posting.
+
 ### 2026-05-30 00:59 EDT
 
 Read:
