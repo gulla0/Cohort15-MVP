@@ -2,6 +2,36 @@
 
 Append-only implementation log.
 
+### 2026-05-31 08:55 EDT
+
+Task:
+- T011 Add durable persistence adapter
+
+Files Changed:
+- `src/persistence/store.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/seeds.mjs`
+- `src/server/app.mjs`
+- `tests/persistence-ledger.test.mjs`
+- `README.md`
+- `src/persistence/README.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added a dependency-free JSON file store that persists users, events, event interests, token transactions, and social posts behind the existing repository API.
+- Wired local durable mode through `COHORT15_PERSISTENCE_FILE`, leaving in-memory state as the default.
+- Updated demo seeding to create seed users and seed grant transactions only when missing, so restarts do not duplicate demo token grants.
+- Added persistence reload coverage proving event/outbox records and derived held balances survive repository reinitialization.
+- Documented local persistence configuration and reset behavior.
+
+Verification:
+- `node --test tests/persistence-ledger.test.mjs` passed with 7 tests.
+- `npm run check` passed with 44 tests.
+
 ### 2026-05-30 07:50 EDT
 
 Task:

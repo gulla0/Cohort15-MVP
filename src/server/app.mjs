@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { getFoundationSummary } from '../domain/constants.mjs';
 import { createDemoRepositories } from '../persistence/seeds.mjs';
+import { createJsonFileStore } from '../persistence/store.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
 import { createDashboardService } from '../services/dashboards.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
@@ -45,7 +46,15 @@ function renderCreatePage(state, options = {}) {
   });
 }
 
-function createState() {
+function createState(options = {}) {
+  const persistenceFile = options.persistenceFile ?? process.env.COHORT15_PERSISTENCE_FILE;
+
+  if (persistenceFile) {
+    return createDemoRepositories({
+      store: createJsonFileStore(persistenceFile)
+    });
+  }
+
   return createDemoRepositories();
 }
 

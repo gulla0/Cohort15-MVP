@@ -16,15 +16,26 @@ export const DEMO_USERS = Object.freeze([
   })
 ]);
 
-export function createDemoRepositories() {
-  const repositories = createRepositories();
+export function createDemoRepositories(options = {}) {
+  const repositories = options.repositories ?? createRepositories(options.seed, {
+    store: options.store
+  });
   const ledger = createTokenLedger(repositories.tokenTransactions, {
     now: () => new Date('2026-06-01T12:10:00.000Z')
   });
 
   for (const user of DEMO_USERS) {
-    repositories.users.create(user);
-    ledger.grant(user.id, 6, 'seed_demo_tokens');
+    if (!repositories.users.findById(user.id)) {
+      repositories.users.create(user);
+    }
+
+    const hasSeedGrant = repositories.tokenTransactions.listByUser(user.id).some((transaction) => (
+      transaction.type === 'grant' && transaction.source === 'seed_demo_tokens'
+    ));
+
+    if (!hasSeedGrant) {
+      ledger.grant(user.id, 6, 'seed_demo_tokens');
+    }
   }
 
   return {

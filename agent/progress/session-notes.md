@@ -2,6 +2,37 @@
 
 Append-only role transition and handoff log.
 
+### 2026-05-31 08:55 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `src/persistence/store.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/seeds.mjs`
+- `src/server/app.mjs`
+- `tests/persistence-ledger.test.mjs`
+- `README.md`
+- `src/persistence/README.md`
+
+Decided:
+- Classified the user request as approved main implementation work and selected T011 as the next unblocked critical-path task.
+- Kept durable persistence dependency-free by adding a JSON-file store behind the existing synchronous repository boundary instead of introducing a database dependency before auth/payment requirements are known.
+- Wired durable local mode through `COHORT15_PERSISTENCE_FILE`, with in-memory repositories remaining the default for isolated tests and demos.
+- Updated demo seeding so durable stores receive seed users and grants only when missing, preventing duplicate seed grant transactions on reload.
+- Marked T011 done after focused persistence tests and full project verification passed.
+
+Assumptions Made:
+- JSON-file persistence is sufficient for this local post-MVP hardening step because the task asks for durable local persistence and does not require concurrent production writes.
+- Later auth, purchase, and social publishing tasks should continue using repository contracts rather than reaching into the JSON storage format.
+
+Next Recommended Step:
+- Execute T012: replace demo query/default-user identity with a regular auth/session boundary for protected flows.
+
 ### 2026-05-30 07:50 EDT
 
 Read:

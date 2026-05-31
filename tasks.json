@@ -402,7 +402,7 @@
     {
       "id": "T011",
       "title": "Add durable persistence adapter",
-      "status": "not_started",
+      "status": "done",
       "phase": "Post-MVP Hardening",
       "dependencies": [
         "T010"
@@ -440,7 +440,8 @@
         "Run the full documented verification suite"
       ],
       "stop_condition": "Stop once durable persistence is available behind the repository boundary and documented.",
-      "notes": "Durable persistence is the first post-MVP hardening task because later auth and purchases need stable user and ledger records."
+      "evidence": "2026-05-31 08:55 EDT: Added a dependency-free JSON file store behind the repository boundary, wired durable mode through COHORT15_PERSISTENCE_FILE, kept in-memory repositories available, documented configuration/reset behavior, and added reload coverage proving records and ledger balances survive repository reinitialization without duplicate seed grants. `npm run check` passed with 44 tests.",
+      "notes": "Durable persistence is available as local JSON-file mode; later auth and purchase tasks can rely on stable user, ledger, event, interest, and outbox records while preserving derived token balance semantics."
     },
     {
       "id": "T012",

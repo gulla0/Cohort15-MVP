@@ -48,8 +48,12 @@ function assertUniqueInterest(store, interest) {
   }
 }
 
-export function createRepositories(seed = {}) {
-  const store = createInMemoryStore(seed);
+export function createRepositories(seed = {}, options = {}) {
+  const store = options.store ?? createInMemoryStore(seed);
+
+  function persist() {
+    store.persist?.();
+  }
 
   return {
     users: {
@@ -58,7 +62,9 @@ export function createRepositories(seed = {}) {
         if (store.users.has(user.id)) {
           throw new Error(`User already exists: ${user.id}`);
         }
-        return writeRecord(store.users, user);
+        const savedUser = writeRecord(store.users, user);
+        persist();
+        return savedUser;
       },
       findById(id) {
         return readRecord(store.users, id);
@@ -70,7 +76,9 @@ export function createRepositories(seed = {}) {
     events: {
       save(event) {
         assertValidEvent(event);
-        return writeRecord(store.events, event);
+        const savedEvent = writeRecord(store.events, event);
+        persist();
+        return savedEvent;
       },
       findById(id) {
         return readRecord(store.events, id);
@@ -83,7 +91,9 @@ export function createRepositories(seed = {}) {
       save(interest) {
         assertValidation(validateEventInterest(interest));
         assertUniqueInterest(store, interest);
-        return writeRecord(store.eventInterests, interest);
+        const savedInterest = writeRecord(store.eventInterests, interest);
+        persist();
+        return savedInterest;
       },
       findById(id) {
         return readRecord(store.eventInterests, id);
@@ -106,7 +116,9 @@ export function createRepositories(seed = {}) {
         if (store.tokenTransactions.has(transaction.id)) {
           throw new Error(`Token transaction already exists: ${transaction.id}`);
         }
-        return writeRecord(store.tokenTransactions, transaction);
+        const savedTransaction = writeRecord(store.tokenTransactions, transaction);
+        persist();
+        return savedTransaction;
       },
       listByUser(userId) {
         return readRecords(store.tokenTransactions).filter((transaction) => transaction.userId === userId);
@@ -121,7 +133,9 @@ export function createRepositories(seed = {}) {
     socialPosts: {
       save(post) {
         assertValidation(validateSocialPost(post));
-        return writeRecord(store.socialPosts, post);
+        const savedPost = writeRecord(store.socialPosts, post);
+        persist();
+        return savedPost;
       },
       findById(id) {
         return readRecord(store.socialPosts, id);

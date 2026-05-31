@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
 import test from 'node:test';
+import { tmpdir } from 'node:os';
 import { buildEvent } from '../src/domain/validation.mjs';
 import { FUTURE_TOKEN_SOURCES, TABLES } from '../src/persistence/schema.mjs';
 import { createRepositories } from '../src/persistence/repositories.mjs';
 import { createDemoRepositories, DEMO_USERS } from '../src/persistence/seeds.mjs';
+import { createJsonFileStore } from '../src/persistence/store.mjs';
 import { createTokenLedger } from '../src/persistence/token-ledger.mjs';
 
 const createdAt = new Date('2026-06-01T12:00:00.000Z');
@@ -165,4 +169,40 @@ test('demo seeds create users and starting token grants through ledger transacti
   assert.equal(repositories.tokenTransactions.list().every((transaction) => transaction.type === 'grant'), true);
   assert.equal(ledger.balanceForUser('user-creator').available, 6);
   assert.equal(ledger.balanceForUser('user-participant').available, 6);
+});
+
+test('json file store persists records across repository reloads', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cohort15-store-'));
+  const filePath = join(dir, 'state.json');
+
+  try {
+    const firstState = createDemoRepositories({
+      store: createJsonFileStore(filePath)
+    });
+
+    firstState.repositories.events.save(buildEvent(eventInput()));
+    firstState.ledger.hold('user-creator', 'event-1', 2);
+    firstState.repositories.socialPosts.save({
+      id: 'post-1',
+      eventId: 'event-1',
+      platform: 'x',
+      postText: 'Join the TypeScript cohort.',
+      status: 'pending',
+      createdAt
+    });
+
+    const secondState = createDemoRepositories({
+      store: createJsonFileStore(filePath)
+    });
+
+    assert.equal(secondState.repositories.users.list().length, 2);
+    assert.equal(secondState.repositories.events.findById('event-1').title, 'Beginner TypeScript Build Cohort');
+    assert.equal(secondState.repositories.socialPosts.findById('post-1').status, 'pending');
+    assert.equal(secondState.ledger.balanceForUser('user-creator').held, 2);
+    assert.equal(secondState.repositories.tokenTransactions.listByUser('user-creator').filter((transaction) => (
+      transaction.type === 'grant' && transaction.source === 'seed_demo_tokens'
+    )).length, 1);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

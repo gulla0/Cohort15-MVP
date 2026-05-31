@@ -1,5 +1,7 @@
 # Persistence
 
-This directory is reserved for database schema, repository modules, seeds, and token ledger primitives.
+This directory owns repository modules, seed data, schema metadata, token ledger primitives, and local persistence stores.
 
-T003 will add storage for users, events, event interests, token transactions, and social posts.
+The default app path uses in-memory repositories for isolated test and demo runs. Durable local mode is enabled by setting `COHORT15_PERSISTENCE_FILE` to a JSON file path before starting the server. The JSON store persists users, events, event interests, token transactions, and social posts behind the same repository API.
+
+Token balances must remain derived from `tokenTransactions`; durable mode stores the transaction log rather than mutable balances.

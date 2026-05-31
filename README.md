@@ -54,6 +54,16 @@ The app seeds two demo users every time the in-memory app state starts:
 
 Seed tokens are recorded as grant transactions, not mutable balance fields. The temporary MVP auth path uses these user IDs in forms and query parameters, for example `/dashboard?creatorUserId=user-creator&participantUserId=user-participant`.
 
+## Local Persistence
+
+By default, the app uses isolated in-memory state and resets whenever the process restarts. To keep users, cohorts, interests, token transactions, and social outbox records across local restarts, point `COHORT15_PERSISTENCE_FILE` at a JSON state file:
+
+```bash
+COHORT15_PERSISTENCE_FILE=.local/cohort15-state.json npm run dev
+```
+
+If the file does not exist, the app creates it and seeds the demo users once with grant transactions. To reset local durable state, stop the server and delete the configured JSON file.
+
 ## MVP Flow
 
 1. Start the app with `npm run dev`.
