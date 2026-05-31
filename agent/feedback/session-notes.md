@@ -145,3 +145,26 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-005-unify-dashboard-token-account/*`
 - `agent/knowledge/index.md`
+
+### 2026-05-31 08:19
+
+User Feedback:
+- Activate the feedback resolver and resolve the active issue.
+
+Issue Mapping:
+- Existing ISSUE-005 resolved.
+
+Reasoning:
+- ISSUE-005 was the only issue still marked not_started in the feedback index.
+- The fix stays within dashboard presentation and route data shape: `/dashboard` now receives one de-duplicated account balance and renders one Account Tokens summary.
+- Ledger semantics, token costs, legacy dashboard routes, Created Cohorts, Interested Cohorts, and Active Cohorts & Schedule were preserved.
+
+Artifacts Updated:
+- `src/services/dashboards.mjs`
+- `src/server/app.mjs`
+- `src/ui/dashboards.mjs`
+- `tests/dashboards.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-005-unify-dashboard-token-account/*`
+- `agent/knowledge/index.md`

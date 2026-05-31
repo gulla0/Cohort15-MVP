@@ -121,10 +121,9 @@ export function createRequestHandler(state = createState()) {
       const participantUserId = url.searchParams.get('participantUserId') ?? 'user-participant';
 
       try {
-        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderDashboardPage({
-          creatorDashboard: dashboardService.getCreatorDashboard(creatorUserId),
-          participantDashboard: dashboardService.getParticipantDashboard(participantUserId)
-        }));
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderDashboardPage(
+          dashboardService.getCombinedDashboard({ creatorUserId, participantUserId })
+        ));
       } catch (error) {
         send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
       }

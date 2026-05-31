@@ -224,7 +224,7 @@ export function renderParticipantDashboardPage({ dashboard }) {
   });
 }
 
-export function renderDashboardPage({ creatorDashboard, participantDashboard }) {
+export function renderDashboardPage({ creatorDashboard, participantDashboard, accountBalance }) {
   const scheduleItems = activeScheduleItems({ creatorDashboard, participantDashboard });
 
   return pageShell({
@@ -236,10 +236,7 @@ export function renderDashboardPage({ creatorDashboard, participantDashboard }) 
       ${dashboardPanel({
         title: 'Account Tokens',
         description: 'Available tokens can be used now. In use tokens are waiting on quorum. Used tokens belong to active cohorts.',
-        children: `<div class="account-token-grid">
-          ${balancePanel(creatorDashboard.balance, `${creatorDashboard.user.displayName}`)}
-          ${balancePanel(participantDashboard.balance, `${participantDashboard.user.displayName}`)}
-        </div>`
+        children: balancePanel(accountBalance)
       })}
       ${dashboardPanel({
         title: 'Active Cohorts & Schedule',

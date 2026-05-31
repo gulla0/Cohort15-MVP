@@ -23,4 +23,4 @@ ISSUE-005-T01
 
 ## Next Unblocked Tasks
 
-- ISSUE-005-T01
+- None. ISSUE-005-T01 is done.

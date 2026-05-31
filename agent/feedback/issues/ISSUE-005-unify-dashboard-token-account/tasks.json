@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-005-T01",
       "title": "Unify dashboard token account presentation",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Update the combined dashboard so Account Tokens presents one token account instead of separate creator and participant token panels.",
       "inputs": [
@@ -57,7 +57,8 @@
         "token ledger balance semantics",
         "demo identity assumptions"
       ],
-      "stop_condition": "Stop when the dashboard presents one token account and verification passes."
+      "stop_condition": "Stop when the dashboard presents one token account and verification passes.",
+      "evidence": "2026-05-31 08:19 EDT: Added a combined dashboard service result with a de-duplicated account token balance, rendered one Account Tokens summary on `/dashboard`, and updated dashboard/MVP tests to reject split Demo Creator/Demo Participant token panels. `npm test -- tests/dashboards.test.mjs tests/mvp-verification.test.mjs`, `npm run lint`, and `npm run check` passed; browser smoke confirmed `/dashboard` has one Account Tokens summary with no Demo Creator/Demo Participant token headings."
     }
   ]
 }

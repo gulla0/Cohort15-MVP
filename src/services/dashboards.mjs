@@ -31,6 +31,22 @@ function serializeForDashboard(repositories, event, userId) {
   });
 }
 
+function combineBalances(balances) {
+  return balances.reduce((combined, balance) => ({
+    grantedOrPurchased: combined.grantedOrPurchased + balance.grantedOrPurchased,
+    held: combined.held + balance.held,
+    consumed: combined.consumed + balance.consumed,
+    refunded: combined.refunded + balance.refunded,
+    available: combined.available + balance.available
+  }), {
+    grantedOrPurchased: 0,
+    held: 0,
+    consumed: 0,
+    refunded: 0,
+    available: 0
+  });
+}
+
 export function createDashboardService({ repositories, ledger }) {
   function getCreatorDashboard(userId) {
     const user = repositories.users.findById(userId);
@@ -82,8 +98,21 @@ export function createDashboardService({ repositories, ledger }) {
     };
   }
 
+  function getCombinedDashboard({ creatorUserId, participantUserId }) {
+    const creatorDashboard = getCreatorDashboard(creatorUserId);
+    const participantDashboard = getParticipantDashboard(participantUserId);
+    const accountUserIds = [...new Set([creatorUserId, participantUserId])];
+
+    return {
+      creatorDashboard,
+      participantDashboard,
+      accountBalance: combineBalances(accountUserIds.map((userId) => ledger.balanceForUser(userId)))
+    };
+  }
+
   return {
     getCreatorDashboard,
-    getParticipantDashboard
+    getParticipantDashboard,
+    getCombinedDashboard
   };
 }

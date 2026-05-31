@@ -115,6 +115,42 @@ test('participant dashboard lists interested cohorts and respects link authoriza
   });
 });
 
+test('combined dashboard service returns one de-duplicated account token balance', () => {
+  const { repositories, ledger, service } = createFixture();
+  const activeEvent = repositories.events.save(eventFixture({ status: 'active' }));
+  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
+  ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  repositories.eventInterests.save({
+    id: 'interest-dashboard',
+    eventId: activeEvent.id,
+    userId: 'user-participant',
+    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    status: 'consumed',
+    createdAt: now
+  });
+
+  const dashboard = service.getCombinedDashboard({
+    creatorUserId: 'user-creator',
+    participantUserId: 'user-participant'
+  });
+
+  assert.deepEqual(dashboard.accountBalance, {
+    grantedOrPurchased: 12,
+    held: 0,
+    consumed: 3,
+    refunded: 0,
+    available: 9
+  });
+
+  const sameUserDashboard = service.getCombinedDashboard({
+    creatorUserId: 'user-creator',
+    participantUserId: 'user-creator'
+  });
+  assert.deepEqual(sameUserDashboard.accountBalance, ledger.balanceForUser('user-creator'));
+});
+
 test('dashboard routes render content-based cohort and event views', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
@@ -187,11 +223,18 @@ test('combined dashboard route shows token summary, active schedule, created coh
   assert.match(response.body, /Available/);
   assert.match(response.body, /In use/);
   assert.match(response.body, /Used/);
+  assert.match(response.body, />9 token\(s\)</);
+  assert.match(response.body, />3 token\(s\)</);
   assert.match(response.body, /Demo Creator started this cohort/);
   assert.match(response.body, /Demo Participant has a confirmed seat/);
+  assert.equal([...response.body.matchAll(/<h2>Available<\/h2>/g)].length, 1);
+  assert.equal([...response.body.matchAll(/<h2>In use<\/h2>/g)].length, 1);
+  assert.equal([...response.body.matchAll(/<h2>Used<\/h2>/g)].length, 1);
   assert.doesNotMatch(response.body, /Returned/);
   assert.doesNotMatch(response.body, /creator tokens:/);
   assert.doesNotMatch(response.body, /participant tokens:/);
+  assert.doesNotMatch(response.body, /<h2>Demo Creator<\/h2>/);
+  assert.doesNotMatch(response.body, /<h2>Demo Participant<\/h2>/);
   assert.doesNotMatch(response.body, /Creator dashboard/);
   assert.doesNotMatch(response.body, /Participant dashboard/);
   assert.match(response.body, /<a class="brand-link" href="\/">Cohort15<\/a>/);
