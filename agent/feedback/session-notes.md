@@ -212,3 +212,26 @@ Reasoning:
 Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-009-rename-token-to-credit/*`
+
+### 2026-06-13
+
+User Feedback:
+- Assume the role of a issue resolver and start working on the first issue.
+
+Issue Mapping:
+- Existing ISSUE-006 resolved.
+
+Reasoning:
+- ISSUE-006 was the first issue still marked `not_started` in the feedback index.
+- The issue was resolved without starting T012 auth by keeping the current demo creator assumption route-side and removing the visible selector from the form.
+- Backend validation now owns the provider allowlist so unsupported meeting links cannot bypass the browser UI.
+
+Artifacts Updated:
+- `src/domain/constants.mjs`
+- `src/domain/validation.mjs`
+- `src/server/app.mjs`
+- `src/ui/create-cohort.mjs`
+- tests using create/event fixtures
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-006-cohort-creation-form-auth-link-rules/*`
+- `agent/knowledge/index.md`

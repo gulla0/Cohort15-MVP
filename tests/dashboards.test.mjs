@@ -20,7 +20,7 @@ function eventFixture(overrides = {}) {
     targetSkillLevel: 'intermediate',
     minQuorum: 1,
     maxParticipants: 6,
-    lockedEventLink: 'https://meet.example/private-dashboard',
+    lockedEventLink: 'https://meet.google.com/private-dashboard',
     firstMeetingAt: new Date('2026-06-20T18:00:00.000Z'),
     meetingDurationMinutes: 75,
     recurrence: 'weekly',
@@ -80,7 +80,7 @@ test('creator dashboard lists owned cohorts with token state and unlocked links'
   const dashboard = service.getCreatorDashboard('user-creator');
 
   assert.equal(dashboard.cohorts.length, 1);
-  assert.equal(dashboard.cohorts[0].event.lockedEventLink, 'https://meet.example/private-dashboard');
+  assert.equal(dashboard.cohorts[0].event.lockedEventLink, 'https://meet.google.com/private-dashboard');
   assert.equal(dashboard.cohorts[0].interestCount, 1);
   assert.deepEqual(dashboard.cohorts[0].tokenSummary, {
     held: CREATE_EVENT_TOKEN_COST,
@@ -106,7 +106,7 @@ test('participant dashboard lists interested cohorts and respects link authoriza
   const dashboard = service.getParticipantDashboard('user-participant');
 
   assert.equal(dashboard.interests.length, 1);
-  assert.equal(dashboard.interests[0].event.lockedEventLink, 'https://meet.example/private-dashboard');
+  assert.equal(dashboard.interests[0].event.lockedEventLink, 'https://meet.google.com/private-dashboard');
   assert.equal(dashboard.interests[0].interest.status, 'consumed');
   assert.deepEqual(dashboard.interests[0].tokenSummary, {
     held: SHOW_INTEREST_TOKEN_COST,
@@ -174,7 +174,7 @@ test('dashboard routes render content-based cohort and event views', async () =>
   assert.match(creator.body, /My Tokens/);
   assert.match(creator.body, /Open Source Pairing Cohort/);
   assert.match(creator.body, /src="\/assets\/default-cohort\.png"/);
-  assert.match(creator.body, /https:\/\/meet\.example\/private-dashboard/);
+  assert.match(creator.body, /https:\/\/meet\.google\.com\/private-dashboard/);
   assert.match(creator.body, /Available/);
   assert.match(creator.body, /In use/);
   assert.match(creator.body, /Used/);
@@ -187,7 +187,7 @@ test('dashboard routes render content-based cohort and event views', async () =>
   assert.match(participant.body, /My Tokens/);
   assert.match(participant.body, /Seat confirmed/);
   assert.match(participant.body, /src="\/assets\/default-cohort\.png"/);
-  assert.match(participant.body, /https:\/\/meet\.example\/private-dashboard/);
+  assert.match(participant.body, /https:\/\/meet\.google\.com\/private-dashboard/);
   assert.match(participant.body, /Available/);
   assert.match(participant.body, /In use/);
   assert.match(participant.body, /Used/);

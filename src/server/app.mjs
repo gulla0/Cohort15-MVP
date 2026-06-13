@@ -17,6 +17,7 @@ import { renderHomePage } from '../ui/home.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..', '..');
+const DEMO_CREATOR_USER_ID = 'user-creator';
 
 function send(res, status, headers, body) {
   res.writeHead(status, headers);
@@ -42,6 +43,7 @@ function parseFormBody(body) {
 function renderCreatePage(state, options = {}) {
   return renderCreateCohortPage({
     users: state.repositories.users.list(),
+    creatorId: DEMO_CREATOR_USER_ID,
     ...options
   });
 }
@@ -111,7 +113,10 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/cohorts/new' && req.method === 'POST') {
-      const values = parseFormBody(await readBody(req));
+      const values = {
+        ...parseFormBody(await readBody(req)),
+        creatorId: DEMO_CREATOR_USER_ID
+      };
 
       try {
         const result = cohortService.create(values);

@@ -18,7 +18,7 @@ function validInput(overrides = {}) {
     targetSkillLevel: 'beginner',
     minQuorum: '5',
     maxParticipants: '8',
-    lockedEventLink: 'https://meet.example/cohort',
+    lockedEventLink: 'https://meet.google.com/cohort',
     firstMeetingAt: '2026-06-20T18:00:00.000Z',
     meetingDurationMinutes: '90',
     recurrence: 'weekly',
@@ -97,6 +97,18 @@ test('create cohort preserves a custom event image URL', () => {
   assert.equal(result.event.imageUrl, 'https://images.example/typescript.png');
 });
 
+test('create cohort supports daily recurring cohorts', () => {
+  const { service } = createServiceFixture();
+
+  const result = service.create(validInput({
+    recurrence: 'daily',
+    meetingCount: '5'
+  }));
+
+  assert.equal(result.event.recurrence, 'daily');
+  assert.equal(result.event.meetingCount, 5);
+});
+
 test('create cohort rejects creators with fewer than 2 available tokens', () => {
   const { repositories, ledger, service } = createServiceFixture();
   ledger.hold('user-creator', 'existing-event-1', 2);
@@ -131,6 +143,17 @@ test('create cohort rejects first meetings before the quorum window closes', () 
   assert.equal(repositories.events.list().length, 0);
 });
 
+test('create cohort rejects unsupported private meeting link providers', () => {
+  const { repositories, service } = createServiceFixture();
+
+  assert.throws(
+    () => service.create(validInput({ lockedEventLink: 'https://example.com/private-room' })),
+    /lockedEventLink must be an approved Google Meet, Zoom, Microsoft Teams, Discord, or Slack https link/
+  );
+
+  assert.equal(repositories.events.list().length, 0);
+});
+
 test('create cohort page renders form errors and success without exposing private link', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state, {
@@ -142,6 +165,10 @@ test('create cohort page renders form errors and success without exposing privat
   assert.match(form.body, /Create cohort/);
   assert.match(form.body, /name="firstMeetingAt" type="datetime-local" min="/);
   assert.match(form.body, /name="imageUrl"/);
+  assert.match(form.body, /<option value="daily">daily<\/option>/);
+  assert.match(form.body, /name="creatorId" type="hidden" value="user-creator"/);
+  assert.doesNotMatch(form.body, /<select name="creatorId"/);
+  assert.doesNotMatch(form.body, />\s*Creator\s*<select/);
 
   const invalid = await invoke(handler, {
     url: '/cohorts/new',
@@ -155,11 +182,30 @@ test('create cohort page renders form errors and success without exposing privat
   const valid = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',
-    body: encodeForm(validInput({ lockedEventLink: 'https://zoom.example/private-room' }))
+    body: encodeForm(validInput({ lockedEventLink: 'https://zoom.us/private-room' }))
   });
   assert.equal(valid.status, 201);
   assert.match(valid.body, /Cohort created/);
   assert.match(valid.body, /Private link status: locked until quorum/);
   assert.match(valid.body, /href="\/dashboard\?creatorUserId=user-creator"/);
-  assert.doesNotMatch(valid.body, /zoom\.example/);
+  assert.doesNotMatch(valid.body, /zoom\.us/);
+});
+
+test('create cohort route assigns the temporary demo creator instead of trusting posted creator ids', async () => {
+  const state = createDemoRepositories();
+  const handler = createRequestHandler(state, {
+    now: () => now
+  });
+
+  const response = await invoke(handler, {
+    url: '/cohorts/new',
+    method: 'POST',
+    body: encodeForm(validInput({
+      creatorId: 'user-participant',
+      lockedEventLink: 'https://meet.google.com/demo-creator-route'
+    }))
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(state.repositories.events.list()[0].creatorId, 'user-creator');
 });

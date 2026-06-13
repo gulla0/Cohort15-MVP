@@ -17,7 +17,7 @@ function validInput(overrides = {}) {
     targetSkillLevel: 'beginner',
     minQuorum: '5',
     maxParticipants: '8',
-    lockedEventLink: 'https://meet.example/private-room',
+    lockedEventLink: 'https://meet.google.com/private-room',
     firstMeetingAt: '2026-06-20T18:00:00.000Z',
     meetingDurationMinutes: '90',
     recurrence: 'weekly',
@@ -52,7 +52,7 @@ test('social post text includes public cohort details and excludes private links
     targetSkillLevel: 'beginner',
     description: 'Build small TypeScript projects together.',
     minQuorum: 5,
-    lockedEventLink: 'https://meet.example/private-room'
+    lockedEventLink: 'https://meet.google.com/private-room'
   };
 
   const postText = buildSocialPostText(event, { publicBaseUrl: 'https://cohort15.example' });
@@ -82,5 +82,5 @@ test('creating a cohort writes a local social-promotion outbox record', () => {
   assert.equal(posts.length, 1);
   assert.match(posts[0].postText, /Beginner TypeScript Build Cohort/);
   assert.match(posts[0].postText, /https:\/\/cohort15\.example\/cohorts\/event-created/);
-  assert.doesNotMatch(posts[0].postText, /meet\.example/);
+  assert.doesNotMatch(posts[0].postText, /meet\.google\.com/);
 });

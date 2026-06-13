@@ -2,5 +2,5 @@
 
 No known blockers.
 
-Open implementation decision:
-- If full auth is not resolved first, the resolver must preserve a temporary demo creator path after removing the visible Creator field.
+Resolved implementation decision:
+- Full auth remains deferred to T012. The create route preserves a temporary `user-creator` demo creator path and ignores posted `creatorId` values after removing the visible Creator field.

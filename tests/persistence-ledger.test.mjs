@@ -24,7 +24,7 @@ function eventInput(overrides = {}) {
     targetSkillLevel: 'beginner',
     minQuorum: 5,
     maxParticipants: 8,
-    lockedEventLink: 'https://meet.example/cohort',
+    lockedEventLink: 'https://meet.google.com/cohort',
     firstMeetingAt: new Date('2026-06-20T18:00:00.000Z'),
     meetingDurationMinutes: 90,
     recurrence: 'weekly',

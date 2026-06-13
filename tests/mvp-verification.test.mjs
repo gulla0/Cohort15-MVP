@@ -16,7 +16,7 @@ function validCreateInput(overrides = {}) {
     targetSkillLevel: 'intermediate',
     minQuorum: '1',
     maxParticipants: '5',
-    lockedEventLink: 'https://meet.example/private-ai-build',
+    lockedEventLink: 'https://meet.google.com/private-ai-build',
     firstMeetingAt: '2026-06-20T18:00:00.000Z',
     meetingDurationMinutes: '90',
     recurrence: 'weekly',
@@ -98,7 +98,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   assert.equal(interestResponse.status, 200);
   assert.match(interestResponse.body, /Quorum met/);
   assert.match(interestResponse.body, /Open dashboard/);
-  assert.match(interestResponse.body, /https:\/\/meet\.example\/private-ai-build/);
+  assert.match(interestResponse.body, /https:\/\/meet\.google\.com\/private-ai-build/);
 
   assert.equal(state.repositories.events.findById(event.id).status, 'active');
   assert.equal(state.ledger.balanceForUser('user-creator').consumed, 2);
@@ -126,7 +126,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   assert.match(combinedDashboard.body, /Practical AI Build Cohort/);
   assert.match(combinedDashboard.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(combinedDashboard.body, /Seat confirmed/);
-  assert.match(combinedDashboard.body, /https:\/\/meet\.example\/private-ai-build/);
+  assert.match(combinedDashboard.body, /https:\/\/meet\.google\.com\/private-ai-build/);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>Available<\/h2>/g)].length, 1);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>In use<\/h2>/g)].length, 1);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>Used<\/h2>/g)].length, 1);
@@ -151,7 +151,7 @@ test('MVP expiry path refunds held creator and participant tokens and removes ex
     body: encodeForm(validCreateInput({
       title: 'Slow Quorum Cohort',
       minQuorum: '2',
-      lockedEventLink: 'https://meet.example/private-slow-quorum'
+      lockedEventLink: 'https://meet.google.com/private-slow-quorum'
     }))
   });
   assert.equal(createResponse.status, 201);

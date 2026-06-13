@@ -36,7 +36,7 @@ function eventInput(overrides = {}) {
     additionalDetails: 'Bring a small project idea.',
     minQuorum: 5,
     maxParticipants: 8,
-    lockedEventLink: 'https://meet.example/cohort',
+    lockedEventLink: 'https://meet.google.com/cohort',
     firstMeetingAt: new Date('2026-06-20T18:00:00.000Z'),
     meetingDurationMinutes: 90,
     recurrence: 'weekly',
@@ -57,7 +57,7 @@ test('domain constants match the MVP enum values', () => {
   ]);
   assert.deepEqual(TARGET_SKILL_LEVELS, ['beginner', 'intermediate', 'advanced', 'any']);
   assert.deepEqual(EVENT_STATUSES, ['open', 'active', 'expired', 'cancelled', 'completed']);
-  assert.deepEqual(RECURRENCE_VALUES, ['none', 'weekly', 'biweekly', 'monthly']);
+  assert.deepEqual(RECURRENCE_VALUES, ['none', 'daily', 'weekly', 'biweekly', 'monthly']);
   assert.deepEqual(SOCIAL_POST_STATUSES, ['pending', 'posted', 'failed']);
 });
 
@@ -105,6 +105,10 @@ test('event validation enforces participant cap, recurrence, and required link r
     () => buildEvent(eventInput({ recurrence: 'weekly', meetingCount: 1 })),
     /Repeating events must have at least two meetings/
   );
+  assert.equal(
+    buildEvent(eventInput({ recurrence: 'daily', meetingCount: 5 })).recurrence,
+    'daily'
+  );
   assert.throws(
     () => buildEvent(eventInput({ lockedEventLink: '' })),
     /lockedEventLink is required/
@@ -112,6 +116,29 @@ test('event validation enforces participant cap, recurrence, and required link r
   assert.throws(
     () => buildEvent(eventInput({ firstMeetingAt: new Date('2026-06-15T12:00:00.000Z') })),
     /firstMeetingAt must be after the 14-day quorum window/
+  );
+});
+
+test('event validation restricts private meeting links to approved providers', () => {
+  const allowedLinks = [
+    'https://meet.google.com/abc-defg-hij',
+    'https://us02web.zoom.us/j/123456789',
+    'https://teams.microsoft.com/l/meetup-join/example',
+    'https://discord.gg/cohort15',
+    'https://app.slack.com/huddle/team-room'
+  ];
+
+  for (const lockedEventLink of allowedLinks) {
+    assert.equal(buildEvent(eventInput({ lockedEventLink })).lockedEventLink, lockedEventLink);
+  }
+
+  assert.throws(
+    () => buildEvent(eventInput({ lockedEventLink: 'https://example.com/private-room' })),
+    /lockedEventLink must be an approved Google Meet, Zoom, Microsoft Teams, Discord, or Slack https link/
+  );
+  assert.throws(
+    () => buildEvent(eventInput({ lockedEventLink: 'http://meet.google.com/abc-defg-hij' })),
+    /lockedEventLink must be an approved Google Meet, Zoom, Microsoft Teams, Discord, or Slack https link/
   );
 });
 

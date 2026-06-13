@@ -20,7 +20,7 @@ function eventFixture(overrides = {}) {
     targetSkillLevel: 'intermediate',
     minQuorum: 2,
     maxParticipants: 6,
-    lockedEventLink: 'https://meet.example/private-open-source',
+    lockedEventLink: 'https://meet.google.com/private-open-source',
     firstMeetingAt: new Date('2026-06-20T18:00:00.000Z'),
     meetingDurationMinutes: 75,
     recurrence: 'weekly',
@@ -187,5 +187,5 @@ test('show interest route unlocks the private link for the participant when quor
   assert.match(response.body, /Private link unlocked/);
   assert.match(response.body, /Open dashboard/);
   assert.match(response.body, /href="\/dashboard\?participantUserId=user-participant"/);
-  assert.match(response.body, /https:\/\/meet\.example\/private-open-source/);
+  assert.match(response.body, /https:\/\/meet\.google\.com\/private-open-source/);
 });

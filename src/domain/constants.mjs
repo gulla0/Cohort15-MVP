@@ -33,6 +33,7 @@ export const EVENT_STATUSES = Object.freeze([
 
 export const RECURRENCE_VALUES = Object.freeze([
   'none',
+  'daily',
   'weekly',
   'biweekly',
   'monthly'
@@ -70,6 +71,17 @@ export const SHOW_INTEREST_TOKEN_COST = 1;
 export const MAX_PARTICIPANTS = 15;
 export const DEFAULT_EXPIRY_DAYS = 14;
 export const DEFAULT_COHORT_IMAGE_PATH = '/assets/default-cohort.png';
+
+export const ALLOWED_MEETING_LINK_HOSTS = Object.freeze([
+  'meet.google.com',
+  'zoom.us',
+  'zoom.com',
+  'teams.microsoft.com',
+  'teams.live.com',
+  'discord.com',
+  'discord.gg',
+  'slack.com'
+]);
 
 export function getFoundationSummary() {
   return {

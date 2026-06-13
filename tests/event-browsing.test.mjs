@@ -20,7 +20,7 @@ function eventFixture(overrides = {}) {
     additionalDetails: 'Bring a repository you want to understand better.',
     minQuorum: 2,
     maxParticipants: 6,
-    lockedEventLink: 'https://meet.example/private-open-source',
+    lockedEventLink: 'https://meet.google.com/private-open-source',
     firstMeetingAt: new Date('2026-06-20T18:00:00.000Z'),
     meetingDurationMinutes: 75,
     recurrence: 'weekly',
@@ -92,9 +92,9 @@ test('event detail reveals active private links only to authorized users', () =>
 
   assert.equal(anonymous.lockedEventLink, undefined);
   assert.equal(anonymous.linkVisibility, 'authorized_only');
-  assert.equal(creator.lockedEventLink, 'https://meet.example/private-open-source');
+  assert.equal(creator.lockedEventLink, 'https://meet.google.com/private-open-source');
   assert.equal(creator.linkVisibility, 'visible');
-  assert.equal(participant.lockedEventLink, 'https://meet.example/private-open-source');
+  assert.equal(participant.lockedEventLink, 'https://meet.google.com/private-open-source');
   assert.equal(participant.linkVisibility, 'visible');
 });
 
@@ -133,5 +133,5 @@ test('active cohort detail route reveals link for creator viewer', async () => {
     method: 'GET'
   });
   assert.equal(creator.status, 200);
-  assert.match(creator.body, /https:\/\/meet\.example\/private-open-source/);
+  assert.match(creator.body, /https:\/\/meet\.google\.com\/private-open-source/);
 });

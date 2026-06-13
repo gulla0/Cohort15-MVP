@@ -22,7 +22,7 @@ function eventFixture(overrides = {}) {
     targetSkillLevel: 'intermediate',
     minQuorum: 2,
     maxParticipants: 6,
-    lockedEventLink: 'https://meet.example/private-open-source',
+    lockedEventLink: 'https://meet.google.com/private-open-source',
     firstMeetingAt: new Date('2026-06-20T18:00:00.000Z'),
     meetingDurationMinutes: 75,
     recurrence: 'weekly',

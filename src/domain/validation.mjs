@@ -1,4 +1,5 @@
 import {
+  ALLOWED_MEETING_LINK_HOSTS,
   DEFAULT_COHORT_IMAGE_PATH,
   DEFAULT_EXPIRY_DAYS,
   EVENT_CATEGORIES,
@@ -82,6 +83,26 @@ function isAllowedImageUrl(value) {
   }
 }
 
+function isAllowedMeetingLink(value) {
+  if (!hasText(value)) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') {
+      return false;
+    }
+
+    const host = url.hostname.toLowerCase();
+    return ALLOWED_MEETING_LINK_HOSTS.some((allowedHost) => (
+      host === allowedHost || host.endsWith(`.${allowedHost}`)
+    ));
+  } catch {
+    return false;
+  }
+}
+
 export function validateEvent(event) {
   const errors = [];
 
@@ -125,6 +146,10 @@ export function validateEvent(event) {
 
   if (hasText(event?.imageUrl) && !isAllowedImageUrl(event.imageUrl)) {
     errors.push('imageUrl must be an http(s) URL or an app-relative path.');
+  }
+
+  if (hasText(event?.lockedEventLink) && !isAllowedMeetingLink(event.lockedEventLink)) {
+    errors.push('lockedEventLink must be an approved Google Meet, Zoom, Microsoft Teams, Discord, or Slack https link.');
   }
 
   if (

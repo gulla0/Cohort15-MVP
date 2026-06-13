@@ -25,13 +25,6 @@ function optionList(values, selectedValue) {
   }).join('');
 }
 
-function userOptions(users, selectedUserId) {
-  return users.map((user) => {
-    const selected = user.id === selectedUserId ? ' selected' : '';
-    return `<option value="${escapeHtml(user.id)}"${selected}>${escapeHtml(user.displayName)}</option>`;
-  }).join('');
-}
-
 function errorList(errors) {
   if (!errors || errors.length === 0) {
     return '';
@@ -68,8 +61,8 @@ function successNotice(result) {
   </section>`;
 }
 
-export function renderCreateCohortPage({ users, values = {}, errors = [], result } = {}) {
-  const selectedUserId = values.creatorId ?? users?.[0]?.id;
+export function renderCreateCohortPage({ users, creatorId, values = {}, errors = [], result } = {}) {
+  const defaultCreatorId = creatorId ?? values.creatorId ?? users?.[0]?.id ?? '';
   const earliestFirstMeeting = new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
   const minimumFirstMeetingValue = formatDateTimeLocal(earliestFirstMeeting);
 
@@ -102,12 +95,7 @@ export function renderCreateCohortPage({ users, values = {}, errors = [], result
       ${errorList(errors)}
 
       <form class="form-grid" method="post" action="/cohorts/new">
-        <label>
-          Creator
-          <select name="creatorId" required>
-            ${userOptions(users ?? [], selectedUserId)}
-          </select>
-        </label>
+        <input name="creatorId" type="hidden" value="${escapeHtml(defaultCreatorId)}">
 
         <label>
           Title

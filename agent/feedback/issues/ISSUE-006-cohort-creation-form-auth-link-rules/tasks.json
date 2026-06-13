@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-006-T01",
       "title": "Tighten create cohort validation and form identity",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Update cohort creation so recurrence, first-meeting timing, meeting-link provider allowlisting, and creator identity presentation match the feedback.",
       "inputs": [
@@ -70,7 +70,8 @@
         "domain recurrence constants",
         "create-flow tests"
       ],
-      "stop_condition": "Stop when creation form behavior and validation rules match the feedback and verification passes."
+      "stop_condition": "Stop when creation form behavior and validation rules match the feedback and verification passes.",
+      "evidence": "2026-06-13: Added daily recurrence, approved-provider https meeting-link validation, hidden demo creator assignment for the create route, and focused tests for form identity, recurrence, link allowlisting, and first-meeting timing. `npm test -- tests/domain-validation.test.mjs tests/create-cohort.test.mjs`, `npm run lint`, and `npm run check` passed."
     }
   ]
 }
