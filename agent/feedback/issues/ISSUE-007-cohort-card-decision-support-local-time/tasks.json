@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-007-T01",
       "title": "Research and redesign cohort request cards",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Define and implement a more useful public cohort card layout for potential participants, including capacity cues, better image proportions, and local-time display.",
       "inputs": [
@@ -63,7 +63,8 @@
         "public feed layout",
         "browser-local time rendering"
       ],
-      "stop_condition": "Stop when cohort cards better support participant decisions, local time is shown, and verification passes."
+      "stop_condition": "Stop when cohort cards better support participant decisions, local time is shown, and verification passes.",
+      "evidence": "2026-06-12 22:08 EDT: Added service-level capacity summaries for public events, redesigned feed cards around compact images and stable decision fields for starts/open spots/quorum, enhanced card/detail times to browser-local display with UTC fallback, and verified with focused tests, browser smoke at desktop and 390px mobile, lint, and `npm run check`."
     }
   ]
 }

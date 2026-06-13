@@ -139,6 +139,17 @@ article p {
   min-height: auto;
 }
 
+.event-card {
+  display: grid;
+  grid-template-columns: minmax(132px, 180px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.event-card-body {
+  min-width: 0;
+}
+
 .event-image,
 .event-hero-image,
 .dashboard-event-image {
@@ -150,8 +161,8 @@ article p {
 }
 
 .event-image {
-  aspect-ratio: 16 / 9;
-  margin-bottom: 16px;
+  aspect-ratio: 4 / 3;
+  margin: 0;
 }
 
 .event-hero-image {
@@ -238,6 +249,10 @@ article p {
   text-decoration-color: #8aa79c;
 }
 
+.event-card p {
+  margin-bottom: 14px;
+}
+
 .status {
   display: inline-flex;
   align-items: center;
@@ -261,6 +276,26 @@ article p {
   margin: 18px 0 0;
 }
 
+.meta-grid.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.decision-grid > div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #dce5df;
+  border-radius: 8px;
+  background: #f8fbf8;
+}
+
 .meta-grid div {
   min-width: 0;
 }
@@ -275,6 +310,11 @@ dt {
 dd {
   margin: 2px 0 0;
   color: #24342c;
+}
+
+.decision-grid dd {
+  color: #17211c;
+  font-weight: 800;
 }
 
 .detail-layout {
@@ -395,8 +435,17 @@ textarea {
   .dashboard-summary,
   .account-token-grid,
   .meta-grid,
+  .decision-grid,
   .detail-layout {
     grid-template-columns: 1fr;
+  }
+
+  .event-card {
+    grid-template-columns: 1fr;
+  }
+
+  .event-image {
+    aspect-ratio: 16 / 9;
   }
 
   .form-grid {

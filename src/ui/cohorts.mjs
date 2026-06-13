@@ -21,6 +21,11 @@ function formatDateTime(value) {
   }).format(value);
 }
 
+function localTime(value) {
+  const isoValue = value.toISOString();
+  return `<time datetime="${escapeHtml(isoValue)}" data-local-time>${escapeHtml(formatDateTime(value))} UTC</time>`;
+}
+
 function pageShell({ title, eyebrow, heading, lede, body }) {
   return `<!doctype html>
 <html lang="en">
@@ -49,6 +54,22 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
 
       ${body}
     </main>
+    <script>
+      for (const timeElement of document.querySelectorAll('[data-local-time]')) {
+        const date = new Date(timeElement.dateTime);
+        if (Number.isNaN(date.getTime())) {
+          continue;
+        }
+
+        const formatter = new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+        timeElement.textContent = formatter.format(date);
+        const timeZone = formatter.resolvedOptions().timeZone;
+        timeElement.setAttribute('aria-label', 'Local time' + (timeZone ? ' in ' + timeZone : '') + ': ' + timeElement.textContent);
+      }
+    </script>
   </body>
 </html>`;
 }
@@ -64,29 +85,57 @@ function emptyFeed() {
   </section>`;
 }
 
+function capacityLabel(event) {
+  if (event.capacity.isFull) {
+    return 'Full';
+  }
+
+  if (event.status === 'active') {
+    return `${event.capacity.openSpots} spot(s) open`;
+  }
+
+  if (event.capacity.quorumRemaining === 0) {
+    return 'Quorum ready';
+  }
+
+  return `${event.capacity.quorumRemaining} more to activate`;
+}
+
 function eventCard(event) {
   return `<article class="event-card">
     <img class="event-image" src="${escapeHtml(event.imageUrl)}" alt="${escapeHtml(event.title)} cohort image">
-    <div class="event-card-header">
-      ${statusBadge(event.status)}
-      <span>${escapeHtml(event.minQuorum)} needed</span>
+    <div class="event-card-body">
+      <div class="event-card-header">
+        ${statusBadge(event.status)}
+        <span>${escapeHtml(capacityLabel(event))}</span>
+      </div>
+      <h2><a href="/cohorts/${encodeURIComponent(event.id)}">${escapeHtml(event.title)}</a></h2>
+      <p>${escapeHtml(event.description)}</p>
+      <dl class="decision-grid" aria-label="Cohort decision details">
+        <div>
+          <dt>Starts</dt>
+          <dd>${localTime(event.firstMeetingAt)}</dd>
+        </div>
+        <div>
+          <dt>Open spots</dt>
+          <dd>${escapeHtml(event.capacity.openSpots)} of ${escapeHtml(event.capacity.maxParticipants)}</dd>
+        </div>
+        <div>
+          <dt>Quorum</dt>
+          <dd>${escapeHtml(event.capacity.committedCount)} / ${escapeHtml(event.capacity.minQuorum)}</dd>
+        </div>
+      </dl>
+      <dl class="meta-grid compact">
+        <div>
+          <dt>Topic</dt>
+          <dd>${escapeHtml(event.topic)}</dd>
+        </div>
+        <div>
+          <dt>Skill</dt>
+          <dd>${formatEnum(event.targetSkillLevel)}</dd>
+        </div>
+      </dl>
     </div>
-    <h2><a href="/cohorts/${encodeURIComponent(event.id)}">${escapeHtml(event.title)}</a></h2>
-    <p>${escapeHtml(event.description)}</p>
-    <dl class="meta-grid">
-      <div>
-        <dt>Topic</dt>
-        <dd>${escapeHtml(event.topic)}</dd>
-      </div>
-      <div>
-        <dt>Skill</dt>
-        <dd>${formatEnum(event.targetSkillLevel)}</dd>
-      </div>
-      <div>
-        <dt>First meeting</dt>
-        <dd>${escapeHtml(formatDateTime(event.firstMeetingAt))}</dd>
-      </div>
-    </dl>
   </article>`;
 }
 
@@ -178,7 +227,7 @@ function eventDetail({ event, users, viewerId, interestResult, interestErrors })
         </div>
         <div>
           <dt>First meeting</dt>
-          <dd>${escapeHtml(formatDateTime(event.firstMeetingAt))}</dd>
+          <dd>${localTime(event.firstMeetingAt)}</dd>
         </div>
         <div>
           <dt>Cadence</dt>
@@ -190,7 +239,7 @@ function eventDetail({ event, users, viewerId, interestResult, interestErrors })
         </div>
         <div>
           <dt>Expires</dt>
-          <dd>${escapeHtml(formatDateTime(event.expiresAt))}</dd>
+          <dd>${localTime(event.expiresAt)}</dd>
         </div>
       </dl>
       ${event.additionalDetails ? `<section class="detail-notes">

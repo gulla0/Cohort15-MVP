@@ -235,3 +235,25 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-006-cohort-creation-form-auth-link-rules/*`
 - `agent/knowledge/index.md`
+
+### 2026-06-12 22:08 EDT
+
+User Feedback:
+- Initiate an issue resolver and work on the next available issue.
+
+Issue Mapping:
+- Existing ISSUE-007 resolved.
+
+Reasoning:
+- ISSUE-007 was the first issue still marked `not_started` in the feedback index.
+- UX research supported keeping card content compact and comparable, with repeated decision fields in predictable positions.
+- The fix stayed scoped to public event browsing, feed card UI, local-time rendering, styles, and focused tests.
+
+Artifacts Updated:
+- `src/services/event-browsing.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/styles.css`
+- `tests/event-browsing.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-007-cohort-card-decision-support-local-time/*`
+- `agent/knowledge/index.md`

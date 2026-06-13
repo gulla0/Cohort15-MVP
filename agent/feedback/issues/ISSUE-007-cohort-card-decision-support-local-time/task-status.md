@@ -2,4 +2,4 @@
 
 | Task ID | Title | Status | Dependencies Satisfied | Evidence | Notes |
 |---|---|---|---|---|---|
-| ISSUE-007-T01 | Research and redesign cohort request cards | not_started | yes | Pending. | Covers card capacity cues, image balance, participant decision hierarchy, and viewer-local time. |
+| ISSUE-007-T01 | Research and redesign cohort request cards | done | yes | `npm run check` passed with 49 tests; browser smoke passed at desktop and 390px mobile. | Added capacity/open-spot/quorum card cues, compact supporting images, and browser-local time display with UTC fallback. |

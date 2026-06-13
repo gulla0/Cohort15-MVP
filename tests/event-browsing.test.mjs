@@ -73,6 +73,52 @@ test('event browsing lists only open and active events without private links', (
   assert.equal(events[1].linkVisibility, 'locked_until_quorum');
 });
 
+test('event browsing summarizes capacity from active and consumed interests', () => {
+  const state = createDemoRepositories();
+  state.repositories.events.save(eventFixture({
+    id: 'event-capacity',
+    status: 'open',
+    minQuorum: 3,
+    maxParticipants: 5
+  }));
+  state.repositories.eventInterests.save({
+    id: 'interest-active',
+    eventId: 'event-capacity',
+    userId: 'user-participant',
+    status: 'active',
+    tokensHeld: 1,
+    createdAt: baseTime
+  });
+  state.repositories.eventInterests.save({
+    id: 'interest-consumed',
+    eventId: 'event-capacity',
+    userId: 'user-committed',
+    status: 'consumed',
+    tokensHeld: 1,
+    createdAt: baseTime
+  });
+  state.repositories.eventInterests.save({
+    id: 'interest-refunded',
+    eventId: 'event-capacity',
+    userId: 'user-refunded',
+    status: 'refunded',
+    tokensHeld: 1,
+    createdAt: baseTime
+  });
+
+  const service = createEventBrowsingService(state);
+  const event = service.getPublicEvent('event-capacity');
+
+  assert.deepEqual(event.capacity, {
+    committedCount: 2,
+    minQuorum: 3,
+    maxParticipants: 5,
+    openSpots: 3,
+    quorumRemaining: 1,
+    isFull: false
+  });
+});
+
 test('event detail reveals active private links only to authorized users', () => {
   const state = createDemoRepositories();
   state.repositories.events.save(eventFixture({ id: 'event-active', status: 'active' }));
@@ -108,6 +154,13 @@ test('cohort feed and detail routes render public fields without leaking locked 
   assert.match(feed.body, /Open Source Pairing Cohort/);
   assert.match(feed.body, /Open source/);
   assert.match(feed.body, /src="\/assets\/default-cohort\.png"/);
+  assert.match(feed.body, /2 more to activate/);
+  assert.match(feed.body, /Open spots/);
+  assert.match(feed.body, /6 of 6/);
+  assert.match(feed.body, /Quorum/);
+  assert.match(feed.body, /0 \/ 2/);
+  assert.match(feed.body, /data-local-time/);
+  assert.match(feed.body, /Jun 20, 2026, 6:00 PM UTC/);
   assert.doesNotMatch(feed.body, /private-open-source/);
 
   const detail = await invoke(handler, { url: '/cohorts/event-open', method: 'GET' });

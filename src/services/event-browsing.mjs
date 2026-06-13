@@ -8,13 +8,34 @@ function eligibleLinkViewerIds(interests) {
     .map((interest) => interest.userId);
 }
 
-function serializeWithInterest(repositories, event, viewerId) {
-  const interestedUserIds = eligibleLinkViewerIds(repositories.eventInterests.listByEvent(event.id));
+function summarizeCapacity(event, interests) {
+  const committedCount = interests
+    .filter((interest) => interest.status === 'active' || interest.status === 'consumed')
+    .length;
+  const openSpots = Math.max(event.maxParticipants - committedCount, 0);
+  const quorumRemaining = Math.max(event.minQuorum - committedCount, 0);
 
-  return serializeEventForViewer(event, {
+  return {
+    committedCount,
+    minQuorum: event.minQuorum,
+    maxParticipants: event.maxParticipants,
+    openSpots,
+    quorumRemaining,
+    isFull: openSpots === 0
+  };
+}
+
+function serializeWithInterest(repositories, event, viewerId) {
+  const interests = repositories.eventInterests.listByEvent(event.id);
+  const interestedUserIds = eligibleLinkViewerIds(interests);
+
+  return {
+    ...serializeEventForViewer(event, {
     userId: viewerId,
     interestedUserIds
-  });
+    }),
+    capacity: summarizeCapacity(event, interests)
+  };
 }
 
 export function createEventBrowsingService({ repositories }) {
