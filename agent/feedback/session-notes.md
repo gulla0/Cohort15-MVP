@@ -257,3 +257,26 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-007-cohort-card-decision-support-local-time/*`
 - `agent/knowledge/index.md`
+
+### 2026-06-13
+
+User Feedback:
+- Initiate an issue resolver and work on the next available issue.
+
+Issue Mapping:
+- Existing ISSUE-008 resolved.
+
+Reasoning:
+- ISSUE-008 was the first issue still marked `not_started` in the feedback index.
+- The simplest fitting implementation is server-side query filtering through `/cohorts?q=`, keeping the dependency-free app model and preserving shareable URLs.
+- Search is limited to public-safe cohort fields and runs after public status filtering, so private meeting links and non-public statuses are not exposed.
+
+Artifacts Updated:
+- `src/services/event-browsing.mjs`
+- `src/server/app.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/styles.css`
+- `tests/event-browsing.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-008-cohort-feed-search/*`
+- `agent/knowledge/index.md`

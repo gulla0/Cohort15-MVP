@@ -25,6 +25,42 @@ function summarizeCapacity(event, interests) {
   };
 }
 
+function normalizeSearchTerm(value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function searchWords(value) {
+  return normalizeSearchTerm(value)
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function publicSearchText(event) {
+  return [
+    event.title,
+    event.description,
+    event.category,
+    event.topic,
+    event.targetAudience,
+    event.targetSkillLevel,
+    event.additionalDetails
+  ]
+    .filter((value) => typeof value === 'string' && value.length > 0)
+    .join(' ')
+    .toLowerCase();
+}
+
+function matchesSearch(event, query) {
+  const words = searchWords(query);
+
+  if (words.length === 0) {
+    return true;
+  }
+
+  const haystack = publicSearchText(event);
+  return words.every((word) => haystack.includes(word));
+}
+
 function serializeWithInterest(repositories, event, viewerId) {
   const interests = repositories.eventInterests.listByEvent(event.id);
   const interestedUserIds = eligibleLinkViewerIds(interests);
@@ -39,10 +75,11 @@ function serializeWithInterest(repositories, event, viewerId) {
 }
 
 export function createEventBrowsingService({ repositories }) {
-  function listPublicEvents() {
+  function listPublicEvents(options = {}) {
     return repositories.events
       .list()
       .filter((event) => PUBLIC_FEED_STATUSES.has(event.status))
+      .filter((event) => matchesSearch(event, options.search))
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .map((event) => serializeWithInterest(repositories, event));
   }

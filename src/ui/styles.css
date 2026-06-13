@@ -133,6 +133,18 @@ article p {
   gap: 16px;
 }
 
+.search-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #d7d0c4;
+  border-radius: 8px;
+  background: #fffdf8;
+}
+
 .event-card,
 .event-detail,
 .dashboard-row {
@@ -449,6 +461,10 @@ textarea {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-panel {
     grid-template-columns: 1fr;
   }
 }

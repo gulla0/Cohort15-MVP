@@ -85,6 +85,26 @@ function emptyFeed() {
   </section>`;
 }
 
+function noSearchResults(search) {
+  return `<section class="notice">
+    <h2>No matching cohorts</h2>
+    <p>No public cohorts match "${escapeHtml(search)}". Try a title, topic, audience, category, or skill word.</p>
+  </section>`;
+}
+
+function searchPanel(search) {
+  return `<form method="get" action="/cohorts" class="search-panel" role="search">
+    <label>
+      Search cohorts
+      <input type="search" name="q" value="${escapeHtml(search)}" placeholder="Try topic, audience, category, or skill">
+    </label>
+    <div class="button-row">
+      <button type="submit">Search</button>
+      ${search ? '<a class="button-link secondary" href="/cohorts">Clear</a>' : ''}
+    </div>
+  </form>`;
+}
+
 function capacityLabel(event) {
   if (event.capacity.isFull) {
     return 'Full';
@@ -254,13 +274,18 @@ function eventDetail({ event, users, viewerId, interestResult, interestErrors })
   </section>`;
 }
 
-export function renderCohortFeedPage({ events }) {
+export function renderCohortFeedPage({ events, search = '' }) {
+  const normalizedSearch = String(search ?? '').trim();
+  const results = events.length === 0
+    ? (normalizedSearch ? noSearchResults(normalizedSearch) : emptyFeed())
+    : `<section class="event-list">${events.map(eventCard).join('')}</section>`;
+
   return pageShell({
     title: 'Cohorts',
     eyebrow: 'Public feed',
     heading: 'Cohorts',
     lede: 'Browse open and active online cohorts. Use 1 token to show interest; tokens are returned if quorum is not met.',
-    body: events.length === 0 ? emptyFeed() : `<section class="event-list">${events.map(eventCard).join('')}</section>`
+    body: `${searchPanel(normalizedSearch)}${results}`
   });
 }
 

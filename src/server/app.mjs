@@ -101,8 +101,10 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/cohorts' && (req.method ?? 'GET') === 'GET') {
+      const search = url.searchParams.get('q') ?? '';
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortFeedPage({
-        events: eventBrowsingService.listPublicEvents()
+        events: eventBrowsingService.listPublicEvents({ search }),
+        search
       }));
       return;
     }

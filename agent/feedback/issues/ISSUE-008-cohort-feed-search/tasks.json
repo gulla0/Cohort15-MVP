@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-008-T01",
       "title": "Add public cohort word search",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Implement a simple word-based search on the public cohorts page while preserving current visibility rules.",
       "inputs": [
@@ -62,7 +62,8 @@
         "cohort feed route",
         "public visibility rules"
       ],
-      "stop_condition": "Stop when public cohort search works and verification passes."
+      "stop_condition": "Stop when public cohort search works and verification passes.",
+      "evidence": "2026-06-13: Added server-side `/cohorts?q=` word search across public-safe cohort fields, rendered search/clear/no-results UI, preserved open/active and private-link visibility rules, and verified with focused event browsing tests plus `npm run check`."
     }
   ]
 }

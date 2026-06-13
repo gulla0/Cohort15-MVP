@@ -119,6 +119,75 @@ test('event browsing summarizes capacity from active and consumed interests', ()
   });
 });
 
+test('event browsing filters public cohorts by case-insensitive words in public fields', () => {
+  const state = createDemoRepositories();
+  state.repositories.events.save(eventFixture({
+    id: 'event-open-source',
+    title: 'Open Source Pairing Cohort',
+    topic: 'Open source',
+    targetAudience: 'Developers looking for contribution reps.',
+    targetSkillLevel: 'intermediate'
+  }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-design',
+    title: 'Design Critique Studio',
+    description: 'Practice product critique rituals.',
+    category: 'practice',
+    topic: 'Product design',
+    targetAudience: 'Designers preparing for portfolio reviews.',
+    targetSkillLevel: 'beginner'
+  }));
+
+  const service = createEventBrowsingService(state);
+
+  assert.deepEqual(
+    service.listPublicEvents({ search: 'OPEN intermediate' }).map((event) => event.id),
+    ['event-open-source']
+  );
+  assert.deepEqual(
+    service.listPublicEvents({ search: 'portfolio designers' }).map((event) => event.id),
+    ['event-design']
+  );
+  assert.deepEqual(
+    service.listPublicEvents({ search: 'does-not-exist' }).map((event) => event.id),
+    []
+  );
+});
+
+test('event browsing search preserves public visibility and link hiding', () => {
+  const state = createDemoRepositories();
+  state.repositories.events.save(eventFixture({
+    id: 'event-open',
+    status: 'open',
+    lockedEventLink: 'https://meet.google.com/private-open-source'
+  }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-expired',
+    status: 'expired',
+    title: 'Expired Open Source Cohort'
+  }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-private-link-only',
+    title: 'Frontend Practice',
+    description: 'Ship small interface exercises with feedback.',
+    category: 'practice',
+    topic: 'Frontend',
+    targetAudience: 'Builders improving interface craft.',
+    targetSkillLevel: 'beginner',
+    additionalDetails: undefined,
+    lockedEventLink: 'https://zoom.us/j/private-search-only'
+  }));
+
+  const service = createEventBrowsingService(state);
+  const byPublicField = service.listPublicEvents({ search: 'open source' });
+  const byPrivateLink = service.listPublicEvents({ search: 'private-search-only' });
+
+  assert.deepEqual(byPublicField.map((event) => event.id), ['event-open']);
+  assert.equal(byPublicField[0].lockedEventLink, undefined);
+  assert.equal(byPublicField[0].linkVisibility, 'locked_until_quorum');
+  assert.deepEqual(byPrivateLink.map((event) => event.id), []);
+});
+
 test('event detail reveals active private links only to authorized users', () => {
   const state = createDemoRepositories();
   state.repositories.events.save(eventFixture({ id: 'event-active', status: 'active' }));
@@ -169,6 +238,34 @@ test('cohort feed and detail routes render public fields without leaking locked 
   assert.match(detail.body, /tokens are returned/);
   assert.match(detail.body, /src="\/assets\/default-cohort\.png"/);
   assert.doesNotMatch(detail.body, /private-open-source/);
+});
+
+test('cohort feed route renders search results and no-results state', async () => {
+  const state = createDemoRepositories();
+  const handler = createRequestHandler(state);
+  state.repositories.events.save(eventFixture({ id: 'event-open', status: 'open' }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-design',
+    title: 'Design Critique Studio',
+    description: 'Practice product critique rituals.',
+    category: 'practice',
+    topic: 'Product design',
+    targetAudience: 'Designers preparing for portfolio reviews.',
+    targetSkillLevel: 'beginner',
+    status: 'open'
+  }));
+
+  const filtered = await invoke(handler, { url: '/cohorts?q=designers', method: 'GET' });
+  assert.equal(filtered.status, 200);
+  assert.match(filtered.body, /Search cohorts/);
+  assert.match(filtered.body, /value="designers"/);
+  assert.match(filtered.body, /Design Critique Studio/);
+  assert.doesNotMatch(filtered.body, /Open Source Pairing Cohort/);
+
+  const noResults = await invoke(handler, { url: '/cohorts?q=python', method: 'GET' });
+  assert.equal(noResults.status, 200);
+  assert.match(noResults.body, /No matching cohorts/);
+  assert.match(noResults.body, /No public cohorts match "python"/);
 });
 
 test('active cohort detail route reveals link for creator viewer', async () => {
