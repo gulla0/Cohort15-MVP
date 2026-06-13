@@ -30,7 +30,7 @@
       ],
       "acceptance_criteria": [
         "A newly created cohort detail page defaults the interest form to a valid participant, not the creator.",
-        "Submitting the default interest form records interest for the demo participant when capacity and tokens allow.",
+        "Submitting the default interest form records interest for the demo participant when capacity and credits allow.",
         "If quorum is met, the participant sees the unlocked private link.",
         "Creator-only interest rejection remains tested."
       ],
@@ -56,10 +56,10 @@
     },
     {
       "id": "ISSUE-001-T02",
-      "title": "Simplify token wording and refund messaging",
+      "title": "Simplify credit wording and refund messaging",
       "status": "done",
       "dependencies": [],
-      "objective": "Replace internal staking and ledger wording with simple user-facing token copy across MVP pages.",
+      "objective": "Replace internal staking and ledger wording with simple user-facing credit copy across MVP pages.",
       "inputs": [
         "agent/feedback/issues/ISSUE-001-mvp-flow-ux-repair/issue.md",
         "src/ui/home.mjs",
@@ -78,14 +78,14 @@
       "authority": [
         "Keep ledger terms in backend code and tests where they describe implementation semantics.",
         "Use simple product language in visible UI.",
-        "Add refund reassurance without implying tokens return after quorum succeeds."
+        "Add refund reassurance without implying credits return after quorum succeeds."
       ],
       "acceptance_criteria": [
-        "Create flow says creators use 2 tokens to start a cohort.",
-        "Interest flow says participants use 1 token to show interest.",
-        "A visible banner or nearby copy says tokens are returned if quorum is not met.",
+        "Create flow says creators use 2 credits to start a cohort.",
+        "Interest flow says participants use 1 credit to show interest.",
+        "A visible banner or nearby copy says credits are returned if quorum is not met.",
         "User-facing pages no longer rely on 'stake' terminology.",
-        "Dashboard copy distinguishes available, in use, used, and returned tokens in plain language."
+        "Dashboard copy distinguishes available, in use, used, and returned credits in plain language."
       ],
       "verification": [
         "Search rendered UI source for remaining user-facing staking terms.",
@@ -102,10 +102,10 @@
       "area": "copy",
       "risk": "low",
       "shared_dependencies": [
-        "token ledger display semantics"
+        "credit ledger display semantics"
       ],
-      "stop_condition": "Stop once visible MVP copy uses simple token language and tests reflect the new wording.",
-      "evidence": "2026-05-30 08:51 EDT: UI and README now use plain token language, refund reassurance is shown on create/feed/detail, and dashboard summaries use available/in use/used/returned wording."
+      "stop_condition": "Stop once visible MVP copy uses simple credit language and tests reflect the new wording.",
+      "evidence": "2026-05-30 08:51 EDT: UI and README now use plain credit language, refund reassurance is shown on create/feed/detail, and dashboard summaries use available/in use/used/returned wording."
     },
     {
       "id": "ISSUE-001-T03",

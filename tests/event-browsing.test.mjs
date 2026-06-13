@@ -86,7 +86,7 @@ test('event browsing summarizes capacity from active and consumed interests', ()
     eventId: 'event-capacity',
     userId: 'user-participant',
     status: 'active',
-    tokensHeld: 1,
+    creditsHeld: 1,
     createdAt: baseTime
   });
   state.repositories.eventInterests.save({
@@ -94,7 +94,7 @@ test('event browsing summarizes capacity from active and consumed interests', ()
     eventId: 'event-capacity',
     userId: 'user-committed',
     status: 'consumed',
-    tokensHeld: 1,
+    creditsHeld: 1,
     createdAt: baseTime
   });
   state.repositories.eventInterests.save({
@@ -102,7 +102,7 @@ test('event browsing summarizes capacity from active and consumed interests', ()
     eventId: 'event-capacity',
     userId: 'user-refunded',
     status: 'refunded',
-    tokensHeld: 1,
+    creditsHeld: 1,
     createdAt: baseTime
   });
 
@@ -196,7 +196,7 @@ test('event detail reveals active private links only to authorized users', () =>
     eventId: 'event-active',
     userId: 'user-participant',
     status: 'active',
-    tokensHeld: 1,
+    creditsHeld: 1,
     createdAt: baseTime
   });
 
@@ -235,7 +235,7 @@ test('cohort feed and detail routes render public fields without leaking locked 
   const detail = await invoke(handler, { url: '/cohorts/event-open', method: 'GET' });
   assert.equal(detail.status, 200);
   assert.match(detail.body, /Private link locked/);
-  assert.match(detail.body, /tokens are returned/);
+  assert.match(detail.body, /credits are returned/);
   assert.match(detail.body, /src="\/assets\/default-cohort\.png"/);
   assert.doesNotMatch(detail.body, /private-open-source/);
 });

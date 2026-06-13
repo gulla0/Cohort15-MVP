@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { CREATE_EVENT_TOKEN_COST, SHOW_INTEREST_TOKEN_COST } from '../domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST, SHOW_INTEREST_CREDIT_COST } from '../domain/constants.mjs';
 import { validateEventInterest } from '../domain/validation.mjs';
 
 function activeOrCommittedInterests(interests) {
@@ -34,10 +34,10 @@ export function createShowInterestService({ repositories, ledger, options = {} }
       updatedAt: activatedAt
     });
 
-    ledger.consumeHeld(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+    ledger.consumeHeld(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
     for (const interest of activeInterests) {
-      ledger.consumeHeld(interest.userId, event.id, SHOW_INTEREST_TOKEN_COST);
+      ledger.consumeHeld(interest.userId, event.id, SHOW_INTEREST_CREDIT_COST);
       repositories.eventInterests.save({
         ...interest,
         status: 'consumed'
@@ -87,13 +87,13 @@ export function createShowInterestService({ repositories, ledger, options = {} }
       id: createInterestId(),
       eventId: event.id,
       userId: user.id,
-      tokensHeld: SHOW_INTEREST_TOKEN_COST,
+      creditsHeld: SHOW_INTEREST_CREDIT_COST,
       status: 'active',
       createdAt: now()
     };
 
     assertNoValidationErrors(validateEventInterest(interest));
-    ledger.hold(user.id, event.id, SHOW_INTEREST_TOKEN_COST);
+    ledger.hold(user.id, event.id, SHOW_INTEREST_CREDIT_COST);
     const savedInterest = repositories.eventInterests.save(interest);
     const quorumResult = activateIfQuorumMet(event);
 
@@ -101,7 +101,7 @@ export function createShowInterestService({ repositories, ledger, options = {} }
       event: quorumResult.event,
       interest: repositories.eventInterests.findById(savedInterest.id),
       participant: user,
-      tokenHoldAmount: SHOW_INTEREST_TOKEN_COST,
+      creditHoldAmount: SHOW_INTEREST_CREDIT_COST,
       activated: quorumResult.activated,
       balance: ledger.balanceForUser(user.id)
     };

@@ -2,7 +2,7 @@ import {
   assertValidEvent,
   validateEventInterest,
   validateSocialPost,
-  validateTokenTransaction
+  validateCreditTransaction
 } from '../domain/validation.mjs';
 import { createInMemoryStore, readRecord, readRecords, writeRecord } from './store.mjs';
 
@@ -110,24 +110,24 @@ export function createRepositories(seed = {}, options = {}) {
         return readRecords(store.eventInterests).filter((interest) => interest.userId === userId);
       }
     },
-    tokenTransactions: {
+    creditTransactions: {
       append(transaction) {
-        assertValidation(validateTokenTransaction(transaction));
-        if (store.tokenTransactions.has(transaction.id)) {
-          throw new Error(`Token transaction already exists: ${transaction.id}`);
+        assertValidation(validateCreditTransaction(transaction));
+        if (store.creditTransactions.has(transaction.id)) {
+          throw new Error(`Credit transaction already exists: ${transaction.id}`);
         }
-        const savedTransaction = writeRecord(store.tokenTransactions, transaction);
+        const savedTransaction = writeRecord(store.creditTransactions, transaction);
         persist();
         return savedTransaction;
       },
       listByUser(userId) {
-        return readRecords(store.tokenTransactions).filter((transaction) => transaction.userId === userId);
+        return readRecords(store.creditTransactions).filter((transaction) => transaction.userId === userId);
       },
       listByEvent(eventId) {
-        return readRecords(store.tokenTransactions).filter((transaction) => transaction.eventId === eventId);
+        return readRecords(store.creditTransactions).filter((transaction) => transaction.eventId === eventId);
       },
       list() {
-        return readRecords(store.tokenTransactions);
+        return readRecords(store.creditTransactions);
       }
     },
     socialPosts: {

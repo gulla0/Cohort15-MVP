@@ -8,7 +8,7 @@ Repair the MVP frontend so creators and participants can complete the core creat
 
 - ISSUE-001-T01 Repair participant interest defaults and success path
   - Depends on: none
-- ISSUE-001-T02 Simplify token wording and refund messaging
+- ISSUE-001-T02 Simplify credit wording and refund messaging
   - Depends on: none
 - ISSUE-001-T03 Enforce first meeting after quorum window
   - Depends on: none

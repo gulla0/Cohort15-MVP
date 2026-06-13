@@ -176,7 +176,7 @@ function linkPanel(event) {
 
   return `<section class="notice">
     <h2>Private link locked</h2>
-    <p>Location unlocks when quorum is met. If quorum is not met by the deadline, all tokens are returned.</p>
+    <p>Location unlocks when quorum is met. If quorum is not met by the deadline, all credits are returned.</p>
   </section>`;
 }
 
@@ -204,7 +204,7 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
       <p>Interest was not recorded.</p>
       <ul>${interestErrors.map((error) => `<li>${escapeHtml(error)}</li>`).join('')}</ul>
     </div>` : ''}
-    ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} used ${escapeHtml(interestResult.tokenHoldAmount)} token to show interest. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'If quorum is not met, this token is returned.'}</p>
+    ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} used ${escapeHtml(interestResult.creditHoldAmount)} credit to show interest. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'If quorum is not met, this credit is returned.'}</p>
       <p><a href="/dashboard?participantUserId=${encodeURIComponent(interestResult.participant.id)}">Open dashboard</a></p>` : ''}
     ${event.status === 'open' ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
       <label>
@@ -213,7 +213,7 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
           ${options}
         </select>
       </label>
-      <button type="submit">Use 1 token</button>
+      <button type="submit">Use 1 credit</button>
     </form>` : ''}
   </section>`;
 }
@@ -284,7 +284,7 @@ export function renderCohortFeedPage({ events, search = '' }) {
     title: 'Cohorts',
     eyebrow: 'Public feed',
     heading: 'Cohorts',
-    lede: 'Browse open and active online cohorts. Use 1 token to show interest; tokens are returned if quorum is not met.',
+    lede: 'Browse open and active online cohorts. Use 1 credit to show interest; credits are returned if quorum is not met.',
     body: `${searchPanel(normalizedSearch)}${results}`
   });
 }

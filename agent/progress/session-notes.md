@@ -84,7 +84,7 @@ Read:
 Decided:
 - Classified the user request as approved setup/bootstrap work because the user explicitly asked to activate the setup manager and add the next atomic task graph set.
 - Preserved T001-T010 as the completed MVP ledger and added T011-T015 as the next post-MVP task wave.
-- Ordered the next wave as durable persistence first, then auth, then token purchases/social publishing/lifecycle controls.
+- Ordered the next wave as durable persistence first, then auth, then credit purchases/social publishing/lifecycle controls.
 - Updated the plan, atomic task graph, task ledger, readable task status, knowledge index, and progress logs.
 
 Assumptions Made:
@@ -109,7 +109,7 @@ Read:
 Decided:
 - Classified the user request as approved main implementation work and selected T010 as the only remaining unblocked task.
 - Added one focused MVP verification test file covering both handoff-critical paths: creation through social outbox, feed/detail privacy, quorum activation, dashboards, and expiry/refund processing.
-- Expanded README handoff documentation with demo users, local flow steps, manual expiry trigger, local social outbox behavior, MVP boundary, post-MVP token packages, and known assumptions.
+- Expanded README handoff documentation with demo users, local flow steps, manual expiry trigger, local social outbox behavior, MVP boundary, post-MVP credit packages, and known assumptions.
 - Marked T010 done after full verification passed.
 
 Assumptions Made:
@@ -117,7 +117,7 @@ Assumptions Made:
 - The browser policy block during feed/unlock smoke does not block T010 because the new automated verification covers the feed, detail, quorum unlock, dashboard, and expiry/refund behavior end to end.
 
 Next Recommended Step:
-- Hand the MVP to user testing or begin post-MVP planning for real auth, durable persistence, USD token purchases, and external social posting.
+- Hand the MVP to user testing or begin post-MVP planning for real auth, durable persistence, USD credit purchases, and external social posting.
 
 ### 2026-05-30 00:59 EDT
 
@@ -136,7 +136,7 @@ Decided:
 - Classified the user request as approved main implementation work and selected the remaining unblocked implementation wave: T007, T008, and T009.
 - Added expiry/refund processing for overdue open cohorts, with a dev/admin POST trigger and refund transactions rather than balance mutation.
 - Added local social promotion outbox generation on cohort creation, keeping real social APIs post-MVP and excluding private links from post text.
-- Added creator and participant dashboards with MVP token summaries and private-link visibility routed through the existing authorization serializer.
+- Added creator and participant dashboards with MVP credit summaries and private-link visibility routed through the existing authorization serializer.
 
 Assumptions Made:
 - The admin expiry route is a local/dev trigger for MVP verification, not a production scheduler or auth model.
@@ -160,7 +160,7 @@ Read:
 - `src/domain/constants.mjs`
 - `src/domain/validation.mjs`
 - `src/persistence/repositories.mjs`
-- `src/persistence/token-ledger.mjs`
+- `src/persistence/credit-ledger.mjs`
 - `src/persistence/seeds.mjs`
 - `src/services/create-cohort.mjs`
 - `src/services/event-browsing.mjs`
@@ -171,7 +171,7 @@ Read:
 
 Decided:
 - Selected T006 as the next wave because it is the critical-path task after T005 and unlocks expiry/refund plus dashboards.
-- Added a dedicated show-interest service that validates open cohorts, existing participants, duplicate active/consumed interest, participant caps, and token availability before recording the interest hold.
+- Added a dedicated show-interest service that validates open cohorts, existing participants, duplicate active/consumed interest, participant caps, and credit availability before recording the interest hold.
 - Kept quorum activation in the interest service: when active interest count reaches `minQuorum`, the event becomes active, creator and participant holds are consumed, and active interests become consumed.
 - Updated event browsing so consumed participants remain authorized to view active private links.
 
@@ -212,7 +212,7 @@ Assumptions Made:
 - The public feed should list only `open` and `active` events; expired/cancelled/completed cohorts are not public discovery items for this MVP surface.
 
 Next Recommended Step:
-- Execute T006: build show-interest and quorum unlock flow on top of the new detail page and existing token ledger.
+- Execute T006: build show-interest and quorum unlock flow on top of the new detail page and existing credit ledger.
 
 ### 2026-05-30 00:33 EDT
 
@@ -228,7 +228,7 @@ Read:
 - `src/domain/constants.mjs`
 - `src/domain/validation.mjs`
 - `src/persistence/repositories.mjs`
-- `src/persistence/token-ledger.mjs`
+- `src/persistence/credit-ledger.mjs`
 - `src/persistence/seeds.mjs`
 - `src/server/app.mjs`
 - `src/ui/home.mjs`
@@ -237,7 +237,7 @@ Decided:
 - Classified the user request as approved main implementation work.
 - Selected T004 as the next wave because T003 was done and T004 was the critical-path unblocked task.
 - Implemented create cohort behavior through a small service layer and demo-backed HTTP form route.
-- Kept the route scoped to creation, validation, and creator token holds; feed/detail, participant interest, quorum, and social outbox remain separate tasks.
+- Kept the route scoped to creation, validation, and creator credit holds; feed/detail, participant interest, quorum, and social outbox remain separate tasks.
 
 Assumptions Made:
 - Demo seed users are the temporary auth path for this wave because regular auth provider remains unspecified.
@@ -268,14 +268,14 @@ Decided:
 - Classified the user request as approved main implementation work.
 - Selected T003 as the next wave because T001 and T002 were done and T003 was the only unblocked critical-path task.
 - Kept persistence dependency-free by adding in-memory repositories plus explicit schema metadata instead of introducing a database package.
-- Implemented token balances as values derived from auditable grant, hold, consume, refund, and future purchase transaction records.
+- Implemented credit balances as values derived from auditable grant, hold, consume, refund, and future purchase transaction records.
 
 Assumptions Made:
 - MVP persistence can start as in-memory storage because the selected scaffold is dependency-free and later database migration can follow the schema metadata.
-- Token transaction amounts are positive; ledger semantics derive held, consumed, refunded, and available balances by transaction type.
+- Credit transaction amounts are positive; ledger semantics derive held, consumed, refunded, and available balances by transaction type.
 
 Next Recommended Step:
-- Execute T004: build the create cohort flow using the repository and token ledger APIs from T003.
+- Execute T004: build the create cohort flow using the repository and credit ledger APIs from T003.
 
 ### 2026-05-30 00:18 EDT
 
@@ -300,7 +300,7 @@ Assumptions Made:
 - Locked links should remain hidden for open events and should be visible after activation only to the creator or viewers already associated with interest.
 
 Next Recommended Step:
-- Execute T003: add persistence schema/repositories and token ledger primitives using the domain validators from T002.
+- Execute T003: add persistence schema/repositories and credit ledger primitives using the domain validators from T002.
 
 ### 2026-05-30 00:13 EDT
 
@@ -329,13 +329,13 @@ Next Recommended Step:
 ### 2026-05-30 00:02 EDT
 
 Read:
-- User clarification that this is discussion and that token sales with USD plus event advertising on socials can come next if urgent, while everything else needs to be built.
-- Existing `plan.md`, `tasks.json`, `atomic-task-graph.md`, and `agent/knowledge/index.md` references to MVP, tokens, and social promotion.
+- User clarification that this is discussion and that credit sales with USD plus event advertising on socials can come next if urgent, while everything else needs to be built.
+- Existing `plan.md`, `tasks.json`, `atomic-task-graph.md`, and `agent/knowledge/index.md` references to MVP, credits, and social promotion.
 
 Decided:
-- Clarified MVP scope: build core cohort creation, discovery, interest, quorum, expiry/refund, private link visibility, dashboards, token ledger, admin/demo grants, and social outbox.
-- Moved USD token purchases and real external social posting to post-MVP / urgent-next.
-- Recorded initial post-MVP pricing assumptions: `$6` for 6 tokens and `$12` for 14 tokens.
+- Clarified MVP scope: build core cohort creation, discovery, interest, quorum, expiry/refund, private link visibility, dashboards, credit ledger, admin/demo grants, and social outbox.
+- Moved USD credit purchases and real external social posting to post-MVP / urgent-next.
+- Recorded initial post-MVP pricing assumptions: `$6` for 6 credits and `$12` for 14 credits.
 
 Assumptions Made:
 - MVP should still include a social outbox so real posting can plug in later.
@@ -358,13 +358,13 @@ Read:
 
 Decided:
 - Classified the user request as setup/bootstrap because the repo contained planning placeholders and a Cohort15 MVP spec but no product implementation.
-- Initialized a 10-task MVP graph covering scaffold, domain validation, persistence/token ledger, create flow, feed/detail visibility, interest/quorum, expiry/refunds, social outbox, dashboards, and final verification.
+- Initialized a 10-task MVP graph covering scaffold, domain validation, persistence/credit ledger, create flow, feed/detail visibility, interest/quorum, expiry/refunds, social outbox, dashboards, and final verification.
 - Kept setup limited to planning and tracker artifacts per setup manager rules; product code implementation should begin with T001.
 
 Assumptions Made:
 - The first implementation task may choose a pragmatic web stack because no stack is specified.
 - Real social posting is deferred until official channels and credentials are provided; initial implementation should use a local/mock social outbox.
-- Seed/demo token grants are acceptable until a product token funding model is specified.
+- Seed/demo credit grants are acceptable until a product credit funding model is specified.
 - Auth provider and deployment target are open implementation questions, not setup blockers.
 
 Next Recommended Step:

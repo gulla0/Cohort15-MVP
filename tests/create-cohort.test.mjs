@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CREATE_EVENT_TOKEN_COST, DEFAULT_COHORT_IMAGE_PATH } from '../src/domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST, DEFAULT_COHORT_IMAGE_PATH } from '../src/domain/constants.mjs';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
 import { createCohortService } from '../src/services/create-cohort.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
@@ -70,7 +70,7 @@ async function invoke(handler, request) {
   };
 }
 
-test('create cohort holds 2 creator tokens and saves an open event with default expiry', () => {
+test('create cohort holds 2 creator credits and saves an open event with default expiry', () => {
   const { repositories, ledger, service } = createServiceFixture();
 
   const result = service.create(validInput());
@@ -82,11 +82,11 @@ test('create cohort holds 2 creator tokens and saves an open event with default 
   assert.equal(result.event.expiresAt.toISOString(), '2026-06-15T12:00:00.000Z');
   assert.equal(repositories.events.findById('event-created').title, 'Beginner TypeScript Build Cohort');
 
-  const transactions = repositories.tokenTransactions.listByEvent('event-created');
+  const transactions = repositories.creditTransactions.listByEvent('event-created');
   assert.equal(transactions.length, 1);
   assert.equal(transactions[0].type, 'hold');
-  assert.equal(transactions[0].amount, CREATE_EVENT_TOKEN_COST);
-  assert.equal(ledger.balanceForUser('user-creator').held, CREATE_EVENT_TOKEN_COST);
+  assert.equal(transactions[0].amount, CREATE_EVENT_CREDIT_COST);
+  assert.equal(ledger.balanceForUser('user-creator').held, CREATE_EVENT_CREDIT_COST);
 });
 
 test('create cohort preserves a custom event image URL', () => {
@@ -109,13 +109,13 @@ test('create cohort supports daily recurring cohorts', () => {
   assert.equal(result.event.meetingCount, 5);
 });
 
-test('create cohort rejects creators with fewer than 2 available tokens', () => {
+test('create cohort rejects creators with fewer than 2 available credits', () => {
   const { repositories, ledger, service } = createServiceFixture();
   ledger.hold('user-creator', 'existing-event-1', 2);
   ledger.hold('user-creator', 'existing-event-2', 2);
   ledger.hold('user-creator', 'existing-event-3', 1);
 
-  assert.throws(() => service.create(validInput()), /Insufficient available tokens/);
+  assert.throws(() => service.create(validInput()), /Insufficient available credits/);
   assert.equal(repositories.events.findById('event-created'), undefined);
 });
 

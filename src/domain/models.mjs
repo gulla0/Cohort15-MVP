@@ -5,7 +5,7 @@
  * @typedef {'none' | 'weekly' | 'biweekly' | 'monthly'} Recurrence
  * @typedef {'pending' | 'posted' | 'failed'} SocialPostStatus
  * @typedef {'active' | 'refunded' | 'consumed'} EventInterestStatus
- * @typedef {'hold' | 'consume' | 'refund' | 'purchase' | 'grant'} TokenTransactionType
+ * @typedef {'hold' | 'consume' | 'refund' | 'purchase' | 'grant'} CreditTransactionType
  * @typedef {'x' | 'linkedin' | 'discord' | 'telegram'} SocialPlatform
  */
 
@@ -40,18 +40,18 @@
  * @property {string} id
  * @property {string} eventId
  * @property {string} userId
- * @property {number} tokensHeld
+ * @property {number} creditsHeld
  * @property {EventInterestStatus} status
  * @property {Date} createdAt
  */
 
 /**
- * @typedef {object} TokenTransaction
+ * @typedef {object} CreditTransaction
  * @property {string} id
  * @property {string} userId
  * @property {string | undefined} [eventId]
  * @property {number} amount
- * @property {TokenTransactionType} type
+ * @property {CreditTransactionType} type
  * @property {Date} createdAt
  */
 

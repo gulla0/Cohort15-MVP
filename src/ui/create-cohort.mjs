@@ -52,7 +52,7 @@ function successNotice(result) {
 
   return `<section class="notice success" aria-live="polite">
     <h2>Cohort created</h2>
-    <p>${escapeHtml(result.event.title)} is open. You used ${result.tokenHoldAmount} creator tokens to start it.</p>
+    <p>${escapeHtml(result.event.title)} is open. You used ${result.creditHoldAmount} creator credits to start it.</p>
     <p>Private link status: locked until quorum.</p>
     <p class="button-row">
       <a class="button-link" href="/cohorts/${encodeURIComponent(result.event.id)}">View cohort</a>
@@ -88,7 +88,7 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">Creator flow</p>
         <h1 id="page-title">Create cohort</h1>
-        <p class="lede">Use 2 tokens to start a cohort. If quorum is not met by the two-week deadline, all tokens are returned.</p>
+        <p class="lede">Use 2 credits to start a cohort. If quorum is not met by the two-week deadline, all credits are returned.</p>
       </section>
 
       ${successNotice(result)}

@@ -5,10 +5,10 @@
   "tasks": [
     {
       "id": "ISSUE-004-T01",
-      "title": "Remove repeated dashboard token details",
+      "title": "Remove repeated dashboard credit details",
       "status": "done",
       "dependencies": [],
-      "objective": "Audit dashboard content and remove repeated token information where row-level copy duplicates the balance summary.",
+      "objective": "Audit dashboard content and remove repeated credit information where row-level copy duplicates the balance summary.",
       "inputs": [
         "issue.md",
         "src/ui/dashboards.mjs",
@@ -26,7 +26,7 @@
       "acceptance_criteria": [
         "Dashboard balance information is not repeated in each cohort/event row when the summary already communicates it.",
         "Cohort/event rows still show enough status context to explain access, quorum, and participation state.",
-        "Tests no longer assert duplicated row-level token summaries."
+        "Tests no longer assert duplicated row-level credit summaries."
       ],
       "verification": [
         "npm test",
@@ -43,17 +43,17 @@
         "dashboard route rendering",
         "MVP verification assertions"
       ],
-      "stop_condition": "Stop when duplicated dashboard token copy is removed and tests cover the revised content.",
-      "evidence": "2026-05-30 10:06 EDT: Removed row-level creator/participant token copy from dashboard cards while preserving topic, schedule, quorum, status, and link context. Covered by dashboard and MVP verification tests."
+      "stop_condition": "Stop when duplicated dashboard credit copy is removed and tests cover the revised content.",
+      "evidence": "2026-05-30 10:06 EDT: Removed row-level creator/participant credit copy from dashboard cards while preserving topic, schedule, quorum, status, and link context. Covered by dashboard and MVP verification tests."
     },
     {
       "id": "ISSUE-004-T02",
-      "title": "Simplify dashboard token summary states",
+      "title": "Simplify dashboard credit summary states",
       "status": "done",
       "dependencies": [
         "ISSUE-004-T01"
       ],
-      "objective": "Update dashboard token summary presentation to show only Available, In use, and Used.",
+      "objective": "Update dashboard credit summary presentation to show only Available, In use, and Used.",
       "inputs": [
         "issue.md",
         "src/ui/dashboards.mjs",
@@ -69,9 +69,9 @@
         "Keep refund/returned values available in the ledger and services, but do not render a Returned dashboard summary section."
       ],
       "acceptance_criteria": [
-        "Dashboard token summary contains Available, In use, and Used sections.",
-        "Dashboard token summary does not render a Returned section.",
-        "Refunded token accounting remains unchanged in persistence and ledger tests."
+        "Dashboard credit summary contains Available, In use, and Used sections.",
+        "Dashboard credit summary does not render a Returned section.",
+        "Refunded credit accounting remains unchanged in persistence and ledger tests."
       ],
       "verification": [
         "npm test",
@@ -82,13 +82,13 @@
         "tests/dashboards.test.mjs",
         "tests/mvp-verification.test.mjs"
       ],
-      "area": "dashboard, token copy",
+      "area": "dashboard, credit copy",
       "risk": "low",
       "shared_dependencies": [
-        "token ledger balance shape"
+        "credit ledger balance shape"
       ],
       "stop_condition": "Stop when Returned is removed from dashboard presentation while internal refund semantics remain untouched.",
-      "evidence": "2026-05-30 10:06 EDT: Dashboard token panels now render only Available, In use, and Used. Ledger refund accounting remains unchanged and tests assert Returned is absent from dashboard output."
+      "evidence": "2026-05-30 10:06 EDT: Dashboard credit panels now render only Available, In use, and Used. Ledger refund accounting remains unchanged and tests assert Returned is absent from dashboard output."
     },
     {
       "id": "ISSUE-004-T03",
@@ -144,7 +144,7 @@
         "legacy dashboard route tests"
       ],
       "stop_condition": "Stop when dashboard wording is consistently updated without breaking legacy route compatibility.",
-      "evidence": "2026-05-30 10:06 EDT: Replaced Creator/Participant dashboard presentation labels with My Cohorts, My Events, My Cohorts & Events, Account Tokens, Created Cohorts, and Interested Cohorts. Legacy routes remain covered by tests."
+      "evidence": "2026-05-30 10:06 EDT: Replaced Creator/Participant dashboard presentation labels with My Cohorts, My Events, My Cohorts & Events, Account Credits, Created Cohorts, and Interested Cohorts. Legacy routes remain covered by tests."
     },
     {
       "id": "ISSUE-004-T04",
@@ -174,7 +174,7 @@
       ],
       "acceptance_criteria": [
         "The dashboard has a clear first-read hierarchy.",
-        "Users can distinguish token availability, active cohorts/schedules, created cohorts, interested cohorts, and available next actions.",
+        "Users can distinguish credit availability, active cohorts/schedules, created cohorts, interested cohorts, and available next actions.",
         "Empty states point to the appropriate next action without using internal role labels."
       ],
       "verification": [
@@ -195,7 +195,7 @@
         "responsive dashboard styles"
       ],
       "stop_condition": "Stop when the dashboard flow review changes are implemented and verified.",
-      "evidence": "2026-05-30 10:06 EDT: Combined dashboard now leads with account token state, then Active Cohorts & Schedule, then Created Cohorts and Interested Cohorts with clearer empty states and next-action copy. Verified by tests, lint, and browser smoke."
+      "evidence": "2026-05-30 10:06 EDT: Combined dashboard now leads with account credit state, then Active Cohorts & Schedule, then Created Cohorts and Interested Cohorts with clearer empty states and next-action copy. Verified by tests, lint, and browser smoke."
     }
   ]
 }

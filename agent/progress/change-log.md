@@ -46,9 +46,9 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added a dependency-free JSON file store that persists users, events, event interests, token transactions, and social posts behind the existing repository API.
+- Added a dependency-free JSON file store that persists users, events, event interests, credit transactions, and social posts behind the existing repository API.
 - Wired local durable mode through `COHORT15_PERSISTENCE_FILE`, leaving in-memory state as the default.
-- Updated demo seeding to create seed users and seed grant transactions only when missing, so restarts do not duplicate demo token grants.
+- Updated demo seeding to create seed users and seed grant transactions only when missing, so restarts do not duplicate demo credit grants.
 - Added persistence reload coverage proving event/outbox records and derived held balances survive repository reinitialization.
 - Documented local persistence configuration and reset behavior.
 
@@ -71,7 +71,7 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added post-MVP task wave T011-T015 for durable persistence, regular auth boundary, token purchase packages, external social publishing adapters, and cancellation/completion lifecycle controls.
+- Added post-MVP task wave T011-T015 for durable persistence, regular auth boundary, credit purchase packages, external social publishing adapters, and cancellation/completion lifecycle controls.
 - Updated the human-readable atomic graph and compact adjacency view.
 - Updated the plan with new post-MVP phases, urgent-next items, open implementation questions, and the new suggested first sprint.
 - Updated task status and knowledge routes so the next manager can start with T011 without rediscovering the current MVP state.
@@ -97,7 +97,7 @@ Files Changed:
 Summary:
 - Added full MVP verification coverage for the create/promote/privacy/quorum/dashboard success path.
 - Added full MVP verification coverage for the create/interest/expiry/refund path, including public discovery removal and private-link non-leakage.
-- Expanded README handoff documentation for local demo users, token grants, MVP flow, expiry trigger, local social outbox, post-MVP token packages, and known assumptions.
+- Expanded README handoff documentation for local demo users, credit grants, MVP flow, expiry trigger, local social outbox, post-MVP credit packages, and known assumptions.
 - Marked T010 done, completing the current main MVP task ledger.
 
 Verification:
@@ -130,7 +130,7 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added expiry processing for overdue open cohorts that marks events expired, refunds creator and participant holds through token transactions, and marks active interests refunded.
+- Added expiry processing for overdue open cohorts that marks events expired, refunds creator and participant holds through credit transactions, and marks active interests refunded.
 - Added `POST /admin/expire-cohorts` as a local/dev manual expiry trigger with optional ISO `now` parameter.
 - Added a social promotion outbox service and create-flow integration that creates pending local posts with public cohort details and no private links.
 - Added creator and participant dashboard services, routes, renderers, and responsive dashboard summary styling.
@@ -159,8 +159,8 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added a show-interest service that records 1-token participant holds, rejects duplicate active/consumed interest, rejects participant-cap overflow, and activates cohorts when quorum is met.
-- Added quorum activation behavior that consumes held creator and participant tokens, marks active interests consumed, and updates event status to active.
+- Added a show-interest service that records 1-credit participant holds, rejects duplicate active/consumed interest, rejects participant-cap overflow, and activates cohorts when quorum is met.
+- Added quorum activation behavior that consumes held creator and participant credits, marks active interests consumed, and updates event status to active.
 - Added a POST interest route and detail-page interest UI using the existing demo-user auth path.
 - Updated active-link authorization so consumed participants can still view unlocked private links.
 - Marked T006 done and unblocked T007 and T009.
@@ -216,9 +216,9 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added a create cohort service that builds valid open events, requires an existing creator, and records a 2-token creator hold through the ledger.
+- Added a create cohort service that builds valid open events, requires an existing creator, and records a 2-credit creator hold through the ledger.
 - Added a demo-backed `GET/POST /cohorts/new` route with form rendering, validation error surfacing, and success rendering that does not expose the private link.
-- Added create-flow tests for token holds, default expiry, insufficient-token rejection, validation failures, and UI response behavior.
+- Added create-flow tests for credit holds, default expiry, insufficient-credit rejection, validation failures, and UI response behavior.
 - Marked T004 done and unblocked T005 and T008.
 
 Verification:
@@ -227,13 +227,13 @@ Verification:
 ### 2026-05-30 00:28 EDT
 
 Task:
-- T003 Add persistence schema and token ledger primitives
+- T003 Add persistence schema and credit ledger primitives
 
 Files Changed:
 - `src/persistence/schema.mjs`
 - `src/persistence/store.mjs`
 - `src/persistence/repositories.mjs`
-- `src/persistence/token-ledger.mjs`
+- `src/persistence/credit-ledger.mjs`
 - `src/persistence/seeds.mjs`
 - `tests/persistence-ledger.test.mjs`
 - `tasks.json`
@@ -243,10 +243,10 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added explicit persistence schema metadata for users, events, event interests, token transactions, and social posts, including a future purchase source path.
+- Added explicit persistence schema metadata for users, events, event interests, credit transactions, and social posts, including a future purchase source path.
 - Added dependency-free in-memory repositories that validate domain records and enforce unique event interest per user/event.
-- Added token ledger primitives for grants, holds, consumes, refunds, insufficient-token checks, and derived available/held balances.
-- Added demo seed users with starting tokens issued through grant transactions.
+- Added credit ledger primitives for grants, holds, consumes, refunds, insufficient-credit checks, and derived available/held balances.
+- Added demo seed users with starting credits issued through grant transactions.
 - Marked T003 done and unblocked T004.
 
 Verification:
@@ -269,8 +269,8 @@ Files Changed:
 - `agent/knowledge/index.md`
 
 Summary:
-- Added spec-aligned domain constants for event categories, statuses, recurrence, social post status, interest status, token transaction type, and social platform values.
-- Added JSDoc domain model typedefs for Event, EventInterest, TokenTransaction, and SocialPost.
+- Added spec-aligned domain constants for event categories, statuses, recurrence, social post status, interest status, credit transaction type, and social platform values.
+- Added JSDoc domain model typedefs for Event, EventInterest, CreditTransaction, and SocialPost.
 - Added domain validators, 14-day default expiry calculation, event builder defaults, and a locked-link serializer that hides private links for open events.
 - Added focused domain tests for enum alignment, event validation, expiry defaults, link visibility, and related object validators.
 - Marked T002 done and unblocked T003.
@@ -324,9 +324,9 @@ Files Changed:
 - `agent/progress/change-log.md`
 
 Summary:
-- Updated setup artifacts so MVP includes all core cohort behavior, admin/demo token grants, and a social outbox.
-- Moved USD token sales and real external social posting to post-MVP / urgent-next.
-- Recorded initial token package assumptions: `$6` for 6 tokens and `$12` for 14 tokens.
+- Updated setup artifacts so MVP includes all core cohort behavior, admin/demo credit grants, and a social outbox.
+- Moved USD credit sales and real external social posting to post-MVP / urgent-next.
+- Recorded initial credit package assumptions: `$6` for 6 credits and `$12` for 14 credits.
 
 Verification:
 - `python3 -m json.tool tasks.json` passed.

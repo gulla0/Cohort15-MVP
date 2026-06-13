@@ -1,4 +1,4 @@
-import { CREATE_EVENT_TOKEN_COST } from '../domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST } from '../domain/constants.mjs';
 
 function expiredOpenEvents(events, now) {
   return events.filter((event) => (
@@ -35,11 +35,11 @@ export function createExpireCohortsService({ repositories, ledger, options = {} 
       };
     }
 
-    ledger.refundHeld(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+    ledger.refundHeld(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
     const refundedInterests = activeInterests(repositories.eventInterests.listByEvent(event.id))
       .map((interest) => {
-        ledger.refundHeld(interest.userId, event.id, interest.tokensHeld);
+        ledger.refundHeld(interest.userId, event.id, interest.creditsHeld);
         return repositories.eventInterests.save({
           ...interest,
           status: 'refunded'

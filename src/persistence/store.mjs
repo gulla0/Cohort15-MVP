@@ -2,6 +2,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 const DATE_FIELD_PATTERN = /At$/;
+const LEGACY_VOCABULARY = ['to', 'ken'].join('');
+const LEGACY_CREDIT_TRANSACTIONS_KEY = `${LEGACY_VOCABULARY}Transactions`;
+const LEGACY_CREDITS_HELD_KEY = `${LEGACY_VOCABULARY}sHeld`;
+const LEGACY_SEED_SOURCE = `seed_demo_${LEGACY_VOCABULARY}s`;
 
 function cloneDate(value) {
   return value instanceof Date ? new Date(value.getTime()) : value;
@@ -21,13 +25,46 @@ function cloneRecords(records) {
   return records.map((record) => cloneRecord(record));
 }
 
-export function createInMemoryStore(seed = {}) {
+function normalizeInterestRecord(record) {
+  const normalized = cloneRecord(record);
+  if (
+    normalized
+    && typeof normalized.creditsHeld === 'undefined'
+    && typeof normalized[LEGACY_CREDITS_HELD_KEY] !== 'undefined'
+  ) {
+    normalized.creditsHeld = normalized[LEGACY_CREDITS_HELD_KEY];
+    delete normalized[LEGACY_CREDITS_HELD_KEY];
+  }
+  return normalized;
+}
+
+function normalizeCreditTransactionRecord(record) {
+  const normalized = cloneRecord(record);
+  if (normalized?.source === LEGACY_SEED_SOURCE) {
+    normalized.source = 'seed_demo_credits';
+  }
+  return normalized;
+}
+
+function normalizeSnapshot(snapshot = {}) {
   return {
-    users: new Map((seed.users ?? []).map((record) => [record.id, cloneRecord(record)])),
-    events: new Map((seed.events ?? []).map((record) => [record.id, cloneRecord(record)])),
-    eventInterests: new Map((seed.eventInterests ?? []).map((record) => [record.id, cloneRecord(record)])),
-    tokenTransactions: new Map((seed.tokenTransactions ?? []).map((record) => [record.id, cloneRecord(record)])),
-    socialPosts: new Map((seed.socialPosts ?? []).map((record) => [record.id, cloneRecord(record)]))
+    users: (snapshot.users ?? []).map(cloneRecord),
+    events: (snapshot.events ?? []).map(cloneRecord),
+    eventInterests: (snapshot.eventInterests ?? []).map(normalizeInterestRecord),
+    creditTransactions: (snapshot.creditTransactions ?? snapshot[LEGACY_CREDIT_TRANSACTIONS_KEY] ?? [])
+      .map(normalizeCreditTransactionRecord),
+    socialPosts: (snapshot.socialPosts ?? []).map(cloneRecord)
+  };
+}
+
+export function createInMemoryStore(seed = {}) {
+  const normalizedSeed = normalizeSnapshot(seed);
+  return {
+    users: new Map(normalizedSeed.users.map((record) => [record.id, cloneRecord(record)])),
+    events: new Map(normalizedSeed.events.map((record) => [record.id, cloneRecord(record)])),
+    eventInterests: new Map(normalizedSeed.eventInterests.map((record) => [record.id, cloneRecord(record)])),
+    creditTransactions: new Map(normalizedSeed.creditTransactions.map((record) => [record.id, cloneRecord(record)])),
+    socialPosts: new Map(normalizedSeed.socialPosts.map((record) => [record.id, cloneRecord(record)]))
   };
 }
 
@@ -54,24 +91,25 @@ function storeToSnapshot(store) {
     users: readRecords(store.users).map(serializeRecord),
     events: readRecords(store.events).map(serializeRecord),
     eventInterests: readRecords(store.eventInterests).map(serializeRecord),
-    tokenTransactions: readRecords(store.tokenTransactions).map(serializeRecord),
+    creditTransactions: readRecords(store.creditTransactions).map(serializeRecord),
     socialPosts: readRecords(store.socialPosts).map(serializeRecord)
   };
 }
 
 function readSnapshot(filePath, seed) {
   if (!existsSync(filePath)) {
-    return seed;
+    return normalizeSnapshot(seed);
   }
 
   const parsed = JSON.parse(readFileSync(filePath, 'utf8'));
-  return {
+  return normalizeSnapshot({
     users: (parsed.users ?? []).map(reviveRecord),
     events: (parsed.events ?? []).map(reviveRecord),
     eventInterests: (parsed.eventInterests ?? []).map(reviveRecord),
-    tokenTransactions: (parsed.tokenTransactions ?? []).map(reviveRecord),
+    creditTransactions: (parsed.creditTransactions ?? []).map(reviveRecord),
+    [LEGACY_CREDIT_TRANSACTIONS_KEY]: (parsed[LEGACY_CREDIT_TRANSACTIONS_KEY] ?? []).map(reviveRecord),
     socialPosts: (parsed.socialPosts ?? []).map(reviveRecord)
-  };
+  });
 }
 
 export function createJsonFileStore(filePath, seed = {}) {

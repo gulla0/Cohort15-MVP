@@ -1,6 +1,6 @@
 import { serializeEventForViewer } from '../domain/validation.mjs';
 
-function tokenSummary(transactions, userId, eventId) {
+function creditSummary(transactions, userId, eventId) {
   const userEventTransactions = transactions.filter((transaction) => (
     transaction.userId === userId && transaction.eventId === eventId
   ));
@@ -54,14 +54,14 @@ export function createDashboardService({ repositories, ledger }) {
       throw new Error('Creator account was not found.');
     }
 
-    const transactions = repositories.tokenTransactions.list();
+    const transactions = repositories.creditTransactions.list();
     const cohorts = repositories.events
       .list()
       .filter((event) => event.creatorId === userId)
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
       .map((event) => ({
         event: serializeForDashboard(repositories, event, userId),
-        tokenSummary: tokenSummary(transactions, userId, event.id),
+        creditSummary: creditSummary(transactions, userId, event.id),
         interestCount: repositories.eventInterests.listByEvent(event.id).length
       }));
 
@@ -78,7 +78,7 @@ export function createDashboardService({ repositories, ledger }) {
       throw new Error('Participant account was not found.');
     }
 
-    const transactions = repositories.tokenTransactions.list();
+    const transactions = repositories.creditTransactions.list();
     const interests = repositories.eventInterests
       .listByUser(userId)
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
@@ -87,7 +87,7 @@ export function createDashboardService({ repositories, ledger }) {
         return {
           interest,
           event: serializeForDashboard(repositories, event, userId),
-          tokenSummary: tokenSummary(transactions, userId, interest.eventId)
+          creditSummary: creditSummary(transactions, userId, interest.eventId)
         };
       });
 

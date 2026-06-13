@@ -200,13 +200,13 @@ article p {
   font-size: 1.1rem;
 }
 
-.account-token-grid {
+.account-credit-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
-.account-token-grid .dashboard-summary {
+.account-credit-grid .dashboard-summary {
   margin-bottom: 0;
 }
 
@@ -445,7 +445,7 @@ textarea {
   }
 
   .dashboard-summary,
-  .account-token-grid,
+  .account-credit-grid,
   .meta-grid,
   .decision-grid,
   .detail-layout {

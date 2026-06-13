@@ -32,9 +32,9 @@ Each executable task should define or tightly imply:
   - Validation: validation tests cover accepted and rejected event inputs from the spec
   - Stop: stop before persistence or UI integration
 
-- T003 Add persistence schema and token ledger primitives
+- T003 Add persistence schema and credit ledger primitives
   - Depends on: T002
-  - Objective: Create storage for users, events, event interests, token transactions, and social posts, with auditable token balance helpers.
+  - Objective: Create storage for users, events, event interests, credit transactions, and social posts, with auditable credit balance helpers.
   - Inputs: domain model from T002, selected persistence layer from T001
   - Authority: change persistence schema, migrations/seeds, repository/data-access modules, and related tests
   - Validation: tests or scripted checks prove hold, consume, refund, and grant records affect balances as expected
@@ -44,10 +44,10 @@ Each executable task should define or tightly imply:
 
 - T004 Build create cohort flow
   - Depends on: T003
-  - Objective: Let an authenticated or demo user create a cohort event by holding 2 tokens and creating an open event with `expiresAt = createdAt + 14 days`.
-  - Inputs: event form requirements from spec, token ledger primitives from T003
+  - Objective: Let an authenticated or demo user create a cohort event by holding 2 credits and creating an open event with `expiresAt = createdAt + 14 days`.
+  - Inputs: event form requirements from spec, credit ledger primitives from T003
   - Authority: change create-event UI/routes/actions/controllers and related tests
-  - Validation: creator without enough tokens cannot create; creator with enough tokens gets an open event and 2-token hold
+  - Validation: creator without enough credits cannot create; creator with enough credits gets an open event and 2-credit hold
   - Stop: stop before participant interest and quorum handling
 
 - T005 Build public event feed and detail visibility
@@ -60,18 +60,18 @@ Each executable task should define or tightly imply:
 
 - T006 Build show-interest and quorum unlock flow
   - Depends on: T005
-  - Objective: Let participants hold 1 token to show interest, prevent duplicate/over-capacity interest, and activate the cohort when active interest count reaches `minQuorum`.
-  - Inputs: EventInterest and TokenTransaction rules from spec, existing event detail flow
-  - Authority: change interest mutation logic, quorum service, token transaction usage, and related UI/tests
-  - Validation: interest creates a 1-token hold; quorum consumes held creator/participant tokens, sets status `active`, and reveals the link only after activation
+  - Objective: Let participants hold 1 credit to show interest, prevent duplicate/over-capacity interest, and activate the cohort when active interest count reaches `minQuorum`.
+  - Inputs: EventInterest and CreditTransaction rules from spec, existing event detail flow
+  - Authority: change interest mutation logic, quorum service, credit transaction usage, and related UI/tests
+  - Validation: interest creates a 1-credit hold; quorum consumes held creator/participant credits, sets status `active`, and reveals the link only after activation
   - Stop: stop before expiry automation
 
 - T007 Build expiry and refund processing
   - Depends on: T006
-  - Objective: Expire open events past `expiresAt` that have not met quorum and refund all held creator/participant tokens.
-  - Inputs: expiry rule from spec, token ledger from T003, interest flow from T006
+  - Objective: Expire open events past `expiresAt` that have not met quorum and refund all held creator/participant credits.
+  - Inputs: expiry rule from spec, credit ledger from T003, interest flow from T006
   - Authority: change expiry job/service, admin/dev trigger if needed, and related tests
-  - Validation: expired events become `expired`, held tokens are refunded, and private links remain hidden
+  - Validation: expired events become `expired`, held credits are refunded, and private links remain hidden
   - Stop: stop before dashboards and social promotion outbox
 
 ### Phase 3 - MVP Surfaces And Promotion Outbox
@@ -86,15 +86,15 @@ Each executable task should define or tightly imply:
 
 - T009 Build creator and participant dashboards
   - Depends on: T006
-  - Objective: Provide dashboard views for creators and participants showing relevant cohorts, statuses, token holds, and unlocked links where allowed.
-  - Inputs: event, interest, and token data from prior tasks
+  - Objective: Provide dashboard views for creators and participants showing relevant cohorts, statuses, credit holds, and unlocked links where allowed.
+  - Inputs: event, interest, and credit data from prior tasks
   - Authority: change dashboard UI/routes and data loaders only
   - Validation: creator sees owned events; participant sees interested events; link visibility follows event status and authorization
   - Stop: stop before broad polish or analytics
 
 - T010 Add MVP verification pass and docs
   - Depends on: T007, T008, T009
-  - Objective: Add final coverage and documentation for the core success path, expiry path, token accounting, and local operation.
+  - Objective: Add final coverage and documentation for the core success path, expiry path, credit accounting, and local operation.
   - Inputs: completed MVP tasks, README/USAGE conventions
   - Authority: change tests, docs, and small defects found during verification; avoid new feature scope
   - Validation: automated checks pass and README describes setup, run, test, seed/demo data, and known assumptions
@@ -104,10 +104,10 @@ Each executable task should define or tightly imply:
 
 - T011 Add durable persistence adapter
   - Depends on: T010
-  - Objective: Replace or augment the in-memory repositories with a durable local persistence adapter while preserving repository contracts and token ledger semantics.
-  - Inputs: persistence schema/repositories, token ledger, seed data, persistence tests, MVP verification tests
+  - Objective: Replace or augment the in-memory repositories with a durable local persistence adapter while preserving repository contracts and credit ledger semantics.
+  - Inputs: persistence schema/repositories, credit ledger, seed data, persistence tests, MVP verification tests
   - Authority: add durable local database adapter, schema/migrations, initialization wiring, and tests; do not implement auth, payment, or social API behavior
-  - Validation: users, events, interests, token transactions, and social posts persist across app restarts; existing token accounting still passes
+  - Validation: users, events, interests, credit transactions, and social posts persist across app restarts; existing credit accounting still passes
   - Stop: stop once durable persistence is available behind the repository boundary and documented
 
 - T012 Replace demo user selection with regular auth boundary
@@ -120,12 +120,12 @@ Each executable task should define or tightly imply:
 
 ### Phase 5 - Post-MVP Monetization And Distribution
 
-- T013 Add token purchase package flow
+- T013 Add credit purchase package flow
   - Depends on: T011, T012
-  - Objective: Add the first token purchase flow for the documented packages, recording purchase transactions without breaking grant or hold accounting.
-  - Inputs: plan token package assumptions, token ledger, persistence schema, dashboards, server routes
-  - Authority: add token package constants/services, purchase route/UI, purchase tests, and payment-mode docs; do not store card data or hard-code provider credentials
-  - Validation: authenticated users can select `$6`/6-token or `$12`/14-token packages; successful local/mock purchases create auditable purchase transactions
+  - Objective: Add the first credit purchase flow for the documented packages, recording purchase transactions without breaking grant or hold accounting.
+  - Inputs: plan credit package assumptions, credit ledger, persistence schema, dashboards, server routes
+  - Authority: add credit package constants/services, purchase route/UI, purchase tests, and payment-mode docs; do not store card data or hard-code provider credentials
+  - Validation: authenticated users can select `$6`/6-credit or `$12`/14-credit packages; successful local/mock purchases create auditable purchase transactions
   - Stop: stop once package purchase accounting works and payment-provider limitations are documented
 
 - T014 Publish social outbox to configured external channels
@@ -140,8 +140,8 @@ Each executable task should define or tightly imply:
 
 - T015 Add cohort completion and cancellation lifecycle handling
   - Depends on: T012
-  - Objective: Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving token accounting and link visibility rules.
-  - Inputs: domain statuses, expiry/token refund behavior, dashboard surfaces, server routes
+  - Objective: Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving credit accounting and link visibility rules.
+  - Inputs: domain statuses, expiry/credit refund behavior, dashboard surfaces, server routes
   - Authority: add lifecycle services, creator/admin route handlers, dashboard actions, and lifecycle tests; do not add broad moderation tooling
   - Validation: authorized users can cancel open cohorts with refunds and complete active cohorts without refunds; unauthorized lifecycle actions are rejected
   - Stop: stop once cancelled and completed lifecycle paths are implemented with tests and documented behavior
@@ -166,10 +166,10 @@ Each executable task should define or tightly imply:
 
 - T018 Add production-grade persistence plan and adapter
   - Depends on: T012, T017
-  - Objective: Move launch persistence beyond local JSON while preserving repository contracts and token ledger auditability.
-  - Inputs: persistence schema, repositories, store, token ledger, README
+  - Objective: Move launch persistence beyond local JSON while preserving repository contracts and credit ledger auditability.
+  - Inputs: persistence schema, repositories, store, credit ledger, README
   - Authority: add provider-backed persistence adapter, schema/migrations, configuration docs, and tests; do not embed credentials
-  - Validation: launch datastore persists users, events, interests, transactions, and social posts; token balances remain transaction-derived
+  - Validation: launch datastore persists users, events, interests, transactions, and social posts; credit balances remain transaction-derived
   - Stop: stop once launch persistence is selected, implemented or explicitly staged, and documented
 
 - T019 Add environment and secrets configuration boundary
@@ -198,7 +198,7 @@ Each executable task should define or tightly imply:
 
 - T022 Complete launch privacy and security review
   - Depends on: T012, T018, T019, T020, T021
-  - Objective: Review launch-critical privacy and security behavior around private links, auth, token accounting, admin operations, logs, and social content.
+  - Objective: Review launch-critical privacy and security behavior around private links, auth, credit accounting, admin operations, logs, and social content.
   - Inputs: domain, services, server, persistence, tests, README
   - Authority: make focused fixes for confirmed launch blockers and document residual risks
   - Validation: private links are verified hidden from public pages, social posts, logs, and unauthorized users; findings are fixed or tracked
@@ -209,7 +209,7 @@ Each executable task should define or tightly imply:
   - Objective: Create and run a production-oriented smoke-test checklist covering launch-critical user and operator flows.
   - Inputs: README, USAGE, MVP spec, tests
   - Authority: add manual or scripted smoke checklist and record verification notes
-  - Validation: checklist covers sign-in, token balance, purchase, create, discovery, interest, quorum, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility
+  - Validation: checklist covers sign-in, credit balance, purchase, create, discovery, interest, quorum, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility
   - Stop: stop once launch smoke testing is documented and ready to execute against the selected environment
 
 ## Compact Adjacency View

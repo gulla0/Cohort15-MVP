@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CREATE_EVENT_TOKEN_COST, SHOW_INTEREST_TOKEN_COST } from '../src/domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST, SHOW_INTEREST_CREDIT_COST } from '../src/domain/constants.mjs';
 import { buildEvent } from '../src/domain/validation.mjs';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
 import { createDashboardService } from '../src/services/dashboards.mjs';
@@ -63,16 +63,16 @@ async function invoke(handler, request) {
   };
 }
 
-test('creator dashboard lists owned cohorts with token state and unlocked links', () => {
+test('creator dashboard lists owned cohorts with credit state and unlocked links', () => {
   const { repositories, ledger, service } = createFixture();
   const activeEvent = repositories.events.save(eventFixture({ status: 'active' }));
-  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
   repositories.eventInterests.save({
     id: 'interest-dashboard',
     eventId: activeEvent.id,
     userId: 'user-participant',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'consumed',
     createdAt: now
   });
@@ -82,9 +82,9 @@ test('creator dashboard lists owned cohorts with token state and unlocked links'
   assert.equal(dashboard.cohorts.length, 1);
   assert.equal(dashboard.cohorts[0].event.lockedEventLink, 'https://meet.google.com/private-dashboard');
   assert.equal(dashboard.cohorts[0].interestCount, 1);
-  assert.deepEqual(dashboard.cohorts[0].tokenSummary, {
-    held: CREATE_EVENT_TOKEN_COST,
-    consumed: CREATE_EVENT_TOKEN_COST,
+  assert.deepEqual(dashboard.cohorts[0].creditSummary, {
+    held: CREATE_EVENT_CREDIT_COST,
+    consumed: CREATE_EVENT_CREDIT_COST,
     refunded: 0
   });
 });
@@ -92,13 +92,13 @@ test('creator dashboard lists owned cohorts with token state and unlocked links'
 test('participant dashboard lists interested cohorts and respects link authorization', () => {
   const { repositories, ledger, service } = createFixture();
   const activeEvent = repositories.events.save(eventFixture({ status: 'active' }));
-  ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
-  ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
+  ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
   repositories.eventInterests.save({
     id: 'interest-dashboard',
     eventId: activeEvent.id,
     userId: 'user-participant',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'consumed',
     createdAt: now
   });
@@ -108,25 +108,25 @@ test('participant dashboard lists interested cohorts and respects link authoriza
   assert.equal(dashboard.interests.length, 1);
   assert.equal(dashboard.interests[0].event.lockedEventLink, 'https://meet.google.com/private-dashboard');
   assert.equal(dashboard.interests[0].interest.status, 'consumed');
-  assert.deepEqual(dashboard.interests[0].tokenSummary, {
-    held: SHOW_INTEREST_TOKEN_COST,
-    consumed: SHOW_INTEREST_TOKEN_COST,
+  assert.deepEqual(dashboard.interests[0].creditSummary, {
+    held: SHOW_INTEREST_CREDIT_COST,
+    consumed: SHOW_INTEREST_CREDIT_COST,
     refunded: 0
   });
 });
 
-test('combined dashboard service returns one de-duplicated account token balance', () => {
+test('combined dashboard service returns one de-duplicated account credit balance', () => {
   const { repositories, ledger, service } = createFixture();
   const activeEvent = repositories.events.save(eventFixture({ status: 'active' }));
-  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
-  ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
+  ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
   repositories.eventInterests.save({
     id: 'interest-dashboard',
     eventId: activeEvent.id,
     userId: 'user-participant',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'consumed',
     createdAt: now
   });
@@ -155,15 +155,15 @@ test('dashboard routes render content-based cohort and event views', async () =>
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
   const activeEvent = state.repositories.events.save(eventFixture({ status: 'active' }));
-  state.ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  state.ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  state.ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
-  state.ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  state.ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  state.ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  state.ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
+  state.ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
   state.repositories.eventInterests.save({
     id: 'interest-dashboard',
     eventId: activeEvent.id,
     userId: 'user-participant',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'consumed',
     createdAt: now
   });
@@ -171,7 +171,7 @@ test('dashboard routes render content-based cohort and event views', async () =>
   const creator = await invoke(handler, { url: '/dashboard/creator?userId=user-creator', method: 'GET' });
   assert.equal(creator.status, 200);
   assert.match(creator.body, /My Cohorts/);
-  assert.match(creator.body, /My Tokens/);
+  assert.match(creator.body, /My Credits/);
   assert.match(creator.body, /Open Source Pairing Cohort/);
   assert.match(creator.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(creator.body, /https:\/\/meet\.google\.com\/private-dashboard/);
@@ -179,12 +179,12 @@ test('dashboard routes render content-based cohort and event views', async () =>
   assert.match(creator.body, /In use/);
   assert.match(creator.body, /Used/);
   assert.doesNotMatch(creator.body, /Returned/);
-  assert.doesNotMatch(creator.body, /creator tokens:/);
+  assert.doesNotMatch(creator.body, /creator credits:/);
 
   const participant = await invoke(handler, { url: '/dashboard/participant?userId=user-participant', method: 'GET' });
   assert.equal(participant.status, 200);
   assert.match(participant.body, /My Events/);
-  assert.match(participant.body, /My Tokens/);
+  assert.match(participant.body, /My Credits/);
   assert.match(participant.body, /Seat confirmed/);
   assert.match(participant.body, /src="\/assets\/default-cohort\.png"/);
   assert.match(participant.body, /https:\/\/meet\.google\.com\/private-dashboard/);
@@ -192,22 +192,22 @@ test('dashboard routes render content-based cohort and event views', async () =>
   assert.match(participant.body, /In use/);
   assert.match(participant.body, /Used/);
   assert.doesNotMatch(participant.body, /Returned/);
-  assert.doesNotMatch(participant.body, /participant tokens:/);
+  assert.doesNotMatch(participant.body, /participant credits:/);
 });
 
-test('combined dashboard route shows token summary, active schedule, created cohorts, and interested cohorts', async () => {
+test('combined dashboard route shows credit summary, active schedule, created cohorts, and interested cohorts', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
   const activeEvent = state.repositories.events.save(eventFixture({ status: 'active' }));
-  state.ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  state.ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  state.ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
-  state.ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_TOKEN_COST);
+  state.ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  state.ledger.consumeHeld(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  state.ledger.hold('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
+  state.ledger.consumeHeld('user-participant', activeEvent.id, SHOW_INTEREST_CREDIT_COST);
   state.repositories.eventInterests.save({
     id: 'interest-dashboard',
     eventId: activeEvent.id,
     userId: 'user-participant',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'consumed',
     createdAt: now
   });
@@ -216,23 +216,23 @@ test('combined dashboard route shows token summary, active schedule, created coh
 
   assert.equal(response.status, 200);
   assert.match(response.body, /My Cohorts &amp; Events/);
-  assert.match(response.body, /Account Tokens/);
+  assert.match(response.body, /Account Credits/);
   assert.match(response.body, /Active Cohorts &amp; Schedule/);
   assert.match(response.body, /Created Cohorts/);
   assert.match(response.body, /Interested Cohorts/);
   assert.match(response.body, /Available/);
   assert.match(response.body, /In use/);
   assert.match(response.body, /Used/);
-  assert.match(response.body, />9 token\(s\)</);
-  assert.match(response.body, />3 token\(s\)</);
+  assert.match(response.body, />9 credit\(s\)</);
+  assert.match(response.body, />3 credit\(s\)</);
   assert.match(response.body, /Demo Creator started this cohort/);
   assert.match(response.body, /Demo Participant has a confirmed seat/);
   assert.equal([...response.body.matchAll(/<h2>Available<\/h2>/g)].length, 1);
   assert.equal([...response.body.matchAll(/<h2>In use<\/h2>/g)].length, 1);
   assert.equal([...response.body.matchAll(/<h2>Used<\/h2>/g)].length, 1);
   assert.doesNotMatch(response.body, /Returned/);
-  assert.doesNotMatch(response.body, /creator tokens:/);
-  assert.doesNotMatch(response.body, /participant tokens:/);
+  assert.doesNotMatch(response.body, /creator credits:/);
+  assert.doesNotMatch(response.body, /participant credits:/);
   assert.doesNotMatch(response.body, /<h2>Demo Creator<\/h2>/);
   assert.doesNotMatch(response.body, /<h2>Demo Participant<\/h2>/);
   assert.doesNotMatch(response.body, /Creator dashboard/);

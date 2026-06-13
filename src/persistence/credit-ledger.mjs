@@ -1,4 +1,4 @@
-import { TOKEN_TRANSACTION_TYPES } from '../domain/constants.mjs';
+import { CREDIT_TRANSACTION_TYPES } from '../domain/constants.mjs';
 
 function createTransactionId(type, userId, eventId, sequence) {
   const eventPart = eventId ? `-${eventId}` : '';
@@ -7,13 +7,13 @@ function createTransactionId(type, userId, eventId, sequence) {
 
 function assertPositiveAmount(amount) {
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('Token amount must be greater than 0.');
+    throw new Error('Credit amount must be greater than 0.');
   }
 }
 
 function assertTransactionType(type) {
-  if (!TOKEN_TRANSACTION_TYPES.includes(type)) {
-    throw new Error(`Unsupported token transaction type: ${type}`);
+  if (!CREDIT_TRANSACTION_TYPES.includes(type)) {
+    throw new Error(`Unsupported credit transaction type: ${type}`);
   }
 }
 
@@ -41,7 +41,7 @@ function totalsFor(transactions) {
   };
 }
 
-export function createTokenLedger(transactionRepository, options = {}) {
+export function createCreditLedger(transactionRepository, options = {}) {
   const now = options.now ?? (() => new Date());
   let sequence = options.sequenceStart ?? transactionRepository.list().length;
 
@@ -77,21 +77,21 @@ export function createTokenLedger(transactionRepository, options = {}) {
   function hold(userId, eventId, amount) {
     const balance = balanceForUser(userId);
     if (balance.available < amount) {
-      throw new Error(`Insufficient available tokens for ${userId}.`);
+      throw new Error(`Insufficient available credits for ${userId}.`);
     }
     return append({ userId, eventId, amount, type: 'hold' });
   }
 
   function consumeHeld(userId, eventId, amount) {
     if (heldForEventUser(userId, eventId) < amount) {
-      throw new Error(`Insufficient held tokens for ${userId} on ${eventId}.`);
+      throw new Error(`Insufficient held credits for ${userId} on ${eventId}.`);
     }
     return append({ userId, eventId, amount, type: 'consume' });
   }
 
   function refundHeld(userId, eventId, amount) {
     if (heldForEventUser(userId, eventId) < amount) {
-      throw new Error(`Insufficient held tokens for ${userId} on ${eventId}.`);
+      throw new Error(`Insufficient held credits for ${userId} on ${eventId}.`);
     }
     return append({ userId, eventId, amount, type: 'refund' });
   }

@@ -70,7 +70,7 @@
         "Do not add persistence or UI integration in this task"
       ],
       "acceptance_criteria": [
-        "Event, EventInterest, TokenTransaction, and SocialPost concepts are represented in typed code",
+        "Event, EventInterest, CreditTransaction, and SocialPost concepts are represented in typed code",
         "Allowed enum values match the spec",
         "Participant cap, recurrence, meeting count, required link, and expiry defaults are validated",
         "Private link visibility policy is represented without leaking links for open events"
@@ -85,13 +85,13 @@
     },
     {
       "id": "T003",
-      "title": "Add persistence schema and token ledger primitives",
+      "title": "Add persistence schema and credit ledger primitives",
       "status": "done",
       "phase": "Product Scaffold And Domain Foundation",
       "dependencies": [
         "T002"
       ],
-      "objective": "Create storage for users, events, event interests, token transactions, and social posts, with auditable token balance helpers.",
+      "objective": "Create storage for users, events, event interests, credit transactions, and social posts, with auditable credit balance helpers.",
       "inputs": [
         "domain model from T002",
         "selected persistence layer from T001"
@@ -100,28 +100,28 @@
         "database schema or migrations",
         "seed/demo data",
         "repository/data-access modules",
-        "token ledger service",
+        "credit ledger service",
         "persistence tests"
       ],
       "authority": [
-        "Token balances must be derived from auditable transaction records or kept consistent with them",
+        "Credit balances must be derived from auditable transaction records or kept consistent with them",
         "Do not silently mutate balances without transaction records",
         "Do not implement user-facing create or interest flows in this task"
       ],
       "acceptance_criteria": [
-        "Users, events, interests, token transactions, and social posts can be persisted",
+        "Users, events, interests, credit transactions, and social posts can be persisted",
         "Hold, consume, refund, and grant transaction types are supported for MVP",
         "The schema leaves a clear path for a later purchase transaction source without requiring USD payments now",
-        "Balance helpers correctly account for held and available tokens",
-        "Seed/demo users can receive starting tokens through grant transactions"
+        "Balance helpers correctly account for held and available credits",
+        "Seed/demo users can receive starting credits through grant transactions"
       ],
       "verification": [
-        "Run persistence or repository tests for token hold/consume/refund behavior",
+        "Run persistence or repository tests for credit hold/consume/refund behavior",
         "Run migration/schema validation if available"
       ],
       "stop_condition": "Stop before user-facing create/interest flows.",
-      "evidence": "2026-05-30 00:28 EDT: Added dependency-free in-memory persistence schema/repositories for users, events, interests, token transactions, and social posts; demo seed grants; and token ledger primitives for grant, hold, consume, refund, and derived balances. `npm run check` passed.",
-      "notes": "Schema module records a future purchase source path without implementing USD token sales."
+      "evidence": "2026-05-30 00:28 EDT: Added dependency-free in-memory persistence schema/repositories for users, events, interests, credit transactions, and social posts; demo seed grants; and credit ledger primitives for grant, hold, consume, refund, and derived balances. `npm run check` passed.",
+      "notes": "Schema module records a future purchase source path without implementing USD credit sales."
     },
     {
       "id": "T004",
@@ -131,10 +131,10 @@
       "dependencies": [
         "T003"
       ],
-      "objective": "Let an authenticated or demo user create a cohort event by holding 2 tokens and creating an open event with expiresAt equal to createdAt plus 14 days.",
+      "objective": "Let an authenticated or demo user create a cohort event by holding 2 credits and creating an open event with expiresAt equal to createdAt plus 14 days.",
       "inputs": [
         "event form requirements from docs/cohort15-mvp-spec-v3.md",
-        "token ledger primitives from T003"
+        "credit ledger primitives from T003"
       ],
       "write_scope": [
         "create-event UI",
@@ -143,14 +143,14 @@
         "create-flow tests"
       ],
       "authority": [
-        "Require enough available tokens before event creation",
+        "Require enough available credits before event creation",
         "Hide lockedEventLink from public outputs",
         "Do not implement participant interest or expiry automation in this task"
       ],
       "acceptance_criteria": [
-        "Creator with fewer than 2 available tokens cannot create an event",
-        "Creator with at least 2 available tokens creates an open event",
-        "Creation records a 2-token hold transaction",
+        "Creator with fewer than 2 available credits cannot create an event",
+        "Creator with at least 2 available credits creates an open event",
+        "Creation records a 2-credit hold transaction",
         "Event expiry defaults to 14 days after creation",
         "Validation errors are surfaced for invalid event inputs"
       ],
@@ -159,7 +159,7 @@
         "Manually smoke test the create flow if a UI exists"
       ],
       "stop_condition": "Stop before participant interest and quorum handling.",
-      "evidence": "2026-05-30 00:33 EDT: Added create cohort service, demo-backed create form route, UI rendering for creation errors/success, and tests for 2-token creator holds, default expiry, insufficient tokens, validation errors, and hidden private links. `npm run check` passed.",
+      "evidence": "2026-05-30 00:33 EDT: Added create cohort service, demo-backed create form route, UI rendering for creation errors/success, and tests for 2-credit creator holds, default expiry, insufficient credits, validation errors, and hidden private links. `npm run check` passed.",
       "notes": "Create flow uses demo users from seed data as the temporary auth path and stops before feed/detail, participant interest, and quorum handling."
     },
     {
@@ -208,30 +208,30 @@
       "dependencies": [
         "T005"
       ],
-      "objective": "Let participants hold 1 token to show interest, prevent duplicate or over-capacity interest, and activate the cohort when active interest count reaches minQuorum.",
+      "objective": "Let participants hold 1 credit to show interest, prevent duplicate or over-capacity interest, and activate the cohort when active interest count reaches minQuorum.",
       "inputs": [
         "EventInterest rules from docs/cohort15-mvp-spec-v3.md",
-        "TokenTransaction rules from docs/cohort15-mvp-spec-v3.md",
+        "CreditTransaction rules from docs/cohort15-mvp-spec-v3.md",
         "event detail flow from T005"
       ],
       "write_scope": [
         "interest action/controller/service",
         "quorum service",
-        "token ledger integration",
+        "credit ledger integration",
         "event detail interest UI",
         "interest and quorum tests"
       ],
       "authority": [
-        "Participants must have at least 1 available token to show interest",
+        "Participants must have at least 1 available credit to show interest",
         "Do not allow duplicate active interest for the same user and event",
         "Do not exceed maxParticipants",
-        "Consume held creator and participant tokens only when quorum is met"
+        "Consume held creator and participant credits only when quorum is met"
       ],
       "acceptance_criteria": [
-        "Showing interest records a 1-token hold and active interest",
+        "Showing interest records a 1-credit hold and active interest",
         "Duplicate and over-capacity interest attempts are rejected",
         "When active interest count reaches minQuorum, event status becomes active",
-        "Quorum consumes held creator and participant tokens",
+        "Quorum consumes held creator and participant credits",
         "Private event link becomes visible only after activation"
       ],
       "verification": [
@@ -239,7 +239,7 @@
         "Manually smoke test interest and unlock if a UI exists"
       ],
       "stop_condition": "Stop before expiry automation.",
-      "evidence": "2026-05-30 00:48 EDT: Added show-interest/quorum service, POST interest route, event detail interest UI, consumed-interest link authorization, and tests for 1-token holds, duplicate/cap rejection, quorum activation, token consumption, and unlocked private link rendering. `npm run check` passed. Browser smoke tested create -> detail -> stake interest -> quorum unlock on `http://localhost:3001`.",
+      "evidence": "2026-05-30 00:48 EDT: Added show-interest/quorum service, POST interest route, event detail interest UI, consumed-interest link authorization, and tests for 1-credit holds, duplicate/cap rejection, quorum activation, credit consumption, and unlocked private link rendering. `npm run check` passed. Browser smoke tested create -> detail -> stake interest -> quorum unlock on `http://localhost:3001`.",
       "notes": "Quorum activation consumes creator and participant holds, changes active interests to consumed, and keeps consumed participants authorized to view active private links."
     },
     {
@@ -250,22 +250,22 @@
       "dependencies": [
         "T006"
       ],
-      "objective": "Expire open events past expiresAt that have not met quorum and refund all held creator and participant tokens.",
+      "objective": "Expire open events past expiresAt that have not met quorum and refund all held creator and participant credits.",
       "inputs": [
         "expiry rule from docs/cohort15-mvp-spec-v3.md",
-        "token ledger from T003",
+        "credit ledger from T003",
         "interest flow from T006"
       ],
       "write_scope": [
         "expiry job/service",
         "manual admin/dev trigger if needed",
-        "token refund logic",
+        "credit refund logic",
         "expiry tests"
       ],
       "authority": [
         "Only open events past expiresAt should be expired",
         "Active events must not be refunded by expiry processing",
-        "Refund all held tokens through refund transaction records"
+        "Refund all held credits through refund transaction records"
       ],
       "acceptance_criteria": [
         "Expired events change status to expired",
@@ -327,11 +327,11 @@
       "dependencies": [
         "T006"
       ],
-      "objective": "Provide dashboard views for creators and participants showing relevant cohorts, statuses, token holds, and unlocked links where allowed.",
+      "objective": "Provide dashboard views for creators and participants showing relevant cohorts, statuses, credit holds, and unlocked links where allowed.",
       "inputs": [
         "event data from T004",
         "interest data from T006",
-        "token data from T003"
+        "credit data from T003"
       ],
       "write_scope": [
         "creator dashboard UI/routes",
@@ -340,13 +340,13 @@
         "dashboard tests"
       ],
       "authority": [
-        "Keep dashboards focused on MVP status and token visibility",
+        "Keep dashboards focused on MVP status and credit visibility",
         "Do not add analytics beyond what is needed to understand cohort state",
         "Respect private link visibility rules"
       ],
       "acceptance_criteria": [
         "Creator dashboard lists owned cohorts and statuses",
-        "Creator dashboard shows relevant token hold/consume/refund state",
+        "Creator dashboard shows relevant credit hold/consume/refund state",
         "Participant dashboard lists cohorts where the user showed interest",
         "Unlocked links appear only when the event is active and the user is authorized"
       ],
@@ -355,7 +355,7 @@
         "Manually inspect dashboards with seeded creator and participant data if a UI exists"
       ],
       "stop_condition": "Stop before broad polish or analytics.",
-      "evidence": "2026-05-30 00:59 EDT: Added dashboard data service, creator and participant dashboard routes/UI, and tests for owned/interested cohorts, token held/consume/refund summaries, and authorized unlocked links. `npm run check` passed; browser smoke checked `/dashboard/creator` and `/dashboard/participant`.",
+      "evidence": "2026-05-30 00:59 EDT: Added dashboard data service, creator and participant dashboard routes/UI, and tests for owned/interested cohorts, credit held/consume/refund summaries, and authorized unlocked links. `npm run check` passed; browser smoke checked `/dashboard/creator` and `/dashboard/participant`.",
       "notes": "Dashboards use demo query-param user selection until regular auth is specified, matching existing create/detail MVP assumptions."
     },
     {
@@ -368,7 +368,7 @@
         "T008",
         "T009"
       ],
-      "objective": "Add final coverage and documentation for the core success path, expiry path, token accounting, and local operation.",
+      "objective": "Add final coverage and documentation for the core success path, expiry path, credit accounting, and local operation.",
       "inputs": [
         "completed MVP tasks",
         "README.md",
@@ -388,15 +388,15 @@
       "acceptance_criteria": [
         "Core success path is covered by automated tests or documented manual verification",
         "Expiry/refund path is covered by automated tests or documented manual verification",
-        "Token ledger behavior is covered by tests",
-        "README documents setup, run, test, seed/demo data, MVP boundary, post-MVP USD token packages, and known assumptions"
+        "Credit ledger behavior is covered by tests",
+        "README documents setup, run, test, seed/demo data, MVP boundary, post-MVP USD credit packages, and known assumptions"
       ],
       "verification": [
         "Run the full documented verification suite",
         "Manually exercise the MVP flow if UI automation is not available"
       ],
       "stop_condition": "Stop once the MVP can be handed to user testing.",
-      "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, post-MVP token package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
+      "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, post-MVP credit package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
       "notes": "Manual browser feed/unlock follow-up was stopped by the browser URL policy after creation; the new automated verification test covers feed, detail, quorum unlock, dashboards, and expiry/refund end to end."
     },
     {
@@ -407,11 +407,11 @@
       "dependencies": [
         "T010"
       ],
-      "objective": "Replace or augment the in-memory repositories with a durable local persistence adapter while preserving the existing repository contracts and token ledger semantics.",
+      "objective": "Replace or augment the in-memory repositories with a durable local persistence adapter while preserving the existing repository contracts and credit ledger semantics.",
       "inputs": [
         "src/persistence/schema.mjs",
         "src/persistence/repositories.mjs",
-        "src/persistence/token-ledger.mjs",
+        "src/persistence/credit-ledger.mjs",
         "src/persistence/seeds.mjs",
         "tests/persistence-ledger.test.mjs",
         "tests/mvp-verification.test.mjs"
@@ -425,14 +425,14 @@
       ],
       "authority": [
         "May introduce a durable local database dependency if needed",
-        "Must keep token balances derived from transaction records",
+        "Must keep credit balances derived from transaction records",
         "Must keep existing service-level behavior compatible with current tests",
         "Do not implement auth, payment, or social API behavior in this task"
       ],
       "acceptance_criteria": [
-        "Users, events, interests, token transactions, and social posts persist across app restarts when durable mode is enabled",
+        "Users, events, interests, credit transactions, and social posts persist across app restarts when durable mode is enabled",
         "Existing in-memory test setup remains available or tests are updated to use an isolated durable store",
-        "Token hold, consume, refund, grant, and future purchase transaction semantics remain auditable",
+        "Credit hold, consume, refund, grant, and future purchase transaction semantics remain auditable",
         "README documents how local persistence is configured and reset"
       ],
       "verification": [
@@ -441,7 +441,7 @@
       ],
       "stop_condition": "Stop once durable persistence is available behind the repository boundary and documented.",
       "evidence": "2026-05-31 08:55 EDT: Added a dependency-free JSON file store behind the repository boundary, wired durable mode through COHORT15_PERSISTENCE_FILE, kept in-memory repositories available, documented configuration/reset behavior, and added reload coverage proving records and ledger balances survive repository reinitialization without duplicate seed grants. `npm run check` passed with 44 tests.",
-      "notes": "Durable persistence is available as local JSON-file mode; later auth and purchase tasks can rely on stable user, ledger, event, interest, and outbox records while preserving derived token balance semantics."
+      "notes": "Durable persistence is available as local JSON-file mode; later auth and purchase tasks can rely on stable user, ledger, event, interest, and outbox records while preserving derived credit balance semantics."
     },
     {
       "id": "T012",
@@ -491,46 +491,46 @@
     },
     {
       "id": "T013",
-      "title": "Add token purchase package flow",
+      "title": "Add credit purchase package flow",
       "status": "not_started",
       "phase": "Post-MVP Monetization",
       "dependencies": [
         "T011",
         "T012"
       ],
-      "objective": "Add the first token purchase flow for the documented post-MVP packages, recording purchase transactions without breaking grant or hold accounting.",
+      "objective": "Add the first credit purchase flow for the documented post-MVP packages, recording purchase transactions without breaking grant or hold accounting.",
       "inputs": [
         "plan.md",
-        "src/persistence/token-ledger.mjs",
+        "src/persistence/credit-ledger.mjs",
         "src/persistence/schema.mjs",
         "src/services/dashboards.mjs",
         "src/server/app.mjs",
         "README.md"
       ],
       "write_scope": [
-        "token package constants or service modules",
+        "credit package constants or service modules",
         "purchase route/controller",
         "purchase UI",
-        "token transaction schema fields if needed",
+        "credit transaction schema fields if needed",
         "purchase tests",
         "README payment-mode notes"
       ],
       "authority": [
-        "Use initial packages of $6 for 6 tokens and $12 for 14 tokens",
+        "Use initial packages of $6 for 6 credits and $12 for 14 credits",
         "May implement a local/mock payment confirmation unless a real payment provider is specified",
-        "Must record successful purchases as auditable purchase token transactions",
+        "Must record successful purchases as auditable purchase credit transactions",
         "Do not store real card data or implement unrequested payment-provider credentials"
       ],
       "acceptance_criteria": [
-        "Authenticated users can select one of the two documented token packages",
+        "Authenticated users can select one of the two documented credit packages",
         "Successful purchase creates a purchase transaction and updates derived available balance",
-        "Cancelled or failed local/mock purchases do not grant tokens",
-        "Dashboards or token summary surfaces reflect purchased token balance",
+        "Cancelled or failed local/mock purchases do not grant credits",
+        "Dashboards or credit summary surfaces reflect purchased credit balance",
         "README clearly labels whether payment is local/mock or provider-backed"
       ],
       "verification": [
         "Run purchase flow tests",
-        "Run token ledger tests",
+        "Run credit ledger tests",
         "Run the full documented verification suite"
       ],
       "stop_condition": "Stop once package purchase accounting works and payment-provider limitations are documented.",
@@ -588,7 +588,7 @@
       "dependencies": [
         "T012"
       ],
-      "objective": "Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving token accounting and link visibility rules.",
+      "objective": "Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving credit accounting and link visibility rules.",
       "inputs": [
         "docs/cohort15-mvp-spec-v3.md",
         "src/domain/constants.mjs",
@@ -606,13 +606,13 @@
       ],
       "authority": [
         "May support cancelled and completed statuses already defined in the domain",
-        "Cancelling open cohorts must refund held creator and participant tokens through refund transactions",
-        "Completing active cohorts must not refund already consumed tokens",
+        "Cancelling open cohorts must refund held creator and participant credits through refund transactions",
+        "Completing active cohorts must not refund already consumed credits",
         "Do not add broad moderation tooling in this task"
       ],
       "acceptance_criteria": [
         "Authorized creators or admins can cancel open cohorts",
-        "Cancellation refunds held creator and participant tokens and removes the cohort from public discovery",
+        "Cancellation refunds held creator and participant credits and removes the cohort from public discovery",
         "Authorized creators or admins can mark active cohorts completed",
         "Completed cohorts keep historical dashboard visibility without exposing links to unauthorized users",
         "Unauthorized lifecycle actions are rejected"
@@ -712,12 +712,12 @@
         "T012",
         "T017"
       ],
-      "objective": "Move launch persistence beyond local JSON by selecting and wiring a production-appropriate datastore while preserving repository contracts and token ledger auditability.",
+      "objective": "Move launch persistence beyond local JSON by selecting and wiring a production-appropriate datastore while preserving repository contracts and credit ledger auditability.",
       "inputs": [
         "src/persistence/schema.mjs",
         "src/persistence/repositories.mjs",
         "src/persistence/store.mjs",
-        "src/persistence/token-ledger.mjs",
+        "src/persistence/credit-ledger.mjs",
         "README.md"
       ],
       "write_scope": [
@@ -728,15 +728,15 @@
       ],
       "authority": [
         "May add a provider-backed adapter once a deployment target/datastore is selected",
-        "Must keep token balances derived from transactions",
+        "Must keep credit balances derived from transactions",
         "Must preserve isolated in-memory tests and local durable mode where useful",
         "Do not embed datastore credentials"
       ],
       "acceptance_criteria": [
         "Production datastore choice is documented",
-        "Users, events, interests, token transactions, and social posts persist in the launch datastore",
+        "Users, events, interests, credit transactions, and social posts persist in the launch datastore",
         "Migrations or schema initialization are repeatable",
-        "Token ledger semantics remain auditable",
+        "Credit ledger semantics remain auditable",
         "Local development still has a documented persistence path"
       ],
       "verification": [
@@ -776,7 +776,7 @@
         "Required and optional environment variables are documented",
         "Missing required launch config fails clearly",
         "Local development remains easy to run",
-        "No real credentials or tokens are committed",
+        "No real credentials or credits are committed",
         "Tests cover configuration parsing or startup validation"
       ],
       "verification": [
@@ -853,7 +853,7 @@
       "acceptance_criteria": [
         "Server emits useful request and error logs",
         "Health/readiness behavior is documented",
-        "Logs avoid private links, secrets, and sensitive tokens",
+        "Logs avoid private links, secrets, and sensitive credits",
         "Launch monitoring checklist is documented"
       ],
       "verification": [
@@ -875,7 +875,7 @@
         "T020",
         "T021"
       ],
-      "objective": "Review launch-critical privacy and security behavior, especially private cohort links, auth boundaries, token accounting, admin operations, logs, and public social content.",
+      "objective": "Review launch-critical privacy and security behavior, especially private cohort links, auth boundaries, credit accounting, admin operations, logs, and public social content.",
       "inputs": [
         "src/domain/validation.mjs",
         "src/server/app.mjs",
@@ -897,7 +897,7 @@
       "acceptance_criteria": [
         "Private links are verified hidden from public pages, social posts, logs, and unauthorized users",
         "Auth and admin boundaries are reviewed",
-        "Token ledger integrity risks are reviewed",
+        "Credit ledger integrity risks are reviewed",
         "Any launch-blocking findings are fixed or explicitly tracked",
         "Residual risks are documented"
       ],
@@ -939,7 +939,7 @@
         "Do not mark launch ready until critical checks pass or blockers are documented"
       ],
       "acceptance_criteria": [
-        "Checklist covers sign-in, token balance, purchase, create cohort, public discovery, show interest, quorum unlock, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility",
+        "Checklist covers sign-in, credit balance, purchase, create cohort, public discovery, show interest, quorum unlock, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility",
         "Checklist includes expected outcomes and rollback notes",
         "Launch blockers discovered during smoke testing are recorded",
         "Full automated verification passes before launch signoff"

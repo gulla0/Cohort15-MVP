@@ -119,7 +119,7 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(combinedDashboard.status, 200);
   assert.match(combinedDashboard.body, /My Cohorts &amp; Events/);
-  assert.match(combinedDashboard.body, /Account Tokens/);
+  assert.match(combinedDashboard.body, /Account Credits/);
   assert.match(combinedDashboard.body, /Active Cohorts &amp; Schedule/);
   assert.match(combinedDashboard.body, /Created Cohorts/);
   assert.match(combinedDashboard.body, /Interested Cohorts/);
@@ -130,16 +130,16 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   assert.equal([...combinedDashboard.body.matchAll(/<h2>Available<\/h2>/g)].length, 1);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>In use<\/h2>/g)].length, 1);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>Used<\/h2>/g)].length, 1);
-  assert.match(combinedDashboard.body, />9 token\(s\)</);
-  assert.match(combinedDashboard.body, />3 token\(s\)</);
+  assert.match(combinedDashboard.body, />9 credit\(s\)</);
+  assert.match(combinedDashboard.body, />3 credit\(s\)</);
   assert.doesNotMatch(combinedDashboard.body, /Returned/);
-  assert.doesNotMatch(combinedDashboard.body, /creator tokens:/);
-  assert.doesNotMatch(combinedDashboard.body, /participant tokens:/);
+  assert.doesNotMatch(combinedDashboard.body, /creator credits:/);
+  assert.doesNotMatch(combinedDashboard.body, /participant credits:/);
   assert.doesNotMatch(combinedDashboard.body, /<h2>Demo Creator<\/h2>/);
   assert.doesNotMatch(combinedDashboard.body, /<h2>Demo Participant<\/h2>/);
 });
 
-test('MVP expiry path refunds held creator and participant tokens and removes expired cohorts from public discovery', async () => {
+test('MVP expiry path refunds held creator and participant credits and removes expired cohorts from public discovery', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state, {
     now: () => now

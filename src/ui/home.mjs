@@ -23,7 +23,7 @@ export function renderHomePage() {
       <section class="hero" aria-labelledby="page-title">
         <p class="eyebrow">Online cohorts</p>
         <h1 id="page-title">${APP_NAME}</h1>
-        <p class="lede">Start an online cohort with 2 tokens, show interest with 1 token, and unlock the private link when quorum is met.</p>
+        <p class="lede">Start an online cohort with 2 credits, show interest with 1 credit, and unlock the private link when quorum is met.</p>
         <p class="button-row">
           <a class="button-link" href="/cohorts">Browse cohorts</a>
           <a class="button-link secondary" href="/cohorts/new">Create a cohort</a>
@@ -37,11 +37,11 @@ export function renderHomePage() {
         </article>
         <article>
           <h2>For participants</h2>
-          <p>Browse cohorts, use 1 token to show interest, and follow your events from your dashboard.</p>
+          <p>Browse cohorts, use 1 credit to show interest, and follow your events from your dashboard.</p>
         </article>
         <article>
-          <h2>Token return</h2>
-          <p>If a cohort does not meet quorum before the two-week deadline, all tokens are returned.</p>
+          <h2>Credit return</h2>
+          <p>If a cohort does not meet quorum before the two-week deadline, all credits are returned.</p>
         </article>
       </section>
     </main>

@@ -2,11 +2,11 @@
 
 ## Issue Summary
 
-The combined dashboard repeats token account state by rendering separate creator and participant token panels, even though the product has one token type.
+The combined dashboard repeats credit account state by rendering separate creator and participant credit panels, even though the product has one credit type.
 
 ## Tasks
 
-- ISSUE-005-T01 Unify dashboard token account presentation
+- ISSUE-005-T01 Unify dashboard credit account presentation
   - Depends on: none
 
 ## Dependency Order

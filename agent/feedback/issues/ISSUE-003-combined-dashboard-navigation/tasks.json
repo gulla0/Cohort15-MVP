@@ -26,7 +26,7 @@
       ],
       "acceptance_criteria": [
         "`/dashboard` shows creator and participant sections on the same page.",
-        "Creator and participant token summaries and unlocked links still render."
+        "Creator and participant credit summaries and unlocked links still render."
       ],
       "verification": [
         "npm test"

@@ -62,15 +62,15 @@ function balancePanel(balance, label = '') {
     ${label ? `<h2>${escapeHtml(label)}</h2>` : ''}
     <article>
       <h2>Available</h2>
-      <p>${escapeHtml(balance.available)} token(s)</p>
+      <p>${escapeHtml(balance.available)} credit(s)</p>
     </article>
     <article>
       <h2>In use</h2>
-      <p>${escapeHtml(balance.held)} token(s)</p>
+      <p>${escapeHtml(balance.held)} credit(s)</p>
     </article>
     <article>
       <h2>Used</h2>
-      <p>${escapeHtml(balance.consumed)} token(s)</p>
+      <p>${escapeHtml(balance.consumed)} credit(s)</p>
     </article>
   </section>`;
 }
@@ -95,7 +95,7 @@ function interestStatusText(status) {
   }
 
   if (status === 'refunded') {
-    return 'Tokens returned';
+    return 'Credits returned';
   }
 
   return formatEnum(status);
@@ -204,7 +204,7 @@ export function renderCreatorDashboardPage({ dashboard }) {
     eyebrow: 'Dashboard',
     heading: 'My Cohorts',
     lede: `${dashboard.user.displayName} cohorts, status, schedule, and unlocked links.`,
-    body: `${balancePanel(dashboard.balance, 'My Tokens')}
+    body: `${balancePanel(dashboard.balance, 'My Credits')}
       ${dashboard.cohorts.length === 0
         ? emptyState('Create a cohort to see your cohorts here.')
         : `<section class="event-list">${dashboard.cohorts.map(creatorCohortRow).join('')}</section>`}`
@@ -217,7 +217,7 @@ export function renderParticipantDashboardPage({ dashboard }) {
     eyebrow: 'Dashboard',
     heading: 'My Events',
     lede: `${dashboard.user.displayName} cohorts with interest, seat status, schedule, and access.`,
-    body: `${balancePanel(dashboard.balance, 'My Tokens')}
+    body: `${balancePanel(dashboard.balance, 'My Credits')}
       ${dashboard.interests.length === 0
         ? emptyState('Show interest in a cohort to see your events here.')
         : `<section class="event-list">${dashboard.interests.map(participantInterestRow).join('')}</section>`}`
@@ -231,11 +231,11 @@ export function renderDashboardPage({ creatorDashboard, participantDashboard, ac
     title: 'Dashboard',
     eyebrow: 'Dashboard',
     heading: 'My Cohorts & Events',
-    lede: 'A single place to check token availability, upcoming active cohorts, created cohorts, and events with interest.',
+    lede: 'A single place to check credit availability, upcoming active cohorts, created cohorts, and events with interest.',
     body: `<div class="dashboard-grid">
       ${dashboardPanel({
-        title: 'Account Tokens',
-        description: 'Available tokens can be used now. In use tokens are waiting on quorum. Used tokens belong to active cohorts.',
+        title: 'Account Credits',
+        description: 'Available credits can be used now. In use credits are waiting on quorum. Used credits belong to active cohorts.',
         children: balancePanel(accountBalance)
       })}
       ${dashboardPanel({

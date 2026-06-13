@@ -2,8 +2,8 @@
 
 ```mermaid
 graph TD
-  T01["ISSUE-004-T01 Remove repeated dashboard token details"]
-  T02["ISSUE-004-T02 Simplify dashboard token summary states"]
+  T01["ISSUE-004-T01 Remove repeated dashboard credit details"]
+  T02["ISSUE-004-T02 Simplify dashboard credit summary states"]
   T03["ISSUE-004-T03 Rename dashboard sections around user intent"]
   T04["ISSUE-004-T04 Review dashboard user flow hierarchy"]
 
@@ -16,8 +16,8 @@ graph TD
 
 ## Order Rationale
 
-Start by removing duplicate token detail so the remaining dashboard content is easier to reason about. Then simplify the summary states and rename the dashboard sections. Finish with a broader flow review once the content and vocabulary are stable.
+Start by removing duplicate credit detail so the remaining dashboard content is easier to reason about. Then simplify the summary states and rename the dashboard sections. Finish with a broader flow review once the content and vocabulary are stable.
 
 ## Resolution
 
-All ISSUE-004 tasks were completed on 2026-05-30. The dashboard now leads with account token state, renders only Available/In use/Used, removes repeated row-level token details, and uses content-based sections for Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts.
+All ISSUE-004 tasks were completed on 2026-05-30. The dashboard now leads with account credit state, renders only Available/In use/Used, removes repeated row-level credit details, and uses content-based sections for Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts.

@@ -7,7 +7,7 @@ Append-only issue-local notes.
 User Feedback:
 - Current frontend is weak.
 - User cannot show interest in events.
-- Avoid words like staking; use simple token wording.
+- Avoid words like staking; use simple credit wording.
 - Calendar allows dates that are already passed and should only allow dates after the two-week time limit.
 - Navigation is weird and dashboard access is unclear.
 
@@ -27,7 +27,7 @@ Decision:
 
 Resolved:
 - Updated the cohort detail interest form to prefer a non-creator demo participant, even when reaching the detail page from create success.
-- Replaced visible staking/ledger wording with simple token language and refund reassurance.
+- Replaced visible staking/ledger wording with simple credit language and refund reassurance.
 - Enforced first meeting dates after the 14-day quorum window in backend validation and added a create-form minimum.
 - Added consistent navigation to cohorts, create, creator dashboard, and participant dashboard.
 - Added next-step links from create success and interest success.

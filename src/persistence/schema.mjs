@@ -35,9 +35,9 @@ export const TABLES = Object.freeze({
   eventInterests: Object.freeze({
     primaryKey: 'id',
     unique: Object.freeze(['eventId', 'userId']),
-    fields: Object.freeze(['id', 'eventId', 'userId', 'tokensHeld', 'status', 'createdAt'])
+    fields: Object.freeze(['id', 'eventId', 'userId', 'creditsHeld', 'status', 'createdAt'])
   }),
-  tokenTransactions: Object.freeze({
+  creditTransactions: Object.freeze({
     primaryKey: 'id',
     indexes: Object.freeze(['userId', 'eventId', 'type']),
     fields: Object.freeze(['id', 'userId', 'eventId', 'amount', 'type', 'source', 'createdAt'])
@@ -49,6 +49,6 @@ export const TABLES = Object.freeze({
   })
 });
 
-export const FUTURE_TOKEN_SOURCES = Object.freeze([
+export const FUTURE_CREDIT_SOURCES = Object.freeze([
   'purchase'
 ]);

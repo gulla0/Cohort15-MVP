@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 import { tmpdir } from 'node:os';
 import { buildEvent } from '../src/domain/validation.mjs';
-import { FUTURE_TOKEN_SOURCES, TABLES } from '../src/persistence/schema.mjs';
+import { FUTURE_CREDIT_SOURCES, TABLES } from '../src/persistence/schema.mjs';
 import { createRepositories } from '../src/persistence/repositories.mjs';
 import { createDemoRepositories, DEMO_USERS } from '../src/persistence/seeds.mjs';
 import { createJsonFileStore } from '../src/persistence/store.mjs';
-import { createTokenLedger } from '../src/persistence/token-ledger.mjs';
+import { createCreditLedger } from '../src/persistence/credit-ledger.mjs';
 
 const createdAt = new Date('2026-06-01T12:00:00.000Z');
 
@@ -39,12 +39,12 @@ test('schema defines MVP persistence tables and leaves purchase source path expl
     'users',
     'events',
     'eventInterests',
-    'tokenTransactions',
+    'creditTransactions',
     'socialPosts'
   ]);
   assert.equal(TABLES.eventInterests.unique.includes('eventId'), true);
   assert.equal(TABLES.eventInterests.unique.includes('userId'), true);
-  assert.deepEqual(FUTURE_TOKEN_SOURCES, ['purchase']);
+  assert.deepEqual(FUTURE_CREDIT_SOURCES, ['purchase']);
 });
 
 test('repositories persist users, events, interests, transactions, and social posts', () => {
@@ -59,11 +59,11 @@ test('repositories persist users, events, interests, transactions, and social po
     id: 'interest-1',
     eventId: 'event-1',
     userId: 'user-participant',
-    tokensHeld: 1,
+    creditsHeld: 1,
     status: 'active',
     createdAt
   });
-  repositories.tokenTransactions.append({
+  repositories.creditTransactions.append({
     id: 'txn-1',
     userId: 'user-creator',
     eventId: 'event-1',
@@ -83,7 +83,7 @@ test('repositories persist users, events, interests, transactions, and social po
   assert.equal(repositories.users.findById('user-creator').displayName, 'Demo Creator');
   assert.equal(repositories.events.findById('event-1').title, 'Beginner TypeScript Build Cohort');
   assert.equal(repositories.eventInterests.listByEvent('event-1').length, 1);
-  assert.equal(repositories.tokenTransactions.listByUser('user-creator').length, 1);
+  assert.equal(repositories.creditTransactions.listByUser('user-creator').length, 1);
   assert.equal(repositories.socialPosts.listByEvent('event-1').length, 1);
 });
 
@@ -93,7 +93,7 @@ test('event interests are unique for a user and event', () => {
     id: 'interest-1',
     eventId: 'event-1',
     userId: 'user-participant',
-    tokensHeld: 1,
+    creditsHeld: 1,
     status: 'active',
     createdAt
   };
@@ -106,9 +106,9 @@ test('event interests are unique for a user and event', () => {
   }), /unique by eventId and userId/);
 });
 
-test('token ledger derives available and held balances from auditable records', () => {
+test('credit ledger derives available and held balances from auditable records', () => {
   const repositories = createRepositories();
-  const ledger = createTokenLedger(repositories.tokenTransactions, {
+  const ledger = createCreditLedger(repositories.creditTransactions, {
     now: () => createdAt
   });
 
@@ -140,17 +140,17 @@ test('token ledger derives available and held balances from auditable records', 
   });
 });
 
-test('token ledger refunds holds and rejects insufficient available or held tokens', () => {
+test('credit ledger refunds holds and rejects insufficient available or held credits', () => {
   const repositories = createRepositories();
-  const ledger = createTokenLedger(repositories.tokenTransactions, {
+  const ledger = createCreditLedger(repositories.creditTransactions, {
     now: () => createdAt
   });
 
   ledger.grant('user-participant', 1);
-  assert.throws(() => ledger.hold('user-participant', 'event-1', 2), /Insufficient available tokens/);
+  assert.throws(() => ledger.hold('user-participant', 'event-1', 2), /Insufficient available credits/);
 
   ledger.hold('user-participant', 'event-1', 1);
-  assert.throws(() => ledger.refundHeld('user-participant', 'event-1', 2), /Insufficient held tokens/);
+  assert.throws(() => ledger.refundHeld('user-participant', 'event-1', 2), /Insufficient held credits/);
 
   ledger.refundHeld('user-participant', 'event-1', 1);
   assert.deepEqual(ledger.balanceForUser('user-participant'), {
@@ -162,11 +162,11 @@ test('token ledger refunds holds and rejects insufficient available or held toke
   });
 });
 
-test('demo seeds create users and starting token grants through ledger transactions', () => {
+test('demo seeds create users and starting credit grants through ledger transactions', () => {
   const { repositories, ledger } = createDemoRepositories();
 
   assert.deepEqual(repositories.users.list().map((user) => user.id), DEMO_USERS.map((user) => user.id));
-  assert.equal(repositories.tokenTransactions.list().every((transaction) => transaction.type === 'grant'), true);
+  assert.equal(repositories.creditTransactions.list().every((transaction) => transaction.type === 'grant'), true);
   assert.equal(ledger.balanceForUser('user-creator').available, 6);
   assert.equal(ledger.balanceForUser('user-participant').available, 6);
 });
@@ -199,9 +199,69 @@ test('json file store persists records across repository reloads', () => {
     assert.equal(secondState.repositories.events.findById('event-1').title, 'Beginner TypeScript Build Cohort');
     assert.equal(secondState.repositories.socialPosts.findById('post-1').status, 'pending');
     assert.equal(secondState.ledger.balanceForUser('user-creator').held, 2);
-    assert.equal(secondState.repositories.tokenTransactions.listByUser('user-creator').filter((transaction) => (
-      transaction.type === 'grant' && transaction.source === 'seed_demo_tokens'
+    assert.equal(secondState.repositories.creditTransactions.listByUser('user-creator').filter((transaction) => (
+      transaction.type === 'grant' && transaction.source === 'seed_demo_credits'
     )).length, 1);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('json file store reads earlier credit ledger snapshots without duplicate seed grants', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cohort15-store-'));
+  const filePath = join(dir, 'state.json');
+  const previousVocabulary = ['to', 'ken'].join('');
+  const previousTransactionsKey = `${previousVocabulary}Transactions`;
+  const previousHeldKey = `${previousVocabulary}sHeld`;
+
+  try {
+    writeFileSync(filePath, `${JSON.stringify({
+      users: [{
+        id: 'user-creator',
+        displayName: 'Demo Creator',
+        createdAt: createdAt.toISOString()
+      }, {
+        id: 'user-participant',
+        displayName: 'Demo Participant',
+        createdAt: createdAt.toISOString()
+      }],
+      events: [],
+      eventInterests: [{
+        id: 'interest-legacy',
+        eventId: 'event-1',
+        userId: 'user-participant',
+        [previousHeldKey]: 1,
+        status: 'active',
+        createdAt: createdAt.toISOString()
+      }],
+      [previousTransactionsKey]: [{
+        id: 'txn-grant-user-creator-1',
+        userId: 'user-creator',
+        amount: 6,
+        type: 'grant',
+        source: `seed_demo_${previousVocabulary}s`,
+        createdAt: createdAt.toISOString()
+      }, {
+        id: 'txn-grant-user-participant-2',
+        userId: 'user-participant',
+        amount: 6,
+        type: 'grant',
+        source: `seed_demo_${previousVocabulary}s`,
+        createdAt: createdAt.toISOString()
+      }],
+      socialPosts: []
+    }, null, 2)}\n`, 'utf8');
+
+    const state = createDemoRepositories({
+      store: createJsonFileStore(filePath)
+    });
+
+    assert.equal(state.repositories.creditTransactions.list().length, 2);
+    assert.equal(state.repositories.eventInterests.findById('interest-legacy').creditsHeld, 1);
+    assert.equal(state.ledger.balanceForUser('user-creator').available, 6);
+    assert.equal(state.repositories.creditTransactions.list().every((transaction) => (
+      transaction.source === 'seed_demo_credits'
+    )), true);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

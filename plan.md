@@ -2,28 +2,28 @@
 
 ## Project
 
-Cohort15 is an online cohort-event platform. Creators stake 2 tokens to publish a cohort event, participants stake 1 token to show interest, and tokens remain held until the cohort either reaches quorum or expires. When quorum is met, the event becomes active, held tokens are consumed, and the private online link is revealed. If the event expires before quorum, held tokens are refunded.
+Cohort15 is an online cohort-event platform. Creators stake 2 credits to publish a cohort event, participants stake 1 credit to show interest, and credits remain held until the cohort either reaches quorum or expires. When quorum is met, the event becomes active, held credits are consumed, and the private online link is revealed. If the event expires before quorum, held credits are refunded.
 
 Source spec: `docs/cohort15-mvp-spec-v3.md`.
 
 ## Product Constraints
 
 - MVP is online-only. There is no in-person location support.
-- Creator cost is 2 held tokens per event. Participant interest cost is 1 held token.
-- Tokens are held while an event is open and are consumed only when quorum is met.
+- Creator cost is 2 held credits per event. Participant interest cost is 1 held credit.
+- Credits are held while an event is open and are consumed only when quorum is met.
 - Events expire 14 days after creation if quorum is not met.
 - Private event links are hidden until quorum is met.
 - Maximum participants is 15, and `maxParticipants` must be greater than or equal to `minQuorum`.
-- Regular user auth, event feed/detail, creator dashboard, participant dashboard, local/admin token grants, social promotion outbox, token ledger, quorum, and expiry behavior are in MVP scope.
-- USD token sales, real automated posting to external social channels, in-app chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events are post-MVP or out of scope.
+- Regular user auth, event feed/detail, creator dashboard, participant dashboard, local/admin credit grants, social promotion outbox, credit ledger, quorum, and expiry behavior are in MVP scope.
+- USD credit sales, real automated posting to external social channels, in-app chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events are post-MVP or out of scope.
 
 ## Build Goal
 
 Ship the smallest usable version that proves:
 
-1. A user can create an online cohort by holding 2 tokens.
-2. Other users can stake 1 token to show interest, and quorum unlocks the private link.
-3. Expired cohorts refund held tokens and keep private links hidden.
+1. A user can create an online cohort by holding 2 credits.
+2. Other users can stake 1 credit to show interest, and quorum unlocks the private link.
+3. Expired cohorts refund held credits and keep private links hidden.
 4. Newly created cohorts generate public-safe social-promotion copy in a local outbox, ready for later real channel posting.
 
 ## Product Decisions Locked For This Plan
@@ -34,9 +34,9 @@ Ship the smallest usable version that proves:
 - Recurrence values are `none`, `weekly`, `biweekly`, and `monthly`.
 - One-time events must have exactly one meeting.
 - Repeating events must have at least two meetings.
-- Token movement must be auditable through transaction records.
-- MVP token supply comes from local/admin grants. USD purchase flows come after MVP.
-- Initial post-MVP token packages are `$6` for 6 tokens and `$12` for 14 tokens.
+- Credit movement must be auditable through transaction records.
+- MVP credit supply comes from local/admin grants. USD purchase flows come after MVP.
+- Initial post-MVP credit packages are `$6` for 6 credits and `$12` for 14 credits.
 - Event interest belongs in a separate object from the event.
 - Private links must never be included in public social outbox content or later public social posts.
 
@@ -54,13 +54,13 @@ Tasks:
 
 Exit criteria:
 - A runnable app skeleton exists with automated checks.
-- Cohort event, interest, token transaction, and social post concepts are represented in typed code and persistence.
+- Cohort event, interest, credit transaction, and social post concepts are represented in typed code and persistence.
 - Spec validation rules are covered by focused tests.
 
 ### Phase 2 - Core Cohort Flow
 
 Goal:
-- Implement the user-facing create, feed, detail, interest, quorum, token, and expiry flows.
+- Implement the user-facing create, feed, detail, interest, quorum, credit, and expiry flows.
 
 Tasks:
 - T004
@@ -83,7 +83,7 @@ Tasks:
 - T010
 
 Exit criteria:
-- Creator and participant dashboards expose the needed event/token states.
+- Creator and participant dashboards expose the needed event/credit states.
 - Cohort creation produces a local social-promotion record with public-safe content.
 - Core lifecycle paths are covered by tests or documented manual verification.
 
@@ -97,21 +97,21 @@ Tasks:
 - T012
 
 Exit criteria:
-- Cohort, user, token, interest, and social outbox records can survive app restart in a local durable store.
+- Cohort, user, credit, interest, and social outbox records can survive app restart in a local durable store.
 - Protected flows no longer trust demo query parameters or default user ids.
 - Private-link authorization remains scoped to the authenticated creator or committed participants.
 
 ### Phase 5 - Post-MVP Monetization And Distribution
 
 Goal:
-- Add the first token purchase path and make social promotion publish through safe adapter boundaries.
+- Add the first credit purchase path and make social promotion publish through safe adapter boundaries.
 
 Tasks:
 - T013
 - T014
 
 Exit criteria:
-- Authenticated users can buy the documented `$6`/6-token and `$12`/14-token packages through a documented local/mock or provider-backed mode.
+- Authenticated users can buy the documented `$6`/6-credit and `$12`/14-credit packages through a documented local/mock or provider-backed mode.
 - Successful purchases create auditable purchase transactions.
 - Pending social outbox posts can be processed by configured adapters without leaking private event links.
 
@@ -125,8 +125,8 @@ Tasks:
 
 Exit criteria:
 - Authorized creators or admins can cancel open cohorts with refunds.
-- Authorized creators or admins can complete active cohorts without refunding consumed tokens.
-- Cancelled and completed cohorts behave correctly in discovery, dashboards, token accounting, and private-link visibility.
+- Authorized creators or admins can complete active cohorts without refunding consumed credits.
+- Cancelled and completed cohorts behave correctly in discovery, dashboards, credit accounting, and private-link visibility.
 
 ### Phase 7 - Launch Readiness
 
@@ -150,7 +150,7 @@ Exit criteria:
 - Environment variables and secrets are documented and validated without committing credentials.
 - Admin/operational endpoints are protected.
 - Basic logging, health, and monitoring expectations are documented.
-- Private-link, auth, token, admin, social, and logging privacy/security risks are reviewed.
+- Private-link, auth, credit, admin, social, and logging privacy/security risks are reviewed.
 - A production launch smoke-test checklist exists and is ready to run against the selected environment.
 
 ## MVP Boundary
@@ -158,12 +158,12 @@ Exit criteria:
 Build now:
 
 - Regular auth.
-- Token ledger and balances.
-- Admin/demo token grants.
-- Create cohort for 2 held tokens.
-- Show interest for 1 held token.
-- Quorum unlock and token consumption.
-- 14-day expiry and token refunds.
+- Credit ledger and balances.
+- Admin/demo credit grants.
+- Create cohort for 2 held credits.
+- Show interest for 1 held credit.
+- Quorum unlock and credit consumption.
+- 14-day expiry and credit refunds.
 - Hidden private links before unlock.
 - Event feed and event detail pages.
 - Creator dashboard.
@@ -174,8 +174,8 @@ Post-MVP / urgent-next:
 
 - Durable persistence beyond the current in-memory store.
 - Regular auth boundary replacing demo query/default-user identity selection.
-- USD token sales.
-- Payment packages: `$6` for 6 tokens and `$12` for 14 tokens.
+- USD credit sales.
+- Payment packages: `$6` for 6 credits and `$12` for 14 credits.
 - Real automated posting from the social outbox to official external channels.
 - Cancelled/completed lifecycle controls for the statuses already represented in the domain.
 - Deterministic stale-date test repair so verification does not depend on the current calendar date.
@@ -193,13 +193,13 @@ If time is tight, cut to:
 
 - Local/demo authentication instead of production auth.
 - Mocked official social posting saved to a `SocialPost` record instead of real platform APIs.
-- Granted seed tokens instead of token purchase flows.
+- Granted seed credits instead of credit purchase flows.
 - One database-backed web app with server-side business logic.
-- Minimal dashboards that list relevant cohorts and token states without advanced analytics.
+- Minimal dashboards that list relevant cohorts and credit states without advanced analytics.
 
 Do not cut:
 
-- Token hold/consume/refund accounting.
+- Credit hold/consume/refund accounting.
 - Quorum unlock behavior.
 - Expiry refund behavior.
 - Hidden private link behavior.
@@ -210,13 +210,13 @@ Do not cut:
 1. Product stack is not specified. The first implementation task should choose and scaffold a pragmatic web stack before feature work begins.
 2. Production auth provider is not specified. Initial implementation may use the selected framework's simplest regular auth approach or a local/demo auth adapter, then document the assumption.
 3. Official social channels are post-MVP. Initial implementation should create a platform-neutral social outbox/mock post and avoid real API integration until channels and credentials are known.
-4. Initial token balances should come from admin/demo grant transactions. USD purchase grants are post-MVP and should initially use `$6` for 6 tokens and `$12` for 14 tokens.
+4. Initial credit balances should come from admin/demo grant transactions. USD purchase grants are post-MVP and should initially use `$6` for 6 credits and `$12` for 14 credits.
 5. Deployment target is not specified. Initial implementation should keep deployment assumptions out of core domain logic.
 6. Durable persistence technology is not specified. T011 may choose a pragmatic local store if it preserves the repository boundary and documented commands.
 7. Payment provider is not specified. T013 should start with a local/mock payment confirmation unless the user selects a real provider.
 8. Official social channels and credentials are not specified. T014 should keep a dry-run/mock adapter path and avoid hard-coded secrets.
 9. Deployment target is still unspecified for public launch. T017 should choose and document the first target before production persistence work.
-10. Production datastore is still unspecified. T018 should follow the deployment choice and preserve token ledger auditability.
+10. Production datastore is still unspecified. T018 should follow the deployment choice and preserve credit ledger auditability.
 11. Secret management and environment variable requirements are not formalized. T019 should add that boundary before provider-backed integrations.
 
 ## Suggested First Sprint

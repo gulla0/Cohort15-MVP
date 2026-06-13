@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CREATE_EVENT_TOKEN_COST, SHOW_INTEREST_TOKEN_COST } from '../src/domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST, SHOW_INTEREST_CREDIT_COST } from '../src/domain/constants.mjs';
 import { buildEvent } from '../src/domain/validation.mjs';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
 import { createShowInterestService } from '../src/services/show-interest.mjs';
@@ -69,24 +69,24 @@ async function invoke(handler, request) {
   };
 }
 
-test('show interest records a 1-token hold and active interest', () => {
+test('show interest records a 1-credit hold and active interest', () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
-  ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   const result = service.showInterest({ eventId: event.id, userId: 'user-participant' });
 
   assert.equal(result.activated, false);
   assert.equal(result.interest.id, 'interest-created');
   assert.equal(result.interest.status, 'active');
-  assert.equal(result.interest.tokensHeld, SHOW_INTEREST_TOKEN_COST);
-  assert.equal(ledger.balanceForUser('user-participant').held, SHOW_INTEREST_TOKEN_COST);
+  assert.equal(result.interest.creditsHeld, SHOW_INTEREST_CREDIT_COST);
+  assert.equal(ledger.balanceForUser('user-participant').held, SHOW_INTEREST_CREDIT_COST);
 });
 
 test('show interest rejects creators without changing the UI default participant path', async () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
-  ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   assert.throws(
     () => service.showInterest({ eventId: event.id, userId: 'user-creator' }),
@@ -104,7 +104,7 @@ test('show interest rejects creators without changing the UI default participant
 test('show interest rejects duplicate active interest and participant cap overflow', () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
-  ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   service.showInterest({ eventId: event.id, userId: 'user-participant' });
 
@@ -128,12 +128,12 @@ test('show interest rejects duplicate active interest and participant cap overfl
     minQuorum: 2,
     maxParticipants: 2
   }));
-  ledger.hold(cappedEvent.creatorId, cappedEvent.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(cappedEvent.creatorId, cappedEvent.id, CREATE_EVENT_CREDIT_COST);
   repositories.eventInterests.save({
     id: 'interest-capped-1',
     eventId: cappedEvent.id,
     userId: 'user-other',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'active',
     createdAt: now
   });
@@ -141,7 +141,7 @@ test('show interest rejects duplicate active interest and participant cap overfl
     id: 'interest-capped-2',
     eventId: cappedEvent.id,
     userId: 'user-second',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'active',
     createdAt: now
   });
@@ -152,10 +152,10 @@ test('show interest rejects duplicate active interest and participant cap overfl
   );
 });
 
-test('show interest activates event at quorum and consumes held tokens', () => {
+test('show interest activates event at quorum and consumes held credits', () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture({ minQuorum: 1, maxParticipants: 3 }));
-  ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   const result = service.showInterest({ eventId: event.id, userId: 'user-participant' });
 
@@ -164,17 +164,17 @@ test('show interest activates event at quorum and consumes held tokens', () => {
   assert.equal(repositories.events.findById(event.id).status, 'active');
   assert.equal(repositories.eventInterests.findById('interest-created').status, 'consumed');
 
-  const transactions = repositories.tokenTransactions.listByEvent(event.id);
+  const transactions = repositories.creditTransactions.listByEvent(event.id);
   assert.equal(transactions.filter((transaction) => transaction.type === 'consume').length, 2);
-  assert.equal(ledger.balanceForUser('user-creator').consumed, CREATE_EVENT_TOKEN_COST);
-  assert.equal(ledger.balanceForUser('user-participant').consumed, SHOW_INTEREST_TOKEN_COST);
+  assert.equal(ledger.balanceForUser('user-creator').consumed, CREATE_EVENT_CREDIT_COST);
+  assert.equal(ledger.balanceForUser('user-participant').consumed, SHOW_INTEREST_CREDIT_COST);
 });
 
 test('show interest route unlocks the private link for the participant when quorum is met', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
   const event = state.repositories.events.save(eventFixture({ minQuorum: 1, maxParticipants: 3 }));
-  state.ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+  state.ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   const response = await invoke(handler, {
     url: `/cohorts/${event.id}/interest`,

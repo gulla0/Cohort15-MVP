@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CREATE_EVENT_TOKEN_COST, SHOW_INTEREST_TOKEN_COST } from '../src/domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST, SHOW_INTEREST_CREDIT_COST } from '../src/domain/constants.mjs';
 import { buildEvent } from '../src/domain/validation.mjs';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
 import { createExpireCohortsService } from '../src/services/expire-cohorts.mjs';
@@ -71,16 +71,16 @@ async function invoke(handler, request) {
   };
 }
 
-test('expiry processing expires overdue open cohorts and refunds held tokens', () => {
+test('expiry processing expires overdue open cohorts and refunds held credits', () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
-  ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
-  ledger.hold('user-participant', event.id, SHOW_INTEREST_TOKEN_COST);
+  ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
+  ledger.hold('user-participant', event.id, SHOW_INTEREST_CREDIT_COST);
   repositories.eventInterests.save({
     id: 'interest-expiring',
     eventId: event.id,
     userId: 'user-participant',
-    tokensHeld: SHOW_INTEREST_TOKEN_COST,
+    creditsHeld: SHOW_INTEREST_CREDIT_COST,
     status: 'active',
     createdAt
   });
@@ -92,11 +92,11 @@ test('expiry processing expires overdue open cohorts and refunds held tokens', (
   assert.equal(repositories.events.findById(event.id).status, 'expired');
   assert.equal(repositories.eventInterests.findById('interest-expiring').status, 'refunded');
   assert.equal(ledger.balanceForUser('user-creator').held, 0);
-  assert.equal(ledger.balanceForUser('user-creator').refunded, CREATE_EVENT_TOKEN_COST);
+  assert.equal(ledger.balanceForUser('user-creator').refunded, CREATE_EVENT_CREDIT_COST);
   assert.equal(ledger.balanceForUser('user-participant').held, 0);
-  assert.equal(ledger.balanceForUser('user-participant').refunded, SHOW_INTEREST_TOKEN_COST);
+  assert.equal(ledger.balanceForUser('user-participant').refunded, SHOW_INTEREST_CREDIT_COST);
 
-  const refundTransactions = repositories.tokenTransactions
+  const refundTransactions = repositories.creditTransactions
     .listByEvent(event.id)
     .filter((transaction) => transaction.type === 'refund');
   assert.equal(refundTransactions.length, 2);
@@ -112,8 +112,8 @@ test('expiry processing ignores active and not-yet-expired cohorts', () => {
     id: 'event-future',
     expiresAt: new Date('2026-06-20T12:00:00.000Z')
   }));
-  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_TOKEN_COST);
-  ledger.hold(futureEvent.creatorId, futureEvent.id, CREATE_EVENT_TOKEN_COST);
+  ledger.hold(activeEvent.creatorId, activeEvent.id, CREATE_EVENT_CREDIT_COST);
+  ledger.hold(futureEvent.creatorId, futureEvent.id, CREATE_EVENT_CREDIT_COST);
 
   const result = service.expireDueCohorts();
 
@@ -127,7 +127,7 @@ test('expiry route returns expired ids and expired cohorts are not public', asyn
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
   const event = state.repositories.events.save(eventFixture());
-  state.ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+  state.ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   const response = await invoke(handler, {
     url: `/admin/expire-cohorts?now=${encodeURIComponent(processingAt.toISOString())}`,

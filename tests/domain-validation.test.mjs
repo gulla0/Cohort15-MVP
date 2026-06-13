@@ -18,7 +18,7 @@ import {
   validateEvent,
   validateEventInterest,
   validateSocialPost,
-  validateTokenTransaction
+  validateCreditTransaction
 } from '../src/domain/validation.mjs';
 
 const createdAt = new Date('2026-06-01T12:00:00.000Z');
@@ -165,17 +165,17 @@ test('locked event links are hidden until activation and only visible to authori
   );
 });
 
-test('related object validators represent interest, token, and social post rules', () => {
+test('related object validators represent interest, credit, and social post rules', () => {
   assert.deepEqual(validateEventInterest({
     id: 'interest-1',
     eventId: 'event-1',
     userId: 'user-participant',
-    tokensHeld: 1,
+    creditsHeld: 1,
     status: 'active',
     createdAt
   }), []);
 
-  assert.deepEqual(validateTokenTransaction({
+  assert.deepEqual(validateCreditTransaction({
     id: 'txn-1',
     userId: 'user-participant',
     eventId: 'event-1',
@@ -197,10 +197,10 @@ test('related object validators represent interest, token, and social post rules
     id: 'interest-1',
     eventId: 'event-1',
     userId: 'user-participant',
-    tokensHeld: 2,
+    creditsHeld: 2,
     status: 'active',
     createdAt
-  }).join(' '), /tokensHeld must be 1/);
+  }).join(' '), /creditsHeld must be 1/);
 });
 
 test('expiry helper rejects invalid dates', () => {

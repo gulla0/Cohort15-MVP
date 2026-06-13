@@ -8,7 +8,7 @@ Blocked Task:
 - None
 
 Reason:
-- Setup is not blocked. Product implementation has open questions around stack, auth provider, deployment, social channels, and seed token policy, but these are recorded as assumptions or scoped into T001/T008.
+- Setup is not blocked. Product implementation has open questions around stack, auth provider, deployment, social channels, and seed credit policy, but these are recorded as assumptions or scoped into T001/T008.
 
 Exact Missing Dependency:
 - None for setup.

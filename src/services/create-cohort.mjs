@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { CREATE_EVENT_TOKEN_COST } from '../domain/constants.mjs';
+import { CREATE_EVENT_CREDIT_COST } from '../domain/constants.mjs';
 import { buildEvent } from '../domain/validation.mjs';
 import { createSocialPromotionService } from './social-promotion.mjs';
 
@@ -72,7 +72,7 @@ export function createCohortService({ repositories, ledger, options = {} }) {
       throw new Error('Creator account was not found.');
     }
 
-    ledger.hold(event.creatorId, event.id, CREATE_EVENT_TOKEN_COST);
+    ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
     const savedEvent = repositories.events.save(event);
     const promotion = socialPromotionService.enqueueForEvent(savedEvent);
 
@@ -80,7 +80,7 @@ export function createCohortService({ repositories, ledger, options = {} }) {
       event: promotion.event,
       creator,
       socialPost: promotion.post,
-      tokenHoldAmount: CREATE_EVENT_TOKEN_COST,
+      creditHoldAmount: CREATE_EVENT_CREDIT_COST,
       balance: ledger.balanceForUser(event.creatorId)
     };
   }

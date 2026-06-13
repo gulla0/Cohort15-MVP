@@ -2,15 +2,15 @@
 
 ## Product Summary
 
-**Cohort15** is a simple online platform where people can create cohort-style events and others can show interest using tokens.
+**Cohort15** is a simple online platform where people can create cohort-style events and others can show interest using credits.
 
 The core idea:
 
-- A creator spends **2 tokens** to create a cohort event.
-- A participant spends **1 token** to show interest.
-- Tokens are held while the cohort is forming.
+- A creator spends **2 credits** to create a cohort event.
+- A participant spends **1 credit** to show interest.
+- Credits are held while the cohort is forming.
 - If minimum quorum is met, the cohort unlocks and the private event link becomes visible.
-- If quorum is not met before expiry, all held tokens are returned.
+- If quorum is not met before expiry, all held credits are returned.
 - Every new cohort event is automatically promoted through official social channels.
 
 This keeps the product lightweight while giving creators built-in distribution.
@@ -19,16 +19,16 @@ This keeps the product lightweight while giving creators built-in distribution.
 
 ## Core MVP Rules
 
-### Token Rules
+### Credit Rules
 
-| Action | Token Cost | What Happens |
+| Action | Credit Cost | What Happens |
 |---|---:|---|
-| Create a cohort event | 2 tokens | Tokens are held while the event is open |
-| Show interest in a cohort | 1 token | Token is held while the event is open |
-| Quorum is met | N/A | Held tokens are consumed |
-| Quorum is not met | N/A | Held tokens are returned |
+| Create a cohort event | 2 credits | Credits are held while the event is open |
+| Show interest in a cohort | 1 credit | Credit is held while the event is open |
+| Quorum is met | N/A | Held credits are consumed |
+| Quorum is not met | N/A | Held credits are returned |
 
-Tokens should not be permanently spent until the cohort successfully unlocks.
+Credits should not be permanently spent until the cohort successfully unlocks.
 
 ---
 
@@ -49,7 +49,7 @@ Result = quorum met
 When quorum is met:
 
 - event status becomes `active`
-- held tokens are consumed
+- held credits are consumed
 - the private online event link becomes visible
 - users can join the cohort externally
 
@@ -66,13 +66,13 @@ Default expiry = createdAt + 14 days
 If quorum is met before expiry:
 
 - the cohort unlocks
-- tokens are consumed
+- credits are consumed
 - the private event link is revealed
 
 If quorum is not met before expiry:
 
 - the cohort expires
-- all held tokens are refunded
+- all held credits are refunded
 - the private event link stays hidden
 
 ---
@@ -108,7 +108,7 @@ This turns every cohort request into a small marketing campaign.
 ```txt
 User creates cohort event
 ↓
-2 tokens are held
+2 credits are held
 ↓
 Event goes live on the platform
 ↓
@@ -116,7 +116,7 @@ System posts event to official socials
 ↓
 People visit the event page
 ↓
-Users spend 1 token to show interest
+Users spend 1 credit to show interest
 ↓
 Quorum is met or event expires
 ```
@@ -167,7 +167,7 @@ Open
 ↓
 Expired
 ↓
-Tokens Returned
+Credits Returned
 ```
 
 ---
@@ -250,7 +250,7 @@ Used for:
 
 - database lookup
 - URLs
-- token transactions
+- credit transactions
 - interest records
 - social post tracking
 
@@ -265,7 +265,7 @@ Used for:
 - ownership
 - editing permissions
 - creator dashboard
-- token holds/refunds
+- credit holds/refunds
 - abuse handling
 
 ---
@@ -359,7 +359,7 @@ Example:
 Beginner developers who know basic JavaScript and want to start learning TypeScript.
 ```
 
-This helps users self-select before spending a token.
+This helps users self-select before spending a credit.
 
 ---
 
@@ -575,7 +575,7 @@ Default:
 expiresAt = createdAt + 14 days
 ```
 
-If quorum is not met by this date, the event expires and tokens are returned.
+If quorum is not met by this date, the event expires and credits are returned.
 
 ---
 
@@ -685,7 +685,7 @@ type EventInterest = {
   id: string;
   eventId: string;
   userId: string;
-  tokensHeld: number;
+  creditsHeld: number;
   status: "active" | "refunded" | "consumed";
   createdAt: Date;
 };
@@ -699,12 +699,12 @@ The event should not store a list of users directly.
 
 ---
 
-## TokenTransaction
+## CreditTransaction
 
-Token history should be auditable.
+Credit history should be auditable.
 
 ```ts
-type TokenTransaction = {
+type CreditTransaction = {
   id: string;
   userId: string;
   eventId?: string;
@@ -716,7 +716,7 @@ type TokenTransaction = {
 
 ### Why separate?
 
-Because token movement should be traceable.
+Because credit movement should be traceable.
 
 Do not silently update balances without transaction records.
 
@@ -756,9 +756,9 @@ Creator logs in
 ↓
 Creator creates cohort event
 ↓
-System checks creator has at least 2 tokens
+System checks creator has at least 2 credits
 ↓
-System holds 2 tokens
+System holds 2 credits
 ↓
 Event status = open
 ↓
@@ -780,9 +780,9 @@ Participant views open cohorts
 ↓
 Participant clicks show interest
 ↓
-System checks participant has at least 1 token
+System checks participant has at least 1 credit
 ↓
-System holds 1 token
+System holds 1 credit
 ↓
 Interest is recorded
 ↓
@@ -798,7 +798,7 @@ Interested count reaches minQuorum
 ↓
 Event status = active
 ↓
-Held tokens are consumed
+Held credits are consumed
 ↓
 Private event link becomes visible
 ↓
@@ -816,7 +816,7 @@ Quorum was not met
 ↓
 Event status = expired
 ↓
-Held tokens are refunded
+Held credits are refunded
 ↓
 Private event link remains hidden
 ```
@@ -864,10 +864,10 @@ The event object may look large, but the user form should be grouped simply.
 ## In Scope
 
 - regular user auth
-- token balance
-- create cohort event for 2 tokens
-- show interest for 1 token
-- token hold / consume / refund logic
+- credit balance
+- create cohort event for 2 credits
+- show interest for 1 credit
+- credit hold / consume / refund logic
 - quorum unlock
 - 14-day expiry
 - hidden online event link
@@ -909,7 +909,7 @@ Secondary metrics:
 Average time to quorum
 Number of interested users per event
 Social post click-through rate
-Token refund rate
+Credit refund rate
 Creator repeat rate
 ```
 
@@ -917,4 +917,4 @@ Creator repeat rate
 
 # Plain-English MVP Summary
 
-Cohort15 lets users create online cohort events by staking 2 tokens. Each event is automatically promoted through official social channels. Other users stake 1 token to show interest. If enough people commit within 14 days, quorum is met, tokens are consumed, and the private event link unlocks. If not enough people commit, the event expires and all held tokens are returned.
+Cohort15 lets users create online cohort events by staking 2 credits. Each event is automatically promoted through official social channels. Other users stake 1 credit to show interest. If enough people commit within 14 days, quorum is met, credits are consumed, and the private event link unlocks. If not enough people commit, the event expires and all held credits are returned.

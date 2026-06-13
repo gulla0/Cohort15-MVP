@@ -7,11 +7,11 @@ import {
   INTEREST_STATUSES,
   MAX_PARTICIPANTS,
   RECURRENCE_VALUES,
-  SHOW_INTEREST_TOKEN_COST,
+  SHOW_INTEREST_CREDIT_COST,
   SOCIAL_PLATFORMS,
   SOCIAL_POST_STATUSES,
   TARGET_SKILL_LEVELS,
-  TOKEN_TRANSACTION_TYPES
+  CREDIT_TRANSACTION_TYPES
 } from './constants.mjs';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -255,19 +255,19 @@ export function validateEventInterest(interest) {
   assertEnum(interest?.status, INTEREST_STATUSES, 'status', errors);
   assertDate(interest?.createdAt, 'createdAt', errors);
 
-  if (interest?.tokensHeld !== SHOW_INTEREST_TOKEN_COST) {
-    errors.push(`tokensHeld must be ${SHOW_INTEREST_TOKEN_COST}.`);
+  if (interest?.creditsHeld !== SHOW_INTEREST_CREDIT_COST) {
+    errors.push(`creditsHeld must be ${SHOW_INTEREST_CREDIT_COST}.`);
   }
 
   return errors;
 }
 
-export function validateTokenTransaction(transaction) {
+export function validateCreditTransaction(transaction) {
   const errors = [];
 
   assertText(transaction?.id, 'id', errors);
   assertText(transaction?.userId, 'userId', errors);
-  assertEnum(transaction?.type, TOKEN_TRANSACTION_TYPES, 'type', errors);
+  assertEnum(transaction?.type, CREDIT_TRANSACTION_TYPES, 'type', errors);
   assertDate(transaction?.createdAt, 'createdAt', errors);
 
   if (typeof transaction?.eventId !== 'undefined' && !hasText(transaction.eventId)) {

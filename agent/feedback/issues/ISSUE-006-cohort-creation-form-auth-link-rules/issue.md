@@ -47,7 +47,7 @@ Out of scope:
 - Implementing full production authentication unless the resolver intentionally coordinates with T012.
 - Supporting arbitrary meeting providers.
 - Uploading meeting links or creating meetings through provider APIs.
-- Changing the 2-token creator cost.
+- Changing the 2-credit creator cost.
 
 ## Notes
 

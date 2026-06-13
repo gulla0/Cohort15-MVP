@@ -1,5 +1,5 @@
 import { createRepositories } from './repositories.mjs';
-import { createTokenLedger } from './token-ledger.mjs';
+import { createCreditLedger } from './credit-ledger.mjs';
 
 export const DEMO_USERS = Object.freeze([
   Object.freeze({
@@ -20,7 +20,7 @@ export function createDemoRepositories(options = {}) {
   const repositories = options.repositories ?? createRepositories(options.seed, {
     store: options.store
   });
-  const ledger = createTokenLedger(repositories.tokenTransactions, {
+  const ledger = createCreditLedger(repositories.creditTransactions, {
     now: () => new Date('2026-06-01T12:10:00.000Z')
   });
 
@@ -29,12 +29,12 @@ export function createDemoRepositories(options = {}) {
       repositories.users.create(user);
     }
 
-    const hasSeedGrant = repositories.tokenTransactions.listByUser(user.id).some((transaction) => (
-      transaction.type === 'grant' && transaction.source === 'seed_demo_tokens'
+    const hasSeedGrant = repositories.creditTransactions.listByUser(user.id).some((transaction) => (
+      transaction.type === 'grant' && transaction.source === 'seed_demo_credits'
     ));
 
     if (!hasSeedGrant) {
-      ledger.grant(user.id, 6, 'seed_demo_tokens');
+      ledger.grant(user.id, 6, 'seed_demo_credits');
     }
   }
 

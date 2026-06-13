@@ -1,6 +1,6 @@
 # Cohort15 MVP
 
-Cohort15 is an online cohort-event platform. Creators use 2 tokens to start a cohort, participants use 1 token to show interest, and quorum unlocks the private online link.
+Cohort15 is an online cohort-event platform. Creators use 2 credits to start a cohort, participants use 1 credit to show interest, and quorum unlocks the private online link.
 
 This repository currently uses a dependency-free Node.js web app foundation so the MVP can run and verify locally without package downloads. Product work is tracked in `tasks.json`; `docs/cohort15-mvp-spec-v3.md` is the product behavior source.
 
@@ -27,7 +27,7 @@ PORT=4000 npm run dev
 ## Source Layout
 
 - `src/domain`: domain constants, models, and validation rules
-- `src/persistence`: database schema, repositories, seed data, and token ledger primitives
+- `src/persistence`: database schema, repositories, seed data, and credit ledger primitives
 - `src/server`: HTTP entry points and server-side app wiring
 - `src/ui`: rendered UI modules and styles
 - `tests`: Node test runner coverage
@@ -49,14 +49,14 @@ The app seeds two demo users every time the in-memory app state starts:
 
 | User | ID | Starting grant |
 |---|---|---|
-| Demo Creator | `user-creator` | 6 tokens |
-| Demo Participant | `user-participant` | 6 tokens |
+| Demo Creator | `user-creator` | 6 credits |
+| Demo Participant | `user-participant` | 6 credits |
 
-Seed tokens are recorded as grant transactions, not mutable balance fields. The temporary MVP auth path uses these user IDs in forms and query parameters, for example `/dashboard?creatorUserId=user-creator&participantUserId=user-participant`.
+Seed credits are recorded as grant transactions, not mutable balance fields. The temporary MVP auth path uses these user IDs in forms and query parameters, for example `/dashboard?creatorUserId=user-creator&participantUserId=user-participant`.
 
 ## Local Persistence
 
-By default, the app uses isolated in-memory state and resets whenever the process restarts. To keep users, cohorts, interests, token transactions, and social outbox records across local restarts, point `COHORT15_PERSISTENCE_FILE` at a JSON state file:
+By default, the app uses isolated in-memory state and resets whenever the process restarts. To keep users, cohorts, interests, credit transactions, and social outbox records across local restarts, point `COHORT15_PERSISTENCE_FILE` at a JSON state file:
 
 ```bash
 COHORT15_PERSISTENCE_FILE=.local/cohort15-state.json npm run dev
@@ -69,10 +69,10 @@ If the file does not exist, the app creates it and seeds the demo users once wit
 1. Start the app with `npm run dev`.
 2. Open `/cohorts/new` and create a cohort as `user-creator`.
 3. Confirm `/cohorts` and `/cohorts/:id` show public cohort details but hide the private online link while the event is open.
-4. Show interest as `user-participant`; this uses 1 participant token while quorum is pending.
-5. When interest reaches quorum, the event becomes active, creator and participant tokens are used, and the private link is visible only to the creator and committed participants.
-6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry returns creator and participant tokens through refund transactions.
-7. Check `/dashboard` for creator and participant cohort status, token summaries, and authorized unlocked links.
+4. Show interest as `user-participant`; this uses 1 participant credit while quorum is pending.
+5. When interest reaches quorum, the event becomes active, creator and participant credits are used, and the private link is visible only to the creator and committed participants.
+6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry returns creator and participant credits through refund transactions.
+7. Check `/dashboard` for creator and participant cohort status, credit summaries, and authorized unlocked links.
 
 Creators can optionally provide an event image URL/path. Blank image fields use the local default image at `/assets/default-cohort.png`.
 
@@ -80,9 +80,9 @@ Creating a cohort also writes a local social-promotion outbox record with public
 
 ## MVP Boundary
 
-Build now: demo/auth path, token ledger, admin/demo token grants, create cohort, show interest, quorum unlock, expiry/refund, hidden private links before unlock, feed/detail pages, dashboards, and a local social-promotion outbox.
+Build now: demo/auth path, credit ledger, admin/demo credit grants, create cohort, show interest, quorum unlock, expiry/refund, hidden private links before unlock, feed/detail pages, dashboards, and a local social-promotion outbox.
 
-Post-MVP: USD token sales, real external social posting, chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events. The first documented token package assumptions are `$6` for 6 tokens and `$12` for 14 tokens.
+Post-MVP: USD credit sales, real external social posting, chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events. The first documented credit package assumptions are `$6` for 6 credits and `$12` for 14 credits.
 
 ## Known Assumptions
 
