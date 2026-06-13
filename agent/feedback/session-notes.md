@@ -168,3 +168,47 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/issues/ISSUE-005-unify-dashboard-token-account/*`
 - `agent/knowledge/index.md`
+
+### 2026-06-13
+
+User Feedback:
+- Cohort creation form should keep first meeting after the two-week quorum window.
+- Daily should be available as a meeting recurrence option.
+- Private meeting links should only allow Google Meet, Zoom, Microsoft Teams, Discord, and Slack.
+- Remove the first Creator field from cohort creation because only creators create requests.
+- Cohort request cards should better show capacity decision information such as max, min, and open spots, with room for the resolver to research better UX.
+- Cohort request card images are too large and should be redesigned around participant decision needs.
+- Cohort request cards should show the viewer's local time.
+- The cohorts page needs word-based search.
+
+Issue Mapping:
+- New ISSUE-006: Tighten Cohort Creation Form Rules.
+- New ISSUE-007: Improve Cohort Cards for Participant Decisions.
+- New ISSUE-008: Add Word-Based Cohort Search.
+
+Reasoning:
+- Creation-form validation, recurrence, link allowlisting, and visible creator selection share the `/cohorts/new` route and create-flow tests, so they belong in one issue.
+- Card capacity, image balance, participant decision hierarchy, and local time are all part of the public feed card experience and should be resolved together with design/UX research.
+- Word-based search is separate route/service filtering behavior and can be implemented independently from the card redesign.
+
+Artifacts Updated:
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-006-cohort-creation-form-auth-link-rules/*`
+- `agent/feedback/issues/ISSUE-007-cohort-card-decision-support-local-time/*`
+- `agent/feedback/issues/ISSUE-008-cohort-feed-search/*`
+
+### 2026-06-13
+
+User Feedback:
+- Replace the word `token` with `credit` throughout the repo, both in the app and outside of it.
+
+Issue Mapping:
+- New ISSUE-009: Rename Token Terminology to Credit.
+
+Reasoning:
+- This is not a duplicate of earlier dashboard token presentation issues because it changes product vocabulary repo-wide.
+- The feedback spans app code, tests, docs, planning artifacts, and agent feedback/history files, so it needs a broad migration issue with an initial audit task instead of a blind search/replace.
+
+Artifacts Updated:
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-009-rename-token-to-credit/*`

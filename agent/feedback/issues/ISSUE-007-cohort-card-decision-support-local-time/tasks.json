@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-007",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-007-T01",
+      "title": "Research and redesign cohort request cards",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Define and implement a more useful public cohort card layout for potential participants, including capacity cues, better image proportions, and local-time display.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-007-cohort-card-decision-support-local-time/issue.md",
+        "src/services/event-browsing.mjs",
+        "src/ui/cohorts.mjs",
+        "src/ui/styles.css",
+        "tests/event-browsing.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "write_scope": [
+        "src/services/event-browsing.mjs",
+        "src/ui/cohorts.mjs",
+        "src/ui/styles.css",
+        "tests/event-browsing.test.mjs",
+        "tests/mvp-verification.test.mjs",
+        "agent/feedback/issues/ISSUE-007-cohort-card-decision-support-local-time/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Use current UX research or credible design references before finalizing the card layout.",
+        "Prioritize participant decision needs over decorative imagery.",
+        "Represent capacity/quorum/open spot information accurately from repository data.",
+        "Prefer viewer-local time rendering for visible cohort times, with accessible fallback behavior.",
+        "Do not add feedback tasks to the main task ledger."
+      ],
+      "acceptance_criteria": [
+        "Public cohort cards clearly communicate capacity state, including enough information to understand min quorum, max participants, and remaining/open spots or an equivalent clearer presentation.",
+        "Card images no longer dominate the card at the expense of title, topic, timing, quorum, and action-relevant details.",
+        "Visible card time is rendered in the viewer's local timezone in the browser, with a stable fallback for non-JavaScript contexts.",
+        "The card layout remains responsive and does not overlap or truncate critical decision text on mobile or desktop.",
+        "Automated tests and a browser smoke check cover the updated card content and layout-critical behavior."
+      ],
+      "verification": [
+        "Run focused event browsing and MVP verification tests.",
+        "Run `npm run lint`.",
+        "Run `npm run check` before issue closeout.",
+        "Run a browser smoke check for `/cohorts` at mobile and desktop widths."
+      ],
+      "files_expected": [
+        "src/services/event-browsing.mjs",
+        "src/ui/cohorts.mjs",
+        "src/ui/styles.css",
+        "tests/event-browsing.test.mjs",
+        "tests/mvp-verification.test.mjs"
+      ],
+      "area": "public feed, cohort cards, local time, capacity UX",
+      "risk": "medium",
+      "shared_dependencies": [
+        "event browsing serializer",
+        "event interest counts",
+        "public feed layout",
+        "browser-local time rendering"
+      ],
+      "stop_condition": "Stop when cohort cards better support participant decisions, local time is shown, and verification passes."
+    }
+  ]
+}

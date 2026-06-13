@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-009",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-009-T01",
+      "title": "Audit token terminology and plan safe migration",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Identify every meaningful token terminology reference and decide which should become credit, which need compatibility handling, and which are out of scope.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-009-rename-token-to-credit/issue.md",
+        "repository-wide search results for token terminology"
+      ],
+      "write_scope": [
+        "agent/feedback/issues/ISSUE-009-rename-token-to-credit/*"
+      ],
+      "authority": [
+        "Classify references before editing to avoid unsafe blind replacement.",
+        "Preserve product behavior and data semantics.",
+        "Do not add feedback tasks to the main task ledger."
+      ],
+      "acceptance_criteria": [
+        "The resolver has a concrete migration map for app code, tests, docs, planning artifacts, and feedback artifacts.",
+        "Compatibility risks are identified before code edits begin.",
+        "Out-of-scope references, if any, are explicitly justified."
+      ],
+      "verification": [
+        "Run repository search for token/Token/TOKEN references and record remaining intentional cases."
+      ],
+      "files_expected": [
+        "agent/feedback/issues/ISSUE-009-rename-token-to-credit/session-notes.md",
+        "agent/feedback/issues/ISSUE-009-rename-token-to-credit/task-status.md"
+      ],
+      "area": "terminology, product language, repository migration",
+      "risk": "medium",
+      "shared_dependencies": [
+        "domain constants",
+        "persistence ledger naming",
+        "tests",
+        "docs and agent workflow artifacts"
+      ],
+      "stop_condition": "Stop when the migration map is clear enough to perform scoped edits safely."
+    },
+    {
+      "id": "ISSUE-009-T02",
+      "title": "Rename app terminology from token to credit",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-009-T01"
+      ],
+      "objective": "Update source code, UI copy, service/test names, and app-facing behavior so the application consistently uses credit terminology.",
+      "inputs": [
+        "ISSUE-009-T01 migration map",
+        "src/domain/*",
+        "src/persistence/*",
+        "src/services/*",
+        "src/server/*",
+        "src/ui/*",
+        "tests/*"
+      ],
+      "write_scope": [
+        "src/domain/*",
+        "src/persistence/*",
+        "src/services/*",
+        "src/server/*",
+        "src/ui/*",
+        "tests/*",
+        "scripts/*"
+      ],
+      "authority": [
+        "Rename visible app terminology to credit/credits.",
+        "Rename internal identifiers where practical without breaking durable state compatibility.",
+        "Preserve create/show-interest costs, hold/consume/refund behavior, and ledger auditability."
+      ],
+      "acceptance_criteria": [
+        "User-facing app pages no longer display token terminology.",
+        "Tests assert credit terminology for create, interest, dashboard, refund, and purchase-adjacent copy.",
+        "Ledger behavior remains unchanged except for terminology.",
+        "Any required compatibility alias is documented in code or issue notes."
+      ],
+      "verification": [
+        "Run focused tests covering create, interest, dashboard, persistence ledger, and MVP verification.",
+        "Run `npm run lint`.",
+        "Run `npm run check` before closeout."
+      ],
+      "files_expected": [
+        "src/domain/*",
+        "src/persistence/*",
+        "src/services/*",
+        "src/ui/*",
+        "tests/*"
+      ],
+      "area": "app terminology, ledger naming, UI copy",
+      "risk": "high",
+      "shared_dependencies": [
+        "durable JSON state shape",
+        "token/credit ledger semantics",
+        "MVP verification tests"
+      ],
+      "stop_condition": "Stop when the app uses credit terminology and behavioral verification passes."
+    },
+    {
+      "id": "ISSUE-009-T03",
+      "title": "Rename repository artifacts from token to credit",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-009-T01"
+      ],
+      "objective": "Update repository documentation, planning artifacts, task ledgers, feedback artifacts, and knowledge index so non-app language consistently uses credit terminology.",
+      "inputs": [
+        "ISSUE-009-T01 migration map",
+        "README.md",
+        "docs/cohort15-mvp-spec-v3.md",
+        "plan.md",
+        "atomic-task-graph.md",
+        "tasks.json",
+        "agent/**/*.md",
+        "agent/**/tasks.json"
+      ],
+      "write_scope": [
+        "README.md",
+        "docs/cohort15-mvp-spec-v3.md",
+        "plan.md",
+        "atomic-task-graph.md",
+        "tasks.json",
+        "agent/**/*.md",
+        "agent/**/tasks.json"
+      ],
+      "authority": [
+        "Update current repository language to credit terminology.",
+        "Preserve historical dates, issue IDs, task IDs, and factual evidence while changing product vocabulary.",
+        "Keep resolved feedback and knowledge-index guardrail consistency intact."
+      ],
+      "acceptance_criteria": [
+        "Current docs and planning artifacts consistently describe credits instead of tokens.",
+        "Agent feedback and knowledge artifacts no longer use token terminology except for explicitly justified historical or compatibility notes.",
+        "`npm run check:workflow` passes after resolved feedback references are updated consistently.",
+        "Repository search shows no unintended token terminology remains."
+      ],
+      "verification": [
+        "Run repository search for token/Token/TOKEN.",
+        "Run `npm run check:workflow`.",
+        "Run `npm run check` before issue closeout."
+      ],
+      "files_expected": [
+        "README.md",
+        "docs/cohort15-mvp-spec-v3.md",
+        "plan.md",
+        "atomic-task-graph.md",
+        "tasks.json",
+        "agent/knowledge/index.md",
+        "agent/feedback/*",
+        "agent/progress/*"
+      ],
+      "area": "docs, planning, feedback workflow, knowledge index",
+      "risk": "high",
+      "shared_dependencies": [
+        "agent workflow guardrail",
+        "resolved feedback issue evidence",
+        "main task ledger history"
+      ],
+      "stop_condition": "Stop when repository artifacts consistently use credit terminology and workflow verification passes."
+    }
+  ]
+}

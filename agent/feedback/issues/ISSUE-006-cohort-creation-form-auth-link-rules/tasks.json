@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-006",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-006-T01",
+      "title": "Tighten create cohort validation and form identity",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Update cohort creation so recurrence, first-meeting timing, meeting-link provider allowlisting, and creator identity presentation match the feedback.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-006-cohort-creation-form-auth-link-rules/issue.md",
+        "src/domain/constants.mjs",
+        "src/domain/validation.mjs",
+        "src/services/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/ui/create-cohort.mjs",
+        "tests/domain-validation.test.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "write_scope": [
+        "src/domain/constants.mjs",
+        "src/domain/validation.mjs",
+        "src/services/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/ui/create-cohort.mjs",
+        "tests/domain-validation.test.mjs",
+        "tests/create-cohort.test.mjs",
+        "tests/mvp-verification.test.mjs",
+        "agent/feedback/issues/ISSUE-006-cohort-creation-form-auth-link-rules/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Preserve the rule that firstMeetingAt must be after the 14-day quorum window.",
+        "Allow daily recurrence as a first-class recurrence option.",
+        "Accept private meeting links only from Google Meet, Zoom, Microsoft Teams, Discord, and Slack domains.",
+        "Remove the visible Creator selector from the create form without allowing participants to create through the UI.",
+        "Do not add feedback tasks to the main task ledger."
+      ],
+      "acceptance_criteria": [
+        "The create form no longer renders the first visible Creator select field.",
+        "Cohort creation still assigns the event to a creator under the current auth/demo assumption.",
+        "`daily` appears as a recurrence option and validates as a repeating recurrence.",
+        "First meeting UI and backend validation reject dates at or before the two-week quorum window.",
+        "Backend validation rejects private meeting links outside the allowed Google Meet, Zoom, Microsoft Teams, Discord, and Slack domains.",
+        "Focused tests cover successful and rejected meeting-link domains, daily recurrence, creator-field removal, and first-meeting timing."
+      ],
+      "verification": [
+        "Run focused domain and create-flow tests.",
+        "Run `npm run lint`.",
+        "Run `npm run check` before issue closeout."
+      ],
+      "files_expected": [
+        "src/domain/constants.mjs",
+        "src/domain/validation.mjs",
+        "src/services/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/ui/create-cohort.mjs",
+        "tests/domain-validation.test.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "area": "create form, validation, demo auth boundary, meeting links",
+      "risk": "medium",
+      "shared_dependencies": [
+        "demo identity assumptions",
+        "T012 auth boundary",
+        "domain recurrence constants",
+        "create-flow tests"
+      ],
+      "stop_condition": "Stop when creation form behavior and validation rules match the feedback and verification passes."
+    }
+  ]
+}
