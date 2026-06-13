@@ -3,6 +3,8 @@ import test from 'node:test';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
 
+const now = new Date('2026-06-01T12:00:00.000Z');
+
 function validCreateInput(overrides = {}) {
   return {
     creatorId: 'user-creator',
@@ -52,7 +54,9 @@ async function invoke(handler, request) {
 
 test('MVP success path creates, promotes, unlocks, and exposes dashboards without leaking locked links early', async () => {
   const state = createDemoRepositories();
-  const handler = createRequestHandler(state);
+  const handler = createRequestHandler(state, {
+    now: () => now
+  });
 
   const createResponse = await invoke(handler, {
     url: '/cohorts/new',
@@ -137,7 +141,9 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
 
 test('MVP expiry path refunds held creator and participant tokens and removes expired cohorts from public discovery', async () => {
   const state = createDemoRepositories();
-  const handler = createRequestHandler(state);
+  const handler = createRequestHandler(state, {
+    now: () => now
+  });
 
   const createResponse = await invoke(handler, {
     url: '/cohorts/new',

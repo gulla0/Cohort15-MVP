@@ -2,6 +2,35 @@
 
 Append-only role transition and handoff log.
 
+### 2026-06-12 21:02 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `tests/create-cohort.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- `src/server/app.mjs`
+- `src/persistence/seeds.mjs`
+
+Decided:
+- Classified the user request as approved manager-led change/fix work and selected T016 because it was the current verification blocker before UI bug testing.
+- Kept production validation intact: first meetings must remain after the 14-day quorum window.
+- Added request-handler option injection so route-level tests can use the same fixed clock pattern already used by service tests.
+- Wired the stale create-flow and MVP verification route tests to a fixed `2026-06-01T12:00:00.000Z` clock, making their `2026-06-20` first meeting fixture valid regardless of the real current date.
+- Marked T016 done after focused route tests and full project verification passed.
+
+Assumptions Made:
+- The immediate UI bug test should use the normal dev server behavior with the real current date, while automated tests should use explicit clocks.
+- T017 deployment target selection remains the next launch-readiness task after T012 auth and T016 verification repair.
+
+Next Recommended Step:
+- Start UI bug testing against the local dev server, then execute T012 when ready to continue launch hardening.
+
 ### 2026-05-31 08:55 EDT
 
 Read:

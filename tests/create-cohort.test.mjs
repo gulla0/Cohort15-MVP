@@ -133,7 +133,9 @@ test('create cohort rejects first meetings before the quorum window closes', () 
 
 test('create cohort page renders form errors and success without exposing private link', async () => {
   const state = createDemoRepositories();
-  const handler = createRequestHandler(state);
+  const handler = createRequestHandler(state, {
+    now: () => now
+  });
 
   const form = await invoke(handler, { url: '/cohorts/new', method: 'GET' });
   assert.equal(form.status, 200);

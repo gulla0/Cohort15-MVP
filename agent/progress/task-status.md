@@ -19,3 +19,11 @@
 | T013 | Add token purchase package flow | not_started | no | Pending. | Depends on T011 and T012; start from `$6`/6-token and `$12`/14-token packages with local/mock payment unless a provider is selected. |
 | T014 | Publish social outbox to configured external channels | not_started | no | Pending. | Depends on T011 and T012; implement adapter-backed publishing with dry-run/mock mode and no private-link leakage. |
 | T015 | Add cohort completion and cancellation lifecycle handling | not_started | no | Pending. | Depends on T012; implement cancellation refunds and active cohort completion for already-modeled statuses. |
+| T016 | Repair time-sensitive MVP verification tests | done | yes | `npm run check` passed with 44 tests. | Added fixed-clock route-test support so create/MVP verification tests no longer depend on the real calendar date. |
+| T017 | Choose and document deployment target | not_started | no | Pending. | Depends on T012 and T016; choose first host and document runtime, env, persistence, and deploy/runbook assumptions. |
+| T018 | Add production-grade persistence plan and adapter | not_started | no | Pending. | Depends on T012 and T017; move beyond local JSON for public multi-user launch while preserving ledger auditability. |
+| T019 | Add environment and secrets configuration boundary | not_started | no | Pending. | Depends on T017; document and validate runtime config without committing real secrets. |
+| T020 | Secure admin and operational endpoints | not_started | no | Pending. | Depends on T012 and T019; protect `/admin/expire-cohorts` and similar operations before public launch. |
+| T021 | Add launch logging and monitoring hooks | not_started | no | Pending. | Depends on T017 and T019; add basic request/error visibility without logging private links or secrets. |
+| T022 | Complete launch privacy and security review | not_started | no | Pending. | Depends on T012, T018, T019, T020, and T021; verify auth, private-link handling, logs, admin operations, and token integrity. |
+| T023 | Create production launch smoke-test checklist | not_started | no | Pending. | Depends on T013, T014, T015, T018, T020, and T022; final launch gate for user and operator flows. |

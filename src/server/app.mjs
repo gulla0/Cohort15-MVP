@@ -60,8 +60,11 @@ function createState(options = {}) {
 
 const defaultState = createState();
 
-export function createRequestHandler(state = createState()) {
-  const cohortService = createCohortService(state);
+export function createRequestHandler(state = createState(), options = {}) {
+  const cohortService = createCohortService({
+    ...state,
+    options
+  });
   const dashboardService = createDashboardService(state);
   const eventBrowsingService = createEventBrowsingService(state);
   const expireCohortsService = createExpireCohortsService(state);

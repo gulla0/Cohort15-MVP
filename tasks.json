@@ -623,6 +623,333 @@
       ],
       "stop_condition": "Stop once cancelled and completed lifecycle paths are implemented with tests and documented behavior.",
       "notes": "This uses existing domain statuses that were modeled but not implemented in the MVP."
+    },
+    {
+      "id": "T016",
+      "title": "Repair time-sensitive MVP verification tests",
+      "status": "done",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T011"
+      ],
+      "objective": "Make create-flow and MVP verification tests deterministic so the 14-day quorum-window rule does not fail as calendar time advances.",
+      "inputs": [
+        "tests/create-cohort.test.mjs",
+        "tests/mvp-verification.test.mjs",
+        "src/server/app.mjs",
+        "src/services/create-cohort.mjs",
+        "src/domain/validation.mjs"
+      ],
+      "write_scope": [
+        "test fixtures",
+        "test-only clock injection if needed",
+        "small app wiring changes needed to support deterministic tests"
+      ],
+      "authority": [
+        "May update stale firstMeetingAt fixtures or inject a fixed clock",
+        "Must preserve the rule that first meetings occur after the 14-day quorum window",
+        "Do not weaken production validation to satisfy stale tests"
+      ],
+      "acceptance_criteria": [
+        "Create-flow route tests pass regardless of the real current date",
+        "MVP success-path verification passes regardless of the real current date",
+        "MVP expiry-path verification passes regardless of the real current date",
+        "The full documented verification suite passes"
+      ],
+      "verification": [
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once the stale date dependency is removed and the full verification suite passes.",
+      "evidence": "2026-06-12 21:02 EDT: Added request-handler option injection so route-level tests can use a fixed clock, wired stale create/MVP verification tests to 2026-06-01, and preserved production first-meeting validation. `npm run check` passed with 44 tests.",
+      "notes": "Current failure observed on 2026-06-13: tests use 2026-06-20 first meetings, which are now inside the required 14-day quorum window."
+    },
+    {
+      "id": "T017",
+      "title": "Choose and document deployment target",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T012",
+        "T016"
+      ],
+      "objective": "Select the first web app deployment target and document the runtime, build, start, persistence, and environment assumptions needed to deploy Cohort15.",
+      "inputs": [
+        "README.md",
+        "package.json",
+        "src/server/app.mjs",
+        "plan.md"
+      ],
+      "write_scope": [
+        "deployment documentation",
+        "runtime configuration files if required by the selected host",
+        "README launch notes"
+      ],
+      "authority": [
+        "May choose a pragmatic first deployment target if the user has not selected one",
+        "May add minimal host-specific config",
+        "Do not add provider credentials or secrets to the repository"
+      ],
+      "acceptance_criteria": [
+        "Deployment target is named and justified",
+        "Required Node/npm versions and start command are documented",
+        "Required environment variables are listed",
+        "Persistence assumptions for the selected host are explicit",
+        "Rollback or redeploy steps are documented at a basic level"
+      ],
+      "verification": [
+        "Run npm run check",
+        "Confirm documented commands match package.json"
+      ],
+      "stop_condition": "Stop once a specific deploy target and deployment runbook are documented.",
+      "notes": "Deployment target is currently unspecified."
+    },
+    {
+      "id": "T018",
+      "title": "Add production-grade persistence plan and adapter",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T012",
+        "T017"
+      ],
+      "objective": "Move launch persistence beyond local JSON by selecting and wiring a production-appropriate datastore while preserving repository contracts and token ledger auditability.",
+      "inputs": [
+        "src/persistence/schema.mjs",
+        "src/persistence/repositories.mjs",
+        "src/persistence/store.mjs",
+        "src/persistence/token-ledger.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "persistence adapter modules",
+        "schema or migration files",
+        "configuration documentation",
+        "persistence tests"
+      ],
+      "authority": [
+        "May add a provider-backed adapter once a deployment target/datastore is selected",
+        "Must keep token balances derived from transactions",
+        "Must preserve isolated in-memory tests and local durable mode where useful",
+        "Do not embed datastore credentials"
+      ],
+      "acceptance_criteria": [
+        "Production datastore choice is documented",
+        "Users, events, interests, token transactions, and social posts persist in the launch datastore",
+        "Migrations or schema initialization are repeatable",
+        "Token ledger semantics remain auditable",
+        "Local development still has a documented persistence path"
+      ],
+      "verification": [
+        "Run persistence adapter tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once launch persistence is selected, implemented or explicitly staged, and documented.",
+      "notes": "The current JSON file adapter is useful locally but is not enough for a public multi-user launch."
+    },
+    {
+      "id": "T019",
+      "title": "Add environment and secrets configuration boundary",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T017"
+      ],
+      "objective": "Define a safe configuration boundary for runtime environment variables and secrets used by auth, persistence, payment, social publishing, and deployment.",
+      "inputs": [
+        "src/server/app.mjs",
+        "README.md",
+        "package.json"
+      ],
+      "write_scope": [
+        "configuration module",
+        "example environment documentation",
+        "startup validation tests",
+        "README configuration notes"
+      ],
+      "authority": [
+        "May add startup validation for required launch configuration",
+        "May add a committed example env file with placeholder values",
+        "Must not commit real secrets",
+        "Must keep test and local development defaults explicit"
+      ],
+      "acceptance_criteria": [
+        "Required and optional environment variables are documented",
+        "Missing required launch config fails clearly",
+        "Local development remains easy to run",
+        "No real credentials or tokens are committed",
+        "Tests cover configuration parsing or startup validation"
+      ],
+      "verification": [
+        "Run configuration tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once config and secrets handling are explicit, tested, and documented.",
+      "notes": "This should happen before real payment, social, or production datastore credentials are introduced."
+    },
+    {
+      "id": "T020",
+      "title": "Secure admin and operational endpoints",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T012",
+        "T019"
+      ],
+      "objective": "Lock down administrative actions such as cohort expiry processing so public users cannot invoke operational endpoints without authorization.",
+      "inputs": [
+        "src/server/app.mjs",
+        "src/services/expire-cohorts.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "admin authorization checks",
+        "admin route tests",
+        "operational documentation"
+      ],
+      "authority": [
+        "May add an admin role or operational secret boundary",
+        "Must keep expiry processing testable locally",
+        "Must reject unauthorized admin requests",
+        "Do not expose private links in admin responses"
+      ],
+      "acceptance_criteria": [
+        "Unauthenticated or non-admin users cannot trigger admin expiry processing",
+        "Authorized admin or configured operational caller can trigger expiry processing",
+        "Failure responses do not leak sensitive data",
+        "Admin operation setup is documented"
+      ],
+      "verification": [
+        "Run admin route tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once admin endpoints are protected and documented for launch operation.",
+      "notes": "The current /admin/expire-cohorts route is a local/dev trigger."
+    },
+    {
+      "id": "T021",
+      "title": "Add launch logging and monitoring hooks",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T017",
+        "T019"
+      ],
+      "objective": "Add basic operational visibility for launch: structured request/error logs, health behavior, and documented monitoring checks.",
+      "inputs": [
+        "src/server/app.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "logging helpers",
+        "health or readiness endpoint behavior",
+        "monitoring documentation",
+        "logging tests where practical"
+      ],
+      "authority": [
+        "May add minimal structured logging without external dependencies unless needed",
+        "Must avoid logging private event links or secrets",
+        "May document provider-level monitoring instead of implementing a full observability stack"
+      ],
+      "acceptance_criteria": [
+        "Server emits useful request and error logs",
+        "Health/readiness behavior is documented",
+        "Logs avoid private links, secrets, and sensitive tokens",
+        "Launch monitoring checklist is documented"
+      ],
+      "verification": [
+        "Run logging or health tests where added",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once minimal launch observability is implemented or explicitly documented.",
+      "notes": "This is intended as a launch baseline, not a full analytics or APM implementation."
+    },
+    {
+      "id": "T022",
+      "title": "Complete launch privacy and security review",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T012",
+        "T018",
+        "T019",
+        "T020",
+        "T021"
+      ],
+      "objective": "Review launch-critical privacy and security behavior, especially private cohort links, auth boundaries, token accounting, admin operations, logs, and public social content.",
+      "inputs": [
+        "src/domain/validation.mjs",
+        "src/server/app.mjs",
+        "src/services",
+        "src/persistence",
+        "tests",
+        "README.md"
+      ],
+      "write_scope": [
+        "security/privacy review notes",
+        "targeted tests for found issues",
+        "small fixes for launch-blocking privacy or security defects"
+      ],
+      "authority": [
+        "May make focused fixes for confirmed launch-blocking issues",
+        "Must preserve private-link visibility rules",
+        "Must not broaden scope into unrelated feature work"
+      ],
+      "acceptance_criteria": [
+        "Private links are verified hidden from public pages, social posts, logs, and unauthorized users",
+        "Auth and admin boundaries are reviewed",
+        "Token ledger integrity risks are reviewed",
+        "Any launch-blocking findings are fixed or explicitly tracked",
+        "Residual risks are documented"
+      ],
+      "verification": [
+        "Run targeted privacy/security tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once launch-critical privacy and security findings are addressed or clearly tracked.",
+      "notes": "This is a focused launch review, not a formal external security audit."
+    },
+    {
+      "id": "T023",
+      "title": "Create production launch smoke-test checklist",
+      "status": "not_started",
+      "phase": "Launch Readiness",
+      "dependencies": [
+        "T013",
+        "T014",
+        "T015",
+        "T018",
+        "T020",
+        "T022"
+      ],
+      "objective": "Create and run a production-oriented smoke-test checklist covering the launch-critical user and operator flows.",
+      "inputs": [
+        "README.md",
+        "USAGE.md",
+        "docs/cohort15-mvp-spec-v3.md",
+        "tests"
+      ],
+      "write_scope": [
+        "launch checklist documentation",
+        "manual verification notes",
+        "small smoke-test scripts if useful"
+      ],
+      "authority": [
+        "May add a manual or scripted smoke-test checklist",
+        "May record launch verification results",
+        "Do not mark launch ready until critical checks pass or blockers are documented"
+      ],
+      "acceptance_criteria": [
+        "Checklist covers sign-in, token balance, purchase, create cohort, public discovery, show interest, quorum unlock, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility",
+        "Checklist includes expected outcomes and rollback notes",
+        "Launch blockers discovered during smoke testing are recorded",
+        "Full automated verification passes before launch signoff"
+      ],
+      "verification": [
+        "Run npm run check",
+        "Run the documented smoke checklist against the target environment when available"
+      ],
+      "stop_condition": "Stop once launch smoke testing is documented and ready to execute against the selected environment.",
+      "notes": "This is the final launch readiness gate after the feature and operational hardening tasks."
     }
   ]
 }

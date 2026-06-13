@@ -2,6 +2,30 @@
 
 Append-only implementation log.
 
+### 2026-06-12 21:02 EDT
+
+Task:
+- T016 Repair time-sensitive MVP verification tests
+
+Files Changed:
+- `src/server/app.mjs`
+- `tests/create-cohort.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Added request-handler option injection so route-level tests can pass a fixed clock into the create cohort service.
+- Updated stale create-flow and MVP verification tests to use a fixed `2026-06-01T12:00:00.000Z` clock instead of depending on the real current date.
+- Preserved production first-meeting validation: first meetings must still occur after the 14-day quorum window.
+- Marked T016 done after verification passed.
+
+Verification:
+- `node --test tests/create-cohort.test.mjs tests/mvp-verification.test.mjs` passed with 8 tests.
+- `npm run check` passed with 44 tests.
+
 ### 2026-05-31 08:55 EDT
 
 Task:

@@ -128,6 +128,31 @@ Exit criteria:
 - Authorized creators or admins can complete active cohorts without refunding consumed tokens.
 - Cancelled and completed cohorts behave correctly in discovery, dashboards, token accounting, and private-link visibility.
 
+### Phase 7 - Launch Readiness
+
+Goal:
+- Close the remaining launch gates that are not pure product features: deterministic verification, deployment, production persistence, environment and secrets handling, admin protection, observability, privacy/security review, and production smoke testing.
+
+Tasks:
+- T016
+- T017
+- T018
+- T019
+- T020
+- T021
+- T022
+- T023
+
+Exit criteria:
+- Automated verification is deterministic and passing.
+- A deployment target and runbook are documented.
+- Launch persistence is selected and implemented or explicitly staged.
+- Environment variables and secrets are documented and validated without committing credentials.
+- Admin/operational endpoints are protected.
+- Basic logging, health, and monitoring expectations are documented.
+- Private-link, auth, token, admin, social, and logging privacy/security risks are reviewed.
+- A production launch smoke-test checklist exists and is ready to run against the selected environment.
+
 ## MVP Boundary
 
 Build now:
@@ -153,6 +178,14 @@ Post-MVP / urgent-next:
 - Payment packages: `$6` for 6 tokens and `$12` for 14 tokens.
 - Real automated posting from the social outbox to official external channels.
 - Cancelled/completed lifecycle controls for the statuses already represented in the domain.
+- Deterministic stale-date test repair so verification does not depend on the current calendar date.
+- Deployment target selection and launch runbook.
+- Production-grade persistence beyond local JSON.
+- Environment and secrets configuration boundary.
+- Admin/operational endpoint protection.
+- Launch logging and monitoring hooks.
+- Launch privacy/security review.
+- Production launch smoke-test checklist.
 
 ## Recommended MVP Cut
 
@@ -182,6 +215,9 @@ Do not cut:
 6. Durable persistence technology is not specified. T011 may choose a pragmatic local store if it preserves the repository boundary and documented commands.
 7. Payment provider is not specified. T013 should start with a local/mock payment confirmation unless the user selects a real provider.
 8. Official social channels and credentials are not specified. T014 should keep a dry-run/mock adapter path and avoid hard-coded secrets.
+9. Deployment target is still unspecified for public launch. T017 should choose and document the first target before production persistence work.
+10. Production datastore is still unspecified. T018 should follow the deployment choice and preserve token ledger auditability.
+11. Secret management and environment variable requirements are not formalized. T019 should add that boundary before provider-backed integrations.
 
 ## Suggested First Sprint
 
@@ -191,6 +227,7 @@ Sprint target:
 Suggested task subset:
 - T011
 - T012
+- T016
 
 Sprint success definition:
-- The app runs locally, automated checks pass, records persist in durable mode, and authenticated users can complete the create/interest/dashboard flow without demo query parameters.
+- The app runs locally, automated checks pass deterministically, records persist in durable mode, and authenticated users can complete the create/interest/dashboard flow without demo query parameters.

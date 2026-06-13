@@ -146,6 +146,72 @@ Each executable task should define or tightly imply:
   - Validation: authorized users can cancel open cohorts with refunds and complete active cohorts without refunds; unauthorized lifecycle actions are rejected
   - Stop: stop once cancelled and completed lifecycle paths are implemented with tests and documented behavior
 
+### Phase 7 - Launch Readiness
+
+- T016 Repair time-sensitive MVP verification tests
+  - Depends on: T011
+  - Objective: Make create-flow and MVP verification tests deterministic so the 14-day quorum-window rule does not fail as calendar time advances.
+  - Inputs: create-flow tests, MVP verification tests, server app wiring, create cohort service, event validation
+  - Authority: update stale fixtures or add test-only/fixed-clock support; do not weaken production validation
+  - Validation: route and MVP verification tests pass regardless of the real current date; full verification passes
+  - Stop: stop once the stale date dependency is removed and `npm run check` passes
+
+- T017 Choose and document deployment target
+  - Depends on: T012, T016
+  - Objective: Select the first web app deployment target and document the runtime, build, start, persistence, and environment assumptions.
+  - Inputs: README, package scripts, server app, plan
+  - Authority: add deployment docs and minimal host config; do not commit credentials
+  - Validation: target, commands, environment variables, persistence assumptions, and rollback/redeploy basics are documented
+  - Stop: stop once a specific deployment runbook exists
+
+- T018 Add production-grade persistence plan and adapter
+  - Depends on: T012, T017
+  - Objective: Move launch persistence beyond local JSON while preserving repository contracts and token ledger auditability.
+  - Inputs: persistence schema, repositories, store, token ledger, README
+  - Authority: add provider-backed persistence adapter, schema/migrations, configuration docs, and tests; do not embed credentials
+  - Validation: launch datastore persists users, events, interests, transactions, and social posts; token balances remain transaction-derived
+  - Stop: stop once launch persistence is selected, implemented or explicitly staged, and documented
+
+- T019 Add environment and secrets configuration boundary
+  - Depends on: T017
+  - Objective: Define safe runtime configuration for auth, persistence, payment, social publishing, and deployment.
+  - Inputs: server app, README, package scripts
+  - Authority: add config parsing, example env docs, startup validation, and tests; do not commit real secrets
+  - Validation: required/optional env vars are documented, launch config fails clearly when missing, and local development remains explicit
+  - Stop: stop once config and secrets handling are explicit, tested, and documented
+
+- T020 Secure admin and operational endpoints
+  - Depends on: T012, T019
+  - Objective: Lock down administrative actions such as cohort expiry processing so public users cannot invoke operational endpoints.
+  - Inputs: server app, expiry service, README
+  - Authority: add admin authorization checks, route tests, and operational docs
+  - Validation: unauthorized admin requests are rejected; authorized admin or operational callers can process expiry
+  - Stop: stop once admin endpoints are protected and documented
+
+- T021 Add launch logging and monitoring hooks
+  - Depends on: T017, T019
+  - Objective: Add basic operational visibility through request/error logs, health behavior, and monitoring documentation.
+  - Inputs: server app, README
+  - Authority: add minimal structured logging and health/readiness docs; avoid logging private links or secrets
+  - Validation: logs are useful and do not expose sensitive values; monitoring checklist is documented
+  - Stop: stop once minimal launch observability exists
+
+- T022 Complete launch privacy and security review
+  - Depends on: T012, T018, T019, T020, T021
+  - Objective: Review launch-critical privacy and security behavior around private links, auth, token accounting, admin operations, logs, and social content.
+  - Inputs: domain, services, server, persistence, tests, README
+  - Authority: make focused fixes for confirmed launch blockers and document residual risks
+  - Validation: private links are verified hidden from public pages, social posts, logs, and unauthorized users; findings are fixed or tracked
+  - Stop: stop once launch-critical privacy and security findings are addressed or tracked
+
+- T023 Create production launch smoke-test checklist
+  - Depends on: T013, T014, T015, T018, T020, T022
+  - Objective: Create and run a production-oriented smoke-test checklist covering launch-critical user and operator flows.
+  - Inputs: README, USAGE, MVP spec, tests
+  - Authority: add manual or scripted smoke checklist and record verification notes
+  - Validation: checklist covers sign-in, token balance, purchase, create, discovery, interest, quorum, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility
+  - Stop: stop once launch smoke testing is documented and ready to execute against the selected environment
+
 ## Compact Adjacency View
 
 ```text
@@ -159,6 +225,16 @@ T007 -> T010
 T008 -> T010
 T009 -> T010
 T010 -> T011
-T011 -> T012, T013, T014
-T012 -> T013, T014, T015
+T011 -> T012, T016
+T012 -> T013, T014, T015, T017, T018, T020, T022
+T016 -> T017
+T017 -> T018, T019, T021
+T019 -> T020, T021, T022
+T018 -> T022, T023
+T020 -> T022, T023
+T021 -> T022
+T013 -> T023
+T014 -> T023
+T015 -> T023
+T022 -> T023
 ```
