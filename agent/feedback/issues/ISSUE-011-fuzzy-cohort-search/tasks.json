@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-011",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-011-T01",
+      "title": "Add fuzzy public cohort search ranking",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Extend public cohort search so exact matches rank first while typo-tolerant or semi-relevant matches still appear lower in results.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-011-fuzzy-cohort-search/issue.md",
+        "agent/feedback/issues/ISSUE-008-cohort-feed-search/issue.md",
+        "src/services/event-browsing.mjs",
+        "src/server/app.mjs",
+        "src/ui/cohorts.mjs",
+        "tests/event-browsing.test.mjs"
+      ],
+      "write_scope": [
+        "src/services/event-browsing.mjs",
+        "src/server/app.mjs",
+        "src/ui/cohorts.mjs",
+        "tests/event-browsing.test.mjs",
+        "tests/mvp-verification.test.mjs",
+        "agent/feedback/issues/ISSUE-011-fuzzy-cohort-search/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Use a dependency-free fuzzy matching strategy unless the app stack changes.",
+        "Rank exact or stronger public-field matches above weaker fuzzy matches.",
+        "Search only public-safe fields already eligible for public cohort discovery.",
+        "Do not expose private links or non-public statuses through search."
+      ],
+      "acceptance_criteria": [
+        "A minor typo such as `tost` can still surface a cohort containing `test`.",
+        "Exact matches rank ahead of fuzzy/semi-relevant matches.",
+        "Search remains case-insensitive and handles multi-word input predictably.",
+        "No-results state remains available when no reasonable public match exists.",
+        "Tests cover typo matching, ranking, and public visibility safety."
+      ],
+      "verification": [
+        "Run focused event browsing tests.",
+        "Run `npm run check` before issue closeout."
+      ],
+      "files_expected": [
+        "src/services/event-browsing.mjs",
+        "src/server/app.mjs",
+        "src/ui/cohorts.mjs",
+        "tests/event-browsing.test.mjs"
+      ],
+      "area": "public feed, search, fuzzy matching",
+      "risk": "medium",
+      "shared_dependencies": [
+        "ISSUE-008 exact word search",
+        "public cohort serializer",
+        "feed result ordering"
+      ],
+      "stop_condition": "Stop when fuzzy matching and exact-first ranking are verified."
+    }
+  ]
+}

@@ -18,6 +18,31 @@ Reasoning:
 Artifacts Updated:
 - TODO
 
+### 2026-06-16
+
+User Feedback:
+- The cohort request form needs meaningful placeholders that show users what belongs in each field.
+- The custom event image input should use the familiar local file-picker pattern where users click a box and choose an image from their system.
+- Cohort search should include semi-relevant typo-tolerant matches, such as returning a `test` cohort for `tost`, with exact matches ranked first.
+- Add a `Buy Credits` button to the nav bar as a placeholder until real payment gates are wired.
+
+Issue Mapping:
+- New ISSUE-010: Improve Create Form Guidance and Image Upload.
+- New ISSUE-011: Add Fuzzy Cohort Search Matches.
+- New ISSUE-012: Add Buy Credits Navigation Placeholder.
+
+Reasoning:
+- Form placeholders and image input are grouped because both affect the creator request form, but they are split into two issue-local tasks due to different implementation risk.
+- Fuzzy search is related to resolved ISSUE-008 but is not a duplicate because it changes ranking and typo-tolerance beyond the existing exact word search.
+- The Buy Credits nav entry is separate from T013 because the user asked for a placeholder now, not the payment implementation.
+
+Artifacts Updated:
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-010-create-form-guidance-and-image-upload/*`
+- `agent/feedback/issues/ISSUE-011-fuzzy-cohort-search/*`
+- `agent/feedback/issues/ISSUE-012-buy-credits-nav-placeholder/*`
+- `agent/knowledge/index.md`
+
 ### 2026-05-30 08:45
 
 User Feedback:

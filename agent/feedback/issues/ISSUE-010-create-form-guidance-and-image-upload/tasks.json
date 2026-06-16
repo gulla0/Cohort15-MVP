@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-010",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-010-T01",
+      "title": "Add meaningful create-form placeholders",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Improve the cohort request form with realistic placeholder and example text that helps creators understand what each field expects.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-010-create-form-guidance-and-image-upload/issue.md",
+        "src/ui/create-cohort.mjs",
+        "src/domain/validation.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/create-cohort.mjs",
+        "tests/create-cohort.test.mjs",
+        "agent/feedback/issues/ISSUE-010-create-form-guidance-and-image-upload/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Use meaningful Cohort15-specific examples instead of generic lorem ipsum.",
+        "Keep examples consistent with current validation rules and meeting-link provider limits.",
+        "Do not change domain behavior unless a placeholder reveals a missing validation issue."
+      ],
+      "acceptance_criteria": [
+        "Important create-form text fields render useful, realistic placeholder or helper examples.",
+        "Examples clarify expected content without replacing labels or submitted values.",
+        "Examples do not expose or suggest private links in public-safe fields.",
+        "Focused tests or snapshots assert that representative placeholders render."
+      ],
+      "verification": [
+        "Run focused create cohort tests.",
+        "Run `npm run check` before issue closeout."
+      ],
+      "files_expected": [
+        "src/ui/create-cohort.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "area": "create form, copy, user guidance",
+      "risk": "low",
+      "shared_dependencies": [
+        "create cohort UI",
+        "domain validation rules"
+      ],
+      "stop_condition": "Stop when form guidance is clear and verified."
+    },
+    {
+      "id": "ISSUE-010-T02",
+      "title": "Support familiar local image selection",
+      "status": "not_started",
+      "dependencies": [
+        "ISSUE-010-T01"
+      ],
+      "objective": "Replace or augment the custom event image input with a standard local file-picker interaction that stores or references the selected image safely.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-010-create-form-guidance-and-image-upload/issue.md",
+        "src/ui/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/services/create-cohort.mjs",
+        "src/domain/validation.mjs",
+        "src/persistence/repositories.mjs",
+        "tests/create-cohort.test.mjs",
+        "tests/domain-validation.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/services/create-cohort.mjs",
+        "src/domain/validation.mjs",
+        "src/persistence/repositories.mjs",
+        "tests/create-cohort.test.mjs",
+        "tests/domain-validation.test.mjs",
+        "public/",
+        "agent/feedback/issues/ISSUE-010-create-form-guidance-and-image-upload/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Implement the smallest dependency-free local file-picker path compatible with the current app.",
+        "Preserve default image behavior when no custom image is selected.",
+        "Validate image type/size enough to avoid accepting arbitrary unsafe content.",
+        "Do not introduce third-party upload or cloud storage dependencies."
+      ],
+      "acceptance_criteria": [
+        "The create form presents a recognizable click-to-choose image input.",
+        "Submitting a valid local image associates that image with the created cohort.",
+        "Feed/detail/dashboard image rendering still works for default and custom images.",
+        "Invalid or unsupported uploads fail clearly without creating a broken cohort.",
+        "Tests cover the selected local image path and default fallback."
+      ],
+      "verification": [
+        "Run focused create/domain tests.",
+        "Run `npm run check` before issue closeout.",
+        "Browser smoke test `/cohorts/new` if UI changes are implemented."
+      ],
+      "files_expected": [
+        "src/ui/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/services/create-cohort.mjs",
+        "src/domain/validation.mjs",
+        "tests/create-cohort.test.mjs"
+      ],
+      "area": "create form, event images, asset handling",
+      "risk": "medium",
+      "shared_dependencies": [
+        "event image validation",
+        "asset serving",
+        "create cohort route parsing"
+      ],
+      "stop_condition": "Stop when image selection uses a familiar local file-picker interaction and rendering remains verified."
+    }
+  ]
+}
