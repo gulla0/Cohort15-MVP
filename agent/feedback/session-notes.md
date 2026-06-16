@@ -24,6 +24,32 @@ User Feedback:
 - Initialize a feedback resolver and start resolving the first available unresolved issue.
 
 Issue Mapping:
+- Existing ISSUE-012 resolved.
+
+Reasoning:
+- ISSUE-012 was the first `not_started` issue in the feedback index after ISSUE-011.
+- The fix creates discovery for the future credit purchase flow without implementing payment, credit grants, purchase transactions, or provider selection.
+- The shared topbar keeps primary navigation consistent across home, feed/detail, create, and dashboard surfaces.
+
+Artifacts Updated:
+- `src/ui/home.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/dashboards.mjs`
+- `src/server/app.mjs`
+- `src/ui/styles.css`
+- `tests/foundation.test.mjs`
+- `tests/dashboards.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-012-buy-credits-nav-placeholder/*`
+- `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
+- Initialize a feedback resolver and start resolving the first available unresolved issue.
+
+Issue Mapping:
 - Existing ISSUE-011 resolved.
 
 Reasoning:

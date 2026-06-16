@@ -18,7 +18,7 @@ import { createShowInterestService } from '../services/show-interest.mjs';
 import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderCreatorDashboardPage, renderDashboardPage, renderParticipantDashboardPage } from '../ui/dashboards.mjs';
-import { renderHomePage } from '../ui/home.mjs';
+import { renderBuyCreditsPlaceholderPage, renderHomePage } from '../ui/home.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..', '..');
@@ -231,6 +231,11 @@ export function createRequestHandler(state = createState(), options = {}) {
 
     if (url.pathname === '/') {
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage());
+      return;
+    }
+
+    if (url.pathname === '/credits/buy' && (req.method ?? 'GET') === 'GET') {
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPlaceholderPage());
       return;
     }
 

@@ -1,4 +1,5 @@
 import { APP_NAME } from '../domain/constants.mjs';
+import { renderTopbar } from './home.mjs';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -37,14 +38,7 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
   </head>
   <body>
     <main class="shell">
-      <nav class="topbar">
-        <a class="brand-link" href="/">${APP_NAME}</a>
-        <div class="topbar-links">
-          <a href="/cohorts">Cohorts</a>
-          <a href="/cohorts/new">Create</a>
-          <a href="/dashboard">Dashboard</a>
-        </div>
-      </nav>
+      ${renderTopbar()}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">${escapeHtml(eyebrow)}</p>

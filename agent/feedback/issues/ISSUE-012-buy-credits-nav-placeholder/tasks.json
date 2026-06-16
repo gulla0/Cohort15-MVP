@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-012-T01",
       "title": "Add Buy Credits nav placeholder",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Add a visible Buy Credits navigation entry that leads to a safe placeholder until real credit purchases are implemented.",
       "inputs": [
@@ -57,7 +57,8 @@
         "main navigation",
         "T013 future purchase flow"
       ],
-      "stop_condition": "Stop when the placeholder nav path exists and cannot create or grant credits."
+      "stop_condition": "Stop when the placeholder nav path exists and cannot create or grant credits.",
+      "evidence": "2026-06-16: Added a shared topbar with `Buy Credits`, routed `/credits/buy` to a clear non-payment placeholder, verified focused route/navigation tests, and browser-smoked the nav click on localhost:3002."
     }
   ]
 }

@@ -1,7 +1,7 @@
 # ISSUE-012 Task Graph
 
 ```text
-ISSUE-012-T01 Add Buy Credits nav placeholder [not_started]
+ISSUE-012-T01 Add Buy Credits nav placeholder [done]
 ```
 
 ## Notes
@@ -17,4 +17,4 @@ ISSUE-012-T01 Add Buy Credits nav placeholder [not_started]
 
 ## Next Unblocked Tasks
 
-- ISSUE-012-T01
+- None.

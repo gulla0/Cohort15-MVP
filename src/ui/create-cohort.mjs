@@ -6,6 +6,7 @@ import {
   RECURRENCE_VALUES,
   TARGET_SKILL_LEVELS
 } from '../domain/constants.mjs';
+import { renderTopbar } from './home.mjs';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -95,14 +96,7 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
   </head>
   <body>
     <main class="shell">
-      <nav class="topbar">
-        <a class="brand-link" href="/">Cohort15</a>
-        <div class="topbar-links">
-          <a href="/cohorts">Cohorts</a>
-          <a href="/cohorts/new">Create</a>
-          <a href="/dashboard">Dashboard</a>
-        </div>
-      </nav>
+      ${renderTopbar()}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">Creator flow</p>

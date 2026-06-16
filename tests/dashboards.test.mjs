@@ -239,6 +239,7 @@ test('combined dashboard route shows credit summary, active schedule, created co
   assert.doesNotMatch(response.body, /Participant dashboard/);
   assert.match(response.body, /<a class="brand-link" href="\/">Cohort15<\/a>/);
   assert.match(response.body, /<div class="topbar-links">/);
+  assert.match(response.body, /href="\/credits\/buy">Buy Credits<\/a>/);
   assert.doesNotMatch(response.body, /dashboard\/creator">Creator dashboard/);
   assert.doesNotMatch(response.body, /dashboard\/participant">Participant dashboard/);
 });

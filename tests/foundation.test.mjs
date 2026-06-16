@@ -34,8 +34,18 @@ test('server renders the MVP foundation shell and health endpoint', async () => 
   const home = await invoke('/');
   assert.equal(home.status, 200);
   assert.match(home.body, /Cohort15/);
+  assert.match(home.body, /href="\/credits\/buy">Buy Credits<\/a>/);
 
   const health = await invoke('/health');
   assert.equal(health.status, 200);
   assert.equal(JSON.parse(health.body).ok, true);
+});
+
+test('buy credits nav placeholder is reachable without granting credits', async () => {
+  const page = await invoke('/credits/buy');
+  assert.equal(page.status, 200);
+  assert.match(page.body, /<h1 id="page-title">Buy Credits<\/h1>/);
+  assert.match(page.body, /Credit purchasing is not live yet/);
+  assert.match(page.body, /no credits are added/i);
+  assert.doesNotMatch(page.body, /payment succeeded/i);
 });
