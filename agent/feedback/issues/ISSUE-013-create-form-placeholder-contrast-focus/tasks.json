@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-013",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-013-T01",
+      "title": "Lighten and hide create-form placeholders on focus",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Make create-form placeholder examples very light by default and hide them while the user focuses/clicks into each field.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-013-create-form-placeholder-contrast-focus/issue.md",
+        "src/ui/create-cohort.mjs",
+        "src/ui/styles.css",
+        "tests/create-cohort.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/create-cohort.mjs",
+        "src/ui/styles.css",
+        "tests/create-cohort.test.mjs",
+        "agent/feedback/issues/ISSUE-013-create-form-placeholder-contrast-focus/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Keep existing meaningful placeholder copy from ISSUE-010 unless a specific field requires a small adjustment for focus behavior.",
+        "Prefer standards-based CSS placeholder/focus behavior before adding custom client-side code.",
+        "Do not change create cohort validation or image upload behavior."
+      ],
+      "acceptance_criteria": [
+        "Create-form placeholder text appears very light in unfocused empty fields.",
+        "Placeholder text is not visible while an affected field is focused.",
+        "Existing field labels and validation behavior remain intact.",
+        "The change covers text inputs and textareas that render placeholder examples.",
+        "Focused tests or browser smoke verify the relevant behavior."
+      ],
+      "verification": [
+        "Run focused create-form tests.",
+        "Run `npm run check` before issue closeout.",
+        "Browser smoke test `/cohorts/new` placeholder contrast and focus behavior if UI changes are implemented."
+      ],
+      "files_expected": [
+        "src/ui/create-cohort.mjs",
+        "src/ui/styles.css",
+        "tests/create-cohort.test.mjs"
+      ],
+      "area": "create form, placeholder styling, focus behavior",
+      "risk": "low",
+      "shared_dependencies": [
+        "ISSUE-010 placeholder content",
+        "create cohort form UI"
+      ],
+      "stop_condition": "Stop when placeholders are visually light and disappear on focus without altering create-flow semantics."
+    }
+  ]
+}

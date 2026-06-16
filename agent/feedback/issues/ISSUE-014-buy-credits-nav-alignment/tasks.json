@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-014",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-014-T01",
+      "title": "Align Buy Credits with navbar options",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Adjust shared navigation markup/styles so the Buy Credits button aligns with the other navbar options on primary pages.",
+      "inputs": [
+        "agent/feedback/issues/ISSUE-014-buy-credits-nav-alignment/issue.md",
+        "src/ui/home.mjs",
+        "src/ui/styles.css",
+        "tests/foundation.test.mjs",
+        "tests/dashboards.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/home.mjs",
+        "src/ui/styles.css",
+        "tests/foundation.test.mjs",
+        "tests/dashboards.test.mjs",
+        "agent/feedback/issues/ISSUE-014-buy-credits-nav-alignment/*",
+        "agent/feedback/issue-index.md",
+        "agent/feedback/session-notes.md",
+        "agent/knowledge/index.md"
+      ],
+      "authority": [
+        "Fix alignment while preserving the non-payment placeholder route behavior from ISSUE-012.",
+        "Keep the shared topbar consistent across pages.",
+        "Do not implement real credit purchasing or ledger changes."
+      ],
+      "acceptance_criteria": [
+        "`Buy Credits` aligns with the other navbar options on desktop.",
+        "The nav remains usable and visually coherent on mobile widths.",
+        "`Buy Credits` still routes to the existing safe placeholder page.",
+        "No payment, credit grant, or purchase transaction behavior is added.",
+        "Focused tests or browser smoke verify the alignment-sensitive navigation surface."
+      ],
+      "verification": [
+        "Run focused navigation/route tests.",
+        "Run `npm run check` before issue closeout.",
+        "Browser smoke test primary navigation at desktop and mobile widths if UI changes are implemented."
+      ],
+      "files_expected": [
+        "src/ui/home.mjs",
+        "src/ui/styles.css",
+        "tests/foundation.test.mjs",
+        "tests/dashboards.test.mjs"
+      ],
+      "area": "navigation, credits, visual alignment",
+      "risk": "low",
+      "shared_dependencies": [
+        "shared topbar",
+        "ISSUE-012 Buy Credits placeholder",
+        "T013 future purchase flow"
+      ],
+      "stop_condition": "Stop when Buy Credits is visually aligned with the other nav items and still cannot create or grant credits."
+    }
+  ]
+}

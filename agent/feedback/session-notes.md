@@ -21,6 +21,27 @@ Artifacts Updated:
 ### 2026-06-16
 
 User Feedback:
+- The cohort request form placeholder text is too dark; it should be very light and disappear when the user clicks into the field.
+- The Buy Credits button needs to align with the other navbar options.
+
+Issue Mapping:
+- New ISSUE-013: Lighten Create Form Placeholders.
+- New ISSUE-014: Align Buy Credits Navigation.
+
+Reasoning:
+- ISSUE-013 is related to resolved ISSUE-010 placeholder guidance, but not a duplicate because it concerns placeholder contrast and focus behavior.
+- ISSUE-014 is related to resolved ISSUE-012 Buy Credits placeholder work, but not a duplicate because it concerns visual alignment of the existing nav item.
+- Both issues are UI-focused and can be resolved independently without adding feedback tasks to the main task ledger.
+
+Artifacts Updated:
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-013-create-form-placeholder-contrast-focus/*`
+- `agent/feedback/issues/ISSUE-014-buy-credits-nav-alignment/*`
+- `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
 - Initialize a feedback resolver and start resolving the first available unresolved issue.
 
 Issue Mapping:
