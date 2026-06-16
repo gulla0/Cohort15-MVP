@@ -2,6 +2,43 @@
 
 Append-only implementation log.
 
+### 2026-06-16 12:48 EDT
+
+Task:
+- T012 Replace demo user selection with regular auth boundary
+
+Files Changed:
+- `src/auth/session.mjs`
+- `src/ui/auth.mjs`
+- `src/server/app.mjs`
+- `src/ui/home.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/dashboards.mjs`
+- `src/ui/styles.css`
+- `tests/create-cohort.test.mjs`
+- `tests/show-interest.test.mjs`
+- `tests/dashboards.test.mjs`
+- `tests/event-browsing.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- `README.md`
+- `tasks.json`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Added dependency-free local session auth with explicit `/auth/sign-in` and `/auth/sign-out`.
+- Guarded create, show-interest, and dashboard routes with session-based identity.
+- Removed protected-flow reliance on posted creator IDs, participant selectors, dashboard identity query parameters, and detail-viewer query parameters.
+- Preserved conservative private-link authorization for signed-in creators and committed participants.
+- Updated README and route tests for the local session auth assumption.
+
+Verification:
+- Focused auth route and MVP flow tests passed.
+- `npm run check` passed with 59 tests.
+
 ### 2026-06-12 21:02 EDT
 
 Task:

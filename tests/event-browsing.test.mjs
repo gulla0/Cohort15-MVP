@@ -53,6 +53,17 @@ async function invoke(handler, request) {
   };
 }
 
+async function signIn(handler, userId) {
+  const response = await invoke(handler, {
+    url: '/auth/sign-in',
+    method: 'POST',
+    body: new URLSearchParams({ userId, returnTo: '/' }).toString()
+  });
+
+  assert.equal(response.status, 303);
+  return response.headers['set-cookie'].split(';')[0];
+}
+
 test('event browsing lists only open and active events without private links', () => {
   const state = createDemoRepositories();
   state.repositories.events.save(eventFixture({ id: 'event-open', status: 'open' }));
@@ -335,8 +346,11 @@ test('active cohort detail route reveals link for creator viewer', async () => {
   assert.doesNotMatch(anonymous.body, /private-open-source/);
 
   const creator = await invoke(handler, {
-    url: '/cohorts/event-active?viewerId=user-creator',
-    method: 'GET'
+    url: '/cohorts/event-active',
+    method: 'GET',
+    headers: {
+      cookie: await signIn(handler, 'user-creator')
+    }
   });
   assert.equal(creator.status, 200);
   assert.match(creator.body, /https:\/\/meet\.google\.com\/private-open-source/);

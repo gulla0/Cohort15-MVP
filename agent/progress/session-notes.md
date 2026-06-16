@@ -2,6 +2,35 @@
 
 Append-only role transition and handoff log.
 
+### 2026-06-16 12:48 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
+- `plan.md`
+- `atomic-task-graph.md`
+- route, UI, service, persistence, and tests needed for T012
+
+Decided:
+- Classified the user request as approved main implementation work and selected T012 as the next unblocked task after T011/T016.
+- Implemented a dependency-free local session cookie boundary instead of choosing an OAuth provider, because provider choice remains unspecified and the app is intentionally dependency-free.
+- Kept seeded demo users available only through explicit `/auth/sign-in`, not through hidden fields, participant selectors, dashboard query params, or `viewerId` query params.
+- Scoped create, interest, dashboard, and active private-link route behavior to the signed-in session user.
+- Updated README, tests, task ledger, task status, change log, and knowledge index for the new auth boundary.
+
+Assumptions Made:
+- Local session auth is sufficient for T012 because the task allows the simplest local/session approach and explicitly defers provider choice.
+- Session storage can be in-memory for now; durable user/event/ledger data remains handled by T011 persistence.
+- `/admin/expire-cohorts` remains a local/dev operational endpoint until T020 secures admin endpoints.
+
+Next Recommended Step:
+- Execute T013, T014, T015, or T017 depending on whether product monetization/distribution, lifecycle controls, or launch-readiness documentation is the priority. T013 is the next lowest-numbered unblocked task.
+
 ### 2026-06-12 21:02 EDT
 
 Read:

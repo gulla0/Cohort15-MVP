@@ -137,14 +137,14 @@ function scoreSearchMatch(event, query) {
   return score;
 }
 
-function serializeWithInterest(repositories, event, viewerId) {
+function serializeWithInterest(repositories, event, currentUserId) {
   const interests = repositories.eventInterests.listByEvent(event.id);
   const interestedUserIds = eligibleLinkViewerIds(interests);
 
   return {
     ...serializeEventForViewer(event, {
-    userId: viewerId,
-    interestedUserIds
+      userId: currentUserId,
+      interestedUserIds
     }),
     capacity: summarizeCapacity(event, interests)
   };
@@ -173,14 +173,14 @@ export function createEventBrowsingService({ repositories }) {
       .map((event) => serializeWithInterest(repositories, event));
   }
 
-  function getPublicEvent(eventId, viewerId) {
+  function getPublicEvent(eventId, currentUserId) {
     const event = repositories.events.findById(eventId);
 
     if (!event || !PUBLIC_FEED_STATUSES.has(event.status)) {
       return undefined;
     }
 
-    return serializeWithInterest(repositories, event, viewerId);
+    return serializeWithInterest(repositories, event, currentUserId);
   }
 
   return {

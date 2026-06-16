@@ -52,20 +52,33 @@ async function invoke(handler, request) {
   };
 }
 
+async function signIn(handler, userId) {
+  const response = await invoke(handler, {
+    url: '/auth/sign-in',
+    method: 'POST',
+    body: new URLSearchParams({ userId, returnTo: '/' }).toString()
+  });
+
+  assert.equal(response.status, 303);
+  return response.headers['set-cookie'].split(';')[0];
+}
+
 test('MVP success path creates, promotes, unlocks, and exposes dashboards without leaking locked links early', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state, {
     now: () => now
   });
+  const creatorCookie = await signIn(handler, 'user-creator');
 
   const createResponse = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',
+    headers: { cookie: creatorCookie },
     body: encodeForm(validCreateInput())
   });
   assert.equal(createResponse.status, 201);
   assert.match(createResponse.body, /Cohort created/);
-  assert.match(createResponse.body, /href="\/dashboard\?creatorUserId=user-creator"/);
+  assert.match(createResponse.body, /href="\/dashboard"/);
   assert.doesNotMatch(createResponse.body, /private-ai-build/);
 
   const [event] = state.repositories.events.list();
@@ -86,14 +99,17 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   });
   assert.equal(publicDetail.status, 200);
   assert.match(publicDetail.body, /Private link locked/);
-  assert.match(publicDetail.body, /<option value="user-participant" selected>Demo Participant<\/option>/);
+  assert.match(publicDetail.body, /Sign in<\/a> to use 1 credit and show interest/);
+  assert.doesNotMatch(publicDetail.body, /<select name="userId"/);
   assert.match(publicDetail.body, /src="\/assets\/default-cohort\.png"/);
   assert.doesNotMatch(publicDetail.body, /private-ai-build/);
 
+  const participantCookie = await signIn(handler, 'user-participant');
   const interestResponse = await invoke(handler, {
     url: `/cohorts/${event.id}/interest`,
     method: 'POST',
-    body: encodeForm({ userId: 'user-participant' })
+    headers: { cookie: participantCookie },
+    body: ''
   });
   assert.equal(interestResponse.status, 200);
   assert.match(interestResponse.body, /Quorum met/);
@@ -114,8 +130,9 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   assert.doesNotMatch(anonymousActiveDetail.body, /private-ai-build/);
 
   const combinedDashboard = await invoke(handler, {
-    url: '/dashboard?creatorUserId=user-creator&participantUserId=user-participant',
-    method: 'GET'
+    url: '/dashboard',
+    method: 'GET',
+    headers: { cookie: participantCookie }
   });
   assert.equal(combinedDashboard.status, 200);
   assert.match(combinedDashboard.body, /My Cohorts &amp; Events/);
@@ -130,8 +147,8 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
   assert.equal([...combinedDashboard.body.matchAll(/<h2>Available<\/h2>/g)].length, 1);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>In use<\/h2>/g)].length, 1);
   assert.equal([...combinedDashboard.body.matchAll(/<h2>Used<\/h2>/g)].length, 1);
-  assert.match(combinedDashboard.body, />9 credit\(s\)</);
-  assert.match(combinedDashboard.body, />3 credit\(s\)</);
+  assert.match(combinedDashboard.body, />5 credit\(s\)</);
+  assert.match(combinedDashboard.body, />1 credit\(s\)</);
   assert.doesNotMatch(combinedDashboard.body, /Returned/);
   assert.doesNotMatch(combinedDashboard.body, /creator credits:/);
   assert.doesNotMatch(combinedDashboard.body, /participant credits:/);
@@ -144,10 +161,12 @@ test('MVP expiry path refunds held creator and participant credits and removes e
   const handler = createRequestHandler(state, {
     now: () => now
   });
+  const creatorCookie = await signIn(handler, 'user-creator');
 
   const createResponse = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',
+    headers: { cookie: creatorCookie },
     body: encodeForm(validCreateInput({
       title: 'Slow Quorum Cohort',
       minQuorum: '2',
@@ -157,10 +176,12 @@ test('MVP expiry path refunds held creator and participant credits and removes e
   assert.equal(createResponse.status, 201);
 
   const [event] = state.repositories.events.list();
+  const participantCookie = await signIn(handler, 'user-participant');
   const interestResponse = await invoke(handler, {
     url: `/cohorts/${event.id}/interest`,
     method: 'POST',
-    body: encodeForm({ userId: 'user-participant' })
+    headers: { cookie: participantCookie },
+    body: ''
   });
   assert.equal(interestResponse.status, 200);
   assert.equal(state.repositories.events.findById(event.id).status, 'open');
@@ -186,8 +207,9 @@ test('MVP expiry path refunds held creator and participant credits and removes e
   assert.equal(state.ledger.balanceForUser('user-participant').refunded, 1);
 
   const detail = await invoke(handler, {
-    url: `/cohorts/${event.id}?viewerId=user-creator`,
-    method: 'GET'
+    url: `/cohorts/${event.id}`,
+    method: 'GET',
+    headers: { cookie: creatorCookie }
   });
   assert.equal(detail.status, 404);
   assert.doesNotMatch(detail.body, /private-slow-quorum/);

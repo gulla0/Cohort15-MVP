@@ -27,7 +27,7 @@ function localTime(value) {
   return `<time datetime="${escapeHtml(isoValue)}" data-local-time>${escapeHtml(formatDateTime(value))} UTC</time>`;
 }
 
-function pageShell({ title, eyebrow, heading, lede, body }) {
+function pageShell({ title, eyebrow, heading, lede, body, currentUser }) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -38,7 +38,7 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar()}
+      ${renderTopbar({ currentUser })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">${escapeHtml(eyebrow)}</p>
@@ -174,23 +174,10 @@ function linkPanel(event) {
   </section>`;
 }
 
-function selectedAttribute(left, right) {
-  return left === right ? ' selected' : '';
-}
-
-function interestPanel({ event, users = [], viewerId, interestResult, interestErrors = [] }) {
+function interestPanel({ event, currentUser, interestResult, interestErrors = [] }) {
   if (event.status !== 'open' && !interestResult && interestErrors.length === 0) {
     return '';
   }
-
-  const selectedUserId = viewerId
-    && viewerId !== event.creatorId
-    ? viewerId
-    : users.find((user) => user.id !== event.creatorId)?.id
-    ?? users[0]?.id;
-  const options = users.map((user) => (
-    `<option value="${escapeHtml(user.id)}"${selectedAttribute(user.id, selectedUserId)}>${escapeHtml(user.displayName)}</option>`
-  )).join('');
 
   return `<section class="notice interest-panel">
     <h2>Show interest</h2>
@@ -199,20 +186,16 @@ function interestPanel({ event, users = [], viewerId, interestResult, interestEr
       <ul>${interestErrors.map((error) => `<li>${escapeHtml(error)}</li>`).join('')}</ul>
     </div>` : ''}
     ${interestResult ? `<p>${escapeHtml(interestResult.participant.displayName)} used ${escapeHtml(interestResult.creditHoldAmount)} credit to show interest. ${interestResult.activated ? 'Quorum met. The cohort is active.' : 'If quorum is not met, this credit is returned.'}</p>
-      <p><a href="/dashboard?participantUserId=${encodeURIComponent(interestResult.participant.id)}">Open dashboard</a></p>` : ''}
-    ${event.status === 'open' ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
-      <label>
-        Demo participant
-        <select name="userId" required>
-          ${options}
-        </select>
-      </label>
+      <p><a href="/dashboard">Open dashboard</a></p>` : ''}
+    ${event.status === 'open' && !currentUser ? '<p><a href="/auth/sign-in">Sign in</a> to use 1 credit and show interest.</p>' : ''}
+    ${event.status === 'open' && currentUser ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
+      <p>Signed in as ${escapeHtml(currentUser.displayName)}.</p>
       <button type="submit">Use 1 credit</button>
     </form>` : ''}
   </section>`;
 }
 
-function eventDetail({ event, users, viewerId, interestResult, interestErrors }) {
+function eventDetail({ event, currentUser, interestResult, interestErrors }) {
   return `<section class="detail-layout">
     <article class="event-detail">
       <img class="event-hero-image" src="${escapeHtml(event.imageUrl)}" alt="${escapeHtml(event.title)} cohort image">
@@ -263,12 +246,12 @@ function eventDetail({ event, users, viewerId, interestResult, interestErrors })
     </article>
     <aside>
       ${linkPanel(event)}
-      ${interestPanel({ event, users, viewerId, interestResult, interestErrors })}
+      ${interestPanel({ event, currentUser, interestResult, interestErrors })}
     </aside>
   </section>`;
 }
 
-export function renderCohortFeedPage({ events, search = '' }) {
+export function renderCohortFeedPage({ events, search = '', currentUser } = {}) {
   const normalizedSearch = String(search ?? '').trim();
   const results = events.length === 0
     ? (normalizedSearch ? noSearchResults(normalizedSearch) : emptyFeed())
@@ -279,16 +262,18 @@ export function renderCohortFeedPage({ events, search = '' }) {
     eyebrow: 'Public feed',
     heading: 'Cohorts',
     lede: 'Browse open and active online cohorts. Use 1 credit to show interest; credits are returned if quorum is not met.',
-    body: `${searchPanel(normalizedSearch)}${results}`
+    body: `${searchPanel(normalizedSearch)}${results}`,
+    currentUser
   });
 }
 
-export function renderCohortDetailPage({ event, users = [], viewerId, interestResult, interestErrors = [] }) {
+export function renderCohortDetailPage({ event, currentUser, interestResult, interestErrors = [] }) {
   return pageShell({
     title: event.title,
     eyebrow: 'Cohort detail',
     heading: event.title,
     lede: `${event.topic} for ${event.targetAudience}`,
-    body: eventDetail({ event, users, viewerId, interestResult, interestErrors })
+    body: eventDetail({ event, currentUser, interestResult, interestErrors }),
+    currentUser
   });
 }

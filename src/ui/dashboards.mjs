@@ -22,7 +22,7 @@ function formatDateTime(value) {
   }).format(value);
 }
 
-function pageShell({ title, eyebrow, heading, lede, body }) {
+function pageShell({ title, eyebrow, heading, lede, body, currentUser }) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -33,7 +33,7 @@ function pageShell({ title, eyebrow, heading, lede, body }) {
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar()}
+      ${renderTopbar({ currentUser })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">${escapeHtml(eyebrow)}</p>
@@ -134,7 +134,7 @@ function creatorCohortRow(item) {
       ${statusBadge(item.event.status)}
       <span>${escapeHtml(item.interestCount)} participant interest(s)</span>
     </div>
-    <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}?viewerId=${encodeURIComponent(item.event.creatorId)}">${escapeHtml(item.event.title)}</a></h2>
+    <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}">${escapeHtml(item.event.title)}</a></h2>
     ${eventMeta(item.event)}
     ${privateLink(item.event)}
   </article>`;
@@ -147,7 +147,7 @@ function participantInterestRow(item) {
       ${statusBadge(item.event.status)}
       <span>${escapeHtml(interestStatusText(item.interest.status))}</span>
     </div>
-    <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}?viewerId=${encodeURIComponent(item.interest.userId)}">${escapeHtml(item.event.title)}</a></h2>
+    <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}">${escapeHtml(item.event.title)}</a></h2>
     ${eventMeta(item.event)}
     ${privateLink(item.event)}
   </article>`;
@@ -186,13 +186,13 @@ function scheduleRow(item) {
       ${statusBadge(item.event.status)}
       <span>${escapeHtml(formatDateTime(item.event.firstMeetingAt))}</span>
     </div>
-    <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}?viewerId=${encodeURIComponent(item.userId)}">${escapeHtml(item.event.title)}</a></h2>
+    <h2><a href="/cohorts/${encodeURIComponent(item.event.id)}">${escapeHtml(item.event.title)}</a></h2>
     <p>${escapeHtml(item.context)}</p>
     ${privateLink(item.event)}
   </article>`;
 }
 
-export function renderCreatorDashboardPage({ dashboard }) {
+export function renderCreatorDashboardPage({ dashboard, currentUser }) {
   return pageShell({
     title: 'My Cohorts',
     eyebrow: 'Dashboard',
@@ -201,11 +201,12 @@ export function renderCreatorDashboardPage({ dashboard }) {
     body: `${balancePanel(dashboard.balance, 'My Credits')}
       ${dashboard.cohorts.length === 0
         ? emptyState('Create a cohort to see your cohorts here.')
-        : `<section class="event-list">${dashboard.cohorts.map(creatorCohortRow).join('')}</section>`}`
+        : `<section class="event-list">${dashboard.cohorts.map(creatorCohortRow).join('')}</section>`}`,
+    currentUser
   });
 }
 
-export function renderParticipantDashboardPage({ dashboard }) {
+export function renderParticipantDashboardPage({ dashboard, currentUser }) {
   return pageShell({
     title: 'My Events',
     eyebrow: 'Dashboard',
@@ -214,11 +215,12 @@ export function renderParticipantDashboardPage({ dashboard }) {
     body: `${balancePanel(dashboard.balance, 'My Credits')}
       ${dashboard.interests.length === 0
         ? emptyState('Show interest in a cohort to see your events here.')
-        : `<section class="event-list">${dashboard.interests.map(participantInterestRow).join('')}</section>`}`
+        : `<section class="event-list">${dashboard.interests.map(participantInterestRow).join('')}</section>`}`,
+    currentUser
   });
 }
 
-export function renderDashboardPage({ creatorDashboard, participantDashboard, accountBalance }) {
+export function renderDashboardPage({ creatorDashboard, participantDashboard, accountBalance, currentUser }) {
   const scheduleItems = activeScheduleItems({ creatorDashboard, participantDashboard });
 
   return pageShell({
@@ -253,6 +255,7 @@ export function renderDashboardPage({ creatorDashboard, participantDashboard, ac
             ? emptyState('Show interest in a cohort to see it here.')
             : `<section class="event-list">${participantDashboard.interests.map(participantInterestRow).join('')}</section>`}`
       })}
-    </div>`
+    </div>`,
+    currentUser
   });
 }

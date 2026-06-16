@@ -105,6 +105,22 @@ button {
   min-height: 34px;
 }
 
+.nav-user {
+  color: #4d5c53;
+  font-weight: 700;
+}
+
+.nav-form {
+  margin: 0;
+}
+
+.nav-form button {
+  min-height: 34px;
+  padding: 0;
+  background: transparent;
+  color: #146c5c;
+}
+
 .topbar .nav-cta {
   padding: 0 12px;
   border-radius: 8px;

@@ -69,6 +69,17 @@ async function invoke(handler, request) {
   };
 }
 
+async function signIn(handler, userId = 'user-participant') {
+  const response = await invoke(handler, {
+    url: '/auth/sign-in',
+    method: 'POST',
+    body: new URLSearchParams({ userId, returnTo: '/' }).toString()
+  });
+
+  assert.equal(response.status, 303);
+  return response.headers['set-cookie'].split(';')[0];
+}
+
 test('show interest records a 1-credit hold and active interest', () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
@@ -83,7 +94,7 @@ test('show interest records a 1-credit hold and active interest', () => {
   assert.equal(ledger.balanceForUser('user-participant').held, SHOW_INTEREST_CREDIT_COST);
 });
 
-test('show interest rejects creators without changing the UI default participant path', async () => {
+test('show interest rejects creators and anonymous detail prompts sign in', async () => {
   const { repositories, ledger, service } = createFixture();
   const event = repositories.events.save(eventFixture());
   ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
@@ -97,8 +108,8 @@ test('show interest rejects creators without changing the UI default participant
   const detail = await invoke(handler, { url: `/cohorts/${event.id}`, method: 'GET' });
 
   assert.equal(detail.status, 200);
-  assert.match(detail.body, /<option value="user-participant" selected>Demo Participant<\/option>/);
-  assert.doesNotMatch(detail.body, /<option value="user-creator" selected>Demo Creator<\/option>/);
+  assert.match(detail.body, /Sign in<\/a> to use 1 credit and show interest/);
+  assert.doesNotMatch(detail.body, /<select name="userId"/);
 });
 
 test('show interest rejects duplicate active interest and participant cap overflow', () => {
@@ -173,19 +184,21 @@ test('show interest activates event at quorum and consumes held credits', () => 
 test('show interest route unlocks the private link for the participant when quorum is met', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state);
+  const cookie = await signIn(handler);
   const event = state.repositories.events.save(eventFixture({ minQuorum: 1, maxParticipants: 3 }));
   state.ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
   const response = await invoke(handler, {
     url: `/cohorts/${event.id}/interest`,
     method: 'POST',
-    body: new URLSearchParams({ userId: 'user-participant' }).toString()
+    headers: { cookie },
+    body: ''
   });
 
   assert.equal(response.status, 200);
   assert.match(response.body, /Quorum met/);
   assert.match(response.body, /Private link unlocked/);
   assert.match(response.body, /Open dashboard/);
-  assert.match(response.body, /href="\/dashboard\?participantUserId=user-participant"/);
+  assert.match(response.body, /href="\/dashboard"/);
   assert.match(response.body, /https:\/\/meet\.google\.com\/private-open-source/);
 });

@@ -76,13 +76,12 @@ function successNotice(result) {
     <p>Private link status: locked until quorum.</p>
     <p class="button-row">
       <a class="button-link" href="/cohorts/${encodeURIComponent(result.event.id)}">View cohort</a>
-      <a class="button-link secondary" href="/dashboard?creatorUserId=${encodeURIComponent(result.event.creatorId)}">Dashboard</a>
+      <a class="button-link secondary" href="/dashboard">Dashboard</a>
     </p>
   </section>`;
 }
 
-export function renderCreateCohortPage({ users, creatorId, values = {}, errors = [], result } = {}) {
-  const defaultCreatorId = creatorId ?? values.creatorId ?? users?.[0]?.id ?? '';
+export function renderCreateCohortPage({ currentUser, values = {}, errors = [], result } = {}) {
   const earliestFirstMeeting = new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
   const minimumFirstMeetingValue = formatDateTimeLocal(earliestFirstMeeting);
 
@@ -96,7 +95,7 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar()}
+      ${renderTopbar({ currentUser })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">Creator flow</p>
@@ -108,8 +107,6 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
       ${errorList(errors)}
 
       <form class="form-grid" method="post" action="/cohorts/new" enctype="multipart/form-data">
-        <input name="creatorId" type="hidden" value="${escapeHtml(defaultCreatorId)}">
-
         <label>
           Title
           <input name="title" value="${inputValue(values, 'title')}" placeholder="${inputPlaceholder('title')}" required>

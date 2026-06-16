@@ -63,6 +63,17 @@ async function invoke(handler, request) {
   };
 }
 
+async function signIn(handler, userId) {
+  const response = await invoke(handler, {
+    url: '/auth/sign-in',
+    method: 'POST',
+    body: new URLSearchParams({ userId, returnTo: '/' }).toString()
+  });
+
+  assert.equal(response.status, 303);
+  return response.headers['set-cookie'].split(';')[0];
+}
+
 test('creator dashboard lists owned cohorts with credit state and unlocked links', () => {
   const { repositories, ledger, service } = createFixture();
   const activeEvent = repositories.events.save(eventFixture({ status: 'active' }));
@@ -168,7 +179,15 @@ test('dashboard routes render content-based cohort and event views', async () =>
     createdAt: now
   });
 
-  const creator = await invoke(handler, { url: '/dashboard/creator?userId=user-creator', method: 'GET' });
+  const anonymous = await invoke(handler, { url: '/dashboard/creator', method: 'GET' });
+  assert.equal(anonymous.status, 401);
+
+  const creatorCookie = await signIn(handler, 'user-creator');
+  const creator = await invoke(handler, {
+    url: '/dashboard/creator',
+    method: 'GET',
+    headers: { cookie: creatorCookie }
+  });
   assert.equal(creator.status, 200);
   assert.match(creator.body, /My Cohorts/);
   assert.match(creator.body, /My Credits/);
@@ -181,7 +200,12 @@ test('dashboard routes render content-based cohort and event views', async () =>
   assert.doesNotMatch(creator.body, /Returned/);
   assert.doesNotMatch(creator.body, /creator credits:/);
 
-  const participant = await invoke(handler, { url: '/dashboard/participant?userId=user-participant', method: 'GET' });
+  const participantCookie = await signIn(handler, 'user-participant');
+  const participant = await invoke(handler, {
+    url: '/dashboard/participant',
+    method: 'GET',
+    headers: { cookie: participantCookie }
+  });
   assert.equal(participant.status, 200);
   assert.match(participant.body, /My Events/);
   assert.match(participant.body, /My Credits/);
@@ -212,7 +236,15 @@ test('combined dashboard route shows credit summary, active schedule, created co
     createdAt: now
   });
 
-  const response = await invoke(handler, { url: '/dashboard', method: 'GET' });
+  const anonymous = await invoke(handler, { url: '/dashboard', method: 'GET' });
+  assert.equal(anonymous.status, 401);
+
+  const cookie = await signIn(handler, 'user-creator');
+  const response = await invoke(handler, {
+    url: '/dashboard',
+    method: 'GET',
+    headers: { cookie }
+  });
 
   assert.equal(response.status, 200);
   assert.match(response.body, /My Cohorts &amp; Events/);
@@ -223,10 +255,10 @@ test('combined dashboard route shows credit summary, active schedule, created co
   assert.match(response.body, /Available/);
   assert.match(response.body, /In use/);
   assert.match(response.body, /Used/);
-  assert.match(response.body, />9 credit\(s\)</);
-  assert.match(response.body, />3 credit\(s\)</);
+  assert.match(response.body, />4 credit\(s\)</);
+  assert.match(response.body, />2 credit\(s\)</);
   assert.match(response.body, /Demo Creator started this cohort/);
-  assert.match(response.body, /Demo Participant has a confirmed seat/);
+  assert.doesNotMatch(response.body, /Demo Participant has a confirmed seat/);
   assert.equal([...response.body.matchAll(/<h2>Available<\/h2>/g)].length, 1);
   assert.equal([...response.body.matchAll(/<h2>In use<\/h2>/g)].length, 1);
   assert.equal([...response.body.matchAll(/<h2>Used<\/h2>/g)].length, 1);

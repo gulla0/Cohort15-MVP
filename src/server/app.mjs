@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, extname, join } from 'node:path';
+import { clearSessionCookie, createSessionManager } from '../auth/session.mjs';
 import {
   ALLOWED_IMAGE_UPLOAD_TYPES,
   MAX_UPLOADED_IMAGE_BYTES,
@@ -15,6 +16,7 @@ import { createDashboardService } from '../services/dashboards.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
 import { createExpireCohortsService } from '../services/expire-cohorts.mjs';
 import { createShowInterestService } from '../services/show-interest.mjs';
+import { renderSignInPage } from '../ui/auth.mjs';
 import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderCreatorDashboardPage, renderDashboardPage, renderParticipantDashboardPage } from '../ui/dashboards.mjs';
@@ -22,7 +24,6 @@ import { renderBuyCreditsPlaceholderPage, renderHomePage } from '../ui/home.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..', '..');
-const DEMO_CREATOR_USER_ID = 'user-creator';
 const IMAGE_EXTENSION_BY_TYPE = Object.freeze({
   'image/gif': '.gif',
   'image/jpeg': '.jpg',
@@ -47,6 +48,25 @@ function contentTypeForImagePath(fileName) {
 function send(res, status, headers, body) {
   res.writeHead(status, headers);
   res.end(body);
+}
+
+function redirect(res, location, headers = {}) {
+  send(res, 303, {
+    location,
+    ...headers
+  }, '');
+}
+
+function safeReturnTo(value) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return '/';
+  }
+
+  if (!value.startsWith('/') || value.startsWith('//')) {
+    return '/';
+  }
+
+  return value;
 }
 
 async function readBodyBuffer(req) {
@@ -157,8 +177,6 @@ async function parseCreateCohortRequest(req, options) {
 
 function renderCreatePage(state, options = {}) {
   return renderCreateCohortPage({
-    users: state.repositories.users.list(),
-    creatorId: DEMO_CREATOR_USER_ID,
     ...options
   });
 }
@@ -189,9 +207,31 @@ export function createRequestHandler(state = createState(), options = {}) {
   const eventBrowsingService = createEventBrowsingService(state);
   const expireCohortsService = createExpireCohortsService(state);
   const showInterestService = createShowInterestService(state);
+  const sessionManager = options.sessionManager ?? createSessionManager({
+    repositories: state.repositories,
+    createSessionId: options.createSessionId
+  });
+
+  function currentUser(req) {
+    return sessionManager.getCurrentUser(req);
+  }
+
+  function requireCurrentUser(req, res) {
+    const user = currentUser(req);
+    if (user) {
+      return user;
+    }
+
+    send(res, 401, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+      users: state.repositories.users.list(),
+      returnTo: req.url ?? '/'
+    }));
+    return undefined;
+  }
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
+    const user = currentUser(req);
 
     if (url.pathname === '/health') {
       send(res, 200, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
@@ -230,12 +270,48 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/') {
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage());
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage({ currentUser: user }));
+      return;
+    }
+
+    if (url.pathname === '/auth/sign-in' && (req.method ?? 'GET') === 'GET') {
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+        users: state.repositories.users.list(),
+        currentUser: user,
+        returnTo: safeReturnTo(url.searchParams.get('returnTo') ?? '/')
+      }));
+      return;
+    }
+
+    if (url.pathname === '/auth/sign-in' && req.method === 'POST') {
+      const values = parseFormBody(await readBodyBuffer(req));
+      const returnTo = safeReturnTo(values.returnTo);
+
+      try {
+        const session = sessionManager.signIn(values.userId);
+        redirect(res, returnTo, {
+          'set-cookie': session.cookie
+        });
+      } catch (error) {
+        send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+          users: state.repositories.users.list(),
+          error: error.message,
+          returnTo
+        }));
+      }
+      return;
+    }
+
+    if (url.pathname === '/auth/sign-out' && req.method === 'POST') {
+      sessionManager.signOut(req);
+      redirect(res, '/', {
+        'set-cookie': clearSessionCookie()
+      });
       return;
     }
 
     if (url.pathname === '/credits/buy' && (req.method ?? 'GET') === 'GET') {
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPlaceholderPage());
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPlaceholderPage({ currentUser: user }));
       return;
     }
 
@@ -243,17 +319,30 @@ export function createRequestHandler(state = createState(), options = {}) {
       const search = url.searchParams.get('q') ?? '';
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortFeedPage({
         events: eventBrowsingService.listPublicEvents({ search }),
-        search
+        search,
+        currentUser: user
       }));
       return;
     }
 
     if (url.pathname === '/cohorts/new' && (req.method ?? 'GET') === 'GET') {
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state));
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
+
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
+        currentUser: authenticatedUser
+      }));
       return;
     }
 
     if (url.pathname === '/cohorts/new' && req.method === 'POST') {
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
+
       let values = {};
       try {
         values = {
@@ -262,29 +351,39 @@ export function createRequestHandler(state = createState(), options = {}) {
             uploadedImagePathPrefix,
             createUploadId
           })),
-          creatorId: DEMO_CREATOR_USER_ID
+          creatorId: authenticatedUser.id
         };
         const result = cohortService.create(values);
         send(res, 201, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
           values: {},
-          result
+          result,
+          currentUser: authenticatedUser
         }));
       } catch (error) {
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
           values,
-          errors: [error.message]
+          errors: [error.message],
+          currentUser: authenticatedUser
         }));
       }
       return;
     }
 
     if (url.pathname === '/dashboard' && (req.method ?? 'GET') === 'GET') {
-      const creatorUserId = url.searchParams.get('creatorUserId') ?? 'user-creator';
-      const participantUserId = url.searchParams.get('participantUserId') ?? 'user-participant';
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
 
       try {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderDashboardPage(
-          dashboardService.getCombinedDashboard({ creatorUserId, participantUserId })
+          {
+            ...dashboardService.getCombinedDashboard({
+              creatorUserId: authenticatedUser.id,
+              participantUserId: authenticatedUser.id
+            }),
+            currentUser: authenticatedUser
+          }
         ));
       } catch (error) {
         send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
@@ -293,11 +392,15 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/dashboard/creator' && (req.method ?? 'GET') === 'GET') {
-      const userId = url.searchParams.get('userId') ?? 'user-creator';
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
 
       try {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatorDashboardPage({
-          dashboard: dashboardService.getCreatorDashboard(userId)
+          dashboard: dashboardService.getCreatorDashboard(authenticatedUser.id),
+          currentUser: authenticatedUser
         }));
       } catch (error) {
         send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
@@ -306,11 +409,15 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/dashboard/participant' && (req.method ?? 'GET') === 'GET') {
-      const userId = url.searchParams.get('userId') ?? 'user-participant';
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
 
       try {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderParticipantDashboardPage({
-          dashboard: dashboardService.getParticipantDashboard(userId)
+          dashboard: dashboardService.getParticipantDashboard(authenticatedUser.id),
+          currentUser: authenticatedUser
         }));
       } catch (error) {
         send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
@@ -342,10 +449,9 @@ export function createRequestHandler(state = createState(), options = {}) {
 
     const cohortDetailMatch = url.pathname.match(/^\/cohorts\/([^/]+)$/);
     if (cohortDetailMatch && (req.method ?? 'GET') === 'GET') {
-      const viewerId = url.searchParams.get('viewerId') ?? undefined;
       const event = eventBrowsingService.getPublicEvent(
         decodeURIComponent(cohortDetailMatch[1]),
-        viewerId
+        user?.id
       );
 
       if (!event) {
@@ -355,29 +461,30 @@ export function createRequestHandler(state = createState(), options = {}) {
 
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
         event,
-        users: state.repositories.users.list(),
-        viewerId
+        currentUser: user
       }));
       return;
     }
 
     const showInterestMatch = url.pathname.match(/^\/cohorts\/([^/]+)\/interest$/);
     if (showInterestMatch && req.method === 'POST') {
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
+
       const eventId = decodeURIComponent(showInterestMatch[1]);
-      const values = parseFormBody(await readBodyBuffer(req));
-      const viewerId = values.userId;
 
       try {
-        const result = showInterestService.showInterest({ eventId, userId: viewerId });
-        const event = eventBrowsingService.getPublicEvent(eventId, viewerId);
+        const result = showInterestService.showInterest({ eventId, userId: authenticatedUser.id });
+        const event = eventBrowsingService.getPublicEvent(eventId, authenticatedUser.id);
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
           event,
-          users: state.repositories.users.list(),
-          viewerId,
+          currentUser: authenticatedUser,
           interestResult: result
         }));
       } catch (error) {
-        const event = eventBrowsingService.getPublicEvent(eventId, viewerId);
+        const event = eventBrowsingService.getPublicEvent(eventId, authenticatedUser.id);
         if (!event) {
           send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Cohort not found');
           return;
@@ -385,8 +492,7 @@ export function createRequestHandler(state = createState(), options = {}) {
 
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
           event,
-          users: state.repositories.users.list(),
-          viewerId,
+          currentUser: authenticatedUser,
           interestErrors: [error.message]
         }));
       }

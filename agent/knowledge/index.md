@@ -47,7 +47,7 @@ Use these routes to avoid broad rediscovery.
 | Social promotion outbox | T008 in `tasks.json`, automated social promotion section in spec, MVP boundary in `plan.md` | Event creation flow and social post outbox persistence | real external API clients during MVP |
 | Dashboards | T009 in `tasks.json`, creator and participant flow sections in spec | Event, interest, credit data loaders | analytics, profiles, chat |
 | Durable persistence hardening | T011 in `tasks.json`, `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/seeds.mjs`, `src/server/app.mjs` | JSON-file mode is enabled with `COHORT15_PERSISTENCE_FILE`; in-memory state remains default. Tests should use isolated temp files for durable coverage. | auth, payments, social APIs unless the task explicitly reaches them |
-| Auth boundary | T012 in `tasks.json`, server route handlers, create/interest/dashboard services | Existing demo-user query/default-user paths and private-link authorization tests | OAuth provider specifics unless selected |
+| Auth boundary | T012 in `tasks.json`, `src/auth/session.mjs`, server route handlers, create/interest/dashboard services | Local session-cookie auth is explicit through `/auth/sign-in`; protected routes should resolve identity from the signed-in session user, not query parameters or posted user IDs. | OAuth provider specifics unless selected |
 | Credit purchases | T013 in `tasks.json`, credit package assumptions in `plan.md`, credit ledger modules | Dashboard/credit summary surfaces and persistence schema if purchase metadata is needed | real card handling or provider credentials unless specified |
 | External social publishing | T014 in `tasks.json`, `src/services/social-promotion.mjs`, social post persistence | Configuration docs and mock/dry-run adapter tests | hard-coded secrets or real API calls in tests |
 | Lifecycle controls | T015 in `tasks.json`, domain statuses, expiry/refund service, dashboards | Server route guards and private-link visibility rules | broad moderation tooling |
@@ -75,14 +75,14 @@ Use these routes to avoid broad rediscovery.
 - Credit purchase is post-MVP; seed/admin grant transactions are part of MVP.
 - Initial post-MVP credit packages are `$6` for 6 credits and `$12` for 14 credits.
 - Real automated social posting is post-MVP; MVP should generate local public-safe outbox content.
-- Create cohort currently uses demo seed users as the temporary auth path and `GET/POST /cohorts/new` as the creation surface.
+- Create cohort uses the signed-in session user as creator and `GET/POST /cohorts/new` as the creation surface.
 - The create success view intentionally reports that the private link is locked and does not render `lockedEventLink`.
-- Public discovery is implemented through `src/services/event-browsing.mjs`, `GET /cohorts`, and `GET /cohorts/:id`; it lists open/active events and keeps locked links hidden unless an active event is viewed by an authorized demo `viewerId`.
-- Show interest is implemented through `src/services/show-interest.mjs` and `POST /cohorts/:id/interest`; it uses demo users, records a 1-credit participant hold, rejects duplicate active/consumed interest and cap overflow, and activates the event at quorum.
+- Public discovery is implemented through `src/services/event-browsing.mjs`, `GET /cohorts`, and `GET /cohorts/:id`; it lists open/active events and keeps locked links hidden unless an active event is viewed by an authorized signed-in creator or committed participant.
+- Show interest is implemented through `src/services/show-interest.mjs` and `POST /cohorts/:id/interest`; the route uses the signed-in session user, records a 1-credit participant hold, rejects duplicate active/consumed interest and cap overflow, and activates the event at quorum.
 - Quorum activation consumes the creator's 2-credit hold and each active participant's 1-credit hold, then marks active interests `consumed`; consumed participants remain authorized to view active private links.
 - Expiry processing lives in `src/services/expire-cohorts.mjs` and is exposed for local/dev use at `POST /admin/expire-cohorts`; it only processes open events past `expiresAt`, refunds held creator/participant credits, and marks active interests `refunded`.
 - Social promotion is local/mock in `src/services/social-promotion.mjs`; create cohort enqueues a pending `x` outbox post with public event fields and a public cohort URL, never the private link.
-- Creator and participant dashboards live at `/dashboard/creator` and `/dashboard/participant`; they use the existing demo `userId` query/default-user path and existing locked-link serializer for authorization.
+- Creator and participant dashboards live at `/dashboard/creator` and `/dashboard/participant`; `/dashboard` is the combined signed-in user view. Dashboard routes require a session and ignore user-controlled identity query parameters.
 - MVP handoff verification lives in `tests/mvp-verification.test.mjs`; it covers create/promote/privacy/quorum/dashboard success behavior and create/interest/expiry/refund behavior across the HTTP handler and in-memory repositories.
 - README now documents local demo users, seed credit grants, MVP flow, manual expiry trigger, local social outbox behavior, post-MVP credit package assumptions, and known MVP assumptions.
 - Feedback resolution on 2026-05-30 added `imageUrl` to events, defaulting blank images to `/assets/default-cohort.png` and allowing custom http(s) or app-relative image values.
@@ -99,7 +99,7 @@ Use these routes to avoid broad rediscovery.
 - T011 durable persistence uses `createJsonFileStore` in `src/persistence/store.mjs`, keeps repository methods synchronous, persists on successful writes, revives `*At` date fields on load, and stores credit balances as auditable transaction records rather than mutable balance fields.
 - Durable local mode is opt-in with `COHORT15_PERSISTENCE_FILE=.local/cohort15-state.json npm run dev`. The app seeds demo users and seed grant transactions only when missing, so reloading an existing state file does not duplicate grants.
 - Route-level tests that create cohorts should inject a fixed clock with `createRequestHandler(state, { now })` when asserting first-meeting behavior. Production validation still requires `firstMeetingAt` after the 14-day quorum window.
-- The next planned task wave is T012-T015. T012 removes demo query/default-user identity from protected flows. T013 and T014 depend on durable/auth foundations. T015 can follow the auth boundary and uses already-modeled `cancelled` and `completed` statuses.
+- T012 added dependency-free local session auth in `src/auth/session.mjs` with explicit seeded-user sign-in/out. T013 and T014 can now build on durable/auth foundations. T015 can follow the auth boundary and uses already-modeled `cancelled` and `completed` statuses.
 - Feedback intake on 2026-06-16 added ISSUE-010 for meaningful create-form placeholders and local image file selection, ISSUE-011 for exact-first fuzzy cohort search, and ISSUE-012 for a Buy Credits navigation placeholder that must not create or grant credits.
 - Feedback resolution on 2026-06-16 completed ISSUE-010: the create form now renders realistic Cohort15 placeholders and posts as multipart form data with a standard local image file picker; uploads are MIME/size validated, saved under `/assets/uploads`, served as static assets, and default image behavior remains unchanged when no image is selected.
 - Feedback resolution on 2026-06-16 completed ISSUE-011: public cohort search now uses deterministic scoring in `src/services/event-browsing.mjs`; exact token matches rank before substring matches, typo-tolerant edit-distance matches rank lower, and matching remains limited to public-safe fields.
@@ -107,10 +107,11 @@ Use these routes to avoid broad rediscovery.
 - Feedback intake on 2026-06-16 added ISSUE-013 for very light create-form placeholder text that disappears on field focus/click, and ISSUE-014 for aligning the `Buy Credits` nav item with the other navbar options.
 - Feedback resolution on 2026-06-16 completed ISSUE-013: create-form input and textarea placeholders now render very light while unfocused and disappear on focus without changing placeholder copy, validation, or image upload behavior.
 - Feedback resolution on 2026-06-16 completed ISSUE-014: shared topbar links now use consistent flex centering and mobile wrap alignment so `Buy Credits` aligns with the other nav options while remaining a non-payment placeholder.
+- T012 auth boundary uses an in-memory session map plus `HttpOnly; SameSite=Lax` session cookie. In local development, seeded demo users remain selectable only at `/auth/sign-in`; protected mutation and dashboard routes call `requireCurrentUser` in `src/server/app.mjs`.
 
 ## Assumptions And Uncertainty
 
-- Regular auth is in scope, but the provider is unspecified. A future implementation may use a simple local/demo auth path if it documents the assumption.
+- A production auth provider is still unspecified. The current boundary is local session auth over seeded users, suitable for dependency-free local development but not a production identity provider.
 - Deployment target is unspecified. Keep deployment-specific choices out of core business logic until clarified.
 - Authorization for viewing active private links should be implemented conservatively. At minimum, creators and interested participants should be eligible; broader public visibility after activation should be clarified if product behavior depends on it.
 - Official social channels are post-MVP. Do not implement real API posting during MVP.
@@ -161,4 +162,5 @@ Before trusting this index, check:
 - 2026-06-16: Feedback intake created ISSUE-013 and ISSUE-014 for create-form placeholder contrast/focus behavior and Buy Credits navbar alignment.
 - 2026-06-16: Feedback resolution completed ISSUE-013: create-form placeholders are now light by default and hidden on field focus.
 - 2026-06-16: Feedback resolution completed ISSUE-014: aligned the Buy Credits nav item with shared topbar links on desktop and mobile while preserving the safe placeholder route.
+- 2026-06-16 12:48 EDT: T012 added a local session-cookie auth boundary, explicit sign-in/out UI, protected create/interest/dashboard routes, signed-in private-link authorization, and README auth notes.
 - 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.

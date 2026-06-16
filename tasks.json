@@ -198,7 +198,7 @@
       ],
       "stop_condition": "Stop before interest mutation behavior.",
       "evidence": "2026-05-30 00:41 EDT: Added event browsing service, public `GET /cohorts` feed, `GET /cohorts/:id` detail route, feed/detail UI rendering, and visibility tests for open/active events, hidden locked links, and authorized active-link viewers. `npm run check` passed.",
-      "notes": "Active event links are revealed through the existing conservative authorization policy when `viewerId` identifies the creator or an active interested participant; interest mutation remains T006."
+      "notes": "Active event links are revealed through the existing conservative authorization policy when the current viewer is the creator or an active interested participant; interest mutation remains T006."
     },
     {
       "id": "T006",
@@ -446,7 +446,7 @@
     {
       "id": "T012",
       "title": "Replace demo user selection with regular auth boundary",
-      "status": "not_started",
+      "status": "done",
       "phase": "Post-MVP Hardening",
       "dependencies": [
         "T011"
@@ -487,7 +487,8 @@
         "Run the full documented verification suite"
       ],
       "stop_condition": "Stop once user identity is resolved through the auth boundary for all protected MVP flows.",
-      "notes": "Provider choice is still open; this task should document any local/session assumption instead of pretending it is production identity."
+      "evidence": "2026-06-16 12:48 EDT: Added dependency-free local session auth with explicit sign-in/sign-out, guarded create/interest/dashboard routes, removed protected-flow query/default demo identity resolution, scoped private-link viewing to the signed-in user, updated auth flow tests and README notes, and verified with focused auth route coverage plus full project checks.",
+      "notes": "Provider choice remains open. Current auth is a local session-cookie boundary over seeded local users; OAuth/provider integration is intentionally deferred."
     },
     {
       "id": "T013",

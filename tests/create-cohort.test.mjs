@@ -103,6 +103,17 @@ async function invoke(handler, request) {
   };
 }
 
+async function signIn(handler, userId = 'user-creator') {
+  const response = await invoke(handler, {
+    url: '/auth/sign-in',
+    method: 'POST',
+    body: new URLSearchParams({ userId, returnTo: '/' }).toString()
+  });
+
+  assert.equal(response.status, 303);
+  return response.headers['set-cookie'].split(';')[0];
+}
+
 test('create cohort holds 2 creator credits and saves an open event with default expiry', () => {
   const { repositories, ledger, service } = createServiceFixture();
 
@@ -192,8 +203,17 @@ test('create cohort page renders form errors and success without exposing privat
   const handler = createRequestHandler(state, {
     now: () => now
   });
+  const cookie = await signIn(handler);
 
-  const form = await invoke(handler, { url: '/cohorts/new', method: 'GET' });
+  const unauthenticatedForm = await invoke(handler, { url: '/cohorts/new', method: 'GET' });
+  assert.equal(unauthenticatedForm.status, 401);
+  assert.match(unauthenticatedForm.body, /Sign in/);
+
+  const form = await invoke(handler, {
+    url: '/cohorts/new',
+    method: 'GET',
+    headers: { cookie }
+  });
   assert.equal(form.status, 200);
   assert.match(form.body, /Create cohort/);
   assert.match(form.body, /name="firstMeetingAt" type="datetime-local" min="/);
@@ -204,7 +224,7 @@ test('create cohort page renders form errors and success without exposing privat
   assert.match(form.body, /https:\/\/meet\.google\.com\/cohort-room/);
   assert.doesNotMatch(form.body, /name="imageUrl"/);
   assert.match(form.body, /<option value="daily">daily<\/option>/);
-  assert.match(form.body, /name="creatorId" type="hidden" value="user-creator"/);
+  assert.doesNotMatch(form.body, /name="creatorId"/);
   assert.doesNotMatch(form.body, /<select name="creatorId"/);
   assert.doesNotMatch(form.body, />\s*Creator\s*<select/);
 
@@ -218,6 +238,7 @@ test('create cohort page renders form errors and success without exposing privat
   const invalid = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',
+    headers: { cookie },
     body: encodeForm(validInput({ title: '' }))
   });
   assert.equal(invalid.status, 400);
@@ -227,24 +248,27 @@ test('create cohort page renders form errors and success without exposing privat
   const valid = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',
+    headers: { cookie },
     body: encodeForm(validInput({ lockedEventLink: 'https://zoom.us/private-room' }))
   });
   assert.equal(valid.status, 201);
   assert.match(valid.body, /Cohort created/);
   assert.match(valid.body, /Private link status: locked until quorum/);
-  assert.match(valid.body, /href="\/dashboard\?creatorUserId=user-creator"/);
+  assert.match(valid.body, /href="\/dashboard"/);
   assert.doesNotMatch(valid.body, /zoom\.us/);
 });
 
-test('create cohort route assigns the temporary demo creator instead of trusting posted creator ids', async () => {
+test('create cohort route uses the signed-in user instead of trusting posted creator ids', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state, {
     now: () => now
   });
+  const cookie = await signIn(handler);
 
   const response = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',
+    headers: { cookie },
     body: encodeForm(validInput({
       creatorId: 'user-participant',
       lockedEventLink: 'https://meet.google.com/demo-creator-route'
@@ -263,6 +287,7 @@ test('create cohort route stores a selected local event image', async () => {
     createUploadId: () => 'uploaded-image',
     uploadedImageDir
   });
+  const cookie = await signIn(handler);
   const form = encodeMultipartForm(validInput({
     lockedEventLink: 'https://meet.google.com/uploaded-image'
   }), {
@@ -275,6 +300,7 @@ test('create cohort route stores a selected local event image', async () => {
     url: '/cohorts/new',
     method: 'POST',
     headers: {
+      cookie,
       'content-type': form.contentType
     },
     body: form.body
@@ -298,6 +324,7 @@ test('create cohort route rejects unsupported uploaded image types', async () =>
     now: () => now,
     uploadedImageDir: await mkdtemp(join(tmpdir(), 'cohort15-upload-test-'))
   });
+  const cookie = await signIn(handler);
   const form = encodeMultipartForm(validInput({
     lockedEventLink: 'https://meet.google.com/bad-upload'
   }), {
@@ -310,6 +337,7 @@ test('create cohort route rejects unsupported uploaded image types', async () =>
     url: '/cohorts/new',
     method: 'POST',
     headers: {
+      cookie,
       'content-type': form.contentType
     },
     body: form.body

@@ -1,6 +1,15 @@
 import { APP_NAME } from '../domain/constants.mjs';
 
-export function renderTopbar() {
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+export function renderTopbar({ currentUser } = {}) {
   return `<nav class="topbar">
         <a class="brand-link" href="/">${APP_NAME}</a>
         <div class="topbar-links">
@@ -8,11 +17,15 @@ export function renderTopbar() {
           <a href="/cohorts/new">Create</a>
           <a href="/dashboard">Dashboard</a>
           <a class="nav-cta" href="/credits/buy">Buy Credits</a>
+          ${currentUser ? `<span class="nav-user">${escapeHtml(currentUser.displayName)}</span>
+          <form class="nav-form" method="post" action="/auth/sign-out">
+            <button type="submit">Sign out</button>
+          </form>` : '<a href="/auth/sign-in">Sign in</a>'}
         </div>
       </nav>`;
 }
 
-export function renderHomePage() {
+export function renderHomePage({ currentUser } = {}) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -23,7 +36,7 @@ export function renderHomePage() {
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar()}
+      ${renderTopbar({ currentUser })}
 
       <section class="hero" aria-labelledby="page-title">
         <p class="eyebrow">Online cohorts</p>
@@ -54,7 +67,7 @@ export function renderHomePage() {
 </html>`;
 }
 
-export function renderBuyCreditsPlaceholderPage() {
+export function renderBuyCreditsPlaceholderPage({ currentUser } = {}) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -65,7 +78,7 @@ export function renderBuyCreditsPlaceholderPage() {
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar()}
+      ${renderTopbar({ currentUser })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">Credits</p>
