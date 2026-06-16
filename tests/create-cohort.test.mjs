@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { CREATE_EVENT_CREDIT_COST, DEFAULT_COHORT_IMAGE_PATH } from '../src/domain/constants.mjs';
 import { createDemoRepositories } from '../src/persistence/seeds.mjs';
@@ -45,6 +48,36 @@ function createServiceFixture(options = {}) {
 
 function encodeForm(values) {
   return new URLSearchParams(values).toString();
+}
+
+function encodeMultipartForm(values, file) {
+  const boundary = '----cohort15-test-boundary';
+  const chunks = [];
+
+  for (const [name, value] of Object.entries(values)) {
+    chunks.push(Buffer.from(
+      `--${boundary}\r\n`
+      + `Content-Disposition: form-data; name="${name}"\r\n\r\n`
+      + `${value}\r\n`
+    ));
+  }
+
+  if (file) {
+    chunks.push(Buffer.from(
+      `--${boundary}\r\n`
+      + `Content-Disposition: form-data; name="eventImage"; filename="${file.filename}"\r\n`
+      + `Content-Type: ${file.contentType}\r\n\r\n`
+    ));
+    chunks.push(file.content);
+    chunks.push(Buffer.from('\r\n'));
+  }
+
+  chunks.push(Buffer.from(`--${boundary}--\r\n`));
+
+  return {
+    contentType: `multipart/form-data; boundary=${boundary}`,
+    body: Buffer.concat(chunks)
+  };
 }
 
 async function invoke(handler, request) {
@@ -164,7 +197,12 @@ test('create cohort page renders form errors and success without exposing privat
   assert.equal(form.status, 200);
   assert.match(form.body, /Create cohort/);
   assert.match(form.body, /name="firstMeetingAt" type="datetime-local" min="/);
-  assert.match(form.body, /name="imageUrl"/);
+  assert.match(form.body, /enctype="multipart\/form-data"/);
+  assert.match(form.body, /name="eventImage" type="file"/);
+  assert.match(form.body, /Ship a tiny AI research assistant in 4 weeks/);
+  assert.match(form.body, /AI workflow prototyping/);
+  assert.match(form.body, /https:\/\/meet\.google\.com\/cohort-room/);
+  assert.doesNotMatch(form.body, /name="imageUrl"/);
   assert.match(form.body, /<option value="daily">daily<\/option>/);
   assert.match(form.body, /name="creatorId" type="hidden" value="user-creator"/);
   assert.doesNotMatch(form.body, /<select name="creatorId"/);
@@ -208,4 +246,69 @@ test('create cohort route assigns the temporary demo creator instead of trusting
 
   assert.equal(response.status, 201);
   assert.equal(state.repositories.events.list()[0].creatorId, 'user-creator');
+});
+
+test('create cohort route stores a selected local event image', async () => {
+  const state = createDemoRepositories();
+  const uploadedImageDir = await mkdtemp(join(tmpdir(), 'cohort15-upload-test-'));
+  const handler = createRequestHandler(state, {
+    now: () => now,
+    createUploadId: () => 'uploaded-image',
+    uploadedImageDir
+  });
+  const form = encodeMultipartForm(validInput({
+    lockedEventLink: 'https://meet.google.com/uploaded-image'
+  }), {
+    filename: 'cohort.png',
+    contentType: 'image/png',
+    content: Buffer.from('fake png bytes')
+  });
+
+  const response = await invoke(handler, {
+    url: '/cohorts/new',
+    method: 'POST',
+    headers: {
+      'content-type': form.contentType
+    },
+    body: form.body
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(state.repositories.events.list()[0].imageUrl, '/assets/uploads/uploaded-image.png');
+  assert.equal(await readFile(join(uploadedImageDir, 'uploaded-image.png'), 'utf8'), 'fake png bytes');
+
+  const imageResponse = await invoke(handler, {
+    url: '/assets/uploads/uploaded-image.png',
+    method: 'GET'
+  });
+  assert.equal(imageResponse.status, 200);
+  assert.equal(imageResponse.headers['content-type'], 'image/png');
+});
+
+test('create cohort route rejects unsupported uploaded image types', async () => {
+  const state = createDemoRepositories();
+  const handler = createRequestHandler(state, {
+    now: () => now,
+    uploadedImageDir: await mkdtemp(join(tmpdir(), 'cohort15-upload-test-'))
+  });
+  const form = encodeMultipartForm(validInput({
+    lockedEventLink: 'https://meet.google.com/bad-upload'
+  }), {
+    filename: 'notes.txt',
+    contentType: 'text/plain',
+    content: Buffer.from('not an image')
+  });
+
+  const response = await invoke(handler, {
+    url: '/cohorts/new',
+    method: 'POST',
+    headers: {
+      'content-type': form.contentType
+    },
+    body: form.body
+  });
+
+  assert.equal(response.status, 400);
+  assert.match(response.body, /Event image must be a PNG, JPG, GIF, or WebP file/);
+  assert.equal(state.repositories.events.list().length, 0);
 });

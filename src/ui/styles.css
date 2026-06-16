@@ -426,6 +426,29 @@ textarea {
   resize: vertical;
 }
 
+.image-picker-box {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px dashed #9aa99f;
+  border-radius: 8px;
+  background: #fffdf8;
+  color: #17211c;
+}
+
+.image-picker-box span {
+  font-weight: 800;
+}
+
+.image-picker-box small {
+  color: #5d6a62;
+  font-weight: 500;
+}
+
+.image-picker-box input {
+  margin-top: 8px;
+}
+
 .span-2 {
   grid-column: 1 / -1;
 }

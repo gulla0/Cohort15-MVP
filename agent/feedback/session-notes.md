@@ -21,6 +21,29 @@ Artifacts Updated:
 ### 2026-06-16
 
 User Feedback:
+- Initialize a feedback resolver and start resolving the first available unresolved issue.
+
+Issue Mapping:
+- Existing ISSUE-010 resolved.
+
+Reasoning:
+- ISSUE-010 was the first `not_started` issue in the feedback index.
+- The two issue-local tasks overlapped on `/cohorts/new`, so they were resolved sequentially in one wave: realistic placeholders first, then local image selection.
+- The local-image approach stays dependency-free and route-side: multipart uploads are validated, saved under `/assets/uploads`, and converted to the existing app-relative `imageUrl` field so downstream feed/detail/dashboard rendering remains unchanged.
+
+Artifacts Updated:
+- `src/ui/create-cohort.mjs`
+- `src/ui/styles.css`
+- `src/server/app.mjs`
+- `src/domain/constants.mjs`
+- `tests/create-cohort.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-010-create-form-guidance-and-image-upload/*`
+- `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
 - The cohort request form needs meaningful placeholders that show users what belongs in each field.
 - The custom event image input should use the familiar local file-picker pattern where users click a box and choose an image from their system.
 - Cohort search should include semi-relevant typo-tolerant matches, such as returning a `test` cohort for `tost`, with exact matches ranked first.

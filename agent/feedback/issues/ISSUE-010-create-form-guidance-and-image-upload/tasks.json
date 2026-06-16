@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-010-T01",
       "title": "Add meaningful create-form placeholders",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Improve the cohort request form with realistic placeholder and example text that helps creators understand what each field expects.",
       "inputs": [
@@ -53,7 +53,7 @@
     {
       "id": "ISSUE-010-T02",
       "title": "Support familiar local image selection",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [
         "ISSUE-010-T01"
       ],

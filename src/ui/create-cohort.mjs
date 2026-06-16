@@ -1,6 +1,8 @@
 import {
+  ALLOWED_IMAGE_UPLOAD_TYPES,
   DEFAULT_EXPIRY_DAYS,
   EVENT_CATEGORIES,
+  MAX_UPLOADED_IMAGE_BYTES,
   RECURRENCE_VALUES,
   TARGET_SKILL_LEVELS
 } from '../domain/constants.mjs';
@@ -16,6 +18,23 @@ function escapeHtml(value) {
 
 function inputValue(values, field) {
   return escapeHtml(values?.[field] ?? '');
+}
+
+function inputPlaceholder(field) {
+  const placeholders = {
+    title: 'Ship a tiny AI research assistant in 4 weeks',
+    description: 'A focused build cohort for people who want weekly accountability while turning notes, prompts, and lightweight automations into a working prototype.',
+    topic: 'AI workflow prototyping',
+    targetAudience: 'Builders with a rough idea who can commit to one live session and one async check-in each week.',
+    minQuorum: '5',
+    maxParticipants: '10',
+    lockedEventLink: 'https://meet.google.com/cohort-room',
+    meetingDurationMinutes: '75',
+    meetingCount: '4',
+    additionalDetails: 'We will share demos every Friday, keep private project links inside the cohort, and pair up for quick feedback between sessions.'
+  };
+
+  return escapeHtml(placeholders[field] ?? '');
 }
 
 function optionList(values, selectedValue) {
@@ -94,17 +113,17 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
       ${successNotice(result)}
       ${errorList(errors)}
 
-      <form class="form-grid" method="post" action="/cohorts/new">
+      <form class="form-grid" method="post" action="/cohorts/new" enctype="multipart/form-data">
         <input name="creatorId" type="hidden" value="${escapeHtml(defaultCreatorId)}">
 
         <label>
           Title
-          <input name="title" value="${inputValue(values, 'title')}" required>
+          <input name="title" value="${inputValue(values, 'title')}" placeholder="${inputPlaceholder('title')}" required>
         </label>
 
         <label class="span-2">
           Short description
-          <textarea name="description" required>${inputValue(values, 'description')}</textarea>
+          <textarea name="description" placeholder="${inputPlaceholder('description')}" required>${inputValue(values, 'description')}</textarea>
         </label>
 
         <label>
@@ -116,12 +135,12 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
 
         <label>
           Topic
-          <input name="topic" value="${inputValue(values, 'topic')}" required>
+          <input name="topic" value="${inputValue(values, 'topic')}" placeholder="${inputPlaceholder('topic')}" required>
         </label>
 
         <label>
           Target audience
-          <input name="targetAudience" value="${inputValue(values, 'targetAudience')}" required>
+          <input name="targetAudience" value="${inputValue(values, 'targetAudience')}" placeholder="${inputPlaceholder('targetAudience')}" required>
         </label>
 
         <label>
@@ -133,12 +152,12 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
 
         <label>
           Minimum quorum
-          <input name="minQuorum" type="number" min="1" value="${inputValue(values, 'minQuorum')}" required>
+          <input name="minQuorum" type="number" min="1" value="${inputValue(values, 'minQuorum')}" placeholder="${inputPlaceholder('minQuorum')}" required>
         </label>
 
         <label>
           Max participants
-          <input name="maxParticipants" type="number" min="1" max="15" value="${inputValue(values, 'maxParticipants')}" required>
+          <input name="maxParticipants" type="number" min="1" max="15" value="${inputValue(values, 'maxParticipants')}" placeholder="${inputPlaceholder('maxParticipants')}" required>
         </label>
 
         <label>
@@ -148,7 +167,7 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
 
         <label>
           Duration minutes
-          <input name="meetingDurationMinutes" type="number" min="1" value="${inputValue(values, 'meetingDurationMinutes')}" required>
+          <input name="meetingDurationMinutes" type="number" min="1" value="${inputValue(values, 'meetingDurationMinutes')}" placeholder="${inputPlaceholder('meetingDurationMinutes')}" required>
         </label>
 
         <label>
@@ -160,22 +179,26 @@ export function renderCreateCohortPage({ users, creatorId, values = {}, errors =
 
         <label>
           Meeting count
-          <input name="meetingCount" type="number" min="1" value="${inputValue(values, 'meetingCount')}" required>
+          <input name="meetingCount" type="number" min="1" value="${inputValue(values, 'meetingCount')}" placeholder="${inputPlaceholder('meetingCount')}" required>
         </label>
 
         <label class="span-2">
           Private online link
-          <input name="lockedEventLink" type="url" value="${inputValue(values, 'lockedEventLink')}" required>
+          <input name="lockedEventLink" type="url" value="${inputValue(values, 'lockedEventLink')}" placeholder="${inputPlaceholder('lockedEventLink')}" required>
         </label>
 
-        <label class="span-2">
-          Event image URL or path
-          <input name="imageUrl" value="${inputValue(values, 'imageUrl')}" placeholder="/assets/default-cohort.png">
+        <label class="span-2 image-picker">
+          Event image
+          <span class="image-picker-box">
+            <span>Choose image</span>
+            <small>PNG, JPG, GIF, or WebP up to ${Math.floor(MAX_UPLOADED_IMAGE_BYTES / 1024 / 1024)} MB. Leave blank to use the Cohort15 default.</small>
+            <input name="eventImage" type="file" accept="${escapeHtml(ALLOWED_IMAGE_UPLOAD_TYPES.join(','))}">
+          </span>
         </label>
 
         <label class="span-2">
           Additional details
-          <textarea name="additionalDetails">${inputValue(values, 'additionalDetails')}</textarea>
+          <textarea name="additionalDetails" placeholder="${inputPlaceholder('additionalDetails')}">${inputValue(values, 'additionalDetails')}</textarea>
         </label>
 
         <button type="submit">Create cohort</button>

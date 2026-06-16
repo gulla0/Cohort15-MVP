@@ -1,8 +1,13 @@
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { getFoundationSummary } from '../domain/constants.mjs';
+import { dirname, extname, join } from 'node:path';
+import {
+  ALLOWED_IMAGE_UPLOAD_TYPES,
+  MAX_UPLOADED_IMAGE_BYTES,
+  getFoundationSummary
+} from '../domain/constants.mjs';
 import { createDemoRepositories } from '../persistence/seeds.mjs';
 import { createJsonFileStore } from '../persistence/store.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
@@ -18,26 +23,136 @@ import { renderHomePage } from '../ui/home.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..', '..');
 const DEMO_CREATOR_USER_ID = 'user-creator';
+const IMAGE_EXTENSION_BY_TYPE = Object.freeze({
+  'image/gif': '.gif',
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp'
+});
+
+function contentTypeForImagePath(fileName) {
+  const extension = extname(fileName).toLowerCase();
+  if (extension === '.gif') {
+    return 'image/gif';
+  }
+  if (extension === '.jpg' || extension === '.jpeg') {
+    return 'image/jpeg';
+  }
+  if (extension === '.webp') {
+    return 'image/webp';
+  }
+  return 'image/png';
+}
 
 function send(res, status, headers, body) {
   res.writeHead(status, headers);
   res.end(body);
 }
 
-async function readBody(req) {
-  if (typeof req.body === 'string') {
+async function readBodyBuffer(req) {
+  if (Buffer.isBuffer(req.body)) {
     return req.body;
+  }
+
+  if (typeof req.body === 'string') {
+    return Buffer.from(req.body);
   }
 
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(Buffer.from(chunk));
   }
-  return Buffer.concat(chunks).toString('utf8');
+  return Buffer.concat(chunks);
 }
 
 function parseFormBody(body) {
-  return Object.fromEntries(new URLSearchParams(body));
+  return Object.fromEntries(new URLSearchParams(body.toString('utf8')));
+}
+
+function parseMultipartFormData(body, contentType) {
+  const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+  if (!boundaryMatch) {
+    throw new Error('Image upload form was missing its boundary.');
+  }
+
+  const boundary = `--${boundaryMatch[1] ?? boundaryMatch[2]}`;
+  const parts = body.toString('latin1').split(boundary);
+  const fields = {};
+  const files = {};
+
+  for (const part of parts) {
+    if (!part || part === '--\r\n' || part === '--') {
+      continue;
+    }
+
+    const headerEnd = part.indexOf('\r\n\r\n');
+    if (headerEnd === -1) {
+      continue;
+    }
+
+    const rawHeaders = part.slice(0, headerEnd).trim();
+    let rawContent = part.slice(headerEnd + 4);
+    if (rawContent.endsWith('\r\n')) {
+      rawContent = rawContent.slice(0, -2);
+    }
+
+    const disposition = rawHeaders.match(/content-disposition:\s*form-data;\s*([^\r\n]+)/i);
+    const name = disposition?.[1]?.match(/name="([^"]+)"/)?.[1];
+    if (!name) {
+      continue;
+    }
+
+    const filename = disposition[1].match(/filename="([^"]*)"/)?.[1];
+    if (typeof filename === 'string') {
+      const contentTypeMatch = rawHeaders.match(/content-type:\s*([^\r\n]+)/i);
+      files[name] = {
+        filename,
+        contentType: contentTypeMatch?.[1]?.trim().toLowerCase() ?? 'application/octet-stream',
+        content: Buffer.from(rawContent, 'latin1')
+      };
+      continue;
+    }
+
+    fields[name] = Buffer.from(rawContent, 'latin1').toString('utf8');
+  }
+
+  return { fields, files };
+}
+
+async function storeUploadedEventImage(file, options) {
+  if (!file || file.filename.length === 0 || file.content.length === 0) {
+    return undefined;
+  }
+
+  if (!ALLOWED_IMAGE_UPLOAD_TYPES.includes(file.contentType)) {
+    throw new Error('Event image must be a PNG, JPG, GIF, or WebP file.');
+  }
+
+  if (file.content.length > MAX_UPLOADED_IMAGE_BYTES) {
+    throw new Error('Event image must be 2 MB or smaller.');
+  }
+
+  const extension = IMAGE_EXTENSION_BY_TYPE[file.contentType] || extname(file.filename).toLowerCase();
+  const fileName = `${options.createUploadId() || randomUUID()}${extension}`;
+  await mkdir(options.uploadedImageDir, { recursive: true });
+  await writeFile(join(options.uploadedImageDir, fileName), file.content);
+  return `${options.uploadedImagePathPrefix}/${fileName}`;
+}
+
+async function parseCreateCohortRequest(req, options) {
+  const contentType = req.headers?.['content-type'] ?? req.headers?.['Content-Type'] ?? '';
+  const body = await readBodyBuffer(req);
+
+  if (!contentType.toLowerCase().startsWith('multipart/form-data')) {
+    return parseFormBody(body);
+  }
+
+  const { fields, files } = parseMultipartFormData(body, contentType);
+  const imageUrl = await storeUploadedEventImage(files.eventImage, options);
+  return {
+    ...fields,
+    ...(imageUrl ? { imageUrl } : {})
+  };
 }
 
 function renderCreatePage(state, options = {}) {
@@ -63,6 +178,9 @@ function createState(options = {}) {
 const defaultState = createState();
 
 export function createRequestHandler(state = createState(), options = {}) {
+  const uploadedImageDir = options.uploadedImageDir ?? join(rootDir, 'public', 'assets', 'uploads');
+  const uploadedImagePathPrefix = options.uploadedImagePathPrefix ?? '/assets/uploads';
+  const createUploadId = options.createUploadId ?? (() => randomUUID());
   const cohortService = createCohortService({
     ...state,
     options
@@ -95,6 +213,22 @@ export function createRequestHandler(state = createState(), options = {}) {
       return;
     }
 
+    if (url.pathname.startsWith('/assets/uploads/') && (req.method ?? 'GET') === 'GET') {
+      const fileName = decodeURIComponent(url.pathname.slice('/assets/uploads/'.length));
+      if (!fileName || fileName.includes('/') || fileName.includes('..')) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Not found');
+        return;
+      }
+
+      try {
+        const image = await readFile(join(uploadedImageDir, fileName));
+        send(res, 200, { 'content-type': contentTypeForImagePath(fileName) }, image);
+      } catch {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Not found');
+      }
+      return;
+    }
+
     if (url.pathname === '/') {
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage());
       return;
@@ -115,12 +249,16 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/cohorts/new' && req.method === 'POST') {
-      const values = {
-        ...parseFormBody(await readBody(req)),
-        creatorId: DEMO_CREATOR_USER_ID
-      };
-
+      let values = {};
       try {
+        values = {
+          ...(await parseCreateCohortRequest(req, {
+            uploadedImageDir,
+            uploadedImagePathPrefix,
+            createUploadId
+          })),
+          creatorId: DEMO_CREATOR_USER_ID
+        };
         const result = cohortService.create(values);
         send(res, 201, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
           values: {},
@@ -221,7 +359,7 @@ export function createRequestHandler(state = createState(), options = {}) {
     const showInterestMatch = url.pathname.match(/^\/cohorts\/([^/]+)\/interest$/);
     if (showInterestMatch && req.method === 'POST') {
       const eventId = decodeURIComponent(showInterestMatch[1]);
-      const values = parseFormBody(await readBody(req));
+      const values = parseFormBody(await readBodyBuffer(req));
       const viewerId = values.userId;
 
       try {

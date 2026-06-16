@@ -1,8 +1,8 @@
 # ISSUE-010 Task Graph
 
 ```text
-ISSUE-010-T01 Add meaningful create-form placeholders [not_started]
-  -> ISSUE-010-T02 Support familiar local image selection [not_started]
+ISSUE-010-T01 Add meaningful create-form placeholders [done]
+  -> ISSUE-010-T02 Support familiar local image selection [done]
 ```
 
 ## Notes
@@ -19,4 +19,4 @@ ISSUE-010-T01 Add meaningful create-form placeholders [not_started]
 
 ## Next Unblocked Tasks
 
-- ISSUE-010-T01
+- None. ISSUE-010 is complete.

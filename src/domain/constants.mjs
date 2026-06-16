@@ -71,6 +71,14 @@ export const SHOW_INTEREST_CREDIT_COST = 1;
 export const MAX_PARTICIPANTS = 15;
 export const DEFAULT_EXPIRY_DAYS = 14;
 export const DEFAULT_COHORT_IMAGE_PATH = '/assets/default-cohort.png';
+export const MAX_UPLOADED_IMAGE_BYTES = 2 * 1024 * 1024;
+
+export const ALLOWED_IMAGE_UPLOAD_TYPES = Object.freeze([
+  'image/gif',
+  'image/jpeg',
+  'image/png',
+  'image/webp'
+]);
 
 export const ALLOWED_MEETING_LINK_HOSTS = Object.freeze([
   'meet.google.com',
