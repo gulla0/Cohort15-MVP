@@ -21,3 +21,23 @@ Artifacts Updated:
 - `agent/feedback/issue-index.md`
 - `agent/feedback/session-notes.md`
 - `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
+- Resolve the next available feedback issue.
+
+Issue Mapping:
+- Existing ISSUE-013 resolved.
+
+Reasoning:
+- ISSUE-013 was the first `not_started` issue in the feedback index.
+- Standards-based CSS was enough: scoped create-form placeholder rules preserve the meaningful ISSUE-010 examples when fields are empty and unfocused, then hide placeholder pseudo-elements during focus without changing validation or image upload behavior.
+
+Artifacts Updated:
+- `src/ui/styles.css`
+- `tests/create-cohort.test.mjs`
+- `agent/feedback/issues/ISSUE-013-create-form-placeholder-contrast-focus/*`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/session-notes.md`
+- `agent/knowledge/index.md`

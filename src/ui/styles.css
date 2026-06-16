@@ -436,6 +436,18 @@ textarea {
   resize: vertical;
 }
 
+.form-grid input::placeholder,
+.form-grid textarea::placeholder {
+  color: #b8b0a4;
+  opacity: 1;
+}
+
+.form-grid input:focus::placeholder,
+.form-grid textarea:focus::placeholder {
+  color: transparent;
+  opacity: 0;
+}
+
 .image-picker-box {
   display: grid;
   gap: 6px;

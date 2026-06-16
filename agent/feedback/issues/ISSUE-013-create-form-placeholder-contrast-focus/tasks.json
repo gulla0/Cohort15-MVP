@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-013-T01",
       "title": "Lighten and hide create-form placeholders on focus",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Make create-form placeholder examples very light by default and hide them while the user focuses/clicks into each field.",
       "inputs": [
@@ -52,7 +52,8 @@
         "ISSUE-010 placeholder content",
         "create cohort form UI"
       ],
-      "stop_condition": "Stop when placeholders are visually light and disappear on focus without altering create-flow semantics."
+      "stop_condition": "Stop when placeholders are visually light and disappear on focus without altering create-flow semantics.",
+      "evidence": "2026-06-16: Added scoped create-form placeholder CSS so examples render very light when unfocused and become transparent with opacity 0 on input/textarea focus. Verified with focused create-cohort tests and browser computed-style smoke on `/cohorts/new`."
     }
   ]
 }

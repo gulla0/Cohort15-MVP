@@ -208,6 +208,13 @@ test('create cohort page renders form errors and success without exposing privat
   assert.doesNotMatch(form.body, /<select name="creatorId"/);
   assert.doesNotMatch(form.body, />\s*Creator\s*<select/);
 
+  const styles = await invoke(handler, { url: '/assets/styles.css', method: 'GET' });
+  assert.equal(styles.status, 200);
+  assert.match(styles.body, /\.form-grid input::placeholder,\n\.form-grid textarea::placeholder/);
+  assert.match(styles.body, /color: #b8b0a4;/);
+  assert.match(styles.body, /\.form-grid input:focus::placeholder,\n\.form-grid textarea:focus::placeholder/);
+  assert.match(styles.body, /color: transparent;\n  opacity: 0;/);
+
   const invalid = await invoke(handler, {
     url: '/cohorts/new',
     method: 'POST',

@@ -68,6 +68,26 @@ Artifacts Updated:
 ### 2026-06-16
 
 User Feedback:
+- Initialize the feedback resolver and resolve the next available issue.
+
+Issue Mapping:
+- Existing ISSUE-013 resolved.
+
+Reasoning:
+- ISSUE-013 was the first unresolved issue in the feedback index.
+- The fix stays in CSS and focused tests: create-form text input and textarea placeholders are styled very light by default and hidden with transparent/zero-opacity placeholder pseudo-elements while focused.
+- The meaningful examples from ISSUE-010, create validation, and image upload behavior were preserved.
+
+Artifacts Updated:
+- `src/ui/styles.css`
+- `tests/create-cohort.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-013-create-form-placeholder-contrast-focus/*`
+- `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
 - Initialize a feedback resolver and start resolving the first available unresolved issue.
 
 Issue Mapping:
