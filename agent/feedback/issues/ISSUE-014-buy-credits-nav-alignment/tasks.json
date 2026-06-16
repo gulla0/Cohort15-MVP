@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-014-T01",
       "title": "Align Buy Credits with navbar options",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Adjust shared navigation markup/styles so the Buy Credits button aligns with the other navbar options on primary pages.",
       "inputs": [
@@ -56,7 +56,8 @@
         "ISSUE-012 Buy Credits placeholder",
         "T013 future purchase flow"
       ],
-      "stop_condition": "Stop when Buy Credits is visually aligned with the other nav items and still cannot create or grant credits."
+      "stop_condition": "Stop when Buy Credits is visually aligned with the other nav items and still cannot create or grant credits.",
+      "evidence": "2026-06-16: Updated shared topbar CSS so all nav links use inline-flex vertical centering with matching min-height, kept the Buy Credits pill as visual-only CTA styling, and left-aligns wrapped mobile nav rows. Focused tests and browser smoke at desktop and 390px mobile passed."
     }
   ]
 }

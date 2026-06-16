@@ -49,3 +49,12 @@ test('buy credits nav placeholder is reachable without granting credits', async 
   assert.match(page.body, /no credits are added/i);
   assert.doesNotMatch(page.body, /payment succeeded/i);
 });
+
+test('primary navigation keeps buy credits aligned with other links', async () => {
+  const styles = await invoke('/assets/styles.css');
+
+  assert.equal(styles.status, 200);
+  assert.match(styles.body, /\.topbar-links\s*{[^}]*align-items:\s*center;/s);
+  assert.match(styles.body, /\.topbar-links a\s*{[^}]*display:\s*inline-flex;[^}]*align-items:\s*center;[^}]*min-height:\s*34px;/s);
+  assert.match(styles.body, /@media \(max-width: 760px\)\s*{[\s\S]*\.topbar-links\s*{[^}]*justify-content:\s*flex-start;/);
+});

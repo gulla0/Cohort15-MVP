@@ -21,6 +21,27 @@ Artifacts Updated:
 ### 2026-06-16
 
 User Feedback:
+- Initialize the feedback resolver and resolve the next available issue.
+
+Issue Mapping:
+- Existing ISSUE-014 resolved.
+
+Reasoning:
+- ISSUE-014 was the first unresolved issue in the feedback index after ISSUE-013.
+- The fix stays in shared navigation styling: all topbar links now share inline-flex vertical centering and a common min-height, while `Buy Credits` keeps only its CTA pill treatment.
+- Mobile nav wrapping now starts from the same edge so the Buy Credits placeholder remains aligned and does not overflow.
+- The `/credits/buy` route remains a safe placeholder with no payment, credit grant, or purchase transaction behavior.
+
+Artifacts Updated:
+- `src/ui/styles.css`
+- `tests/foundation.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-014-buy-credits-nav-alignment/*`
+- `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
 - The cohort request form placeholder text is too dark; it should be very light and disappear when the user clicks into the field.
 - The Buy Credits button needs to align with the other navbar options.
 

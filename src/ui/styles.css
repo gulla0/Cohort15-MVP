@@ -94,14 +94,18 @@ button {
 .topbar-links {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
   gap: 18px;
 }
 
-.topbar .nav-cta {
+.topbar-links a {
   display: inline-flex;
   align-items: center;
   min-height: 34px;
+}
+
+.topbar .nav-cta {
   padding: 0 12px;
   border-radius: 8px;
   background: #146c5c;
@@ -487,6 +491,10 @@ textarea {
 
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .topbar-links {
+    justify-content: flex-start;
   }
 
   .dashboard-summary,
