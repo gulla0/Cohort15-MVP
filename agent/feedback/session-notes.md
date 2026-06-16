@@ -24,6 +24,26 @@ User Feedback:
 - Initialize a feedback resolver and start resolving the first available unresolved issue.
 
 Issue Mapping:
+- Existing ISSUE-011 resolved.
+
+Reasoning:
+- ISSUE-011 was the first `not_started` issue in the feedback index after ISSUE-010.
+- The fix builds on ISSUE-008 search by keeping `/cohorts?q=` server-side and public-safe while changing the service filter into deterministic scoring.
+- Exact token matches rank above substring matches, and small edit-distance matches allow typo-tolerant results such as `tost` returning a `test` cohort lower in the list.
+
+Artifacts Updated:
+- `src/services/event-browsing.mjs`
+- `tests/event-browsing.test.mjs`
+- `agent/feedback/issue-index.md`
+- `agent/feedback/issues/ISSUE-011-fuzzy-cohort-search/*`
+- `agent/knowledge/index.md`
+
+### 2026-06-16
+
+User Feedback:
+- Initialize a feedback resolver and start resolving the first available unresolved issue.
+
+Issue Mapping:
 - Existing ISSUE-010 resolved.
 
 Reasoning:

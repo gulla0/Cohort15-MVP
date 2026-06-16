@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-011-T01",
       "title": "Add fuzzy public cohort search ranking",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Extend public cohort search so exact matches rank first while typo-tolerant or semi-relevant matches still appear lower in results.",
       "inputs": [
@@ -58,7 +58,8 @@
         "public cohort serializer",
         "feed result ordering"
       ],
-      "stop_condition": "Stop when fuzzy matching and exact-first ranking are verified."
+      "stop_condition": "Stop when fuzzy matching and exact-first ranking are verified.",
+      "evidence": "2026-06-16: Added dependency-free public-field search scoring in `src/services/event-browsing.mjs` with exact matches ranked above substring and typo-tolerant matches. Added focused tests for `tost` returning exact `tost` before fuzzy `test`, multi-word fuzzy filtering, and existing public visibility/private-link safety. `node --test tests/event-browsing.test.mjs` passed."
     }
   ]
 }

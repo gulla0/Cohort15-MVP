@@ -1,7 +1,7 @@
 # ISSUE-011 Task Graph
 
 ```text
-ISSUE-011-T01 Add fuzzy public cohort search ranking [not_started]
+ISSUE-011-T01 Add fuzzy public cohort search ranking [done]
 ```
 
 ## Notes
@@ -17,4 +17,4 @@ ISSUE-011-T01 Add fuzzy public cohort search ranking [not_started]
 
 ## Next Unblocked Tasks
 
-- ISSUE-011-T01
+- None.

@@ -154,6 +154,62 @@ test('event browsing filters public cohorts by case-insensitive words in public 
   );
 });
 
+test('event browsing returns typo-tolerant matches below exact matches', () => {
+  const state = createDemoRepositories();
+  state.repositories.events.save(eventFixture({
+    id: 'event-fuzzy-test',
+    title: 'Test Cohort',
+    topic: 'Search quality',
+    targetAudience: 'Builders validating typo handling.',
+    createdAt: new Date('2026-06-03T12:00:00.000Z')
+  }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-exact-tost',
+    title: 'Tost Workshop',
+    description: 'Practice spelling-aware search interactions.',
+    topic: 'Search quality',
+    targetAudience: 'Builders validating exact ranking.',
+    createdAt: new Date('2026-06-01T12:00:00.000Z')
+  }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-unrelated',
+    title: 'Design Critique Studio',
+    topic: 'Product design',
+    targetAudience: 'Designers preparing for portfolio reviews.',
+    createdAt: new Date('2026-06-04T12:00:00.000Z')
+  }));
+
+  const service = createEventBrowsingService(state);
+
+  assert.deepEqual(
+    service.listPublicEvents({ search: 'tost' }).map((event) => event.id),
+    ['event-exact-tost', 'event-fuzzy-test']
+  );
+});
+
+test('event browsing fuzzy search handles multi-word input predictably', () => {
+  const state = createDemoRepositories();
+  state.repositories.events.save(eventFixture({
+    id: 'event-test-builders',
+    title: 'Test Cohort',
+    topic: 'Search quality',
+    targetAudience: 'Builders validating typo handling.'
+  }));
+  state.repositories.events.save(eventFixture({
+    id: 'event-test-designers',
+    title: 'Test Critique',
+    topic: 'Design',
+    targetAudience: 'Designers preparing for portfolio reviews.'
+  }));
+
+  const service = createEventBrowsingService(state);
+
+  assert.deepEqual(
+    service.listPublicEvents({ search: 'tost builders' }).map((event) => event.id),
+    ['event-test-builders']
+  );
+});
+
 test('event browsing search preserves public visibility and link hiding', () => {
   const state = createDemoRepositories();
   state.repositories.events.save(eventFixture({
