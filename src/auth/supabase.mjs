@@ -110,6 +110,8 @@ export function createSupabaseAuthAdapter({
         id: appUserId,
         displayName: displayNameForSupabaseUser(supabaseUser),
         email: supabaseUser.email,
+        authProvider: 'supabase',
+        authSubject: supabaseUser.id,
         createdAt: supabaseUser.created_at ? new Date(supabaseUser.created_at) : new Date()
       });
     }

@@ -40,10 +40,13 @@ test('schema defines MVP persistence tables and leaves purchase source path expl
     'events',
     'eventInterests',
     'creditTransactions',
-    'socialPosts'
+    'socialPosts',
+    'purchases'
   ]);
   assert.equal(TABLES.eventInterests.unique.includes('eventId'), true);
   assert.equal(TABLES.eventInterests.unique.includes('userId'), true);
+  assert.equal(TABLES.users.fields.includes('authProvider'), true);
+  assert.equal(TABLES.purchases.fields.includes('creditTransactionId'), true);
   assert.deepEqual(FUTURE_CREDIT_SOURCES, ['purchase']);
 });
 
@@ -79,12 +82,25 @@ test('repositories persist users, events, interests, transactions, and social po
     status: 'pending',
     createdAt
   });
+  repositories.purchases.save({
+    id: 'purchase-1',
+    userId: 'user-creator',
+    provider: 'stripe',
+    providerCheckoutId: 'checkout-1',
+    packageCredits: 6,
+    amountCents: 600,
+    currency: 'usd',
+    status: 'pending',
+    createdAt,
+    updatedAt: createdAt
+  });
 
   assert.equal(repositories.users.findById('user-creator').displayName, 'Demo Creator');
   assert.equal(repositories.events.findById('event-1').title, 'Beginner TypeScript Build Cohort');
   assert.equal(repositories.eventInterests.listByEvent('event-1').length, 1);
   assert.equal(repositories.creditTransactions.listByUser('user-creator').length, 1);
   assert.equal(repositories.socialPosts.listByEvent('event-1').length, 1);
+  assert.equal(repositories.purchases.listByUser('user-creator')[0].provider, 'stripe');
 });
 
 test('event interests are unique for a user and event', () => {

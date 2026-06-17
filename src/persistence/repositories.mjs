@@ -21,6 +21,14 @@ function assertUser(user) {
     errors.push('email must be non-empty when present.');
   }
 
+  if (typeof user?.authProvider !== 'undefined' && (typeof user.authProvider !== 'string' || user.authProvider.trim().length === 0)) {
+    errors.push('authProvider must be non-empty when present.');
+  }
+
+  if (typeof user?.authSubject !== 'undefined' && (typeof user.authSubject !== 'string' || user.authSubject.trim().length === 0)) {
+    errors.push('authSubject must be non-empty when present.');
+  }
+
   if (!(user?.createdAt instanceof Date) || Number.isNaN(user.createdAt.getTime())) {
     errors.push('createdAt must be a valid Date.');
   }
@@ -31,6 +39,52 @@ function assertUser(user) {
 }
 
 function assertValidation(errors) {
+  if (errors.length > 0) {
+    throw new Error(errors.join(' '));
+  }
+}
+
+function assertPurchase(purchase) {
+  const errors = [];
+
+  for (const field of ['id', 'userId', 'provider', 'status']) {
+    if (typeof purchase?.[field] !== 'string' || purchase[field].trim().length === 0) {
+      errors.push(`${field} is required.`);
+    }
+  }
+
+  if (typeof purchase?.providerCheckoutId !== 'undefined' && (typeof purchase.providerCheckoutId !== 'string' || purchase.providerCheckoutId.trim().length === 0)) {
+    errors.push('providerCheckoutId must be non-empty when present.');
+  }
+
+  if (typeof purchase?.providerPaymentId !== 'undefined' && (typeof purchase.providerPaymentId !== 'string' || purchase.providerPaymentId.trim().length === 0)) {
+    errors.push('providerPaymentId must be non-empty when present.');
+  }
+
+  if (!Number.isInteger(purchase?.packageCredits) || purchase.packageCredits <= 0) {
+    errors.push('packageCredits must be a positive integer.');
+  }
+
+  if (!Number.isInteger(purchase?.amountCents) || purchase.amountCents <= 0) {
+    errors.push('amountCents must be a positive integer.');
+  }
+
+  if (typeof purchase?.currency !== 'string' || purchase.currency.trim().length === 0) {
+    errors.push('currency is required.');
+  }
+
+  if (typeof purchase?.creditTransactionId !== 'undefined' && (typeof purchase.creditTransactionId !== 'string' || purchase.creditTransactionId.trim().length === 0)) {
+    errors.push('creditTransactionId must be non-empty when present.');
+  }
+
+  if (!(purchase?.createdAt instanceof Date) || Number.isNaN(purchase.createdAt.getTime())) {
+    errors.push('createdAt must be a valid Date.');
+  }
+
+  if (!(purchase?.updatedAt instanceof Date) || Number.isNaN(purchase.updatedAt.getTime())) {
+    errors.push('updatedAt must be a valid Date.');
+  }
+
   if (errors.length > 0) {
     throw new Error(errors.join(' '));
   }
@@ -145,6 +199,23 @@ export function createRepositories(seed = {}, options = {}) {
       },
       list() {
         return readRecords(store.socialPosts);
+      }
+    },
+    purchases: {
+      save(purchase) {
+        assertPurchase(purchase);
+        const savedPurchase = writeRecord(store.purchases, purchase);
+        persist();
+        return savedPurchase;
+      },
+      findById(id) {
+        return readRecord(store.purchases, id);
+      },
+      listByUser(userId) {
+        return readRecords(store.purchases).filter((purchase) => purchase.userId === userId);
+      },
+      list() {
+        return readRecords(store.purchases);
       }
     }
   };

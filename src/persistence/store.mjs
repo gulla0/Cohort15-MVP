@@ -53,7 +53,8 @@ function normalizeSnapshot(snapshot = {}) {
     eventInterests: (snapshot.eventInterests ?? []).map(normalizeInterestRecord),
     creditTransactions: (snapshot.creditTransactions ?? snapshot[LEGACY_CREDIT_TRANSACTIONS_KEY] ?? [])
       .map(normalizeCreditTransactionRecord),
-    socialPosts: (snapshot.socialPosts ?? []).map(cloneRecord)
+    socialPosts: (snapshot.socialPosts ?? []).map(cloneRecord),
+    purchases: (snapshot.purchases ?? []).map(cloneRecord)
   };
 }
 
@@ -64,7 +65,8 @@ export function createInMemoryStore(seed = {}) {
     events: new Map(normalizedSeed.events.map((record) => [record.id, cloneRecord(record)])),
     eventInterests: new Map(normalizedSeed.eventInterests.map((record) => [record.id, cloneRecord(record)])),
     creditTransactions: new Map(normalizedSeed.creditTransactions.map((record) => [record.id, cloneRecord(record)])),
-    socialPosts: new Map(normalizedSeed.socialPosts.map((record) => [record.id, cloneRecord(record)]))
+    socialPosts: new Map(normalizedSeed.socialPosts.map((record) => [record.id, cloneRecord(record)])),
+    purchases: new Map(normalizedSeed.purchases.map((record) => [record.id, cloneRecord(record)]))
   };
 }
 
@@ -86,13 +88,14 @@ function reviveRecord(record) {
   );
 }
 
-function storeToSnapshot(store) {
+export function storeToSnapshot(store) {
   return {
     users: readRecords(store.users).map(serializeRecord),
     events: readRecords(store.events).map(serializeRecord),
     eventInterests: readRecords(store.eventInterests).map(serializeRecord),
     creditTransactions: readRecords(store.creditTransactions).map(serializeRecord),
-    socialPosts: readRecords(store.socialPosts).map(serializeRecord)
+    socialPosts: readRecords(store.socialPosts).map(serializeRecord),
+    purchases: readRecords(store.purchases).map(serializeRecord)
   };
 }
 
@@ -108,7 +111,8 @@ function readSnapshot(filePath, seed) {
     eventInterests: (parsed.eventInterests ?? []).map(reviveRecord),
     creditTransactions: (parsed.creditTransactions ?? []).map(reviveRecord),
     [LEGACY_CREDIT_TRANSACTIONS_KEY]: (parsed[LEGACY_CREDIT_TRANSACTIONS_KEY] ?? []).map(reviveRecord),
-    socialPosts: (parsed.socialPosts ?? []).map(reviveRecord)
+    socialPosts: (parsed.socialPosts ?? []).map(reviveRecord),
+    purchases: (parsed.purchases ?? []).map(reviveRecord)
   });
 }
 

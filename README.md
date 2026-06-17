@@ -48,6 +48,7 @@ This executes the repository lint check, the agent workflow guardrail, and the N
 
 The first production deployment target is a Render Web Service named `cohort15-mvp`. The initial runbook is in [docs/deployment-render.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/deployment-render.md), and the starter service configuration is captured in [render.yaml](/Users/gzero/Desktop/cohort15/cohort15-mvp/render.yaml).
 The production configuration and secrets boundary is documented in [docs/production-config.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/production-config.md).
+Supabase Postgres production persistence setup is documented in [docs/supabase-postgres.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/supabase-postgres.md), with the SQL migration in [supabase/migrations/20260617000000_cohort15_core.sql](/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260617000000_cohort15_core.sql).
 
 Initial production assumptions:
 
@@ -55,6 +56,7 @@ Initial production assumptions:
 - Build command: `npm install`
 - Start command: `npm start`
 - Health check path: `/`
+- Persistence: Supabase Postgres through server-side REST/RPC using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
 - Generated app URL: `https://cohort15-mvp.onrender.com`, unless Render assigns a different available service URL
 - Existing domain use: `cohort15.com` already hosts the pre-release landing page on Netlify
 - Custom domain options: keep the app on the Render URL, move `cohort15.com` from Netlify to Render, or use a subdomain such as `https://app.cohort15.com`
@@ -62,7 +64,7 @@ Initial production assumptions:
 
 Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are documented in the production configuration runbook.
 
-Production auth for T015 uses Supabase Auth with Google and GitHub providers. The app keeps local seeded-account sign-in available only outside production mode; in production `/auth/sign-in` starts Supabase provider flows and `/auth/callback` exchanges the Supabase identity into the app session.
+Production auth for T015 uses Supabase Auth with Google and GitHub providers. The app keeps local seeded-account sign-in available only outside production mode; in production `/auth/sign-in` starts Supabase provider flows and `/auth/callback` exchanges the Supabase identity into the app session. Production persistence for T017 hydrates users, cohorts, interests, credit transactions, social posts, and purchase records from Supabase Postgres; local demo seed grants are not created in production mode.
 
 ## Local Demo Data
 

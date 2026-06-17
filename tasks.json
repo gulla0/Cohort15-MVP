@@ -664,7 +664,7 @@
     {
       "id": "T017",
       "title": "Add Supabase Postgres production persistence adapter",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T014",
@@ -705,8 +705,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop once production persistence is selectable, documented, and covered by tests or a documented integration path.",
-      "evidence": "Pending.",
-      "notes": "Supabase Postgres is the selected production datastore."
+      "evidence": "2026-06-17 EDT: Added dependency-free Supabase Postgres production persistence via server-side REST hydration/write-through, production startup selection without demo seed users, SQL migration/runbook docs, purchase/auth-linked persistence fields, and focused Supabase persistence tests. npm run check passed with 72 tests.",
+      "notes": "Production mode hydrates repository state from Supabase Postgres using server-only SUPABASE_SERVICE_ROLE_KEY. Local in-memory and JSON stores remain available for development/tests. SQL migration includes purchase table and credit RPC helpers using advisory locks for concurrent credit transaction safety."
     },
     {
       "id": "T018",

@@ -3,7 +3,7 @@ export const SCHEMA_VERSION = 1;
 export const TABLES = Object.freeze({
   users: Object.freeze({
     primaryKey: 'id',
-    fields: Object.freeze(['id', 'displayName', 'email', 'createdAt'])
+    fields: Object.freeze(['id', 'displayName', 'email', 'authProvider', 'authSubject', 'createdAt'])
   }),
   events: Object.freeze({
     primaryKey: 'id',
@@ -46,6 +46,24 @@ export const TABLES = Object.freeze({
     primaryKey: 'id',
     indexes: Object.freeze(['eventId', 'platform', 'status']),
     fields: Object.freeze(['id', 'eventId', 'platform', 'postText', 'postUrl', 'status', 'createdAt', 'postedAt'])
+  }),
+  purchases: Object.freeze({
+    primaryKey: 'id',
+    indexes: Object.freeze(['userId', 'provider', 'status']),
+    fields: Object.freeze([
+      'id',
+      'userId',
+      'provider',
+      'providerCheckoutId',
+      'providerPaymentId',
+      'packageCredits',
+      'amountCents',
+      'currency',
+      'status',
+      'creditTransactionId',
+      'createdAt',
+      'updatedAt'
+    ])
   })
 });
 

@@ -11,6 +11,9 @@ Official docs checked on 2026-06-17:
 - Supabase GitHub login: https://supabase.com/docs/guides/auth/social-login/auth-github
 - Supabase OAuth sign-in and callback exchange: https://supabase.com/docs/reference/javascript/auth-signinwithoauth
 - Supabase email magic links: https://supabase.com/docs/guides/auth/auth-email-passwordless
+- Supabase Database overview: https://supabase.com/docs/guides/database/overview
+- Supabase database connections and poolers: https://supabase.com/docs/guides/database/connecting-to-postgres
+- Supabase Data REST API: https://supabase.com/docs/guides/api
 - Stripe API keys: https://docs.stripe.com/keys
 - Stripe webhooks: https://docs.stripe.com/webhooks
 - GitHub OAuth app callbacks: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
@@ -42,7 +45,7 @@ Set these in the Render service environment, not in source control:
 | `COHORT15_UPLOAD_MODE` | no | Use `disabled` until T026 hardens production image storage. `local` is rejected in production. |
 | `SUPABASE_URL` | no | Supabase project URL for T015/T017. |
 | `SUPABASE_ANON_KEY` | yes | Supabase public anon key used by auth-facing code. Treat as environment config, not source text. |
-| `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only Supabase service role key. Never expose in browser output. |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only Supabase service role key for production Postgres persistence. Never expose in browser output. |
 | `STRIPE_SECRET_KEY` | yes | Server-side Stripe key for T020. |
 | `STRIPE_WEBHOOK_SECRET` | yes | Stripe webhook signing secret for T021. |
 | `STRIPE_PRICE_6_CREDITS` | no | Stripe Price ID for the `$6` / 6-credit package. |
@@ -81,7 +84,13 @@ No secrets should be pasted into chat or committed to this repository. Enter sec
    - Set Site URL to `COHORT15_APP_URL`.
    - Add redirect URL: `COHORT15_APP_URL` + `SUPABASE_AUTH_CALLBACK_PATH`, default `https://cohort15-mvp.onrender.com/auth/callback`.
    - Set `SUPABASE_ENABLE_MAGIC_LINK=false` in Render until email magic links are intentionally enabled.
-3. Google OAuth for Supabase Auth:
+3. Supabase Postgres schema:
+   - Open local file `supabase/migrations/20260617000000_cohort15_core.sql`.
+   - In Supabase, go to `SQL Editor` -> `New query`.
+   - Paste and run the migration SQL.
+   - In `Table Editor`, confirm `cohort15_users`, `cohort15_events`, `cohort15_event_interests`, `cohort15_credit_transactions`, `cohort15_social_posts`, and `cohort15_purchases` exist.
+   - Keep `SUPABASE_SERVICE_ROLE_KEY` only in Render server environment values; do not paste it into source, docs, browser code, or chat.
+4. Google OAuth for Supabase Auth:
    - Open https://console.cloud.google.com.
    - Go to `APIs & Services` -> `Credentials` -> `Create Credentials` -> `OAuth client ID`.
    - Use application type `Web application`.
@@ -89,41 +98,41 @@ No secrets should be pasted into chat or committed to this repository. Enter sec
    - Add the Supabase Google callback URL shown in `Supabase Dashboard` -> `Authentication` -> `Providers` -> `Google`.
    - Store the generated client ID and secret in Supabase, not in this repository.
    - Enable the Google provider in `Supabase Dashboard` -> `Authentication` -> `Providers` -> `Google`.
-4. GitHub OAuth for Supabase Auth:
+5. GitHub OAuth for Supabase Auth:
    - Open https://github.com/settings/developers.
    - Go to `OAuth Apps` -> `New OAuth App`.
    - Set Homepage URL to `COHORT15_APP_URL`, default `https://cohort15-mvp.onrender.com`.
    - Set Authorization callback URL to the GitHub callback URL shown in `Supabase Dashboard` -> `Authentication` -> `Providers` -> `GitHub`.
    - Store the generated client ID and secret in Supabase, not in this repository.
    - Enable the GitHub provider in `Supabase Dashboard` -> `Authentication` -> `Providers` -> `GitHub`.
-5. Optional Supabase email magic links:
+6. Optional Supabase email magic links:
    - Keep `SUPABASE_ENABLE_MAGIC_LINK=false` unless email auth is a launch requirement.
    - If enabling it, go to `Supabase Dashboard` -> `Authentication` -> `Providers` -> `Email` and confirm sign-in links are enabled.
    - Go to `Authentication` -> `Email Templates` and check the magic-link template sends users back to the configured redirect URL.
    - Use a production SMTP/custom sender before setting `SUPABASE_ENABLE_MAGIC_LINK=true` in Render.
-6. Stripe products, prices, and webhook:
+7. Stripe products, prices, and webhook:
    - Open https://dashboard.stripe.com.
    - Go to `Developers` -> `API keys` for `STRIPE_SECRET_KEY`.
    - Go to `Product catalog` and create prices for `$6` / 6 credits and `$12` / 14 credits; copy the resulting Price IDs.
    - Go to `Developers` -> `Webhooks` -> `Add endpoint`.
    - Endpoint URL: `COHORT15_APP_URL` + `STRIPE_WEBHOOK_PATH`, default `https://cohort15-mvp.onrender.com/stripe/webhook`.
    - Store the webhook signing secret in `STRIPE_WEBHOOK_SECRET`.
-7. LinkedIn:
+8. LinkedIn:
    - Open https://www.linkedin.com/developers/apps.
    - Create or select the Cohort15 app.
    - In `Auth`, add the redirect URL required by the LinkedIn adapter when T023 defines it.
    - Store client ID and client secret in Render.
-8. X:
+9. X:
    - Open https://developer.x.com/en/portal/dashboard.
    - Create or select the Cohort15 project/app.
    - Configure OAuth 2.0 callback URLs when T023 defines the final adapter route.
    - Store API key/client ID and secret in Render.
-9. Email provider:
+10. Email provider:
    - Select the launch email provider before T023.
    - Verify `EMAIL_FROM_ADDRESS` in that provider's dashboard.
    - Store the provider API key in Render.
 
-Checkpoint: report back only non-secret values after setup, such as the final `COHORT15_APP_URL`, whether Supabase Google/GitHub providers are enabled, whether `SUPABASE_ENABLE_MAGIC_LINK` is staying false or has been intentionally enabled, Stripe price IDs, chosen email provider name, and whether secrets were entered in Render. Do not paste API keys, webhook secrets, service role keys, session secrets, or OAuth client secrets into chat.
+Checkpoint: report back only non-secret values after setup, such as the final `COHORT15_APP_URL`, whether Supabase Google/GitHub providers are enabled, whether the Supabase Postgres migration was applied, whether `SUPABASE_ENABLE_MAGIC_LINK` is staying false or has been intentionally enabled, Stripe price IDs, chosen email provider name, and whether secrets were entered in Render. Do not paste API keys, webhook secrets, service role keys, session secrets, or OAuth client secrets into chat.
 
 ## Local Verification
 

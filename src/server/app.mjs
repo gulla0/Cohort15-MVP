@@ -12,6 +12,9 @@ import {
   getFoundationSummary
 } from '../domain/constants.mjs';
 import { createDemoRepositories } from '../persistence/seeds.mjs';
+import { createRepositories } from '../persistence/repositories.mjs';
+import { createCreditLedger } from '../persistence/credit-ledger.mjs';
+import { createSupabasePostgresStore } from '../persistence/supabase-postgres.mjs';
 import { createJsonFileStore } from '../persistence/store.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
 import { createDashboardService } from '../services/dashboards.mjs';
@@ -193,6 +196,28 @@ function createState(options = {}) {
   }
 
   return createDemoRepositories();
+}
+
+export async function createConfiguredState(options = {}) {
+  const env = options.env ?? process.env;
+  const runtimeConfig = options.runtimeConfig ?? loadRuntimeConfig(env);
+
+  if (!runtimeConfig.isProduction) {
+    return createState(options);
+  }
+
+  const store = await createSupabasePostgresStore({
+    supabaseUrl: runtimeConfig.auth.supabaseUrl,
+    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
+    fetchImpl: options.fetchImpl
+  });
+  const repositories = createRepositories({}, { store });
+  const ledger = createCreditLedger(repositories.creditTransactions);
+
+  return {
+    repositories,
+    ledger
+  };
 }
 
 const defaultState = createState();
@@ -608,9 +633,26 @@ export function createApp() {
   return createServer(handleRequest);
 }
 
+export async function createConfiguredApp(options = {}) {
+  const env = options.env ?? process.env;
+  const runtimeConfig = options.runtimeConfig ?? loadRuntimeConfig(env);
+  const state = await createConfiguredState({
+    ...options,
+    env,
+    runtimeConfig
+  });
+  return createServer(createRequestHandler(state, {
+    ...options,
+    runtimeConfig
+  }));
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const config = loadRuntimeConfig();
-  createApp().listen(config.port, config.host, () => {
+  const app = await createConfiguredApp({
+    runtimeConfig: config
+  });
+  app.listen(config.port, config.host, () => {
     console.log(`Cohort15 server running at http://${config.host}:${config.port}`);
   });
 }

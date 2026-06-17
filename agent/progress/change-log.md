@@ -5,6 +5,40 @@ Append-only implementation log.
 ### 2026-06-17 EDT
 
 Task:
+- T017 Add Supabase Postgres production persistence adapter
+
+Files Changed:
+- `README.md`
+- `docs/production-config.md`
+- `docs/supabase-postgres.md`
+- `supabase/migrations/20260617000000_cohort15_core.sql`
+- `src/auth/supabase.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/schema.mjs`
+- `src/persistence/store.mjs`
+- `src/persistence/supabase-postgres.mjs`
+- `src/server/app.mjs`
+- `tests/persistence-ledger.test.mjs`
+- `tests/supabase-postgres.test.mjs`
+- `tasks.json`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Added dependency-free Supabase Postgres production persistence using server-side PostgREST hydration/write-through.
+- Wired production startup to hydrate Supabase state and avoid local demo seed users/grants in production mode.
+- Added purchase persistence scaffolding and Supabase auth-linked user fields.
+- Added a Supabase SQL migration with users, events, interests, credit transactions, social posts, purchases, RLS enablement, and credit RPC helpers using advisory locks.
+- Added a Supabase Postgres setup runbook with official docs links, dashboard paths, env var names, secret-handling warnings, verification steps, and continue/block checkpoint.
+
+Verification:
+- `npm run check` passed with 72 tests.
+
+### 2026-06-17 EDT
+
+Task:
 - T015 Integrate Supabase Auth account boundary
 
 Files Changed:

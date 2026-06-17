@@ -6,6 +6,46 @@ Append-only role transition and handoff log.
 
 Read:
 - `start.txt`
+- `agent/router/intent-router.md`
+- `README.md`
+- `USAGE.md`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent-starters/startNewManager.txt`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
+- `src/persistence/store.mjs`
+- `src/persistence/repositories.mjs`
+- `src/persistence/schema.mjs`
+- `src/persistence/credit-ledger.mjs`
+- `src/persistence/seeds.mjs`
+- `src/server/app.mjs`
+- `src/auth/supabase.mjs`
+- `src/config/runtime.mjs`
+- current official Supabase docs for database overview, tables/SQL editor, connection options, and Data REST API
+
+Decided:
+- Classified the user request as approved main implementation work and selected T017 as the next unblocked critical-path task after T015.
+- Kept the app dependency-free by adding a small Supabase PostgREST adapter rather than a new Postgres client dependency.
+- Added production startup state selection through `createConfiguredState()`: production hydrates from Supabase Postgres, while local development keeps existing in-memory or JSON-backed demo state.
+- Avoided production demo seed users/grants by creating plain repositories over the Supabase store in production mode.
+- Added purchase persistence scaffolding and auth-linked user fields now so T020-T021 can attach Stripe fulfillment without changing the core table surface again.
+- Documented the human Supabase setup path and SQL migration without asking for secrets in chat.
+- Marked T017 done after full verification passed.
+
+Assumptions Made:
+- Initial production traffic can use server-side PostgREST with the service role key held only in Render env; direct Postgres client pooling can be revisited if write volume or transaction semantics demand it.
+- The migration should create the `cohort15_purchases` table before Stripe work even though checkout/webhook behavior remains T020-T021.
+- Credit transaction concurrency should be handled by database-side RPC helpers with advisory locks as the integration path for payment and hardening tasks.
+
+Next Recommended Step:
+- Execute T018: harden production sessions and CSRF behavior before admin, Stripe, and live publishing tasks.
+
+### 2026-06-17 EDT
+
+Read:
+- `start.txt`
 - `agent-starters/startNewManager.txt`
 - `agent/knowledge/index.md`
 - `tasks.json`
