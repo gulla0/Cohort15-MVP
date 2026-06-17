@@ -55,7 +55,8 @@ Initial production assumptions:
 - Start command: `npm start`
 - Health check path: `/`
 - Generated app URL: `https://cohort15-mvp.onrender.com`, unless Render assigns a different available service URL
-- Optional custom domain: `https://app.cohort15.com`, only after the domain is owned and verified
+- Existing domain use: `cohort15.com` already hosts the pre-release landing page on Netlify
+- Custom domain options: keep the app on the Render URL, move `cohort15.com` from Netlify to Render, or use a subdomain such as `https://app.cohort15.com`
 
 Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are handled in the next configuration task.
 

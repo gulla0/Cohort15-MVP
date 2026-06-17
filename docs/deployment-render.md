@@ -27,7 +27,8 @@ Official docs checked on 2026-06-17:
 - Start command: `npm start`
 - Health check path: `/`
 - Public service URL assumption: `https://cohort15-mvp.onrender.com`
-- Custom domain assumption, if available before launch: `https://app.cohort15.com`
+- Current domain use: `cohort15.com` hosts the pre-release landing page on Netlify
+- Custom domain options: keep the app on the Render URL, move `cohort15.com` from Netlify to Render, or use a subdomain such as `https://app.cohort15.com`
 - Auto-deploy setting for launch setup: off until T014-T030 production integrations are verified
 
 The app reads `PORT` from the environment and defaults to `3000` locally. Render provides the public web service port at runtime; `src/server/app.mjs` binds to `HOST` or `0.0.0.0` so the service can receive external traffic.
@@ -76,16 +77,16 @@ No credentials should be pasted into chat or committed to this repository.
 6. After the first deploy completes, record the generated Render URL. If the service name is available, use `https://cohort15-mvp.onrender.com`.
 7. Optional custom domain setup:
    - In Render, open the service -> `Settings` -> `Custom Domains` -> `+ Add Custom Domain`.
-   - Enter `app.cohort15.com` only if that domain is owned and intended for launch.
-   - In the DNS provider, add the records Render displays for `app.cohort15.com`; remove conflicting `AAAA` records while configuring the Render domain.
+   - Enter the chosen app domain: `cohort15.com` if moving the root domain from Netlify to Render, or `app.cohort15.com` if keeping the Netlify landing page on the root domain.
+   - In the DNS provider, add the records Render displays for the chosen domain; remove conflicting `AAAA` records while configuring the Render domain.
    - Return to Render and click `Verify` next to the domain.
 8. Report back with only non-secret values:
-   - Final app base URL, for example `https://cohort15-mvp.onrender.com` or `https://app.cohort15.com`
+   - Final app base URL, for example `https://cohort15-mvp.onrender.com`, `https://cohort15.com`, or `https://app.cohort15.com`
    - Production branch name
    - Whether auto-deploy is off
    - Whether a custom domain was verified
 
-Checkpoint: T014 can proceed after the Render service exists or after the team confirms the public app base URL that later Supabase, Stripe, and social callback settings should use.
+Checkpoint: T014 can proceed after the Render service exists or after the team confirms the public app base URL that later Supabase, Stripe, and social callback settings should use. Current state is a Netlify pre-release landing page on `cohort15.com`; the production app can still move that root domain to Render if that becomes the chosen launch URL.
 
 ## Deploy And Verification
 
