@@ -2,6 +2,33 @@
 
 Append-only implementation log.
 
+### 2026-06-17 EDT
+
+Task:
+- T013 Choose and document production deployment target
+
+Files Changed:
+- `docs/deployment-render.md`
+- `render.yaml`
+- `src/server/app.mjs`
+- `README.md`
+- `plan.md`
+- `tasks.json`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Selected Render Web Service `cohort15-mvp` as the first production deployment target.
+- Added a Render deployment runbook with official docs links, dashboard setup steps, app URL/domain assumptions, env var names, secret-handling guidance, verification steps, and rollback instructions.
+- Added `render.yaml` with Node 24, `npm install`, `npm start`, `/` health check, and auto-deploy off.
+- Updated the server entry point to bind to `HOST` or `0.0.0.0` while preserving `PORT`.
+- Updated README, plan, task ledger, status view, and knowledge index for the Render deployment decision.
+
+Verification:
+- `npm run check` passed.
+
 ### 2026-06-16 12:48 EDT
 
 Task:

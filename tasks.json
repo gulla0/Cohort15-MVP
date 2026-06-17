@@ -493,7 +493,7 @@
     {
       "id": "T013",
       "title": "Choose and document production deployment target",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T012",
@@ -531,8 +531,8 @@
         "Run npm run check if workflow artifacts changed"
       ],
       "stop_condition": "Stop once the first production target and runbook are explicit.",
-      "evidence": "Pending.",
-      "notes": "Deployment target must be chosen before Supabase, auth callback, Stripe webhook, and social callback/env details are finalized."
+      "evidence": "2026-06-17 EDT: Chose Render Web Service `cohort15-mvp` as the first production target, added `docs/deployment-render.md` with current official Render links and a human setup checklist, added `render.yaml`, documented runtime/start/health/rollback/app URL assumptions, and verified with `npm run check`.",
+      "notes": "Render is the selected deployment target. Use `https://cohort15-mvp.onrender.com` unless Render assigns a different URL; optional custom domain assumption is `https://app.cohort15.com` after DNS verification."
     },
     {
       "id": "T014",

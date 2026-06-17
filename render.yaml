@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: cohort15-mvp
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: false
+    envVars:
+      - key: NODE_VERSION
+        value: "24"

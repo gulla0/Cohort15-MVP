@@ -2,6 +2,38 @@
 
 Append-only role transition and handoff log.
 
+### 2026-06-17 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/progress/blockers.md`
+- `README.md`
+- `plan.md`
+- `package.json`
+- `src/server/app.mjs`
+- current official Render docs for web services, Node deployment, deploys, health checks, rollbacks, custom domains, environment variables, and Node version configuration
+
+Decided:
+- Classified the user request as approved main implementation work and selected T013 as the next unblocked task after T012 and T016.
+- Chose Render Web Service `cohort15-mvp` as the first production deployment target.
+- Added a Render runbook and `render.yaml` instead of committing provider credentials or requiring dashboard setup before local work could continue.
+- Bound the server entry point to `HOST` or `0.0.0.0` while preserving `PORT`, matching Render web service runtime expectations.
+- Marked T013 done after verification.
+
+Assumptions Made:
+- The launch app base URL should be `https://cohort15-mvp.onrender.com` unless Render assigns a different available service URL.
+- `https://app.cohort15.com` is an optional custom domain assumption only if the domain is owned and verified.
+- Auto-deploy should stay off until T014-T030 production integrations and smoke tests are complete.
+
+Next Recommended Step:
+- Execute T014: add the production configuration and secrets boundary using the Render app base URL and without committing provider credentials.
+
 ### 2026-06-16 12:48 EDT
 
 Read:

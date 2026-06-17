@@ -16,6 +16,7 @@ npm run dev
 npm run check
 npm test
 npm run lint
+npm start
 ```
 
 The dev server starts at [http://localhost:3000](http://localhost:3000) by default. Override the port with:
@@ -42,6 +43,21 @@ npm run check
 ```
 
 This executes the repository lint check, the agent workflow guardrail, and the Node test suite.
+
+## Production Deployment Target
+
+The first production deployment target is a Render Web Service named `cohort15-mvp`. The initial runbook is in [docs/deployment-render.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/deployment-render.md), and the starter service configuration is captured in [render.yaml](/Users/gzero/Desktop/cohort15/cohort15-mvp/render.yaml).
+
+Initial production assumptions:
+
+- Runtime: Node 24
+- Build command: `npm install`
+- Start command: `npm start`
+- Health check path: `/`
+- Generated app URL: `https://cohort15-mvp.onrender.com`, unless Render assigns a different available service URL
+- Optional custom domain: `https://app.cohort15.com`, only after the domain is owned and verified
+
+Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are handled in the next configuration task.
 
 ## Local Demo Data
 

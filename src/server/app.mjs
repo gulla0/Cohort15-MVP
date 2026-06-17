@@ -511,7 +511,8 @@ export function createApp() {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = Number.parseInt(process.env.PORT ?? '3000', 10);
-  createApp().listen(port, () => {
-    console.log(`Cohort15 dev server running at http://localhost:${port}`);
+  const host = process.env.HOST ?? '0.0.0.0';
+  createApp().listen(port, host, () => {
+    console.log(`Cohort15 server running at http://${host}:${port}`);
   });
 }

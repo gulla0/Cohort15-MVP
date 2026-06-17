@@ -209,7 +209,7 @@ Do not cut:
 
 ## Open Implementation Questions
 
-1. Deployment target is still unspecified for public launch. T013 should choose and document the first target before Supabase callback URLs, Stripe webhooks, and social configuration are finalized.
+1. The first production deployment target is Render Web Service `cohort15-mvp`. The initial app base URL assumption is `https://cohort15-mvp.onrender.com`, with `https://app.cohort15.com` as the optional verified custom domain. See `docs/deployment-render.md`.
 2. Secret management and environment variable requirements are not formalized. T014 should add that boundary before provider-backed integrations.
 3. Production credit bootstrap policy is still unspecified: new users may need to buy credits first, or receive explicit ledger-backed launch/admin grants.
 4. Production upload storage is still unspecified: T026 should either harden storage for uploaded event images or constrain uploads in production.
