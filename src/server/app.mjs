@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, extname, join } from 'node:path';
 import { clearSessionCookie, createSessionManager } from '../auth/session.mjs';
+import { loadRuntimeConfig } from '../config/runtime.mjs';
 import {
   ALLOWED_IMAGE_UPLOAD_TYPES,
   MAX_UPLOADED_IMAGE_BYTES,
@@ -510,9 +511,8 @@ export function createApp() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = Number.parseInt(process.env.PORT ?? '3000', 10);
-  const host = process.env.HOST ?? '0.0.0.0';
-  createApp().listen(port, host, () => {
-    console.log(`Cohort15 server running at http://${host}:${port}`);
+  const config = loadRuntimeConfig();
+  createApp().listen(config.port, config.host, () => {
+    console.log(`Cohort15 server running at http://${config.host}:${config.port}`);
   });
 }

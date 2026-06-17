@@ -6,6 +6,42 @@ Append-only role transition and handoff log.
 
 Read:
 - `start.txt`
+- `agent/router/intent-router.md`
+- `README.md`
+- `USAGE.md`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent-starters/startNewManager.txt`
+- `agent/progress/session-notes.md`
+- `plan.md`
+- `atomic-task-graph.md`
+- `src/server/app.mjs`
+- `package.json`
+- `render.yaml`
+- current official docs for Render environment variables, Supabase redirect URLs, Stripe keys/webhooks, Google/GitHub OAuth, LinkedIn OAuth, and X OAuth
+
+Decided:
+- Classified the user request as approved main implementation work and selected T014 as the next unblocked critical-path task after T013.
+- Added a dependency-free runtime config module instead of introducing dotenv or provider SDK dependencies in this task.
+- Treated `COHORT15_APP_ENV=production` and `NODE_ENV=production` as production mode triggers.
+- Made production startup fail clearly when required app URL, session, admin, Supabase, Stripe, social, email, or upload values are missing.
+- Rejected `COHORT15_PERSISTENCE_FILE` and `COHORT15_UPLOAD_MODE=local` in production to avoid silent local/demo fallbacks.
+- Documented human setup steps and exact env var names without asking for secrets in chat or committing credentials.
+- Marked T014 done after focused runtime config tests and full project verification passed.
+
+Assumptions Made:
+- `https://cohort15-mvp.onrender.com` remains the default app base URL until Render assigns a different URL or a custom domain is verified.
+- Production uploads should be disabled by config until T026 selects hardened storage.
+- Render `sync: false` placeholders are the right place to represent required secrets without storing values in the repo.
+
+Next Recommended Step:
+- Execute T015: integrate Supabase Auth with Google and GitHub providers while keeping seeded local auth development-only.
+
+### 2026-06-17 EDT
+
+Read:
+- `start.txt`
 - `agent-starters/startNewManager.txt`
 - `agent/knowledge/index.md`
 - `tasks.json`

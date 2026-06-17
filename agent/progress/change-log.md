@@ -5,6 +5,37 @@ Append-only implementation log.
 ### 2026-06-17 EDT
 
 Task:
+- T014 Add production configuration and secrets boundary
+
+Files Changed:
+- `.env.example`
+- `.gitignore`
+- `docs/production-config.md`
+- `render.yaml`
+- `src/config/runtime.mjs`
+- `src/server/app.mjs`
+- `tests/runtime-config.test.mjs`
+- `README.md`
+- `tasks.json`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Added dependency-free runtime config parsing and production validation.
+- Wired server startup through `loadRuntimeConfig`.
+- Documented required and optional production env vars for Render, Supabase, Stripe, LinkedIn, X, email, admin access, app URL, sessions, and uploads.
+- Added `.env.example` and ignored local `.env*` files while keeping the example tracked.
+- Expanded `render.yaml` with production mode, app URL, disabled uploads, and `sync: false` placeholders for required secrets.
+
+Verification:
+- `node --test tests/runtime-config.test.mjs` passed with 6 tests.
+- `npm run check` passed with 65 tests.
+
+### 2026-06-17 EDT
+
+Task:
 - T013 Choose and document production deployment target
 
 Files Changed:

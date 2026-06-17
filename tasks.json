@@ -537,7 +537,7 @@
     {
       "id": "T014",
       "title": "Add production configuration and secrets boundary",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T013"
@@ -573,8 +573,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop once configuration and secret handling are explicit, tested, and documented.",
-      "evidence": "Pending.",
-      "notes": "This replaces the old broad T019 and becomes the dependency for production auth, persistence, Stripe, social publishing, and admin controls."
+      "evidence": "2026-06-17 EDT: Added `src/config/runtime.mjs` production-mode validation, wired server startup through the runtime config, documented required Render/Supabase/Stripe/social/email/admin/upload env vars in `.env.example` and `docs/production-config.md`, expanded `render.yaml` with non-secret values plus `sync: false` secret placeholders, and verified with focused config tests plus `npm run check`.",
+      "notes": "Production mode is enabled by `COHORT15_APP_ENV=production` or `NODE_ENV=production`; startup fails clearly when required values are missing, local JSON persistence is configured, or local upload storage is selected."
     },
     {
       "id": "T015",

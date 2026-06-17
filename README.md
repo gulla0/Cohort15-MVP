@@ -47,6 +47,7 @@ This executes the repository lint check, the agent workflow guardrail, and the N
 ## Production Deployment Target
 
 The first production deployment target is a Render Web Service named `cohort15-mvp`. The initial runbook is in [docs/deployment-render.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/deployment-render.md), and the starter service configuration is captured in [render.yaml](/Users/gzero/Desktop/cohort15/cohort15-mvp/render.yaml).
+The production configuration and secrets boundary is documented in [docs/production-config.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/production-config.md).
 
 Initial production assumptions:
 
@@ -57,8 +58,9 @@ Initial production assumptions:
 - Generated app URL: `https://cohort15-mvp.onrender.com`, unless Render assigns a different available service URL
 - Existing domain use: `cohort15.com` already hosts the pre-release landing page on Netlify
 - Custom domain options: keep the app on the Render URL, move `cohort15.com` from Netlify to Render, or use a subdomain such as `https://app.cohort15.com`
+- Production startup validation: set `COHORT15_APP_ENV=production` or `NODE_ENV=production`; missing required Supabase, Stripe, social, admin, app URL, upload, or session values fail startup clearly
 
-Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are handled in the next configuration task.
+Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are documented in the production configuration runbook.
 
 ## Local Demo Data
 

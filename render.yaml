@@ -10,3 +10,39 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "24"
+      - key: COHORT15_APP_ENV
+        value: production
+      - key: COHORT15_APP_URL
+        value: https://cohort15-mvp.onrender.com
+      - key: COHORT15_UPLOAD_MODE
+        value: disabled
+      - key: COHORT15_SESSION_SECRET
+        sync: false
+      - key: COHORT15_ADMIN_EMAILS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_6_CREDITS
+        sync: false
+      - key: STRIPE_PRICE_14_CREDITS
+        sync: false
+      - key: LINKEDIN_CLIENT_ID
+        sync: false
+      - key: LINKEDIN_CLIENT_SECRET
+        sync: false
+      - key: X_API_KEY
+        sync: false
+      - key: X_API_SECRET
+        sync: false
+      - key: EMAIL_PROVIDER_API_KEY
+        sync: false
+      - key: EMAIL_FROM_ADDRESS
+        sync: false
