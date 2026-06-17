@@ -121,7 +121,7 @@
       ],
       "stop_condition": "Stop before user-facing create/interest flows.",
       "evidence": "2026-05-30 00:28 EDT: Added dependency-free in-memory persistence schema/repositories for users, events, interests, credit transactions, and social posts; demo seed grants; and credit ledger primitives for grant, hold, consume, refund, and derived balances. `npm run check` passed.",
-      "notes": "Schema module records a future purchase source path without implementing USD credit sales."
+      "notes": "Schema module records purchase-source extensibility; production Stripe purchase fulfillment is now covered by T020-T021."
     },
     {
       "id": "T004",
@@ -301,7 +301,7 @@
         "optional local outbox UI or dev view"
       ],
       "authority": [
-        "Do not add real external social API posting in MVP",
+        "Do not add real external social API posting in this local-outbox task; production publishing is covered by T022-T024",
         "Social content must never include lockedEventLink",
         "Status may be pending, posted, or failed according to local/mock behavior"
       ],
@@ -317,7 +317,7 @@
       ],
       "stop_condition": "Stop after local/mock promotion is represented and verifiable.",
       "evidence": "2026-05-30 00:59 EDT: Added local social promotion service, integrated create cohort with pending social post creation, and tests confirming required public fields and public page URL are included while private links are excluded. `npm run check` passed.",
-      "notes": "Real social APIs remain post-MVP. The MVP creates a pending local outbox record on cohort creation and keeps event socialPostStatus consistent with the post status."
+      "notes": "This task created the local public-safe outbox record. Production publishing to LinkedIn, X, and Email is now covered by T022-T024."
     },
     {
       "id": "T009",
@@ -389,14 +389,14 @@
         "Core success path is covered by automated tests or documented manual verification",
         "Expiry/refund path is covered by automated tests or documented manual verification",
         "Credit ledger behavior is covered by tests",
-        "README documents setup, run, test, seed/demo data, MVP boundary, post-MVP USD credit packages, and known assumptions"
+        "README documents setup, run, test, seed/demo data, MVP boundary, production credit package assumptions, and known assumptions"
       ],
       "verification": [
         "Run the full documented verification suite",
         "Manually exercise the MVP flow if UI automation is not available"
       ],
       "stop_condition": "Stop once the MVP can be handed to user testing.",
-      "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, post-MVP credit package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
+      "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, credit package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
       "notes": "Manual browser feed/unlock follow-up was stopped by the browser URL policy after creation; the new automated verification test covers feed, detail, quorum unlock, dashboards, and expiry/refund end to end."
     },
     {
@@ -492,138 +492,126 @@
     },
     {
       "id": "T013",
-      "title": "Add credit purchase package flow",
+      "title": "Choose and document production deployment target",
       "status": "not_started",
-      "phase": "Post-MVP Monetization",
+      "phase": "Production MVP Readiness",
       "dependencies": [
-        "T011",
-        "T012"
+        "T012",
+        "T016"
       ],
-      "objective": "Add the first credit purchase flow for the documented post-MVP packages, recording purchase transactions without breaking grant or hold accounting.",
+      "objective": "Select the first production host and document the runtime, deploy, start, health check, rollback, and app URL assumptions.",
       "inputs": [
-        "plan.md",
-        "src/persistence/credit-ledger.mjs",
-        "src/persistence/schema.mjs",
-        "src/services/dashboards.mjs",
+        "README.md",
+        "package.json",
         "src/server/app.mjs",
-        "README.md"
+        "plan.md"
       ],
       "write_scope": [
-        "credit package constants or service modules",
-        "purchase route/controller",
-        "purchase UI",
-        "credit transaction schema fields if needed",
-        "purchase tests",
-        "README payment-mode notes"
+        "deployment documentation",
+        "minimal host configuration if needed",
+        "README.md",
+        "plan.md"
       ],
       "authority": [
-        "Use initial packages of $6 for 6 credits and $12 for 14 credits",
-        "May implement a local/mock payment confirmation unless a real payment provider is specified",
-        "Must record successful purchases as auditable purchase credit transactions",
-        "Do not store real card data or implement unrequested payment-provider credentials"
+        "Select a concrete target instead of leaving deployment generic",
+        "Do not commit credentials",
+        "Keep deployment-specific behavior out of core domain logic unless needed for runtime configuration"
       ],
       "acceptance_criteria": [
-        "Authenticated users can select one of the two documented credit packages",
-        "Successful purchase creates a purchase transaction and updates derived available balance",
-        "Cancelled or failed local/mock purchases do not grant credits",
-        "Dashboards or credit summary surfaces reflect purchased credit balance",
-        "README clearly labels whether payment is local/mock or provider-backed"
+        "A specific production deployment target is documented",
+        "Runtime and start commands are documented",
+        "App URL/domain assumptions are documented",
+        "Rollback or redeploy basics are documented"
       ],
       "verification": [
-        "Run purchase flow tests",
-        "Run credit ledger tests",
-        "Run the full documented verification suite"
+        "Review deployment docs for concrete target, commands, and assumptions",
+        "Run npm run check if workflow artifacts changed"
       ],
-      "stop_condition": "Stop once package purchase accounting works and payment-provider limitations are documented.",
-      "notes": "A real provider is not specified, so local/mock purchase mode is acceptable if clearly documented."
+      "stop_condition": "Stop once the first production target and runbook are explicit.",
+      "evidence": "Pending.",
+      "notes": "Deployment target must be chosen before Supabase, auth callback, Stripe webhook, and social callback/env details are finalized."
     },
     {
       "id": "T014",
-      "title": "Publish social outbox to configured external channels",
+      "title": "Add production configuration and secrets boundary",
       "status": "not_started",
-      "phase": "Post-MVP Distribution",
+      "phase": "Production MVP Readiness",
       "dependencies": [
-        "T011",
-        "T012"
+        "T013"
       ],
-      "objective": "Turn the local social-promotion outbox into a publishable channel adapter flow that can post public-safe cohort content to configured official channels.",
+      "objective": "Define safe runtime configuration for production, including Supabase, Stripe, social publishing, admin access, cookies, app URL, upload behavior, and local/demo mode separation.",
       "inputs": [
-        "src/services/social-promotion.mjs",
-        "src/services/create-cohort.mjs",
-        "src/persistence/repositories.mjs",
-        "docs/cohort15-mvp-spec-v3.md",
-        "README.md"
+        "src/server/app.mjs",
+        "README.md",
+        "package.json"
       ],
       "write_scope": [
-        "social channel adapter modules",
-        "outbox processing service",
-        "configuration documentation",
-        "social post status handling",
-        "social publishing tests"
+        "configuration module",
+        "startup validation",
+        "example env documentation",
+        "config tests"
       ],
       "authority": [
-        "Must keep private event links out of all generated and published social content",
-        "May implement dry-run/mock adapters if official channels or credentials are absent",
-        "Must record posted or failed status per SocialPost",
-        "Do not hard-code secrets or require credentials for normal test runs"
+        "Do not commit real secrets",
+        "Production mode must not silently fall back to demo/local defaults",
+        "Keep local development explicit and easy to run"
       ],
       "acceptance_criteria": [
-        "Pending social posts can be processed through a configured adapter boundary",
-        "Successful publishes record platform post URLs when available and mark posts posted",
-        "Failed publishes capture failure state without losing the outbox record",
-        "Dry-run or mock mode remains available for local development and tests",
-        "Tests prove private links are never sent to adapters"
+        "Required and optional env vars are documented",
+        "Production config fails clearly when required values are missing",
+        "Local development remains explicit",
+        "Secrets are never logged or committed"
       ],
       "verification": [
-        "Run social publishing tests with a mock adapter",
-        "Run the full documented verification suite"
+        "Run focused config tests",
+        "Run npm run check"
       ],
-      "stop_condition": "Stop once external-channel publishing is adapter-backed, testable, and safely configurable.",
-      "notes": "Official channels and credentials are still unknown; adapter boundaries and dry-run behavior should come before real API credentials."
+      "stop_condition": "Stop once configuration and secret handling are explicit, tested, and documented.",
+      "evidence": "Pending.",
+      "notes": "This replaces the old broad T019 and becomes the dependency for production auth, persistence, Stripe, social publishing, and admin controls."
     },
     {
       "id": "T015",
-      "title": "Add cohort completion and cancellation lifecycle handling",
+      "title": "Integrate Supabase Auth account boundary",
       "status": "not_started",
-      "phase": "Post-MVP Lifecycle Controls",
+      "phase": "Production MVP Readiness",
       "dependencies": [
-        "T012"
+        "T014"
       ],
-      "objective": "Implement bounded creator/admin lifecycle controls for cancelling open cohorts and completing active cohorts while preserving credit accounting and link visibility rules.",
+      "objective": "Implement production authentication with Supabase Auth using Google login, GitHub login, and optional magic-link/email login while preserving local seeded auth only for development.",
       "inputs": [
-        "docs/cohort15-mvp-spec-v3.md",
-        "src/domain/constants.mjs",
-        "src/domain/validation.mjs",
-        "src/services/expire-cohorts.mjs",
-        "src/services/dashboards.mjs",
-        "src/server/app.mjs"
+        "src/auth/session.mjs",
+        "src/server/app.mjs",
+        "src/ui/auth.mjs",
+        "README.md"
       ],
       "write_scope": [
-        "lifecycle service modules",
-        "creator/admin route handlers",
-        "dashboard lifecycle actions",
-        "lifecycle tests",
-        "README lifecycle notes"
+        "auth adapter modules",
+        "auth routes/callback handling",
+        "session integration",
+        "auth UI",
+        "auth tests",
+        "docs"
       ],
       "authority": [
-        "May support cancelled and completed statuses already defined in the domain",
-        "Cancelling open cohorts must refund held creator and participant credits through refund transactions",
-        "Completing active cohorts must not refund already consumed credits",
-        "Do not add broad moderation tooling in this task"
+        "Use Supabase Auth for production",
+        "Enable Google and GitHub login assumptions in docs/config",
+        "Support optional magic-link/email login if configured",
+        "Do not expose seeded demo sign-in in production"
       ],
       "acceptance_criteria": [
-        "Authorized creators or admins can cancel open cohorts",
-        "Cancellation refunds held creator and participant credits and removes the cohort from public discovery",
-        "Authorized creators or admins can mark active cohorts completed",
-        "Completed cohorts keep historical dashboard visibility without exposing links to unauthorized users",
-        "Unauthorized lifecycle actions are rejected"
+        "Production users can sign in and sign out through Supabase Auth",
+        "Protected routes resolve identity from Supabase-backed sessions in production",
+        "Seeded local users are restricted to development mode",
+        "Anonymous and wrong-user access are rejected"
       ],
       "verification": [
-        "Run lifecycle service and route tests",
-        "Run the full documented verification suite"
+        "Run focused auth route tests",
+        "Run npm run check"
       ],
-      "stop_condition": "Stop once cancelled and completed lifecycle paths are implemented with tests and documented behavior.",
-      "notes": "This uses existing domain statuses that were modeled but not implemented in the MVP."
+      "stop_condition": "Stop once production auth identity replaces demo users for production protected flows.",
+      "evidence": "Pending.",
+      "notes": "Supabase Auth is the selected provider. Google and GitHub are required launch providers; magic-link/email is optional/configured."
     },
     {
       "id": "T016",
@@ -666,137 +654,100 @@
     },
     {
       "id": "T017",
-      "title": "Choose and document deployment target",
+      "title": "Add Supabase Postgres production persistence adapter",
       "status": "not_started",
-      "phase": "Launch Readiness",
+      "phase": "Production MVP Readiness",
       "dependencies": [
-        "T012",
-        "T016"
+        "T014",
+        "T015"
       ],
-      "objective": "Select the first web app deployment target and document the runtime, build, start, persistence, and environment assumptions needed to deploy Cohort15.",
+      "objective": "Move production persistence from local JSON to Supabase Postgres while preserving repository contracts and transaction-derived credit ledger semantics.",
       "inputs": [
-        "README.md",
-        "package.json",
-        "src/server/app.mjs",
-        "plan.md"
-      ],
-      "write_scope": [
-        "deployment documentation",
-        "runtime configuration files if required by the selected host",
-        "README launch notes"
-      ],
-      "authority": [
-        "May choose a pragmatic first deployment target if the user has not selected one",
-        "May add minimal host-specific config",
-        "Do not add provider credentials or secrets to the repository"
-      ],
-      "acceptance_criteria": [
-        "Deployment target is named and justified",
-        "Required Node/npm versions and start command are documented",
-        "Required environment variables are listed",
-        "Persistence assumptions for the selected host are explicit",
-        "Rollback or redeploy steps are documented at a basic level"
-      ],
-      "verification": [
-        "Run npm run check",
-        "Confirm documented commands match package.json"
-      ],
-      "stop_condition": "Stop once a specific deploy target and deployment runbook are documented.",
-      "notes": "Deployment target is currently unspecified."
-    },
-    {
-      "id": "T018",
-      "title": "Add production-grade persistence plan and adapter",
-      "status": "not_started",
-      "phase": "Launch Readiness",
-      "dependencies": [
-        "T012",
-        "T017"
-      ],
-      "objective": "Move launch persistence beyond local JSON by selecting and wiring a production-appropriate datastore while preserving repository contracts and credit ledger auditability.",
-      "inputs": [
-        "src/persistence/schema.mjs",
-        "src/persistence/repositories.mjs",
         "src/persistence/store.mjs",
+        "src/persistence/repositories.mjs",
+        "src/persistence/schema.mjs",
         "src/persistence/credit-ledger.mjs",
         "README.md"
       ],
       "write_scope": [
-        "persistence adapter modules",
-        "schema or migration files",
-        "configuration documentation",
-        "persistence tests"
+        "Supabase Postgres adapter",
+        "schema/migrations or SQL docs",
+        "repository wiring",
+        "persistence tests",
+        "docs"
       ],
       "authority": [
-        "May add a provider-backed adapter once a deployment target/datastore is selected",
-        "Must keep credit balances derived from transactions",
-        "Must preserve isolated in-memory tests and local durable mode where useful",
-        "Do not embed datastore credentials"
+        "Use Supabase Postgres as the selected production datastore",
+        "Preserve auditable credit transactions",
+        "Do not embed Supabase service credentials in source",
+        "Keep local JSON or in-memory mode available for development/tests"
       ],
       "acceptance_criteria": [
-        "Production datastore choice is documented",
-        "Users, events, interests, credit transactions, and social posts persist in the launch datastore",
-        "Migrations or schema initialization are repeatable",
-        "Credit ledger semantics remain auditable",
-        "Local development still has a documented persistence path"
+        "Users, cohorts, interests, credit transactions, social posts, purchases, and auth-linked records persist in Supabase Postgres",
+        "Credit balances remain transaction-derived",
+        "Credit hold/consume/refund/purchase writes are safe under concurrent requests",
+        "Migration/init docs exist"
       ],
       "verification": [
-        "Run persistence adapter tests",
+        "Run focused persistence tests",
         "Run npm run check"
       ],
-      "stop_condition": "Stop once launch persistence is selected, implemented or explicitly staged, and documented.",
-      "notes": "The current JSON file adapter is useful locally but is not enough for a public multi-user launch."
+      "stop_condition": "Stop once production persistence is selectable, documented, and covered by tests or a documented integration path.",
+      "evidence": "Pending.",
+      "notes": "Supabase Postgres is the selected production datastore."
+    },
+    {
+      "id": "T018",
+      "title": "Harden production sessions and CSRF behavior",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T015",
+        "T017"
+      ],
+      "objective": "Make authenticated browser mutations launch-safe with production cookie/session settings and CSRF protection or an explicit equivalent strategy.",
+      "inputs": [
+        "src/auth/session.mjs",
+        "src/server/app.mjs",
+        "src/ui/*.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "session/cookie handling",
+        "CSRF tokens or equivalent controls",
+        "route tests",
+        "docs"
+      ],
+      "authority": [
+        "Production cookies must assume HTTPS",
+        "Mutating routes must reject invalid auth/session state",
+        "Do not log session tokens or CSRF tokens"
+      ],
+      "acceptance_criteria": [
+        "Secure production cookie behavior is documented and implemented",
+        "Session expiration and sign-out invalidation are documented",
+        "POST routes have CSRF protection or an explicitly tested equivalent",
+        "Tests cover missing or invalid session/CSRF cases"
+      ],
+      "verification": [
+        "Run focused auth/security route tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once session and mutation protection are production-MVP safe.",
+      "evidence": "Pending.",
+      "notes": "This closes the gap between local session auth and launch browser security."
     },
     {
       "id": "T019",
-      "title": "Add environment and secrets configuration boundary",
-      "status": "not_started",
-      "phase": "Launch Readiness",
-      "dependencies": [
-        "T017"
-      ],
-      "objective": "Define a safe configuration boundary for runtime environment variables and secrets used by auth, persistence, payment, social publishing, and deployment.",
-      "inputs": [
-        "src/server/app.mjs",
-        "README.md",
-        "package.json"
-      ],
-      "write_scope": [
-        "configuration module",
-        "example environment documentation",
-        "startup validation tests",
-        "README configuration notes"
-      ],
-      "authority": [
-        "May add startup validation for required launch configuration",
-        "May add a committed example env file with placeholder values",
-        "Must not commit real secrets",
-        "Must keep test and local development defaults explicit"
-      ],
-      "acceptance_criteria": [
-        "Required and optional environment variables are documented",
-        "Missing required launch config fails clearly",
-        "Local development remains easy to run",
-        "No real credentials or credits are committed",
-        "Tests cover configuration parsing or startup validation"
-      ],
-      "verification": [
-        "Run configuration tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once config and secrets handling are explicit, tested, and documented.",
-      "notes": "This should happen before real payment, social, or production datastore credentials are introduced."
-    },
-    {
-      "id": "T020",
       "title": "Secure admin and operational endpoints",
       "status": "not_started",
-      "phase": "Launch Readiness",
+      "phase": "Production MVP Readiness",
       "dependencies": [
-        "T012",
-        "T019"
+        "T014",
+        "T015",
+        "T018"
       ],
-      "objective": "Lock down administrative actions such as cohort expiry processing so public users cannot invoke operational endpoints without authorization.",
+      "objective": "Lock down administrative operations including cohort expiry, social publishing operations, and payment/social operational retries.",
       "inputs": [
         "src/server/app.mjs",
         "src/services/expire-cohorts.mjs",
@@ -804,153 +755,499 @@
       ],
       "write_scope": [
         "admin authorization checks",
-        "admin route tests",
-        "operational documentation"
+        "admin role/config handling",
+        "route tests",
+        "operational docs"
       ],
       "authority": [
-        "May add an admin role or operational secret boundary",
-        "Must keep expiry processing testable locally",
-        "Must reject unauthorized admin requests",
-        "Do not expose private links in admin responses"
+        "Admin status must not come from client-controlled input",
+        "Protect /admin/expire-cohorts before public launch",
+        "Use Supabase-authenticated admin identity or a documented operational credential"
       ],
       "acceptance_criteria": [
-        "Unauthenticated or non-admin users cannot trigger admin expiry processing",
-        "Authorized admin or configured operational caller can trigger expiry processing",
-        "Failure responses do not leak sensitive data",
-        "Admin operation setup is documented"
+        "Unauthenticated and non-admin users cannot invoke admin operations",
+        "Authorized admin or operational callers can process expiry",
+        "Admin authorization is tested and documented"
       ],
       "verification": [
-        "Run admin route tests",
+        "Run focused admin route tests",
         "Run npm run check"
       ],
-      "stop_condition": "Stop once admin endpoints are protected and documented for launch operation.",
-      "notes": "The current /admin/expire-cohorts route is a local/dev trigger."
+      "stop_condition": "Stop once all operational endpoints are protected and documented.",
+      "evidence": "Pending.",
+      "notes": "Depends on production auth/session hardening so admin controls are not layered onto demo identity."
+    },
+    {
+      "id": "T020",
+      "title": "Implement Stripe credit purchase packages",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T014",
+        "T015",
+        "T017"
+      ],
+      "objective": "Replace the Buy Credits placeholder with real Stripe-backed purchases for the MVP packages: $6 for 6 credits and $12 for 14 credits.",
+      "inputs": [
+        "src/persistence/credit-ledger.mjs",
+        "src/server/app.mjs",
+        "src/ui/dashboards.mjs",
+        "src/ui/home.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "Stripe checkout integration",
+        "purchase service",
+        "purchase routes/UI",
+        "credit ledger purchase transactions",
+        "tests",
+        "docs"
+      ],
+      "authority": [
+        "Use Stripe as the selected payment provider",
+        "Do not store card data",
+        "Do not grant credits until payment success is verified",
+        "Do not hard-code Stripe secrets"
+      ],
+      "acceptance_criteria": [
+        "Authenticated users can select both MVP credit packages",
+        "Stripe checkout or payment flow is initiated with configured prices",
+        "Successful verified payment creates auditable purchase credit transactions",
+        "Failed/cancelled payments do not grant credits"
+      ],
+      "verification": [
+        "Run focused purchase tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once Stripe-backed package purchases work in production mode and local/test mode is documented.",
+      "evidence": "Pending.",
+      "notes": "Stripe is selected. Mock-only payment is not acceptable for MVP production."
     },
     {
       "id": "T021",
-      "title": "Add launch logging and monitoring hooks",
+      "title": "Add Stripe webhook idempotency and purchase reconciliation",
       "status": "not_started",
-      "phase": "Launch Readiness",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T020"
+      ],
+      "objective": "Make Stripe purchase fulfillment reliable by handling webhooks, duplicate events, pending/failed states, and reconciliation metadata.",
+      "inputs": [
+        "src/server/app.mjs",
+        "src/persistence/schema.mjs",
+        "src/persistence/repositories.mjs",
+        "src/persistence/credit-ledger.mjs"
+      ],
+      "write_scope": [
+        "webhook route",
+        "purchase state persistence",
+        "idempotency checks",
+        "reconciliation docs",
+        "tests"
+      ],
+      "authority": [
+        "Verify Stripe webhook signatures in production",
+        "Store provider event/payment IDs",
+        "Prevent duplicate credit grants",
+        "Do not log sensitive payment payloads"
+      ],
+      "acceptance_criteria": [
+        "Duplicate Stripe events do not double-grant credits",
+        "Failed/cancelled/pending payment states are represented",
+        "Purchase grant happens only after verified payment success",
+        "Operational reconciliation fields are documented"
+      ],
+      "verification": [
+        "Run focused webhook/idempotency tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once Stripe fulfillment is idempotent and auditable.",
+      "evidence": "Pending.",
+      "notes": "This is required because credits are money-adjacent and cannot rely only on a success redirect."
+    },
+    {
+      "id": "T022",
+      "title": "Configure MVP social channels",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T014"
+      ],
+      "objective": "Define the MVP social publishing scope and credentials for LinkedIn, X, and Email.",
+      "inputs": [
+        "src/services/social-promotion.mjs",
+        "README.md",
+        "plan.md"
+      ],
+      "write_scope": [
+        "social configuration docs",
+        "channel constants/config",
+        "format constraints"
+      ],
+      "authority": [
+        "Limit MVP live publishing to LinkedIn, X, and Email",
+        "Keep dry-run mode available",
+        "Do not include private links in any social content"
+      ],
+      "acceptance_criteria": [
+        "LinkedIn, X, and Email are documented as launch channels",
+        "Required credentials/env vars are documented",
+        "Dry-run vs live behavior is documented",
+        "Per-channel content constraints are recorded"
+      ],
+      "verification": [
+        "Review docs/config for selected channels",
+        "Run npm run check if workflow artifacts changed"
+      ],
+      "stop_condition": "Stop once selected social channels and configuration requirements are explicit.",
+      "evidence": "Pending.",
+      "notes": "Highest-return MVP socials are LinkedIn, X, and Email."
+    },
+    {
+      "id": "T023",
+      "title": "Implement LinkedIn, X, and Email social publishing adapters",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
       "dependencies": [
         "T017",
-        "T019"
+        "T022"
       ],
-      "objective": "Add basic operational visibility for launch: structured request/error logs, health behavior, and documented monitoring checks.",
+      "objective": "Publish pending social outbox records through adapter-backed LinkedIn, X, and Email channels with persisted status handling and no private-link leakage.",
       "inputs": [
+        "src/services/social-promotion.mjs",
+        "src/persistence/repositories.mjs",
         "src/server/app.mjs",
         "README.md"
       ],
       "write_scope": [
-        "logging helpers",
-        "health or readiness endpoint behavior",
-        "monitoring documentation",
-        "logging tests where practical"
+        "social adapter boundary",
+        "LinkedIn adapter",
+        "X adapter",
+        "Email adapter",
+        "outbox processor",
+        "status persistence",
+        "tests",
+        "docs"
       ],
       "authority": [
-        "May add minimal structured logging without external dependencies unless needed",
-        "Must avoid logging private event links or secrets",
-        "May document provider-level monitoring instead of implementing a full observability stack"
+        "Do not hard-code social credentials",
+        "Preserve dry-run mode for testing",
+        "Never send private event links",
+        "Keep adapters bounded to selected MVP channels"
       ],
       "acceptance_criteria": [
-        "Server emits useful request and error logs",
-        "Health/readiness behavior is documented",
-        "Logs avoid private links, secrets, and sensitive credits",
-        "Launch monitoring checklist is documented"
+        "Pending posts can be processed through configured LinkedIn, X, and Email adapters",
+        "Posted/failed status is persisted",
+        "Failures are captured without leaking secrets",
+        "Tests prove private links are never published"
       ],
       "verification": [
-        "Run logging or health tests where added",
+        "Run focused social publishing tests",
         "Run npm run check"
       ],
-      "stop_condition": "Stop once minimal launch observability is implemented or explicitly documented.",
-      "notes": "This is intended as a launch baseline, not a full analytics or APM implementation."
+      "stop_condition": "Stop once selected MVP channels can publish or dry-run through configured adapters.",
+      "evidence": "Pending.",
+      "notes": "This expands the local social outbox into real MVP publishing."
     },
     {
-      "id": "T022",
-      "title": "Complete launch privacy and security review",
+      "id": "T024",
+      "title": "Add admin controls for social publishing",
       "status": "not_started",
-      "phase": "Launch Readiness",
+      "phase": "Production MVP Readiness",
       "dependencies": [
-        "T012",
+        "T019",
+        "T023"
+      ],
+      "objective": "Restrict live social publishing and retry operations to admin or operational authorization.",
+      "inputs": [
+        "src/server/app.mjs",
+        "src/services/social-promotion.mjs",
+        "src/ui/dashboards.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "admin social routes or controls",
+        "retry/process handlers",
+        "authorization tests",
+        "docs"
+      ],
+      "authority": [
+        "Live posting must require admin/operational authorization",
+        "Do not expose secrets or private links in admin UI/logs",
+        "Keep dry-run available for local verification"
+      ],
+      "acceptance_criteria": [
+        "Admins can process or retry pending social posts",
+        "Non-admin users cannot trigger live publishing",
+        "Failures are visible without exposing secrets/private links"
+      ],
+      "verification": [
+        "Run focused admin social tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once live social publishing is operationally controlled.",
+      "evidence": "Pending.",
+      "notes": "Social publishing is MVP scope, but live posting should not be uncontrolled."
+    },
+    {
+      "id": "T025",
+      "title": "Define production credit bootstrap policy",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T015",
+        "T017",
+        "T020"
+      ],
+      "objective": "Remove production reliance on demo seed grants by defining how real users receive credits at launch.",
+      "inputs": [
+        "src/persistence/seeds.mjs",
+        "src/persistence/credit-ledger.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "credit bootstrap service/config",
+        "seed behavior changes",
+        "docs",
+        "tests"
+      ],
+      "authority": [
+        "Production must not silently grant demo credits",
+        "All grants or purchases must be ledger-backed",
+        "Document whether launch users start with free credits or must buy credits"
+      ],
+      "acceptance_criteria": [
+        "New-user credit policy is documented",
+        "Demo seed grants are development-only",
+        "Production credits come from Stripe purchases or explicit admin/launch grants",
+        "Tests cover production seed behavior"
+      ],
+      "verification": [
+        "Run focused credit bootstrap tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once production starting credit behavior is explicit and auditable.",
+      "evidence": "Pending.",
+      "notes": "Needed because real payments are MVP scope and seeded local grants cannot be the production funding model."
+    },
+    {
+      "id": "T026",
+      "title": "Harden or constrain production image uploads",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T014",
+        "T017"
+      ],
+      "objective": "Make event image uploads safe for production, or explicitly disable custom uploads in production while preserving default/URL image behavior.",
+      "inputs": [
+        "src/server/app.mjs",
+        "src/ui/create-cohort.mjs",
+        "src/ui/styles.css",
+        "README.md"
+      ],
+      "write_scope": [
+        "upload storage/config",
+        "validation hardening",
+        "static serving policy",
+        "tests",
+        "docs"
+      ],
+      "authority": [
+        "Prevent path traversal and arbitrary overwrite",
+        "Only approved image types and sizes may be accepted",
+        "Document production storage behavior",
+        "Do not commit uploaded user content"
+      ],
+      "acceptance_criteria": [
+        "Production upload mode is documented",
+        "Uploads are safely stored or disabled in production",
+        "File type/size/path protections are tested",
+        "Default image behavior still works"
+      ],
+      "verification": [
+        "Run focused upload tests",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once production upload behavior is safe or intentionally constrained.",
+      "evidence": "Pending.",
+      "notes": "Current local uploads are useful for MVP testing but need a production storage/safety decision."
+    },
+    {
+      "id": "T027",
+      "title": "Add production logging, audit, and health checks",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T014",
+        "T017",
+        "T019",
+        "T021",
+        "T023"
+      ],
+      "objective": "Add minimal operational visibility for health, errors, auth/admin failures, credit ledger movements, Stripe purchases, and social publishing without leaking sensitive data.",
+      "inputs": [
+        "src/server/app.mjs",
+        "src/persistence/credit-ledger.mjs",
+        "src/services/social-promotion.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "structured logging helpers",
+        "health/readiness behavior",
+        "audit events",
+        "monitoring docs",
+        "tests where practical"
+      ],
+      "authority": [
+        "Do not log private links, secrets, session tokens, CSRF tokens, or payment details",
+        "Keep logging minimal and useful",
+        "Document monitoring expectations"
+      ],
+      "acceptance_criteria": [
+        "Health endpoint is production-suitable",
+        "Errors are logged",
+        "Payment, credit, admin expiry, and social publish actions have minimal audit trail",
+        "Sensitive values are excluded from logs"
+      ],
+      "verification": [
+        "Run focused logging/privacy tests where practical",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once MVP operations are diagnosable without leaking sensitive data.",
+      "evidence": "Pending.",
+      "notes": "This replaces generic logging with launch-specific audit needs."
+    },
+    {
+      "id": "T028",
+      "title": "Decide and implement MVP lifecycle controls",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T019"
+      ],
+      "objective": "Implement or explicitly defer launch lifecycle actions for cancelled and completed cohorts, with at minimum an operational cancellation/refund path if needed.",
+      "inputs": [
+        "src/services/expire-cohorts.mjs",
+        "src/server/app.mjs",
+        "src/ui/dashboards.mjs",
+        "README.md"
+      ],
+      "write_scope": [
+        "lifecycle decision doc",
+        "cancel/complete services if implemented",
+        "route/UI controls if implemented",
+        "tests"
+      ],
+      "authority": [
+        "Preserve credit accounting",
+        "Unauthorized lifecycle actions must be rejected",
+        "Do not add broad moderation tooling"
+      ],
+      "acceptance_criteria": [
+        "Launch decision for cancellation/completion is documented",
+        "If implemented, open cohort cancellation refunds held credits",
+        "If implemented, active cohort completion does not refund consumed credits",
+        "If deferred, operational workaround and risk are documented"
+      ],
+      "verification": [
+        "Run focused lifecycle tests if implemented",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop once lifecycle launch scope is implemented or explicitly deferred.",
+      "evidence": "Pending.",
+      "notes": "Existing T015 planned lifecycle work should be handled here for production MVP scope."
+    },
+    {
+      "id": "T029",
+      "title": "Complete production MVP security and privacy review",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
         "T018",
         "T019",
-        "T020",
-        "T021"
+        "T021",
+        "T024",
+        "T026",
+        "T027",
+        "T028"
       ],
-      "objective": "Review launch-critical privacy and security behavior, especially private cohort links, auth boundaries, credit accounting, admin operations, logs, and public social content.",
+      "objective": "Review launch-critical behavior after real auth, Supabase persistence, Stripe payments, selected social publishing, admin controls, uploads, and logging are in place.",
       "inputs": [
-        "src/domain/validation.mjs",
-        "src/server/app.mjs",
-        "src/services",
+        "src/domain",
         "src/persistence",
+        "src/services",
+        "src/server",
+        "src/ui",
         "tests",
         "README.md"
       ],
       "write_scope": [
-        "security/privacy review notes",
-        "targeted tests for found issues",
-        "small fixes for launch-blocking privacy or security defects"
+        "security review notes",
+        "focused fixes for blockers",
+        "residual risk docs"
       ],
       "authority": [
-        "May make focused fixes for confirmed launch-blocking issues",
-        "Must preserve private-link visibility rules",
-        "Must not broaden scope into unrelated feature work"
+        "Fix confirmed launch blockers within scope",
+        "Track or document accepted residual risks",
+        "Verify private links are not exposed publicly or through social/logs"
       ],
       "acceptance_criteria": [
-        "Private links are verified hidden from public pages, social posts, logs, and unauthorized users",
-        "Auth and admin boundaries are reviewed",
-        "Credit ledger integrity risks are reviewed",
-        "Any launch-blocking findings are fixed or explicitly tracked",
-        "Residual risks are documented"
-      ],
-      "verification": [
-        "Run targeted privacy/security tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once launch-critical privacy and security findings are addressed or clearly tracked.",
-      "notes": "This is a focused launch review, not a formal external security audit."
-    },
-    {
-      "id": "T023",
-      "title": "Create production launch smoke-test checklist",
-      "status": "not_started",
-      "phase": "Launch Readiness",
-      "dependencies": [
-        "T013",
-        "T014",
-        "T015",
-        "T018",
-        "T020",
-        "T022"
-      ],
-      "objective": "Create and run a production-oriented smoke-test checklist covering the launch-critical user and operator flows.",
-      "inputs": [
-        "README.md",
-        "USAGE.md",
-        "docs/cohort15-mvp-spec-v3.md",
-        "tests"
-      ],
-      "write_scope": [
-        "launch checklist documentation",
-        "manual verification notes",
-        "small smoke-test scripts if useful"
-      ],
-      "authority": [
-        "May add a manual or scripted smoke-test checklist",
-        "May record launch verification results",
-        "Do not mark launch ready until critical checks pass or blockers are documented"
-      ],
-      "acceptance_criteria": [
-        "Checklist covers sign-in, credit balance, purchase, create cohort, public discovery, show interest, quorum unlock, expiry, cancellation, completion, dashboard, social publishing, admin operation, and private-link visibility",
-        "Checklist includes expected outcomes and rollback notes",
-        "Launch blockers discovered during smoke testing are recorded",
-        "Full automated verification passes before launch signoff"
+        "Auth/session/CSRF reviewed",
+        "Private-link leakage reviewed",
+        "Credit ledger and Stripe fulfillment reviewed",
+        "Admin authorization reviewed",
+        "Social publishing reviewed",
+        "Upload behavior reviewed",
+        "Logging privacy reviewed"
       ],
       "verification": [
         "Run npm run check",
-        "Run the documented smoke checklist against the target environment when available"
+        "Run any focused security/privacy tests added during review"
       ],
-      "stop_condition": "Stop once launch smoke testing is documented and ready to execute against the selected environment.",
-      "notes": "This is the final launch readiness gate after the feature and operational hardening tasks."
+      "stop_condition": "Stop once launch-blocking privacy/security findings are fixed or explicitly accepted.",
+      "evidence": "Pending.",
+      "notes": "This replaces the prior generic T022 and must run after the real production integrations exist."
+    },
+    {
+      "id": "T030",
+      "title": "Run production MVP smoke test",
+      "status": "not_started",
+      "phase": "Production MVP Readiness",
+      "dependencies": [
+        "T029"
+      ],
+      "objective": "Create and run the final production-MVP smoke checklist against the selected production-like environment.",
+      "inputs": [
+        "README.md",
+        "USAGE.md",
+        "tests",
+        "deployment docs"
+      ],
+      "write_scope": [
+        "smoke checklist",
+        "verification notes",
+        "small blocker fixes if found"
+      ],
+      "authority": [
+        "Smoke against the selected deployment target or a faithful production-like environment",
+        "Do not mark launch-ready with unreviewed payment/auth/social failures"
+      ],
+      "acceptance_criteria": [
+        "Sign up/sign in/sign out works",
+        "Stripe purchase grants credits after verified success",
+        "Create, feed/search/detail, interest, quorum, dashboard, expiry/refund, and private-link authorization work",
+        "LinkedIn, X, and Email social publishing is verified in dry-run or approved live mode",
+        "Admin operations are protected",
+        "Logs do not leak private links or secrets"
+      ],
+      "verification": [
+        "Run documented smoke checklist",
+        "Run npm run check after any fixes"
+      ],
+      "stop_condition": "Stop once production MVP smoke passes or launch blockers are reported.",
+      "evidence": "Pending.",
+      "notes": "Final launch gate for MVP production readiness."
     }
   ]
 }

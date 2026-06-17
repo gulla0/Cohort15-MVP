@@ -393,6 +393,29 @@ Verification:
 - Custom schema-required-field and dependency-reference check passed for 10 tasks.
 - Task IDs were checked across `tasks.json`, `atomic-task-graph.md`, and `agent/progress/task-status.md`.
 
+### 2026-06-17 EDT
+
+Task:
+- Production MVP dependency graph planning update
+
+Files Changed:
+- `plan.md`
+- `atomic-task-graph.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Rebuilt the remaining launch graph as production-ready MVP scope instead of mock/post-MVP scope.
+- Added explicit tasks for production deployment, config/secrets, Supabase Auth, Supabase Postgres, production session/CSRF hardening, admin controls, real Stripe purchases and webhook idempotency, LinkedIn/X/Email social publishing, social admin controls, production credit bootstrap, upload hardening, logging/audit, lifecycle launch decision, security/privacy review, and production MVP smoke testing.
+- Updated planning docs so Stripe payments and LinkedIn/X/Email publishing are production-MVP requirements, not deferrable post-MVP work.
+
+Verification:
+- Dependency-reference validation for `tasks.json` passed.
+- `npm run check` passed with 59 tests.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

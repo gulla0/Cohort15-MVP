@@ -399,6 +399,31 @@ Assumptions Made:
 Next Recommended Step:
 - Start `agent-starters/startNewManager.txt` and execute T001 from `tasks.json`.
 
+### 2026-06-17 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `atomic-task-graph.md`
+- `plan.md`
+
+Decided:
+- Treated the user request as manager planning work for a production-ready MVP dependency graph.
+- Incorporated user decisions that Stripe is required for MVP payments, Supabase Auth is required with Google and GitHub login plus optional magic-link/email login, Supabase Postgres is the production datastore, and MVP social publishing targets LinkedIn, X, and Email.
+- Replaced the old mock/post-MVP launch tasks with T013-T030 covering deployment, config/secrets, Supabase Auth, Supabase Postgres, session/CSRF hardening, admin controls, Stripe purchases and webhooks, selected social publishing, credit bootstrap, upload hardening, logging/audit, lifecycle decision, security review, and production smoke testing.
+- Preserved completed T001-T012 and T016 evidence while aligning the human-readable graph, status view, plan, and knowledge index to the new production-MVP boundary.
+
+Assumptions Made:
+- The deployment target is still open and should be selected before provider callback URLs, Stripe webhook configuration, and social credentials are finalized.
+- Magic-link/email login is optional in production config, while Google and GitHub login are required.
+- LinkedIn, X, and Email are the complete MVP social scope unless the user changes launch-channel priority.
+
+Next Recommended Step:
+- Execute T013: choose and document the production deployment target.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

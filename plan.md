@@ -14,8 +14,11 @@ Source spec: `docs/cohort15-mvp-spec-v3.md`.
 - Events expire 14 days after creation if quorum is not met.
 - Private event links are hidden until quorum is met.
 - Maximum participants is 15, and `maxParticipants` must be greater than or equal to `minQuorum`.
-- Regular user auth, event feed/detail, creator dashboard, participant dashboard, local/admin credit grants, social promotion outbox, credit ledger, quorum, and expiry behavior are in MVP scope.
-- USD credit sales, real automated posting to external social channels, in-app chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events are post-MVP or out of scope.
+- Regular user auth, event feed/detail, creator dashboard, participant dashboard, credit ledger, quorum, expiry behavior, real Stripe-backed credit sales, and selected high-return social publishing are in production MVP scope.
+- Production MVP auth uses Supabase Auth with Google login, GitHub login, and optional magic-link/email login.
+- Production MVP persistence uses Supabase Postgres.
+- Production MVP social publishing targets LinkedIn, X, and Email only.
+- In-app chat, profiles, reputation, AI matching, waitlists, calendar integrations, broad moderation tooling, and in-person events are post-MVP or out of scope.
 
 ## Build Goal
 
@@ -24,7 +27,8 @@ Ship the smallest usable version that proves:
 1. A user can create an online cohort by holding 2 credits.
 2. Other users can stake 1 credit to show interest, and quorum unlocks the private link.
 3. Expired cohorts refund held credits and keep private links hidden.
-4. Newly created cohorts generate public-safe social-promotion copy in a local outbox, ready for later real channel posting.
+4. Authenticated users can buy credits through real Stripe-backed payment packages.
+5. Newly created cohorts generate public-safe social-promotion copy and publish through selected LinkedIn, X, and Email adapters without leaking private links.
 
 ## Product Decisions Locked For This Plan
 
@@ -35,8 +39,8 @@ Ship the smallest usable version that proves:
 - One-time events must have exactly one meeting.
 - Repeating events must have at least two meetings.
 - Credit movement must be auditable through transaction records.
-- MVP credit supply comes from local/admin grants. USD purchase flows come after MVP.
-- Initial post-MVP credit packages are `$6` for 6 credits and `$12` for 14 credits.
+- Local development credit supply can come from seed/admin grants, but production MVP credits must come from Stripe purchases or explicit ledger-backed launch/admin grants.
+- Production MVP credit packages are `$6` for 6 credits and `$12` for 14 credits.
 - Event interest belongs in a separate object from the event.
 - Private links must never be included in public social outbox content or later public social posts.
 
@@ -101,40 +105,15 @@ Exit criteria:
 - Protected flows no longer trust demo query parameters or default user ids.
 - Private-link authorization remains scoped to the authenticated creator or committed participants.
 
-### Phase 5 - Post-MVP Monetization And Distribution
+### Phase 5 - Production MVP Platform, Payments, And Distribution
 
 Goal:
-- Add the first credit purchase path and make social promotion publish through safe adapter boundaries.
+- Prepare Cohort15 for production MVP launch with Supabase Auth, Supabase Postgres, Stripe payments, and selected social publishing.
 
 Tasks:
 - T013
 - T014
-
-Exit criteria:
-- Authenticated users can buy the documented `$6`/6-credit and `$12`/14-credit packages through a documented local/mock or provider-backed mode.
-- Successful purchases create auditable purchase transactions.
-- Pending social outbox posts can be processed by configured adapters without leaking private event links.
-
-### Phase 6 - Post-MVP Lifecycle Controls
-
-Goal:
-- Implement lifecycle actions for statuses already modeled but not yet user-accessible.
-
-Tasks:
 - T015
-
-Exit criteria:
-- Authorized creators or admins can cancel open cohorts with refunds.
-- Authorized creators or admins can complete active cohorts without refunding consumed credits.
-- Cancelled and completed cohorts behave correctly in discovery, dashboards, credit accounting, and private-link visibility.
-
-### Phase 7 - Launch Readiness
-
-Goal:
-- Close the remaining launch gates that are not pure product features: deterministic verification, deployment, production persistence, environment and secrets handling, admin protection, observability, privacy/security review, and production smoke testing.
-
-Tasks:
-- T016
 - T017
 - T018
 - T019
@@ -142,24 +121,35 @@ Tasks:
 - T021
 - T022
 - T023
+- T024
+- T025
+- T026
+- T027
+- T028
+- T029
+- T030
 
 Exit criteria:
-- Automated verification is deterministic and passing.
 - A deployment target and runbook are documented.
-- Launch persistence is selected and implemented or explicitly staged.
-- Environment variables and secrets are documented and validated without committing credentials.
-- Admin/operational endpoints are protected.
-- Basic logging, health, and monitoring expectations are documented.
-- Private-link, auth, credit, admin, social, and logging privacy/security risks are reviewed.
-- A production launch smoke-test checklist exists and is ready to run against the selected environment.
+- Production configuration and secrets are validated without committed credentials.
+- Supabase Auth protects production user flows, with Google and GitHub login enabled and optional magic-link/email login.
+- Supabase Postgres persists production users, cohorts, interests, credit transactions, social posts, purchases, and auth-linked records.
+- Stripe purchases for `$6`/6 credits and `$12`/14 credits are verified, idempotent, and ledger-backed.
+- Admin and operational endpoints are protected.
+- LinkedIn, X, and Email social publishing is adapter-backed, admin-controlled for live operations, and never includes private event links.
+- Uploads are production-safe or explicitly constrained.
+- Basic logging, audit, health, and monitoring expectations exist without leaking private links, secrets, session tokens, or payment details.
+- Launch privacy/security review and production MVP smoke testing are complete.
 
 ## MVP Boundary
 
 Build now:
 
-- Regular auth.
+- Production auth through Supabase Auth.
+- Supabase Postgres production persistence.
 - Credit ledger and balances.
-- Admin/demo credit grants.
+- Local/admin credit grants for development or explicit launch grants only.
+- Real Stripe credit purchases.
 - Create cohort for 2 held credits.
 - Show interest for 1 held credit.
 - Quorum unlock and credit consumption.
@@ -168,37 +158,31 @@ Build now:
 - Event feed and event detail pages.
 - Creator dashboard.
 - Participant dashboard.
-- Social-promotion draft/outbox generation.
+- Social-promotion outbox generation.
+- Real social publishing to LinkedIn, X, and Email.
 
 Post-MVP / urgent-next:
 
-- Durable persistence beyond the current in-memory store.
-- Regular auth boundary replacing demo query/default-user identity selection.
-- USD credit sales.
-- Payment packages: `$6` for 6 credits and `$12` for 14 credits.
-- Real automated posting from the social outbox to official external channels.
 - Cancelled/completed lifecycle controls for the statuses already represented in the domain.
-- Deterministic stale-date test repair so verification does not depend on the current calendar date.
-- Deployment target selection and launch runbook.
-- Production-grade persistence beyond local JSON.
-- Environment and secrets configuration boundary.
-- Admin/operational endpoint protection.
-- Launch logging and monitoring hooks.
-- Launch privacy/security review.
-- Production launch smoke-test checklist.
+- Broader moderation/reporting tooling.
+- Additional social channels beyond LinkedIn, X, and Email.
+- Advanced analytics, profiles, reputation, AI matching, waitlists, calendar integrations, chat, and in-person events.
 
 ## Recommended MVP Cut
 
 If time is tight, cut to:
 
-- Local/demo authentication instead of production auth.
-- Mocked official social posting saved to a `SocialPost` record instead of real platform APIs.
-- Granted seed credits instead of credit purchase flows.
-- One database-backed web app with server-side business logic.
+- Supabase Auth with only Google and GitHub enabled first; magic-link/email can remain optional.
+- LinkedIn, X, and Email only for social publishing.
+- One Supabase Postgres-backed web app with server-side business logic.
 - Minimal dashboards that list relevant cohorts and credit states without advanced analytics.
 
 Do not cut:
 
+- Production auth.
+- Supabase Postgres production persistence.
+- Real Stripe-backed credit purchases.
+- LinkedIn, X, and Email social publishing.
 - Credit hold/consume/refund accounting.
 - Quorum unlock behavior.
 - Expiry refund behavior.
@@ -207,27 +191,22 @@ Do not cut:
 
 ## Open Implementation Questions
 
-1. Product stack is not specified. The first implementation task should choose and scaffold a pragmatic web stack before feature work begins.
-2. Production auth provider is not specified. Initial implementation may use the selected framework's simplest regular auth approach or a local/demo auth adapter, then document the assumption.
-3. Official social channels are post-MVP. Initial implementation should create a platform-neutral social outbox/mock post and avoid real API integration until channels and credentials are known.
-4. Initial credit balances should come from admin/demo grant transactions. USD purchase grants are post-MVP and should initially use `$6` for 6 credits and `$12` for 14 credits.
-5. Deployment target is not specified. Initial implementation should keep deployment assumptions out of core domain logic.
-6. Durable persistence technology is not specified. T011 may choose a pragmatic local store if it preserves the repository boundary and documented commands.
-7. Payment provider is not specified. T013 should start with a local/mock payment confirmation unless the user selects a real provider.
-8. Official social channels and credentials are not specified. T014 should keep a dry-run/mock adapter path and avoid hard-coded secrets.
-9. Deployment target is still unspecified for public launch. T017 should choose and document the first target before production persistence work.
-10. Production datastore is still unspecified. T018 should follow the deployment choice and preserve credit ledger auditability.
-11. Secret management and environment variable requirements are not formalized. T019 should add that boundary before provider-backed integrations.
+1. Deployment target is still unspecified for public launch. T013 should choose and document the first target before Supabase callback URLs, Stripe webhooks, and social configuration are finalized.
+2. Secret management and environment variable requirements are not formalized. T014 should add that boundary before provider-backed integrations.
+3. Production credit bootstrap policy is still unspecified: new users may need to buy credits first, or receive explicit ledger-backed launch/admin grants.
+4. Production upload storage is still unspecified: T026 should either harden storage for uploaded event images or constrain uploads in production.
+5. Lifecycle launch scope is still open: T028 should implement or explicitly defer cancellation/completion controls with an operational workaround.
 
 ## Suggested First Sprint
 
 Sprint target:
-- Harden the completed MVP so user and ledger data survive restart and protected flows use a real auth boundary.
+- Convert the completed local MVP into a production-ready MVP launch slice.
 
 Suggested task subset:
-- T011
-- T012
-- T016
+- T013
+- T014
+- T015
+- T017
 
 Sprint success definition:
-- The app runs locally, automated checks pass deterministically, records persist in durable mode, and authenticated users can complete the create/interest/dashboard flow without demo query parameters.
+- The production deployment target, env/secrets boundary, Supabase Auth integration, and Supabase Postgres path are documented or implemented enough to unblock Stripe, social publishing, and admin hardening.
