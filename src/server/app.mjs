@@ -237,7 +237,10 @@ export function createRequestHandler(state = createState(), options = {}) {
   const showInterestService = createShowInterestService(state);
   const sessionManager = options.sessionManager ?? createSessionManager({
     repositories: state.repositories,
-    createSessionId: options.createSessionId
+    createSessionId: options.createSessionId,
+    createCsrfToken: options.createCsrfToken,
+    secureCookies: runtimeConfig.isProduction,
+    now: options.sessionNow
   });
   const supabaseAuth = options.supabaseAuthAdapter ?? createSupabaseAuthAdapter({
     repositories: state.repositories,
@@ -252,6 +255,19 @@ export function createRequestHandler(state = createState(), options = {}) {
     return sessionManager.getCurrentUser(req);
   }
 
+  function currentCsrfToken(req) {
+    return sessionManager.csrfTokenForRequest(req);
+  }
+
+  function rejectInvalidCsrf(req, res, token) {
+    if (!runtimeConfig.isProduction || sessionManager.verifyCsrfToken(req, token)) {
+      return false;
+    }
+
+    send(res, 403, { 'content-type': 'text/plain; charset=utf-8' }, 'Invalid CSRF token.');
+    return true;
+  }
+
   function requireCurrentUser(req, res) {
     const user = currentUser(req);
     if (user) {
@@ -262,6 +278,7 @@ export function createRequestHandler(state = createState(), options = {}) {
       users: state.repositories.users.list(),
       mode: runtimeConfig.isProduction ? 'supabase' : 'local',
       enableMagicLink: runtimeConfig.auth.enableMagicLink,
+      csrfToken: currentCsrfToken(req),
       returnTo: req.url ?? '/'
     }));
     return undefined;
@@ -308,7 +325,10 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/') {
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage({ currentUser: user }));
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderHomePage({
+        currentUser: user,
+        csrfToken: currentCsrfToken(req)
+      }));
       return;
     }
 
@@ -318,6 +338,7 @@ export function createRequestHandler(state = createState(), options = {}) {
         currentUser: user,
         mode: runtimeConfig.isProduction ? 'supabase' : 'local',
         enableMagicLink: runtimeConfig.auth.enableMagicLink,
+        csrfToken: currentCsrfToken(req),
         returnTo: safeReturnTo(url.searchParams.get('returnTo') ?? '/')
       }));
       return;
@@ -341,6 +362,7 @@ export function createRequestHandler(state = createState(), options = {}) {
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
           users: state.repositories.users.list(),
           error: error.message,
+          csrfToken: currentCsrfToken(req),
           returnTo
         }));
       }
@@ -361,6 +383,7 @@ export function createRequestHandler(state = createState(), options = {}) {
         send(res, 500, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
           mode: 'supabase',
           enableMagicLink: runtimeConfig.auth.enableMagicLink,
+          csrfToken: currentCsrfToken(req),
           error: error.message,
           returnTo: safeReturnTo(url.searchParams.get('returnTo') ?? '/')
         }));
@@ -381,12 +404,14 @@ export function createRequestHandler(state = createState(), options = {}) {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
           mode: 'supabase',
           enableMagicLink: true,
+          csrfToken: currentCsrfToken(req),
           returnTo
         }));
       } catch (error) {
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
           mode: 'supabase',
           enableMagicLink: true,
+          csrfToken: currentCsrfToken(req),
           error: error.message,
           returnTo
         }));
@@ -419,6 +444,7 @@ export function createRequestHandler(state = createState(), options = {}) {
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
           mode: 'supabase',
           enableMagicLink: runtimeConfig.auth.enableMagicLink,
+          csrfToken: currentCsrfToken(req),
           error: error.message,
           returnTo: '/'
         }));
@@ -427,15 +453,23 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/auth/sign-out' && req.method === 'POST') {
+      const values = parseFormBody(await readBodyBuffer(req));
+      if (rejectInvalidCsrf(req, res, values.csrfToken)) {
+        return;
+      }
+
       sessionManager.signOut(req);
       redirect(res, '/', {
-        'set-cookie': clearSessionCookie()
+        'set-cookie': clearSessionCookie({ secureCookies: runtimeConfig.isProduction })
       });
       return;
     }
 
     if (url.pathname === '/credits/buy' && (req.method ?? 'GET') === 'GET') {
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPlaceholderPage({ currentUser: user }));
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPlaceholderPage({
+        currentUser: user,
+        csrfToken: currentCsrfToken(req)
+      }));
       return;
     }
 
@@ -444,7 +478,8 @@ export function createRequestHandler(state = createState(), options = {}) {
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortFeedPage({
         events: eventBrowsingService.listPublicEvents({ search }),
         search,
-        currentUser: user
+        currentUser: user,
+        csrfToken: currentCsrfToken(req)
       }));
       return;
     }
@@ -456,7 +491,8 @@ export function createRequestHandler(state = createState(), options = {}) {
       }
 
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
-        currentUser: authenticatedUser
+        currentUser: authenticatedUser,
+        csrfToken: currentCsrfToken(req)
       }));
       return;
     }
@@ -477,17 +513,22 @@ export function createRequestHandler(state = createState(), options = {}) {
           })),
           creatorId: authenticatedUser.id
         };
+        if (rejectInvalidCsrf(req, res, values.csrfToken)) {
+          return;
+        }
         const result = cohortService.create(values);
         send(res, 201, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
           values: {},
           result,
-          currentUser: authenticatedUser
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req)
         }));
       } catch (error) {
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderCreatePage(state, {
           values,
           errors: [error.message],
-          currentUser: authenticatedUser
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req)
         }));
       }
       return;
@@ -506,7 +547,8 @@ export function createRequestHandler(state = createState(), options = {}) {
               creatorUserId: authenticatedUser.id,
               participantUserId: authenticatedUser.id
             }),
-            currentUser: authenticatedUser
+            currentUser: authenticatedUser,
+            csrfToken: currentCsrfToken(req)
           }
         ));
       } catch (error) {
@@ -524,7 +566,8 @@ export function createRequestHandler(state = createState(), options = {}) {
       try {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCreatorDashboardPage({
           dashboard: dashboardService.getCreatorDashboard(authenticatedUser.id),
-          currentUser: authenticatedUser
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req)
         }));
       } catch (error) {
         send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
@@ -541,7 +584,8 @@ export function createRequestHandler(state = createState(), options = {}) {
       try {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderParticipantDashboardPage({
           dashboard: dashboardService.getParticipantDashboard(authenticatedUser.id),
-          currentUser: authenticatedUser
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req)
         }));
       } catch (error) {
         send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, error.message);
@@ -550,6 +594,13 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/admin/expire-cohorts' && req.method === 'POST') {
+      if (runtimeConfig.isProduction) {
+        send(res, 403, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
+          error: 'Admin operations require production admin authorization before launch.'
+        }));
+        return;
+      }
+
       const nowParam = url.searchParams.get('now');
       const processedAt = nowParam ? new Date(nowParam) : new Date();
 
@@ -585,7 +636,8 @@ export function createRequestHandler(state = createState(), options = {}) {
 
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
         event,
-        currentUser: user
+        currentUser: user,
+        csrfToken: currentCsrfToken(req)
       }));
       return;
     }
@@ -598,6 +650,10 @@ export function createRequestHandler(state = createState(), options = {}) {
       }
 
       const eventId = decodeURIComponent(showInterestMatch[1]);
+      const values = parseFormBody(await readBodyBuffer(req));
+      if (rejectInvalidCsrf(req, res, values.csrfToken)) {
+        return;
+      }
 
       try {
         const result = showInterestService.showInterest({ eventId, userId: authenticatedUser.id });
@@ -605,6 +661,7 @@ export function createRequestHandler(state = createState(), options = {}) {
         send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
           event,
           currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req),
           interestResult: result
         }));
       } catch (error) {
@@ -617,6 +674,7 @@ export function createRequestHandler(state = createState(), options = {}) {
         send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderCohortDetailPage({
           event,
           currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req),
           interestErrors: [error.message]
         }));
       }

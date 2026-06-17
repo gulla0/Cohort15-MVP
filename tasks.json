@@ -711,7 +711,7 @@
     {
       "id": "T018",
       "title": "Harden production sessions and CSRF behavior",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T015",
@@ -749,8 +749,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop once session and mutation protection are production-MVP safe.",
-      "evidence": "Pending.",
-      "notes": "This closes the gap between local session auth and launch browser security."
+      "evidence": "2026-06-17 EDT: Added expiring opaque server-side sessions with production Secure/HttpOnly/SameSite=Lax cookies, per-session CSRF tokens in signed-in forms, production CSRF rejection for protected browser mutations, production admin POST fail-closed behavior pending T019, sign-out invalidation, session expiry tests, and session/CSRF docs. npm run check passed with 77 tests.",
+      "notes": "Production sessions expire after 8 hours. CSRF protection is enforced in production for signed-in cohort creation, show-interest, and sign-out form posts; production admin mutation is disabled until T019 adds authorization; local development keeps the simple seeded-user workflow."
     },
     {
       "id": "T019",

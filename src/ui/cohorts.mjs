@@ -27,7 +27,7 @@ function localTime(value) {
   return `<time datetime="${escapeHtml(isoValue)}" data-local-time>${escapeHtml(formatDateTime(value))} UTC</time>`;
 }
 
-function pageShell({ title, eyebrow, heading, lede, body, currentUser }) {
+function pageShell({ title, eyebrow, heading, lede, body, currentUser, csrfToken }) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -38,7 +38,7 @@ function pageShell({ title, eyebrow, heading, lede, body, currentUser }) {
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar({ currentUser })}
+      ${renderTopbar({ currentUser, csrfToken })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">${escapeHtml(eyebrow)}</p>
@@ -174,7 +174,7 @@ function linkPanel(event) {
   </section>`;
 }
 
-function interestPanel({ event, currentUser, interestResult, interestErrors = [] }) {
+function interestPanel({ event, currentUser, csrfToken, interestResult, interestErrors = [] }) {
   if (event.status !== 'open' && !interestResult && interestErrors.length === 0) {
     return '';
   }
@@ -189,13 +189,14 @@ function interestPanel({ event, currentUser, interestResult, interestErrors = []
       <p><a href="/dashboard">Open dashboard</a></p>` : ''}
     ${event.status === 'open' && !currentUser ? '<p><a href="/auth/sign-in">Sign in</a> to use 1 credit and show interest.</p>' : ''}
     ${event.status === 'open' && currentUser ? `<form method="post" action="/cohorts/${encodeURIComponent(event.id)}/interest" class="inline-form">
+      ${csrfToken ? `<input name="csrfToken" type="hidden" value="${escapeHtml(csrfToken)}">` : ''}
       <p>Signed in as ${escapeHtml(currentUser.displayName)}.</p>
       <button type="submit">Use 1 credit</button>
     </form>` : ''}
   </section>`;
 }
 
-function eventDetail({ event, currentUser, interestResult, interestErrors }) {
+function eventDetail({ event, currentUser, csrfToken, interestResult, interestErrors }) {
   return `<section class="detail-layout">
     <article class="event-detail">
       <img class="event-hero-image" src="${escapeHtml(event.imageUrl)}" alt="${escapeHtml(event.title)} cohort image">
@@ -246,12 +247,12 @@ function eventDetail({ event, currentUser, interestResult, interestErrors }) {
     </article>
     <aside>
       ${linkPanel(event)}
-      ${interestPanel({ event, currentUser, interestResult, interestErrors })}
+      ${interestPanel({ event, currentUser, csrfToken, interestResult, interestErrors })}
     </aside>
   </section>`;
 }
 
-export function renderCohortFeedPage({ events, search = '', currentUser } = {}) {
+export function renderCohortFeedPage({ events, search = '', currentUser, csrfToken } = {}) {
   const normalizedSearch = String(search ?? '').trim();
   const results = events.length === 0
     ? (normalizedSearch ? noSearchResults(normalizedSearch) : emptyFeed())
@@ -263,17 +264,19 @@ export function renderCohortFeedPage({ events, search = '', currentUser } = {}) 
     heading: 'Cohorts',
     lede: 'Browse open and active online cohorts. Use 1 credit to show interest; credits are returned if quorum is not met.',
     body: `${searchPanel(normalizedSearch)}${results}`,
-    currentUser
+    currentUser,
+    csrfToken
   });
 }
 
-export function renderCohortDetailPage({ event, currentUser, interestResult, interestErrors = [] }) {
+export function renderCohortDetailPage({ event, currentUser, csrfToken, interestResult, interestErrors = [] }) {
   return pageShell({
     title: event.title,
     eyebrow: 'Cohort detail',
     heading: event.title,
     lede: `${event.topic} for ${event.targetAudience}`,
-    body: eventDetail({ event, currentUser, interestResult, interestErrors }),
-    currentUser
+    body: eventDetail({ event, currentUser, csrfToken, interestResult, interestErrors }),
+    currentUser,
+    csrfToken
   });
 }

@@ -5,6 +5,39 @@ Append-only implementation log.
 ### 2026-06-17 EDT
 
 Task:
+- T018 Harden production sessions and CSRF behavior
+
+Files Changed:
+- `README.md`
+- `docs/production-config.md`
+- `src/auth/session.mjs`
+- `src/server/app.mjs`
+- `src/ui/auth.mjs`
+- `src/ui/home.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/dashboards.mjs`
+- `tests/session-security.test.mjs`
+- `tasks.json`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Added expiring opaque server-side app sessions with production Secure/HttpOnly/SameSite=Lax cookies, `Max-Age`, and `Expires`.
+- Added per-session CSRF tokens to signed-in forms and production-mode rejection for missing or invalid tokens on protected browser mutations.
+- Made the production admin expiry POST fail closed until T019 adds explicit admin authorization.
+- Added sign-out invalidation and session expiry coverage.
+- Documented the production session/CSRF boundary, exact local files, env values, verification checkpoint, and no-secrets handling.
+
+Verification:
+- `node --test tests/session-security.test.mjs` passed with 5 tests.
+- `npm run check` passed with 77 tests.
+
+### 2026-06-17 EDT
+
+Task:
 - T017 Add Supabase Postgres production persistence adapter
 
 Files Changed:

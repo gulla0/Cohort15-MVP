@@ -81,7 +81,7 @@ function successNotice(result) {
   </section>`;
 }
 
-export function renderCreateCohortPage({ currentUser, values = {}, errors = [], result } = {}) {
+export function renderCreateCohortPage({ currentUser, csrfToken, values = {}, errors = [], result } = {}) {
   const earliestFirstMeeting = new Date(Date.now() + DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
   const minimumFirstMeetingValue = formatDateTimeLocal(earliestFirstMeeting);
 
@@ -95,7 +95,7 @@ export function renderCreateCohortPage({ currentUser, values = {}, errors = [], 
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar({ currentUser })}
+      ${renderTopbar({ currentUser, csrfToken })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">Creator flow</p>
@@ -107,6 +107,7 @@ export function renderCreateCohortPage({ currentUser, values = {}, errors = [], 
       ${errorList(errors)}
 
       <form class="form-grid" method="post" action="/cohorts/new" enctype="multipart/form-data">
+        ${csrfToken ? `<input name="csrfToken" type="hidden" value="${escapeHtml(csrfToken)}">` : ''}
         <label>
           Title
           <input name="title" value="${inputValue(values, 'title')}" placeholder="${inputPlaceholder('title')}" required>

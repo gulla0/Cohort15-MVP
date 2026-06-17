@@ -14,6 +14,9 @@ Official docs checked on 2026-06-17:
 - Supabase Database overview: https://supabase.com/docs/guides/database/overview
 - Supabase database connections and poolers: https://supabase.com/docs/guides/database/connecting-to-postgres
 - Supabase Data REST API: https://supabase.com/docs/guides/api
+- MDN Set-Cookie reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie
+- MDN secure cookie configuration: https://developer.mozilla.org/en-US/docs/Web/Security/Practical_implementation_guides/Cookies
+- OWASP CSRF prevention cheat sheet: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
 - Stripe API keys: https://docs.stripe.com/keys
 - Stripe webhooks: https://docs.stripe.com/webhooks
 - GitHub OAuth app callbacks: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
@@ -40,7 +43,7 @@ Set these in the Render service environment, not in source control:
 |---|---:|---|
 | `COHORT15_APP_ENV` | no | Set to `production` on Render. |
 | `COHORT15_APP_URL` | no | Public app base URL, initially `https://cohort15-mvp.onrender.com` unless a verified custom domain replaces it. |
-| `COHORT15_SESSION_SECRET` | yes | At least 32 random characters for production session signing/encryption work in T018. |
+| `COHORT15_SESSION_SECRET` | yes | At least 32 random characters reserved for production session hardening. Do not paste it into chat or source. |
 | `COHORT15_ADMIN_EMAILS` | no | Comma-separated admin emails for T019/T024 operational controls. |
 | `COHORT15_UPLOAD_MODE` | no | Use `disabled` until T026 hardens production image storage. `local` is rejected in production. |
 | `SUPABASE_URL` | no | Supabase project URL for T015/T017. |
@@ -110,24 +113,32 @@ No secrets should be pasted into chat or committed to this repository. Enter sec
    - If enabling it, go to `Supabase Dashboard` -> `Authentication` -> `Providers` -> `Email` and confirm sign-in links are enabled.
    - Go to `Authentication` -> `Email Templates` and check the magic-link template sends users back to the configured redirect URL.
    - Use a production SMTP/custom sender before setting `SUPABASE_ENABLE_MAGIC_LINK=true` in Render.
-7. Stripe products, prices, and webhook:
+7. Production session and CSRF hardening:
+   - No provider dashboard setup is required for T018 beyond setting `COHORT15_APP_ENV=production`, `COHORT15_APP_URL`, and `COHORT15_SESSION_SECRET` in Render.
+   - Confirm `COHORT15_APP_URL` is an `https://` URL. The production session cookie is `HttpOnly`, `SameSite=Lax`, `Secure`, scoped to `Path=/`, and expires after 8 hours with `Max-Age` and `Expires`.
+   - Confirm no `COHORT15_COOKIE_DOMAIN` override is set unless a custom domain decision explicitly requires it. The current cookie is host-only because no `Domain` attribute is emitted.
+   - Browser form mutations that require a signed-in user include a hidden `csrfToken` and production routes reject missing or mismatched tokens with HTTP 403.
+   - The production `/admin/expire-cohorts` POST currently fails closed with HTTP 403 until T019 adds explicit admin authorization.
+   - Local files to review when changing this boundary: `src/auth/session.mjs`, `src/server/app.mjs`, `src/ui/home.mjs`, `src/ui/create-cohort.mjs`, `src/ui/cohorts.mjs`, `src/ui/dashboards.mjs`, `src/ui/auth.mjs`, and `tests/session-security.test.mjs`.
+   - Verification checkpoint: after deployment, sign in through Supabase, open `/cohorts/new`, submit a cohort normally, sign out, and confirm the protected dashboard requires sign-in again. Do not inspect or share session cookie values or CSRF token values in chat.
+8. Stripe products, prices, and webhook:
    - Open https://dashboard.stripe.com.
    - Go to `Developers` -> `API keys` for `STRIPE_SECRET_KEY`.
    - Go to `Product catalog` and create prices for `$6` / 6 credits and `$12` / 14 credits; copy the resulting Price IDs.
    - Go to `Developers` -> `Webhooks` -> `Add endpoint`.
    - Endpoint URL: `COHORT15_APP_URL` + `STRIPE_WEBHOOK_PATH`, default `https://cohort15-mvp.onrender.com/stripe/webhook`.
    - Store the webhook signing secret in `STRIPE_WEBHOOK_SECRET`.
-8. LinkedIn:
+9. LinkedIn:
    - Open https://www.linkedin.com/developers/apps.
    - Create or select the Cohort15 app.
    - In `Auth`, add the redirect URL required by the LinkedIn adapter when T023 defines it.
    - Store client ID and client secret in Render.
-9. X:
+10. X:
    - Open https://developer.x.com/en/portal/dashboard.
    - Create or select the Cohort15 project/app.
    - Configure OAuth 2.0 callback URLs when T023 defines the final adapter route.
    - Store API key/client ID and secret in Render.
-10. Email provider:
+11. Email provider:
    - Select the launch email provider before T023.
    - Verify `EMAIL_FROM_ADDRESS` in that provider's dashboard.
    - Store the provider API key in Render.

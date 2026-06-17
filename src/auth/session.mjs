@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 export const SESSION_COOKIE_NAME = 'cohort15_session';
+export const DEFAULT_SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
 
 function parseCookieHeader(header) {
   if (!header) {
@@ -24,16 +25,58 @@ function parseCookieHeader(header) {
     }));
 }
 
-function cookieForSession(sessionId) {
-  return `${SESSION_COOKIE_NAME}=${encodeURIComponent(sessionId)}; Path=/; HttpOnly; SameSite=Lax`;
+function formatCookieExpires(now, maxAgeSeconds) {
+  return new Date(now.getTime() + maxAgeSeconds * 1000).toUTCString();
 }
 
-export function clearSessionCookie() {
-  return `${SESSION_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
+function cookieForSession(sessionId, options) {
+  const now = options.now();
+  const parts = [
+    `${SESSION_COOKIE_NAME}=${encodeURIComponent(sessionId)}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${options.maxAgeSeconds}`,
+    `Expires=${formatCookieExpires(now, options.maxAgeSeconds)}`
+  ];
+
+  if (options.secureCookies) {
+    parts.push('Secure');
+  }
+
+  return parts.join('; ');
 }
 
-export function createSessionManager({ repositories, createSessionId = () => randomUUID() }) {
+export function clearSessionCookie({ secureCookies = false } = {}) {
+  const parts = [
+    `${SESSION_COOKIE_NAME}=`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    'Max-Age=0'
+  ];
+
+  if (secureCookies) {
+    parts.push('Secure');
+  }
+
+  return parts.join('; ');
+}
+
+export function createSessionManager({
+  repositories,
+  createSessionId = () => randomUUID(),
+  createCsrfToken = () => randomUUID(),
+  now = () => new Date(),
+  secureCookies = false,
+  maxAgeSeconds = DEFAULT_SESSION_MAX_AGE_SECONDS
+}) {
   const sessions = new Map();
+  const options = {
+    now,
+    secureCookies,
+    maxAgeSeconds
+  };
 
   function sessionIdFromRequest(req) {
     const cookies = parseCookieHeader(req.headers?.cookie ?? req.headers?.Cookie);
@@ -46,12 +89,39 @@ export function createSessionManager({ repositories, createSessionId = () => ran
       return undefined;
     }
 
-    const userId = sessions.get(sessionId);
-    if (!userId) {
+    const session = sessions.get(sessionId);
+    if (!session) {
       return undefined;
     }
 
-    return repositories.users.findById(userId);
+    if (session.expiresAt <= now()) {
+      sessions.delete(sessionId);
+      return undefined;
+    }
+
+    return repositories.users.findById(session.userId);
+  }
+
+  function csrfTokenForRequest(req) {
+    const sessionId = sessionIdFromRequest(req);
+    if (!sessionId) {
+      return undefined;
+    }
+
+    const session = sessions.get(sessionId);
+    if (!session || session.expiresAt <= now()) {
+      if (session) {
+        sessions.delete(sessionId);
+      }
+      return undefined;
+    }
+
+    return session.csrfToken;
+  }
+
+  function verifyCsrfToken(req, token) {
+    const expected = csrfTokenForRequest(req);
+    return Boolean(expected && token && token === expected);
   }
 
   function signInUser(user) {
@@ -60,11 +130,15 @@ export function createSessionManager({ repositories, createSessionId = () => ran
     }
 
     const sessionId = createSessionId();
-    sessions.set(sessionId, user.id);
+    sessions.set(sessionId, {
+      userId: user.id,
+      csrfToken: createCsrfToken(),
+      expiresAt: new Date(now().getTime() + maxAgeSeconds * 1000)
+    });
     return {
       user,
       sessionId,
-      cookie: cookieForSession(sessionId)
+      cookie: cookieForSession(sessionId, options)
     };
   }
 
@@ -85,9 +159,11 @@ export function createSessionManager({ repositories, createSessionId = () => ran
   }
 
   return {
+    csrfTokenForRequest,
     getCurrentUser,
     signIn,
     signInUser,
-    signOut
+    signOut,
+    verifyCsrfToken
   };
 }

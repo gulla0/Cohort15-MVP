@@ -58,6 +58,7 @@ function supabaseSignInForm(returnTo, enableMagicLink) {
 export function renderSignInPage({
   users = [],
   currentUser,
+  csrfToken,
   error,
   returnTo = '/',
   mode = 'local',
@@ -75,7 +76,7 @@ export function renderSignInPage({
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar({ currentUser })}
+      ${renderTopbar({ currentUser, csrfToken })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">${isProduction ? 'Secure auth' : 'Local auth'}</p>

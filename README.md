@@ -65,6 +65,7 @@ Initial production assumptions:
 Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are documented in the production configuration runbook.
 
 Production auth for T015 uses Supabase Auth with Google and GitHub providers. The app keeps local seeded-account sign-in available only outside production mode; in production `/auth/sign-in` starts Supabase provider flows and `/auth/callback` exchanges the Supabase identity into the app session. Production persistence for T017 hydrates users, cohorts, interests, credit transactions, social posts, and purchase records from Supabase Postgres; local demo seed grants are not created in production mode.
+Production session hardening for T018 uses opaque server-side app sessions with `HttpOnly`, `SameSite=Lax`, `Secure`, expiring cookies in production. Signed-in browser mutations include server-issued CSRF tokens and reject missing or invalid tokens before mutating cohort, interest, or sign-out state.
 
 ## Local Demo Data
 
@@ -111,6 +112,7 @@ Production-MVP launch work still includes Supabase Postgres persistence, hardene
 
 - Local persistence is in-memory by default. Restarting the dev server resets demo data unless `COHORT15_PERSISTENCE_FILE` is set.
 - Auth uses a dependency-free local session cookie and seeded local users in development; production mode uses Supabase Auth for Google and GitHub sign-in.
+- Production sessions expire after 8 hours and sign-out invalidates the server-side session record. Production protected forms use CSRF tokens; local development keeps the same simple form workflow without requiring provider secrets.
 - The admin expiry endpoint is a local/dev trigger, not a production scheduler or authorization model.
 - Private links stay hidden for open cohorts. Active cohort links are visible only to the creator and committed participants.
 - Social promotion is local outbox generation only; real external posting is intentionally out of scope for this MVP.

@@ -22,7 +22,7 @@ function formatDateTime(value) {
   }).format(value);
 }
 
-function pageShell({ title, eyebrow, heading, lede, body, currentUser }) {
+function pageShell({ title, eyebrow, heading, lede, body, currentUser, csrfToken }) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -33,7 +33,7 @@ function pageShell({ title, eyebrow, heading, lede, body, currentUser }) {
   </head>
   <body>
     <main class="shell">
-      ${renderTopbar({ currentUser })}
+      ${renderTopbar({ currentUser, csrfToken })}
 
       <section class="page-heading" aria-labelledby="page-title">
         <p class="eyebrow">${escapeHtml(eyebrow)}</p>
@@ -192,7 +192,7 @@ function scheduleRow(item) {
   </article>`;
 }
 
-export function renderCreatorDashboardPage({ dashboard, currentUser }) {
+export function renderCreatorDashboardPage({ dashboard, currentUser, csrfToken }) {
   return pageShell({
     title: 'My Cohorts',
     eyebrow: 'Dashboard',
@@ -202,11 +202,12 @@ export function renderCreatorDashboardPage({ dashboard, currentUser }) {
       ${dashboard.cohorts.length === 0
         ? emptyState('Create a cohort to see your cohorts here.')
         : `<section class="event-list">${dashboard.cohorts.map(creatorCohortRow).join('')}</section>`}`,
-    currentUser
+    currentUser,
+    csrfToken
   });
 }
 
-export function renderParticipantDashboardPage({ dashboard, currentUser }) {
+export function renderParticipantDashboardPage({ dashboard, currentUser, csrfToken }) {
   return pageShell({
     title: 'My Events',
     eyebrow: 'Dashboard',
@@ -216,11 +217,12 @@ export function renderParticipantDashboardPage({ dashboard, currentUser }) {
       ${dashboard.interests.length === 0
         ? emptyState('Show interest in a cohort to see your events here.')
         : `<section class="event-list">${dashboard.interests.map(participantInterestRow).join('')}</section>`}`,
-    currentUser
+    currentUser,
+    csrfToken
   });
 }
 
-export function renderDashboardPage({ creatorDashboard, participantDashboard, accountBalance, currentUser }) {
+export function renderDashboardPage({ creatorDashboard, participantDashboard, accountBalance, currentUser, csrfToken }) {
   const scheduleItems = activeScheduleItems({ creatorDashboard, participantDashboard });
 
   return pageShell({
@@ -256,6 +258,7 @@ export function renderDashboardPage({ creatorDashboard, participantDashboard, ac
             : `<section class="event-list">${participantDashboard.interests.map(participantInterestRow).join('')}</section>`}`
       })}
     </div>`,
-    currentUser
+    currentUser,
+    csrfToken
   });
 }

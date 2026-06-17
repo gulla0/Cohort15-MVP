@@ -15,6 +15,48 @@ Read:
 - `agent-starters/startNewManager.txt`
 - `agent/progress/session-notes.md`
 - `agent/progress/blockers.md`
+- `src/auth/session.mjs`
+- `src/server/app.mjs`
+- `src/ui/auth.mjs`
+- `src/ui/home.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/dashboards.mjs`
+- `src/config/runtime.mjs`
+- `docs/production-config.md`
+- current MDN Set-Cookie and secure cookie docs, plus the OWASP CSRF prevention cheat sheet
+
+Decided:
+- Classified the user request as approved main implementation work and selected T018 as the next unblocked critical-path task after T017.
+- Kept app sessions dependency-free and server-side opaque instead of moving session storage to a new provider in this task.
+- Added 8-hour session expiration and production cookie attributes: `HttpOnly`, `SameSite=Lax`, `Secure`, `Path=/`, `Max-Age`, and `Expires`.
+- Added per-session CSRF tokens to signed-in forms and enforced token checks in production for create cohort, show interest, and sign-out mutations.
+- Made the production admin expiry POST fail closed until T019 adds explicit admin authorization.
+- Kept CSRF enforcement production-mode-only so local seeded-user development remains frictionless while production browser mutations are protected.
+- Documented that T018 requires no provider dashboard setup beyond Render env values already in the production checklist.
+- Marked T018 done after focused session security tests and full verification passed.
+
+Assumptions Made:
+- An 8-hour app-session lifetime is acceptable for the MVP launch until a later account/session policy review changes it.
+- Server-side in-memory session storage remains acceptable for the initial Render service shape; if Render scales horizontally, shared session storage should be added before multiple instances serve authenticated traffic.
+- Admin endpoint authorization remains T019; T018 protects authenticated browser form mutations and sign-out rather than redesigning operational authorization.
+
+Next Recommended Step:
+- Execute T019: secure admin and operational endpoints now that production sessions and CSRF behavior are hardened.
+
+### 2026-06-17 EDT
+
+Read:
+- `start.txt`
+- `agent/router/intent-router.md`
+- `README.md`
+- `USAGE.md`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent-starters/startNewManager.txt`
+- `agent/progress/session-notes.md`
+- `agent/progress/blockers.md`
 - `src/persistence/store.mjs`
 - `src/persistence/repositories.mjs`
 - `src/persistence/schema.mjs`
