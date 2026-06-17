@@ -515,15 +515,18 @@
       "authority": [
         "Select a concrete target instead of leaving deployment generic",
         "Do not commit credentials",
-        "Keep deployment-specific behavior out of core domain logic unless needed for runtime configuration"
+        "Keep deployment-specific behavior out of core domain logic unless needed for runtime configuration",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "A specific production deployment target is documented",
         "Runtime and start commands are documented",
         "App URL/domain assumptions are documented",
-        "Rollback or redeploy basics are documented"
+        "Rollback or redeploy basics are documented",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Review deployment docs for concrete target, commands, and assumptions",
         "Run npm run check if workflow artifacts changed"
       ],
@@ -554,15 +557,18 @@
       "authority": [
         "Do not commit real secrets",
         "Production mode must not silently fall back to demo/local defaults",
-        "Keep local development explicit and easy to run"
+        "Keep local development explicit and easy to run",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Required and optional env vars are documented",
         "Production config fails clearly when required values are missing",
         "Local development remains explicit",
-        "Secrets are never logged or committed"
+        "Secrets are never logged or committed",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused config tests",
         "Run npm run check"
       ],
@@ -597,15 +603,18 @@
         "Use Supabase Auth for production",
         "Enable Google and GitHub login assumptions in docs/config",
         "Support optional magic-link/email login if configured",
-        "Do not expose seeded demo sign-in in production"
+        "Do not expose seeded demo sign-in in production",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Production users can sign in and sign out through Supabase Auth",
         "Protected routes resolve identity from Supabase-backed sessions in production",
         "Seeded local users are restricted to development mode",
-        "Anonymous and wrong-user access are rejected"
+        "Anonymous and wrong-user access are rejected",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused auth route tests",
         "Run npm run check"
       ],
@@ -680,15 +689,18 @@
         "Use Supabase Postgres as the selected production datastore",
         "Preserve auditable credit transactions",
         "Do not embed Supabase service credentials in source",
-        "Keep local JSON or in-memory mode available for development/tests"
+        "Keep local JSON or in-memory mode available for development/tests",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Users, cohorts, interests, credit transactions, social posts, purchases, and auth-linked records persist in Supabase Postgres",
         "Credit balances remain transaction-derived",
         "Credit hold/consume/refund/purchase writes are safe under concurrent requests",
-        "Migration/init docs exist"
+        "Migration/init docs exist",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused persistence tests",
         "Run npm run check"
       ],
@@ -721,15 +733,18 @@
       "authority": [
         "Production cookies must assume HTTPS",
         "Mutating routes must reject invalid auth/session state",
-        "Do not log session tokens or CSRF tokens"
+        "Do not log session tokens or CSRF tokens",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Secure production cookie behavior is documented and implemented",
         "Session expiration and sign-out invalidation are documented",
         "POST routes have CSRF protection or an explicitly tested equivalent",
-        "Tests cover missing or invalid session/CSRF cases"
+        "Tests cover missing or invalid session/CSRF cases",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused auth/security route tests",
         "Run npm run check"
       ],
@@ -762,14 +777,17 @@
       "authority": [
         "Admin status must not come from client-controlled input",
         "Protect /admin/expire-cohorts before public launch",
-        "Use Supabase-authenticated admin identity or a documented operational credential"
+        "Use Supabase-authenticated admin identity or a documented operational credential",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Unauthenticated and non-admin users cannot invoke admin operations",
         "Authorized admin or operational callers can process expiry",
-        "Admin authorization is tested and documented"
+        "Admin authorization is tested and documented",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused admin route tests",
         "Run npm run check"
       ],
@@ -807,15 +825,18 @@
         "Use Stripe as the selected payment provider",
         "Do not store card data",
         "Do not grant credits until payment success is verified",
-        "Do not hard-code Stripe secrets"
+        "Do not hard-code Stripe secrets",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Authenticated users can select both MVP credit packages",
         "Stripe checkout or payment flow is initiated with configured prices",
         "Successful verified payment creates auditable purchase credit transactions",
-        "Failed/cancelled payments do not grant credits"
+        "Failed/cancelled payments do not grant credits",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused purchase tests",
         "Run npm run check"
       ],
@@ -849,15 +870,18 @@
         "Verify Stripe webhook signatures in production",
         "Store provider event/payment IDs",
         "Prevent duplicate credit grants",
-        "Do not log sensitive payment payloads"
+        "Do not log sensitive payment payloads",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Duplicate Stripe events do not double-grant credits",
         "Failed/cancelled/pending payment states are represented",
         "Purchase grant happens only after verified payment success",
-        "Operational reconciliation fields are documented"
+        "Operational reconciliation fields are documented",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused webhook/idempotency tests",
         "Run npm run check"
       ],
@@ -887,15 +911,18 @@
       "authority": [
         "Limit MVP live publishing to LinkedIn, X, and Email",
         "Keep dry-run mode available",
-        "Do not include private links in any social content"
+        "Do not include private links in any social content",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "LinkedIn, X, and Email are documented as launch channels",
         "Required credentials/env vars are documented",
         "Dry-run vs live behavior is documented",
-        "Per-channel content constraints are recorded"
+        "Per-channel content constraints are recorded",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Review docs/config for selected channels",
         "Run npm run check if workflow artifacts changed"
       ],
@@ -933,15 +960,18 @@
         "Do not hard-code social credentials",
         "Preserve dry-run mode for testing",
         "Never send private event links",
-        "Keep adapters bounded to selected MVP channels"
+        "Keep adapters bounded to selected MVP channels",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Pending posts can be processed through configured LinkedIn, X, and Email adapters",
         "Posted/failed status is persisted",
         "Failures are captured without leaking secrets",
-        "Tests prove private links are never published"
+        "Tests prove private links are never published",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused social publishing tests",
         "Run npm run check"
       ],
@@ -974,14 +1004,17 @@
       "authority": [
         "Live posting must require admin/operational authorization",
         "Do not expose secrets or private links in admin UI/logs",
-        "Keep dry-run available for local verification"
+        "Keep dry-run available for local verification",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Admins can process or retry pending social posts",
         "Non-admin users cannot trigger live publishing",
-        "Failures are visible without exposing secrets/private links"
+        "Failures are visible without exposing secrets/private links",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused admin social tests",
         "Run npm run check"
       ],
@@ -1014,15 +1047,18 @@
       "authority": [
         "Production must not silently grant demo credits",
         "All grants or purchases must be ledger-backed",
-        "Document whether launch users start with free credits or must buy credits"
+        "Document whether launch users start with free credits or must buy credits",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "New-user credit policy is documented",
         "Demo seed grants are development-only",
         "Production credits come from Stripe purchases or explicit admin/launch grants",
-        "Tests cover production seed behavior"
+        "Tests cover production seed behavior",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused credit bootstrap tests",
         "Run npm run check"
       ],
@@ -1057,15 +1093,18 @@
         "Prevent path traversal and arbitrary overwrite",
         "Only approved image types and sizes may be accepted",
         "Document production storage behavior",
-        "Do not commit uploaded user content"
+        "Do not commit uploaded user content",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Production upload mode is documented",
         "Uploads are safely stored or disabled in production",
         "File type/size/path protections are tested",
-        "Default image behavior still works"
+        "Default image behavior still works",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused upload tests",
         "Run npm run check"
       ],
@@ -1102,15 +1141,18 @@
       "authority": [
         "Do not log private links, secrets, session tokens, CSRF tokens, or payment details",
         "Keep logging minimal and useful",
-        "Document monitoring expectations"
+        "Document monitoring expectations",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Health endpoint is production-suitable",
         "Errors are logged",
         "Payment, credit, admin expiry, and social publish actions have minimal audit trail",
-        "Sensitive values are excluded from logs"
+        "Sensitive values are excluded from logs",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused logging/privacy tests where practical",
         "Run npm run check"
       ],
@@ -1142,15 +1184,18 @@
       "authority": [
         "Preserve credit accounting",
         "Unauthorized lifecycle actions must be rejected",
-        "Do not add broad moderation tooling"
+        "Do not add broad moderation tooling",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Launch decision for cancellation/completion is documented",
         "If implemented, open cohort cancellation refunds held credits",
         "If implemented, active cohort completion does not refund consumed credits",
-        "If deferred, operational workaround and risk are documented"
+        "If deferred, operational workaround and risk are documented",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run focused lifecycle tests if implemented",
         "Run npm run check"
       ],
@@ -1190,7 +1235,8 @@
       "authority": [
         "Fix confirmed launch blockers within scope",
         "Track or document accepted residual risks",
-        "Verify private links are not exposed publicly or through social/logs"
+        "Verify private links are not exposed publicly or through social/logs",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Auth/session/CSRF reviewed",
@@ -1199,9 +1245,11 @@
         "Admin authorization reviewed",
         "Social publishing reviewed",
         "Upload behavior reviewed",
-        "Logging privacy reviewed"
+        "Logging privacy reviewed",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run npm run check",
         "Run any focused security/privacy tests added during review"
       ],
@@ -1231,7 +1279,8 @@
       ],
       "authority": [
         "Smoke against the selected deployment target or a faithful production-like environment",
-        "Do not mark launch-ready with unreviewed payment/auth/social failures"
+        "Do not mark launch-ready with unreviewed payment/auth/social failures",
+        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
       ],
       "acceptance_criteria": [
         "Sign up/sign in/sign out works",
@@ -1239,9 +1288,11 @@
         "Create, feed/search/detail, interest, quorum, dashboard, expiry/refund, and private-link authorization work",
         "LinkedIn, X, and Email social publishing is verified in dry-run or approved live mode",
         "Admin operations are protected",
-        "Logs do not leak private links or secrets"
+        "Logs do not leak private links or secrets",
+        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
       ],
       "verification": [
+        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
         "Run documented smoke checklist",
         "Run npm run check after any fixes"
       ],

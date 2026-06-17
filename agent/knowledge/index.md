@@ -33,6 +33,12 @@ It is advisory. Code, verified behavior, and canonical ledgers override this ind
 
 Use these routes to avoid broad rediscovery.
 
+## Human Setup Routing Rule
+
+For any task involving deployment, Supabase, Google/GitHub OAuth, Stripe, LinkedIn, X, Email, DNS, webhooks, callback URLs, hosting dashboards, production secrets, or other provider/account setup, the manager or worker must first produce a Human Setup Checklist before depending on external setup.
+
+The checklist must include current official docs or dashboard links, exact dashboard navigation paths, exact callback/webhook/redirect/app URL/DNS values, exact local file paths to edit, exact env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user to report completion. Do not ask the user to paste secrets into chat. Continue local implementation that is not blocked by external setup.
+
 | Task Type | Read First | Then Read | Avoid Unless Needed |
 |---|---|---|---|
 | Setup/bootstrap | `start.txt`, `agent-starters/startSetupManager.txt`, `docs/cohort15-mvp-spec-v3.md` | `plan.md`, `tasks.json`, `atomic-task-graph.md`, progress files | product source until T001 creates it |

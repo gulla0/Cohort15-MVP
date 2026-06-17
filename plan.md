@@ -44,6 +44,24 @@ Ship the smallest usable version that proves:
 - Event interest belongs in a separate object from the event.
 - Private links must never be included in public social outbox content or later public social posts.
 
+## Human Setup Standard
+
+Provider-dependent production tasks must identify human setup requirements before relying on external setup.
+
+For deployment, Supabase, Google/GitHub OAuth, Stripe, LinkedIn, X, Email, DNS, webhooks, callback URLs, hosting dashboards, production secrets, or similar external provider work, the executor must first provide a Human Setup Checklist with:
+
+- current official documentation or dashboard links
+- exact dashboard navigation paths
+- exact callback, webhook, redirect, app URL, or DNS values to enter
+- exact local file paths to edit when local configuration is needed
+- exact environment variable names
+- clear labels for secrets, with instructions not to paste secrets into chat
+- what the agent can implement immediately versus what is blocked
+- verification steps the user can perform
+- a clear checkpoint for the user to report completion
+
+The agent should continue non-blocked local implementation when possible and stop only when external setup is genuinely required.
+
 ## Execution Phases
 
 ### Phase 1 - Product Scaffold And Domain Foundation

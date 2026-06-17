@@ -416,6 +416,30 @@ Verification:
 - Dependency-reference validation for `tasks.json` passed.
 - `npm run check` passed with 59 tests.
 
+### 2026-06-17 EDT
+
+Task:
+- Add Human Setup Checklist standard
+
+Files Changed:
+- `plan.md`
+- `atomic-task-graph.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+- `agent/knowledge/index.md`
+
+Summary:
+- Added a project-wide standard requiring exact Human Setup Checklists for provider-dependent or external human setup tasks.
+- Required future agents to include official/current links, dashboard paths, callback/webhook/redirect values, local file paths, env var names, secret warnings, verification steps, and clear checkpoints before depending on human setup.
+- Applied the standard to remaining production-MVP tasks T013-T030, excluding completed T016.
+
+Verification:
+- Dependency-reference validation for `tasks.json` passed.
+- `git diff --check` passed.
+- `npm run check` passed with 59 tests.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

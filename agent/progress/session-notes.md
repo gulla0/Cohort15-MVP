@@ -424,6 +424,27 @@ Assumptions Made:
 Next Recommended Step:
 - Execute T013: choose and document the production deployment target.
 
+### 2026-06-17 EDT
+
+Read:
+- User clarification that provider-dependent work should give exact human steps, links, file paths, env var names, and checkpoints.
+- `tasks.json`
+- `atomic-task-graph.md`
+- `plan.md`
+- `agent/knowledge/index.md`
+
+Decided:
+- Added a project-wide Human Setup Checklist standard for any task that requires human action outside the repository.
+- Applied the checklist requirement to every remaining production-MVP task T013-T030 except already-completed T016.
+- Required future agents to use current official provider docs or dashboard links, exact dashboard navigation, exact callback/webhook/redirect values, exact local file paths, exact env var names, secret warnings, verification steps, and clear continue/block checkpoints.
+
+Assumptions Made:
+- Provider setup instructions should be operator-grade and should not ask the user to paste secrets into chat.
+- Future agents should continue any local implementation that is not blocked by external provider setup.
+
+Next Recommended Step:
+- Execute T013 with the new Human Setup Checklist standard.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

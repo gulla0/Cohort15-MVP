@@ -12,6 +12,27 @@ Each executable task should define or tightly imply:
 - Evaluation boundary: what counts as done.
 - Stop boundary: when the executor should stop.
 
+## Human Setup Checklist Rule
+
+Any task that requires human action outside the repository must start by identifying the human setup path before depending on that external setup.
+
+This applies to deployment, Supabase, Google/GitHub OAuth, Stripe, LinkedIn, X, Email, DNS, webhooks, callback URLs, hosting dashboards, production secrets, or any other provider/account setup.
+
+The executor must:
+
+- Research current official provider documentation or dashboard instructions when provider setup details may have changed.
+- Provide exact dashboard or documentation links.
+- Provide exact dashboard navigation paths.
+- Provide exact callback, webhook, redirect, app URL, or DNS values to enter.
+- Provide exact local file paths to edit, such as `/Users/gzero/Desktop/cohort15/cohort15-mvp/.env.local`, when local changes are needed.
+- Provide exact environment variable names.
+- Clearly label secrets and state that secrets should not be pasted into chat.
+- Separate what the agent can implement immediately from what is blocked on human setup.
+- Provide verification steps the user can run or inspect.
+- End blocked external setup instructions with a clear checkpoint, such as "tell me when this is done."
+
+The executor should continue with non-blocked local implementation when possible and stop only when external setup is genuinely required before safe progress can continue.
+
 ## Task Graph
 
 ### Phase 1 - Product Scaffold And Domain Foundation
