@@ -623,6 +623,28 @@ Verification:
 - Focused admin/session/expiry/MVP tests passed: 13 tests.
 - `npm run check` passed: lint, workflow guardrail, and 80 tests.
 
+### 2026-06-17 18:14 EDT
+
+Task:
+- T020 Implement Stripe credit purchase packages
+
+Files Changed:
+- Stripe transport and purchase service modules
+- purchase routes, package UI, runtime config, repositories, and credit ledger
+- focused Stripe purchase tests and existing foundation/config tests
+- Stripe setup and production documentation
+- canonical task, knowledge, and progress trackers
+
+Summary:
+- Replaced the Buy Credits placeholder with authenticated `$6`/6-credit and `$12`/14-credit packages backed by Stripe-hosted Checkout.
+- Added pending and paid purchase records plus server-verified, auditable purchase credit transactions.
+- Prevented grants for cancelled, unpaid, mismatched, and repeated browser-return fulfillment attempts.
+- Added exact Stripe/Render setup steps, secret warnings, redirect URLs, verification steps, and the T021 webhook checkpoint.
+
+Verification:
+- Focused purchase/foundation/runtime tests passed: 15 tests.
+- `npm run check` passed: lint, workflow guardrail, and 85 tests.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

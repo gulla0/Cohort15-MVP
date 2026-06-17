@@ -15,6 +15,7 @@ import {
 import { createDemoRepositories } from '../persistence/seeds.mjs';
 import { createRepositories } from '../persistence/repositories.mjs';
 import { createCreditLedger } from '../persistence/credit-ledger.mjs';
+import { createStripeCheckoutAdapter } from '../payments/stripe.mjs';
 import { createSupabasePostgresStore } from '../persistence/supabase-postgres.mjs';
 import { createJsonFileStore } from '../persistence/store.mjs';
 import { createCohortService } from '../services/create-cohort.mjs';
@@ -22,11 +23,12 @@ import { createDashboardService } from '../services/dashboards.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
 import { createExpireCohortsService } from '../services/expire-cohorts.mjs';
 import { createShowInterestService } from '../services/show-interest.mjs';
+import { createPurchaseCreditsService } from '../services/purchase-credits.mjs';
 import { renderSignInPage } from '../ui/auth.mjs';
 import { renderCohortDetailPage, renderCohortFeedPage } from '../ui/cohorts.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderCreatorDashboardPage, renderDashboardPage, renderParticipantDashboardPage } from '../ui/dashboards.mjs';
-import { renderBuyCreditsPlaceholderPage, renderHomePage } from '../ui/home.mjs';
+import { renderBuyCreditsPage, renderHomePage, renderPurchaseCompletePage } from '../ui/home.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..', '..');
@@ -254,6 +256,21 @@ export function createRequestHandler(state = createState(), options = {}) {
     supabaseAnonKey: runtimeConfig.auth.supabaseAnonKey,
     fetchImpl: options.fetchImpl
   });
+  const stripeCheckout = options.stripeCheckoutAdapter ?? (runtimeConfig.stripe.checkoutEnabled
+    ? createStripeCheckoutAdapter({
+      secretKey: (options.env ?? process.env).STRIPE_SECRET_KEY,
+      fetchImpl: options.fetchImpl
+    })
+    : undefined);
+  const purchaseCreditsService = createPurchaseCreditsService({
+    repositories: state.repositories,
+    ledger: state.ledger,
+    stripeCheckout,
+    stripeConfig: runtimeConfig.stripe,
+    appUrl: runtimeConfig.appUrl,
+    now: options.purchaseNow,
+    createId: options.createPurchaseId
+  });
 
   function currentUser(req) {
     return sessionManager.getCurrentUser(req);
@@ -470,10 +487,64 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/credits/buy' && (req.method ?? 'GET') === 'GET') {
-      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPlaceholderPage({
+      send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPage({
         currentUser: user,
-        csrfToken: currentCsrfToken(req)
+        csrfToken: currentCsrfToken(req),
+        checkoutEnabled: runtimeConfig.stripe.checkoutEnabled,
+        cancelled: url.searchParams.get('cancelled') === '1'
       }));
+      return;
+    }
+
+    if (url.pathname === '/credits/checkout' && req.method === 'POST') {
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
+      const values = parseFormBody(await readBodyBuffer(req));
+      if (rejectInvalidCsrf(req, res, values.csrfToken)) {
+        return;
+      }
+      try {
+        const result = await purchaseCreditsService.startCheckout({
+          user: authenticatedUser,
+          packageId: values.packageId
+        });
+        redirect(res, result.checkoutUrl);
+      } catch (error) {
+        send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPage({
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req),
+          checkoutEnabled: runtimeConfig.stripe.checkoutEnabled,
+          error: error.message
+        }));
+      }
+      return;
+    }
+
+    if (url.pathname === '/credits/checkout/complete' && (req.method ?? 'GET') === 'GET') {
+      const authenticatedUser = requireCurrentUser(req, res);
+      if (!authenticatedUser) {
+        return;
+      }
+      try {
+        const result = await purchaseCreditsService.completeCheckout({
+          userId: authenticatedUser.id,
+          sessionId: url.searchParams.get('session_id')
+        });
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderPurchaseCompletePage({
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req),
+          purchase: result.purchase
+        }));
+      } catch (error) {
+        send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderBuyCreditsPage({
+          currentUser: authenticatedUser,
+          csrfToken: currentCsrfToken(req),
+          checkoutEnabled: runtimeConfig.stripe.checkoutEnabled,
+          error: error.message
+        }));
+      }
       return;
     }
 

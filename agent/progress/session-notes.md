@@ -652,6 +652,28 @@ Assumptions Made:
 Next Recommended Step:
 - Execute T020: implement Stripe credit purchase packages; it unlocks webhook reconciliation and production credit bootstrap work.
 
+### 2026-06-17 18:14 EDT
+
+Read:
+- `start.txt` and implementation manager instructions
+- canonical task, knowledge, progress, and blocker trackers
+- T020 purchase, runtime config, persistence, server, UI, and test inputs
+- current official Stripe Checkout and Checkout Session documentation
+
+Decided:
+- Selected T020 as the next dependency-ready critical-path task.
+- Used Stripe-hosted Checkout with configured one-time Price IDs and no card-data handling in Cohort15.
+- Required an authenticated account and server-side retrieval of a matching complete/paid Checkout Session before adding ledger credits.
+- Kept signed webhook processing, durable provider-event idempotency, and no-return reconciliation in T021.
+- Marked T020 done after focused tests and the full repository check passed.
+
+Assumptions Made:
+- The configured Stripe prices have exact fixed amounts of `$6.00` and `$12.00`; the server still verifies returned amount and currency before fulfillment.
+- Browser-return fulfillment is sufficient for T020's checkout slice but is not the final reliability boundary for money-adjacent production behavior.
+
+Next Recommended Step:
+- Execute T021: add signed Stripe webhook idempotency and purchase reconciliation.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

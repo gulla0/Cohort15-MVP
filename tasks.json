@@ -798,7 +798,7 @@
     {
       "id": "T020",
       "title": "Implement Stripe credit purchase packages",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T014",
@@ -841,8 +841,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop once Stripe-backed package purchases work in production mode and local/test mode is documented.",
-      "evidence": "Pending.",
-      "notes": "Stripe is selected. Mock-only payment is not acceptable for MVP production."
+      "evidence": "2026-06-17 EDT: Replaced the Buy Credits placeholder with authenticated $6/6-credit and $12/14-credit package selection, dependency-free Stripe-hosted Checkout Session creation, server-side paid Session verification, pending/paid purchase persistence, and auditable purchase credit transactions. Added failed/cancelled/mismatch protections, focused route/service tests, and an operator-grade Stripe setup checklist. npm run check passed with 85 tests.",
+      "notes": "T020 verifies paid Checkout Sessions on the authenticated browser return and avoids repeat grants in the running repository. T021 remains required for signed webhook fulfillment, durable provider-event idempotency, and reconciliation when a paid browser does not return."
     },
     {
       "id": "T021",

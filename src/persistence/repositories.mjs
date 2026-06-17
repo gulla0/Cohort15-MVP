@@ -211,6 +211,11 @@ export function createRepositories(seed = {}, options = {}) {
       findById(id) {
         return readRecord(store.purchases, id);
       },
+      findByProviderCheckoutId(providerCheckoutId) {
+        return readRecords(store.purchases).find((purchase) => (
+          purchase.providerCheckoutId === providerCheckoutId
+        ));
+      },
       listByUser(userId) {
         return readRecords(store.purchases).filter((purchase) => purchase.userId === userId);
       },

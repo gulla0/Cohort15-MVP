@@ -74,6 +74,13 @@ export function createCreditLedger(transactionRepository, options = {}) {
     return append({ userId, amount, type: 'grant', source });
   }
 
+  function purchase(userId, amount, source) {
+    if (typeof source !== 'string' || source.trim().length === 0) {
+      throw new Error('Purchase credits require an auditable source.');
+    }
+    return append({ userId, amount, type: 'purchase', source });
+  }
+
   function hold(userId, eventId, amount) {
     const balance = balanceForUser(userId);
     if (balance.available < amount) {
@@ -99,6 +106,7 @@ export function createCreditLedger(transactionRepository, options = {}) {
   return {
     balanceForUser,
     grant,
+    purchase,
     hold,
     consumeHeld,
     refundHeld

@@ -160,6 +160,9 @@ export function loadRuntimeConfig(env = process.env) {
     }),
     stripe: Object.freeze({
       webhookPath: env.STRIPE_WEBHOOK_PATH?.trim() || '/stripe/webhook',
+      checkoutEnabled: Boolean(env.STRIPE_SECRET_KEY?.trim()
+        && env.STRIPE_PRICE_6_CREDITS?.trim()
+        && env.STRIPE_PRICE_14_CREDITS?.trim()),
       price6Credits: env.STRIPE_PRICE_6_CREDITS?.trim(),
       price14Credits: env.STRIPE_PRICE_14_CREDITS?.trim()
     }),

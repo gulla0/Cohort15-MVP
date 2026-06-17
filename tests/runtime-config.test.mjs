@@ -81,6 +81,7 @@ test('production runtime config returns sanitized operational values without sec
   assert.equal(config.auth.supabaseAuthCallbackPath, '/auth/supabase/callback');
   assert.equal(config.auth.enableMagicLink, true);
   assert.equal(config.stripe.webhookPath, '/payments/stripe/webhook');
+  assert.equal(config.stripe.checkoutEnabled, true);
   assert.deepEqual(config.adminEmails, ['admin@example.com']);
   assert.equal('SUPABASE_SERVICE_ROLE_KEY' in config, false);
   assert.equal('STRIPE_SECRET_KEY' in config, false);
