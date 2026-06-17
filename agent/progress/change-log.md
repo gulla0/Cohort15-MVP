@@ -5,6 +5,38 @@ Append-only implementation log.
 ### 2026-06-17 EDT
 
 Task:
+- T015 Integrate Supabase Auth account boundary
+
+Files Changed:
+- `.env.example`
+- `README.md`
+- `docs/production-config.md`
+- `render.yaml`
+- `src/auth/session.mjs`
+- `src/auth/supabase.mjs`
+- `src/config/runtime.mjs`
+- `src/server/app.mjs`
+- `src/ui/auth.mjs`
+- `tests/runtime-config.test.mjs`
+- `tests/supabase-auth.test.mjs`
+- `tasks.json`
+- `agent/knowledge/index.md`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `agent/progress/change-log.md`
+
+Summary:
+- Added a dependency-free Supabase Auth adapter for OAuth/PKCE provider redirects and callback code exchange.
+- Added production Google/GitHub sign-in routes, callback-to-app-session handling, and production lockout for seeded local sign-in.
+- Added optional magic-link configuration behind `SUPABASE_ENABLE_MAGIC_LINK`.
+- Expanded production setup docs with Supabase provider setup, exact callback URLs, Render env vars, and secret-handling checkpoints.
+
+Verification:
+- `npm run check` passed with 69 tests.
+
+### 2026-06-17 EDT
+
+Task:
 - T014 Add production configuration and secrets boundary
 
 Files Changed:

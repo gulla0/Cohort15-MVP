@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, extname, join } from 'node:path';
 import { clearSessionCookie, createSessionManager } from '../auth/session.mjs';
+import { createSupabaseAuthAdapter, SUPABASE_AUTH_PROVIDERS } from '../auth/supabase.mjs';
 import { loadRuntimeConfig } from '../config/runtime.mjs';
 import {
   ALLOWED_IMAGE_UPLOAD_TYPES,
@@ -197,6 +198,7 @@ function createState(options = {}) {
 const defaultState = createState();
 
 export function createRequestHandler(state = createState(), options = {}) {
+  const runtimeConfig = options.runtimeConfig ?? loadRuntimeConfig(options.env ?? process.env);
   const uploadedImageDir = options.uploadedImageDir ?? join(rootDir, 'public', 'assets', 'uploads');
   const uploadedImagePathPrefix = options.uploadedImagePathPrefix ?? '/assets/uploads';
   const createUploadId = options.createUploadId ?? (() => randomUUID());
@@ -212,6 +214,14 @@ export function createRequestHandler(state = createState(), options = {}) {
     repositories: state.repositories,
     createSessionId: options.createSessionId
   });
+  const supabaseAuth = options.supabaseAuthAdapter ?? createSupabaseAuthAdapter({
+    repositories: state.repositories,
+    appUrl: runtimeConfig.appUrl,
+    callbackPath: runtimeConfig.auth.supabaseAuthCallbackPath,
+    supabaseUrl: runtimeConfig.auth.supabaseUrl,
+    supabaseAnonKey: runtimeConfig.auth.supabaseAnonKey,
+    fetchImpl: options.fetchImpl
+  });
 
   function currentUser(req) {
     return sessionManager.getCurrentUser(req);
@@ -225,6 +235,8 @@ export function createRequestHandler(state = createState(), options = {}) {
 
     send(res, 401, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
       users: state.repositories.users.list(),
+      mode: runtimeConfig.isProduction ? 'supabase' : 'local',
+      enableMagicLink: runtimeConfig.auth.enableMagicLink,
       returnTo: req.url ?? '/'
     }));
     return undefined;
@@ -279,12 +291,19 @@ export function createRequestHandler(state = createState(), options = {}) {
       send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
         users: state.repositories.users.list(),
         currentUser: user,
+        mode: runtimeConfig.isProduction ? 'supabase' : 'local',
+        enableMagicLink: runtimeConfig.auth.enableMagicLink,
         returnTo: safeReturnTo(url.searchParams.get('returnTo') ?? '/')
       }));
       return;
     }
 
     if (url.pathname === '/auth/sign-in' && req.method === 'POST') {
+      if (runtimeConfig.isProduction) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Local sign-in is not available in production.');
+        return;
+      }
+
       const values = parseFormBody(await readBodyBuffer(req));
       const returnTo = safeReturnTo(values.returnTo);
 
@@ -298,6 +317,85 @@ export function createRequestHandler(state = createState(), options = {}) {
           users: state.repositories.users.list(),
           error: error.message,
           returnTo
+        }));
+      }
+      return;
+    }
+
+    const supabaseSignInMatch = url.pathname.match(/^\/auth\/supabase\/([^/]+)$/);
+    if (supabaseSignInMatch && (req.method ?? 'GET') === 'GET') {
+      const provider = decodeURIComponent(supabaseSignInMatch[1]);
+      if (!runtimeConfig.isProduction || !SUPABASE_AUTH_PROVIDERS.includes(provider)) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Not found');
+        return;
+      }
+
+      try {
+        redirect(res, supabaseAuth.startOAuth(provider, safeReturnTo(url.searchParams.get('returnTo') ?? '/')));
+      } catch (error) {
+        send(res, 500, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+          mode: 'supabase',
+          enableMagicLink: runtimeConfig.auth.enableMagicLink,
+          error: error.message,
+          returnTo: safeReturnTo(url.searchParams.get('returnTo') ?? '/')
+        }));
+      }
+      return;
+    }
+
+    if (url.pathname === '/auth/magic-link' && req.method === 'POST') {
+      if (!runtimeConfig.isProduction || !runtimeConfig.auth.enableMagicLink) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Not found');
+        return;
+      }
+
+      const values = parseFormBody(await readBodyBuffer(req));
+      const returnTo = safeReturnTo(values.returnTo);
+      try {
+        await supabaseAuth.sendMagicLink({ email: values.email, returnTo });
+        send(res, 200, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+          mode: 'supabase',
+          enableMagicLink: true,
+          returnTo
+        }));
+      } catch (error) {
+        send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+          mode: 'supabase',
+          enableMagicLink: true,
+          error: error.message,
+          returnTo
+        }));
+      }
+      return;
+    }
+
+    if (url.pathname === runtimeConfig.auth.supabaseAuthCallbackPath && (req.method ?? 'GET') === 'GET') {
+      if (!runtimeConfig.isProduction) {
+        send(res, 404, { 'content-type': 'text/plain; charset=utf-8' }, 'Not found');
+        return;
+      }
+
+      try {
+        const result = url.searchParams.has('token_hash')
+          ? await supabaseAuth.verifyMagicLinkToken({
+            tokenHash: url.searchParams.get('token_hash'),
+            type: url.searchParams.get('type') ?? 'email',
+            returnTo: url.searchParams.get('returnTo') ?? '/'
+          })
+          : await supabaseAuth.exchangeCodeForSession({
+            code: url.searchParams.get('code'),
+            state: url.searchParams.get('state')
+          });
+        const session = sessionManager.signInUser(result.appUser);
+        redirect(res, safeReturnTo(result.returnTo), {
+          'set-cookie': session.cookie
+        });
+      } catch (error) {
+        send(res, 400, { 'content-type': 'text/html; charset=utf-8' }, renderSignInPage({
+          mode: 'supabase',
+          enableMagicLink: runtimeConfig.auth.enableMagicLink,
+          error: error.message,
+          returnTo: '/'
         }));
       }
       return;

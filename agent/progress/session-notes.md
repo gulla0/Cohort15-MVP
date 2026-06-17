@@ -6,6 +6,39 @@ Append-only role transition and handoff log.
 
 Read:
 - `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- `agent/progress/session-notes.md`
+- `src/auth/session.mjs`
+- `src/server/app.mjs`
+- `src/ui/auth.mjs`
+- `src/config/runtime.mjs`
+- `docs/production-config.md`
+- current official Supabase docs for redirect URLs, Google login, GitHub login, OAuth sign-in/callback exchange, and passwordless email
+
+Decided:
+- Classified the user request as approved main implementation work and selected T015 as the next unblocked critical-path task after T014.
+- Kept the app dependency-free by implementing a small Supabase Auth adapter over Supabase Auth HTTP endpoints instead of adding `@supabase/supabase-js`.
+- Used OAuth/PKCE for production Google and GitHub sign-in, with `/auth/supabase/:provider` starting provider login and `/auth/callback` exchanging the returned code.
+- Preserved seeded local sign-in only for non-production runtime mode and blocked `/auth/sign-in` POST in production.
+- Converted authenticated Supabase users into app users with `supabase:<id>` IDs, then reused the existing app session boundary for protected routes.
+- Left stronger production session and CSRF behavior to T018, as planned.
+- Marked T015 done after full verification passed.
+
+Assumptions Made:
+- Render will run a single service instance for initial MVP auth callback state unless T018/T017 move session or OAuth state storage into a durable/shared store.
+- Google and GitHub are the required launch providers; email magic link remains optional and is disabled unless `SUPABASE_ENABLE_MAGIC_LINK=true`.
+- Supabase provider setup, OAuth client secrets, and Render secrets are handled through dashboards and not pasted into chat.
+
+Next Recommended Step:
+- Execute T017: add Supabase Postgres production persistence adapter now that production auth identity exists.
+
+### 2026-06-17 EDT
+
+Read:
+- `start.txt`
 - `agent/router/intent-router.md`
 - `README.md`
 - `USAGE.md`

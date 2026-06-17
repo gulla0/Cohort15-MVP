@@ -69,6 +69,7 @@ test('production runtime config returns sanitized operational values without sec
     HOST: '127.0.0.1',
     PORT: '4242',
     SUPABASE_AUTH_CALLBACK_PATH: '/auth/supabase/callback',
+    SUPABASE_ENABLE_MAGIC_LINK: 'true',
     STRIPE_WEBHOOK_PATH: '/payments/stripe/webhook'
   }));
 
@@ -76,7 +77,9 @@ test('production runtime config returns sanitized operational values without sec
   assert.equal(config.host, '127.0.0.1');
   assert.equal(config.port, 4242);
   assert.equal(config.auth.supabaseUrl, 'https://project.supabase.co');
+  assert.equal(config.auth.supabaseAnonKey, 'anon-key');
   assert.equal(config.auth.supabaseAuthCallbackPath, '/auth/supabase/callback');
+  assert.equal(config.auth.enableMagicLink, true);
   assert.equal(config.stripe.webhookPath, '/payments/stripe/webhook');
   assert.deepEqual(config.adminEmails, ['admin@example.com']);
   assert.equal('SUPABASE_SERVICE_ROLE_KEY' in config, false);
@@ -90,4 +93,5 @@ test('runtime env var list documents production requirements', () => {
   assert.ok(vars.requiredInProduction.includes('STRIPE_SECRET_KEY'));
   assert.ok(vars.requiredInProduction.includes('SUPABASE_SERVICE_ROLE_KEY'));
   assert.ok(vars.optional.includes('COHORT15_PERSISTENCE_FILE'));
+  assert.ok(vars.optional.includes('SUPABASE_ENABLE_MAGIC_LINK'));
 });

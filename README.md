@@ -62,6 +62,8 @@ Initial production assumptions:
 
 Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are documented in the production configuration runbook.
 
+Production auth for T015 uses Supabase Auth with Google and GitHub providers. The app keeps local seeded-account sign-in available only outside production mode; in production `/auth/sign-in` starts Supabase provider flows and `/auth/callback` exchanges the Supabase identity into the app session.
+
 ## Local Demo Data
 
 The app seeds two demo users every time the in-memory app state starts:
@@ -101,12 +103,12 @@ Creating a cohort also writes a local social-promotion outbox record with public
 
 Build now: local session auth path, credit ledger, admin/demo credit grants, create cohort, show interest, quorum unlock, expiry/refund, hidden private links before unlock, feed/detail pages, dashboards, and a local social-promotion outbox.
 
-Post-MVP: USD credit sales, real external social posting, chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events. The first documented credit package assumptions are `$6` for 6 credits and `$12` for 14 credits.
+Production-MVP launch work still includes Supabase Postgres persistence, hardened sessions/CSRF, admin controls, Stripe credit sales, LinkedIn/X/Email publishing, credit bootstrap policy, production upload hardening, audit/health checks, lifecycle controls, security review, and smoke testing. Later product scope includes chat, profiles, reputation, AI matching, waitlists, calendar integrations, moderation tooling, and in-person events. The first documented credit package assumptions are `$6` for 6 credits and `$12` for 14 credits.
 
 ## Known Assumptions
 
-- Persistence is in-memory for the MVP. Restarting the dev server resets demo data.
-- Auth uses a dependency-free local session cookie and seeded local users until a real provider is selected.
+- Local persistence is in-memory by default. Restarting the dev server resets demo data unless `COHORT15_PERSISTENCE_FILE` is set.
+- Auth uses a dependency-free local session cookie and seeded local users in development; production mode uses Supabase Auth for Google and GitHub sign-in.
 - The admin expiry endpoint is a local/dev trigger, not a production scheduler or authorization model.
 - Private links stay hidden for open cohorts. Active cohort links are visible only to the creator and committed participants.
 - Social promotion is local outbox generation only; real external posting is intentionally out of scope for this MVP.

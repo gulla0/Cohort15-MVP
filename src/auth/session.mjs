@@ -54,9 +54,8 @@ export function createSessionManager({ repositories, createSessionId = () => ran
     return repositories.users.findById(userId);
   }
 
-  function signIn(userId) {
-    const user = repositories.users.findById(userId);
-    if (!user) {
+  function signInUser(user) {
+    if (!user?.id) {
       throw new Error('User account was not found.');
     }
 
@@ -69,6 +68,15 @@ export function createSessionManager({ repositories, createSessionId = () => ran
     };
   }
 
+  function signIn(userId) {
+    const user = repositories.users.findById(userId);
+    if (!user) {
+      throw new Error('User account was not found.');
+    }
+
+    return signInUser(user);
+  }
+
   function signOut(req) {
     const sessionId = sessionIdFromRequest(req);
     if (sessionId) {
@@ -79,6 +87,7 @@ export function createSessionManager({ repositories, createSessionId = () => ran
   return {
     getCurrentUser,
     signIn,
+    signInUser,
     signOut
   };
 }

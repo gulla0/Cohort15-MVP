@@ -579,7 +579,7 @@
     {
       "id": "T015",
       "title": "Integrate Supabase Auth account boundary",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T014"
@@ -619,8 +619,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop once production auth identity replaces demo users for production protected flows.",
-      "evidence": "Pending.",
-      "notes": "Supabase Auth is the selected provider. Google and GitHub are required launch providers; magic-link/email is optional/configured."
+      "evidence": "2026-06-17 EDT: Added dependency-free Supabase Auth OAuth/PKCE adapter, production provider sign-in routes for Google and GitHub, Supabase callback-to-app-session handling, production local-seeded-auth lockout, optional magic-link configuration, setup docs, and focused Supabase auth route tests. `npm run check` passed with 69 tests.",
+      "notes": "Production auth uses Supabase Auth with Google and GitHub as required providers; magic-link/email remains optional behind `SUPABASE_ENABLE_MAGIC_LINK`."
     },
     {
       "id": "T016",

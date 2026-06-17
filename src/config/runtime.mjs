@@ -37,6 +37,7 @@ const OPTIONAL_ENV = Object.freeze([
   'NODE_VERSION',
   'PORT',
   'SUPABASE_AUTH_CALLBACK_PATH',
+  'SUPABASE_ENABLE_MAGIC_LINK',
   'STRIPE_WEBHOOK_PATH'
 ]);
 
@@ -153,7 +154,9 @@ export function loadRuntimeConfig(env = process.env) {
     uploadMode: env.COHORT15_UPLOAD_MODE?.trim().toLowerCase() || 'local',
     auth: Object.freeze({
       supabaseUrl: env.SUPABASE_URL?.trim(),
-      supabaseAuthCallbackPath: env.SUPABASE_AUTH_CALLBACK_PATH?.trim() || '/auth/callback'
+      supabaseAnonKey: env.SUPABASE_ANON_KEY?.trim(),
+      supabaseAuthCallbackPath: env.SUPABASE_AUTH_CALLBACK_PATH?.trim() || '/auth/callback',
+      enableMagicLink: env.SUPABASE_ENABLE_MAGIC_LINK?.trim().toLowerCase() === 'true'
     }),
     stripe: Object.freeze({
       webhookPath: env.STRIPE_WEBHOOK_PATH?.trim() || '/stripe/webhook',
