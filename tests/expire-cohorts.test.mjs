@@ -125,13 +125,31 @@ test('expiry processing ignores active and not-yet-expired cohorts', () => {
 
 test('expiry route returns expired ids and expired cohorts are not public', async () => {
   const state = createDemoRepositories();
-  const handler = createRequestHandler(state);
+  const handler = createRequestHandler(state, {
+    runtimeConfig: {
+      appEnv: 'development',
+      isProduction: false,
+      appUrl: 'http://localhost:3000',
+      auth: {},
+      stripe: {},
+      adminEmails: ['creator@example.test']
+    }
+  });
   const event = state.repositories.events.save(eventFixture());
   state.ledger.hold(event.creatorId, event.id, CREATE_EVENT_CREDIT_COST);
 
+  const signInResponse = await invoke(handler, {
+    url: '/auth/sign-in',
+    method: 'POST',
+    body: new URLSearchParams({ userId: 'user-creator' }).toString()
+  });
+  const cookie = signInResponse.headers['set-cookie'].split(';')[0];
+
   const response = await invoke(handler, {
     url: `/admin/expire-cohorts?now=${encodeURIComponent(processingAt.toISOString())}`,
-    method: 'POST'
+    method: 'POST',
+    headers: { cookie },
+    body: ''
   });
 
   assert.equal(response.status, 200);

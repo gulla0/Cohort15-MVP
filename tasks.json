@@ -755,7 +755,7 @@
     {
       "id": "T019",
       "title": "Secure admin and operational endpoints",
-      "status": "not_started",
+      "status": "done",
       "phase": "Production MVP Readiness",
       "dependencies": [
         "T014",
@@ -792,8 +792,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop once all operational endpoints are protected and documented.",
-      "evidence": "Pending.",
-      "notes": "Depends on production auth/session hardening so admin controls are not layered onto demo identity."
+      "evidence": "2026-06-17 EDT: Added server-configured admin authorization using authenticated account email membership in COHORT15_ADMIN_EMAILS, protected POST /admin/expire-cohorts from unauthenticated and non-admin callers, required production CSRF validation, added focused authorization tests, and documented exact Render/Supabase operator setup and verification checkpoints. npm run check passed with 80 tests.",
+      "notes": "Admin role is derived case-insensitively from the persisted signed-in user email and server-side runtime config, never request input. The expiry operation remains an authenticated operational trigger rather than a scheduler."
     },
     {
       "id": "T020",

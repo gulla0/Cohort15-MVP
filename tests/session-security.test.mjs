@@ -20,7 +20,7 @@ function productionRuntimeConfig() {
       enableMagicLink: false
     },
     stripe: {},
-    adminEmails: ['admin@example.com']
+    adminEmails: ['creator@example.test']
   };
 }
 
@@ -183,7 +183,7 @@ test('production protected mutations reject missing or invalid CSRF tokens', asy
   assert.equal(state.repositories.events.list().length, 1);
 });
 
-test('production admin mutation endpoint fails closed until admin authorization is implemented', async () => {
+test('production admin mutation endpoint rejects unauthenticated callers', async () => {
   const { handler } = createProductionHandler();
 
   const response = await invoke(handler, {
@@ -191,9 +191,9 @@ test('production admin mutation endpoint fails closed until admin authorization 
     method: 'POST'
   });
 
-  assert.equal(response.status, 403);
+  assert.equal(response.status, 401);
   assert.deepEqual(JSON.parse(response.body), {
-    error: 'Admin operations require production admin authorization before launch.'
+    error: 'Authentication is required for admin operations.'
   });
 });
 

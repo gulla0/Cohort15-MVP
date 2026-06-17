@@ -628,6 +628,30 @@ Assumptions Made:
 Next Recommended Step:
 - Execute T013 with the new Human Setup Checklist standard.
 
+### 2026-06-17 17:43 EDT
+
+Read:
+- `start.txt`
+- `agent-starters/startNewManager.txt`
+- `agent/knowledge/index.md`
+- `tasks.json`
+- `agent/progress/task-status.md`
+- T019 implementation inputs and existing auth/session/config tests
+
+Decided:
+- Selected T019 as the next dependency-ready critical-path task.
+- Derived admin status only from the persisted authenticated user email matched case-insensitively against server-side `COHORT15_ADMIN_EMAILS`.
+- Required authentication for the expiry operation in every runtime mode and retained production CSRF enforcement for the admin mutation.
+- Documented exact Supabase and Render navigation, environment configuration, operation path, secret warnings, verification steps, and a stop checkpoint when admin identity is uncertain.
+- Marked T019 done after focused tests and the full repository check passed.
+
+Assumptions Made:
+- Email allowlisting is sufficient for the initial single-service MVP admin boundary because Supabase owns account authentication and the allowlist is controlled only by server runtime configuration.
+- Cohort expiry remains a manually triggered operational action until a later task introduces scheduling or broader operational tooling.
+
+Next Recommended Step:
+- Execute T020: implement Stripe credit purchase packages; it unlocks webhook reconciliation and production credit bootstrap work.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

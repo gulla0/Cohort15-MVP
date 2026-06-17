@@ -597,6 +597,32 @@ Verification:
 - `git diff --check` passed.
 - `npm run check` passed with 59 tests.
 
+### 2026-06-17 17:43 EDT
+
+Task:
+- T019 Secure admin and operational endpoints
+
+Files Changed:
+- `src/auth/admin.mjs`
+- `src/server/app.mjs`
+- `tests/admin-authorization.test.mjs`
+- `tests/session-security.test.mjs`
+- `tests/expire-cohorts.test.mjs`
+- `tests/mvp-verification.test.mjs`
+- `README.md`
+- `docs/production-config.md`
+- `.env.example`
+- canonical task, knowledge, and progress trackers
+
+Summary:
+- Added an authenticated admin authorization boundary based on persisted account email membership in server-side `COHORT15_ADMIN_EMAILS`.
+- Protected cohort expiry from unauthenticated and non-admin callers and required production CSRF validation before mutation.
+- Added operator-grade Render/Supabase setup instructions and focused authorization coverage.
+
+Verification:
+- Focused admin/session/expiry/MVP tests passed: 13 tests.
+- `npm run check` passed: lint, workflow guardrail, and 80 tests.
+
 ## Template
 
 ### YYYY-MM-DD HH:MM

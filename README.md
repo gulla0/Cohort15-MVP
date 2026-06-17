@@ -66,6 +66,7 @@ Do not commit provider credentials or paste secrets into chat. Production secret
 
 Production auth for T015 uses Supabase Auth with Google and GitHub providers. The app keeps local seeded-account sign-in available only outside production mode; in production `/auth/sign-in` starts Supabase provider flows and `/auth/callback` exchanges the Supabase identity into the app session. Production persistence for T017 hydrates users, cohorts, interests, credit transactions, social posts, and purchase records from Supabase Postgres; local demo seed grants are not created in production mode.
 Production session hardening for T018 uses opaque server-side app sessions with `HttpOnly`, `SameSite=Lax`, `Secure`, expiring cookies in production. Signed-in browser mutations include server-issued CSRF tokens and reject missing or invalid tokens before mutating cohort, interest, or sign-out state.
+Administrative mutations are authorized from the signed-in account email matched against server-side `COHORT15_ADMIN_EMAILS`. `POST /admin/expire-cohorts` rejects unauthenticated and non-admin callers and requires the signed-in admin's CSRF token; role status is never accepted from request input.
 
 ## Local Demo Data
 
@@ -95,7 +96,7 @@ If the file does not exist, the app creates it and seeds the demo users once wit
 3. Confirm `/cohorts` and `/cohorts/:id` show public cohort details but hide the private online link while the event is open.
 4. Sign out, sign in as `user-participant`, then show interest; this uses 1 participant credit while quorum is pending.
 5. When interest reaches quorum, the event becomes active, creator and participant credits are used, and the private link is visible only to the creator and committed participants.
-6. Use `POST /admin/expire-cohorts?now=<ISO date>` to process overdue open cohorts that did not reach quorum. Expiry returns creator and participant credits through refund transactions.
+6. As an authenticated configured admin, use `POST /admin/expire-cohorts?now=<ISO date>` with the CSRF token from the signed-in session to process overdue open cohorts that did not reach quorum. Expiry returns creator and participant credits through refund transactions.
 7. Check `/dashboard` while signed in to see the current user's cohort status, credit summary, and authorized unlocked links.
 
 Creators can optionally provide an event image URL/path. Blank image fields use the local default image at `/assets/default-cohort.png`.
@@ -113,7 +114,7 @@ Production-MVP launch work still includes Supabase Postgres persistence, hardene
 - Local persistence is in-memory by default. Restarting the dev server resets demo data unless `COHORT15_PERSISTENCE_FILE` is set.
 - Auth uses a dependency-free local session cookie and seeded local users in development; production mode uses Supabase Auth for Google and GitHub sign-in.
 - Production sessions expire after 8 hours and sign-out invalidates the server-side session record. Production protected forms use CSRF tokens; local development keeps the same simple form workflow without requiring provider secrets.
-- The admin expiry endpoint is a local/dev trigger, not a production scheduler or authorization model.
+- The admin expiry endpoint is an authenticated operational trigger, not a scheduler. Authorization comes from the persisted account email and server-side `COHORT15_ADMIN_EMAILS`; production requests also require CSRF protection.
 - Private links stay hidden for open cohorts. Active cohort links are visible only to the creator and committed participants.
 - Social promotion is local outbox generation only; real external posting is intentionally out of scope for this MVP.
 

@@ -159,7 +159,15 @@ test('MVP success path creates, promotes, unlocks, and exposes dashboards withou
 test('MVP expiry path refunds held creator and participant credits and removes expired cohorts from public discovery', async () => {
   const state = createDemoRepositories();
   const handler = createRequestHandler(state, {
-    now: () => now
+    now: () => now,
+    runtimeConfig: {
+      appEnv: 'development',
+      isProduction: false,
+      appUrl: 'http://localhost:3000',
+      auth: {},
+      stripe: {},
+      adminEmails: ['creator@example.test']
+    }
   });
   const creatorCookie = await signIn(handler, 'user-creator');
 
@@ -190,7 +198,9 @@ test('MVP expiry path refunds held creator and participant credits and removes e
 
   const expireResponse = await invoke(handler, {
     url: `/admin/expire-cohorts?now=${encodeURIComponent('2030-01-01T00:00:00.000Z')}`,
-    method: 'POST'
+    method: 'POST',
+    headers: { cookie: creatorCookie },
+    body: ''
   });
   assert.equal(expireResponse.status, 200);
   assert.deepEqual(JSON.parse(expireResponse.body), {

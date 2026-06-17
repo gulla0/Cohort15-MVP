@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, extname, join } from 'node:path';
 import { clearSessionCookie, createSessionManager } from '../auth/session.mjs';
+import { createAdminAuthorizer } from '../auth/admin.mjs';
 import { createSupabaseAuthAdapter, SUPABASE_AUTH_PROVIDERS } from '../auth/supabase.mjs';
 import { loadRuntimeConfig } from '../config/runtime.mjs';
 import {
@@ -235,6 +236,9 @@ export function createRequestHandler(state = createState(), options = {}) {
   const eventBrowsingService = createEventBrowsingService(state);
   const expireCohortsService = createExpireCohortsService(state);
   const showInterestService = createShowInterestService(state);
+  const adminAuthorizer = options.adminAuthorizer ?? createAdminAuthorizer({
+    adminEmails: runtimeConfig.adminEmails
+  });
   const sessionManager = options.sessionManager ?? createSessionManager({
     repositories: state.repositories,
     createSessionId: options.createSessionId,
@@ -594,10 +598,23 @@ export function createRequestHandler(state = createState(), options = {}) {
     }
 
     if (url.pathname === '/admin/expire-cohorts' && req.method === 'POST') {
-      if (runtimeConfig.isProduction) {
-        send(res, 403, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
-          error: 'Admin operations require production admin authorization before launch.'
+      const authenticatedUser = currentUser(req);
+      if (!authenticatedUser) {
+        send(res, 401, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
+          error: 'Authentication is required for admin operations.'
         }));
+        return;
+      }
+
+      if (!adminAuthorizer.isAdmin(authenticatedUser)) {
+        send(res, 403, { 'content-type': 'application/json; charset=utf-8' }, JSON.stringify({
+          error: 'Admin authorization is required for this operation.'
+        }));
+        return;
+      }
+
+      const values = parseFormBody(await readBodyBuffer(req));
+      if (rejectInvalidCsrf(req, res, values.csrfToken)) {
         return;
       }
 

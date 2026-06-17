@@ -44,7 +44,7 @@ Set these in the Render service environment, not in source control:
 | `COHORT15_APP_ENV` | no | Set to `production` on Render. |
 | `COHORT15_APP_URL` | no | Public app base URL, initially `https://cohort15-mvp.onrender.com` unless a verified custom domain replaces it. |
 | `COHORT15_SESSION_SECRET` | yes | At least 32 random characters reserved for production session hardening. Do not paste it into chat or source. |
-| `COHORT15_ADMIN_EMAILS` | no | Comma-separated admin emails for T019/T024 operational controls. |
+| `COHORT15_ADMIN_EMAILS` | no | Comma-separated Supabase-authenticated account emails allowed to invoke admin operations. Email matching is case-insensitive. |
 | `COHORT15_UPLOAD_MODE` | no | Use `disabled` until T026 hardens production image storage. `local` is rejected in production. |
 | `SUPABASE_URL` | no | Supabase project URL for T015/T017. |
 | `SUPABASE_ANON_KEY` | yes | Supabase public anon key used by auth-facing code. Treat as environment config, not source text. |
@@ -118,27 +118,35 @@ No secrets should be pasted into chat or committed to this repository. Enter sec
    - Confirm `COHORT15_APP_URL` is an `https://` URL. The production session cookie is `HttpOnly`, `SameSite=Lax`, `Secure`, scoped to `Path=/`, and expires after 8 hours with `Max-Age` and `Expires`.
    - Confirm no `COHORT15_COOKIE_DOMAIN` override is set unless a custom domain decision explicitly requires it. The current cookie is host-only because no `Domain` attribute is emitted.
    - Browser form mutations that require a signed-in user include a hidden `csrfToken` and production routes reject missing or mismatched tokens with HTTP 403.
-   - The production `/admin/expire-cohorts` POST currently fails closed with HTTP 403 until T019 adds explicit admin authorization.
    - Local files to review when changing this boundary: `src/auth/session.mjs`, `src/server/app.mjs`, `src/ui/home.mjs`, `src/ui/create-cohort.mjs`, `src/ui/cohorts.mjs`, `src/ui/dashboards.mjs`, `src/ui/auth.mjs`, and `tests/session-security.test.mjs`.
    - Verification checkpoint: after deployment, sign in through Supabase, open `/cohorts/new`, submit a cohort normally, sign out, and confirm the protected dashboard requires sign-in again. Do not inspect or share session cookie values or CSRF token values in chat.
-8. Stripe products, prices, and webhook:
+8. Admin identity and expiry operation:
+   - In Supabase, open https://supabase.com/dashboard, select the Cohort15 project, then go to `Authentication` -> `Users`.
+   - Confirm each intended administrator has signed in through Google or GitHub and note the exact account email shown there. Do not use a request parameter, display name, or unverified alternate email as the role source.
+   - In Render, open https://dashboard.render.com, then go to `Dashboard` -> `cohort15-mvp` -> `Environment`.
+   - Set `COHORT15_ADMIN_EMAILS` to the comma-separated administrator account emails. This value is configuration rather than an authentication secret, but it still belongs in Render rather than client code or request input.
+   - Click `Save and deploy` only when the listed emails have been reviewed. The app must restart with the updated environment before authorization changes take effect.
+   - Local implementation files: `src/auth/admin.mjs`, `src/server/app.mjs`, and `tests/admin-authorization.test.mjs`.
+   - Exact operation path: `POST COHORT15_APP_URL/admin/expire-cohorts`; an optional ISO timestamp may be supplied as `?now=<ISO date>`. Browser/form callers must send the hidden `csrfToken` from their authenticated app session. Never paste session cookies or CSRF tokens into chat.
+   - Verification checkpoint: sign in with an email listed in `COHORT15_ADMIN_EMAILS` and confirm an expiry request succeeds; sign in with an unlisted account and confirm HTTP 403; sign out and confirm HTTP 401. If no intended admin account exists in Supabase or its email is uncertain, stop here and resolve that identity before relying on the endpoint operationally.
+9. Stripe products, prices, and webhook:
    - Open https://dashboard.stripe.com.
    - Go to `Developers` -> `API keys` for `STRIPE_SECRET_KEY`.
    - Go to `Product catalog` and create prices for `$6` / 6 credits and `$12` / 14 credits; copy the resulting Price IDs.
    - Go to `Developers` -> `Webhooks` -> `Add endpoint`.
    - Endpoint URL: `COHORT15_APP_URL` + `STRIPE_WEBHOOK_PATH`, default `https://cohort15-mvp.onrender.com/stripe/webhook`.
    - Store the webhook signing secret in `STRIPE_WEBHOOK_SECRET`.
-9. LinkedIn:
+10. LinkedIn:
    - Open https://www.linkedin.com/developers/apps.
    - Create or select the Cohort15 app.
    - In `Auth`, add the redirect URL required by the LinkedIn adapter when T023 defines it.
    - Store client ID and client secret in Render.
-10. X:
+11. X:
    - Open https://developer.x.com/en/portal/dashboard.
    - Create or select the Cohort15 project/app.
    - Configure OAuth 2.0 callback URLs when T023 defines the final adapter route.
    - Store API key/client ID and secret in Render.
-11. Email provider:
+12. Email provider:
    - Select the launch email provider before T023.
    - Verify `EMAIL_FROM_ADDRESS` in that provider's dashboard.
    - Store the provider API key in Render.
