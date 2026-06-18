@@ -96,7 +96,7 @@
     {
       "id": "L002",
       "title": "Add isolated lofi persistence and Supabase migration",
-      "status": "not_started",
+      "status": "done",
       "phase": "Domain and Data Isolation",
       "dependencies": [
         "L001"
@@ -139,8 +139,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when isolated data access is tested; do not build forms or deploy a live database.",
-      "evidence": "Pending.",
-      "notes": "Uses a new Supabase project in production. No deleted production migration is an input."
+      "evidence": "2026-06-18: isolated local repositories, server-only Supabase adapter, atomic interest/quorum RPC, lofi-only migration, RLS posture, privacy boundaries, and focused concurrency/idempotency tests implemented; npm run check passed.",
+      "notes": "Complete. Uses a new Supabase project in production. L003 is the next ready task."
     },
     {
       "id": "L003",

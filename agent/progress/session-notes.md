@@ -49,3 +49,14 @@ No open implementation questions remain before L001.
 - Kept persistence, HTTP routes, and UI outside this task wave.
 
 Verification completed with 12 focused domain tests and the full repository check. L002 is next.
+
+## 2026-06-18 — L002 isolated lofi persistence
+
+- Added an in-memory lofi store and repository layer for cohorts, interests, and notification deliveries only.
+- Added privacy-safe public reads with derived interest counts and server-private email fields.
+- Serialized local interest acceptance per cohort and added equivalent transaction-safe Supabase RPC behavior for creator, duplicate, expiry, already-met, and quorum-transition outcomes.
+- Added a server-only PostgREST adapter using service-role credentials and isolated `cohort15_lofi_*` objects.
+- Added the three-table migration with normalized emails, unique interest/idempotency constraints, RLS, no browser policies, and service-role-only RPC execution.
+- Manager review tightened security-definer permissions, search-path isolation, persisted timestamp hydration, database normalization, and local lock cleanup.
+
+Verification completed with 8 focused persistence/Supabase tests and the full repository check. L003 is next.

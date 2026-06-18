@@ -50,3 +50,13 @@ Verification: `npm run check` passed with 11 aligned tasks and 5 shell tests.
 - Added focused boundary, invalid-date, month-end, DST, lifecycle, normalization, and privacy tests.
 
 Verification: `node --test tests/domain-validation.test.mjs` passed with 12 tests; `npm run check` passed with 17 tests.
+
+## 2026-06-18 — L002 isolated lofi persistence and migration
+
+- Added isolated local repositories for cohorts, interests, and notification deliveries.
+- Added atomic per-cohort interest acceptance and exactly-once quorum transition behavior.
+- Added a server-only Supabase PostgREST adapter and transaction-safe interest RPC.
+- Added the three-table `cohort15_lofi_*` migration with normalized-email and idempotency uniqueness, RLS, no browser policies, and service-role-only access.
+- Added focused privacy, conflict, concurrency, adapter, notification-outcome, and migration-isolation tests.
+
+Verification: `node --test tests/persistence.test.mjs tests/supabase-postgres.test.mjs` passed with 8 tests; `npm run check` passed.
