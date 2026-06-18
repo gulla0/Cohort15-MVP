@@ -13,7 +13,7 @@ Advisory context router for the lofi MVP branch. Verify against code and `tasks.
 | `agent/progress/task-status.md` | Readable status | Derived status view |
 | `docs/human-tasks/lofi-mvp-launch.md` | Separate Supabase/Render/Resend/DNS setup | Human operations source |
 
-`docs/cohort15-mvp-spec-v3.md` and Git history describe the later production MVP. They are historical on this branch and must not override the lofi spec.
+Git history contains the later production MVP. It must not override the lofi spec on this branch.
 
 ## Agent Workflow
 
@@ -29,12 +29,12 @@ Advisory context router for the lofi MVP branch. Verify against code and `tasks.
 
 | Area | Current files | Lofi direction |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Reuse Node HTTP routing/startup; remove auth, credits, payments, admin, uploads, and social from the runtime path. |
-| Domain | `src/domain/constants.mjs`, `models.mjs`, `validation.mjs` | L001 replaces 14-day/credit/cap/image/private-viewer assumptions with seven-day anonymous lofi rules. |
-| Persistence | `src/persistence/*`, `supabase/migrations/*` | Reuse repository/store/PostgREST patterns; L002 creates isolated `cohort15_lofi_*` tables and does not touch existing tables. |
-| Create flow | `src/services/create-cohort.mjs`, `src/ui/create-cohort.mjs` | Reuse form fields and validation patterns; remove auth, credits, max participants, images, and social; add private creator email and abuse controls. |
-| Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs` | Adapt supplied marketing page, place full listing on `/`, sort active first, add status filters and public quorum progress. |
-| Interest flow | `src/services/show-interest.mjs`, cohort detail route/UI | Replace signed-in user/credit logic with normalized email-only interest and public link unlock. |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Clean lofi-only Node shell with home, styles, health, and 404 behavior. |
+| Domain | not yet created | L001 adds the seven-day anonymous lofi domain from the product spec. |
+| Persistence | not yet created | L002 creates isolated repositories and `cohort15_lofi_*` tables. |
+| Create flow | not yet created | L003 adds private creator email, retained form fields, timezone capture, and abuse controls. |
+| Browse flow | `src/ui/home.mjs`, `src/ui/styles.css` shell only | L004 adds listings, filters, detail views, local times, and public quorum progress. |
+| Interest flow | not yet created | L005 adds normalized email-only interest and public link unlock. |
 | Email | No lofi adapter yet | L006 adds a small Resend HTTP adapter with fake-provider tests. |
 | Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration and stale route removal. |
 
@@ -43,7 +43,7 @@ Advisory context router for the lofi MVP branch. Verify against code and `tasks.
 - Stack remains dependency-free Node.js ES modules with server-rendered HTML.
 - Approved meeting hosts already exist in `ALLOWED_MEETING_LINK_HOSTS`: Google Meet, Zoom, Microsoft Teams, Discord, and Slack.
 - Existing browser-local time enhancement can be reused, but creation must submit the browser timezone/absolute timestamp explicitly.
-- Existing Supabase adapter uses server-side REST with a service-role key; the lofi deployment must use a new project and lofi-only table names.
+- The removed Supabase adapter pattern remains available in Git history; L002 may reuse the server-side REST approach with a new project and lofi-only table names.
 - The supplied marketing source is `/Users/gzero/Desktop/cohort15/Marketing/early-interest-landing-page/index.html`; reuse its visual language and Google Analytics ID `G-LF22TLDSBV` without editing that external file.
 
 ## Privacy And Isolation Traps
@@ -57,6 +57,6 @@ Advisory context router for the lofi MVP branch. Verify against code and `tasks.
 
 ## Current State
 
-- Planning reset completed on 2026-06-18.
+- Planning reset and clean shell L000 completed on 2026-06-18.
 - Product implementation has not started.
 - Next ready task: L001.

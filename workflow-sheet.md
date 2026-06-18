@@ -6,7 +6,7 @@ Domain and Data Isolation
 
 ## Current Critical Path
 
-L001 → L002 → L003/L004 → L005 → L006 → L007 → L008 → L009 → L010
+L000 (done) → L001 → L002 → L003/L004 → L005 → L006 → L007 → L008 → L009 → L010
 
 ## Ready Task Candidates
 

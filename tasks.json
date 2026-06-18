@@ -9,11 +9,58 @@
   ],
   "tasks": [
     {
+      "id": "L000",
+      "title": "Establish the clean lofi application shell",
+      "status": "done",
+      "phase": "Foundation Cleanup",
+      "dependencies": [],
+      "objective": "Remove the legacy production-MVP runtime and leave a runnable lofi-only Node application shell for incremental implementation.",
+      "inputs": [
+        "src",
+        "tests",
+        "supabase/migrations",
+        "public/assets",
+        "docs",
+        "render.yaml",
+        ".env.example"
+      ],
+      "write_scope": [
+        "minimal config/server/UI shell",
+        "foundation tests",
+        "legacy runtime deletion",
+        "lofi deployment placeholders",
+        "workflow tracker alignment"
+      ],
+      "authority": [
+        "Delete auth, credits, payments, dashboards, social promotion, uploads, old persistence/domain/services, legacy tests, and production-MVP migrations/runbooks.",
+        "Retain scripts, agent workflow, lofi planning artifacts, and a branded runnable shell.",
+        "Do not implement cohort domain, persistence, forms, interest, or email behavior."
+      ],
+      "acceptance_criteria": [
+        "Only lofi shell modules remain under src.",
+        "Legacy product routes return 404.",
+        "Home, styles, and health routes work.",
+        "Environment and Render placeholders use lofi-specific names.",
+        "Old migrations, production runbooks, assets, and tests are removed.",
+        "npm run check passes."
+      ],
+      "verification": [
+        "Run npm run check",
+        "Inspect repository tree for legacy runtime artifacts",
+        "Smoke test home and health routes"
+      ],
+      "stop_condition": "Stop when the clean shell is runnable and ready for L001.",
+      "evidence": "2026-06-18: legacy runtime removed; lofi home/health/style shell and focused tests added; npm run check passed.",
+      "notes": "Git history preserves all removed production-MVP code and documentation."
+    },
+    {
       "id": "L001",
       "title": "Define the lofi domain and validation policy",
       "status": "not_started",
       "phase": "Domain and Data Isolation",
-      "dependencies": [],
+      "dependencies": [
+        "L000"
+      ],
       "objective": "Replace production-MVP domain assumptions with the anonymous lofi cohort, lifecycle, email, scheduling, quorum, and public-link rules.",
       "inputs": [
         "docs/cohort15-lofi-mvp-spec.md",
@@ -29,7 +76,7 @@
         "focused domain tests"
       ],
       "authority": [
-        "Remove credits, maximum participants, images, social status, and authenticated link-authorization fields from the lofi domain path.",
+        "Do not introduce credits, maximum participants, images, social status, or authenticated link-authorization fields into the lofi domain.",
         "Keep categories, audience, skill level, recurrence, duration, meeting count, and approved meeting hosts where reusable.",
         "Do not change persistence, routes, or UI in this task."
       ],
@@ -118,7 +165,7 @@
         "focused create tests"
       ],
       "authority": [
-        "Remove auth, credits, image upload, and social outbox behavior from creation.",
+        "Do not introduce auth, credits, image upload, or social outbox behavior into creation.",
         "Accept creator email privately and normalize it.",
         "Limit accepted cohort creations to five per IP per rolling hour.",
         "Redirect successful creation to the cohort detail page.",
@@ -315,7 +362,7 @@
       "authority": [
         "Name the Render service cohort15-lofi-mvp and target this branch until merge/deployment policy changes.",
         "Require lofi-specific Supabase URL/service key and Resend key only in production.",
-        "Remove production requirements for Supabase Auth, sessions, admin, Stripe, social publishing, and uploads.",
+        "Do not add production requirements for Supabase Auth, sessions, admin, Stripe, social publishing, or uploads.",
         "Do not create provider resources or change DNS."
       ],
       "acceptance_criteria": [
@@ -367,7 +414,7 @@
         "Automated tests cover create, browse, filter, interest, duplicate rejection, creator rejection, quorum unlock, seven-day expiry, final-meeting link hiding, and local-time labels.",
         "Tests cover both IP limits and honeypots.",
         "Rendered pages and logs do not expose emails, IPs, secrets, or pre-quorum links.",
-        "Old auth/credits/payments/social/images are unreachable in the lofi runtime.",
+        "Auth, credit, payment, social, image, dashboard, and admin routes remain absent from the lofi runtime.",
         "npm run check passes."
       ],
       "verification": [

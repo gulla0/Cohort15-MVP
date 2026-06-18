@@ -1,9 +1,9 @@
 {
-  "name": "cohort15-mvp",
+  "name": "cohort15-lofi-mvp",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Cohort15 MVP web app foundation.",
+  "description": "Minimal Cohort15 lofi MVP application shell.",
   "scripts": {
     "dev": "node src/server/app.mjs",
     "start": "node src/server/app.mjs",

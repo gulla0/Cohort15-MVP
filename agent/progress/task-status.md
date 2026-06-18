@@ -4,6 +4,7 @@
 
 | Task | Title | Status | Dependencies Ready | Evidence |
 |---|---|---|---|---|
+| L000 | Establish the clean lofi application shell | done | yes | Legacy runtime removed; focused shell tests and full checks passed. |
 | L001 | Define the lofi domain and validation policy | not_started | yes | Pending |
 | L002 | Add isolated lofi persistence and Supabase migration | not_started | no | Pending |
 | L003 | Build anonymous cohort creation | not_started | no | Pending |

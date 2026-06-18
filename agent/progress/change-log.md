@@ -10,3 +10,12 @@
 - Added an isolated lofi provider/deployment human-task runbook.
 
 Verification: `npm run check` passed with 85 tests.
+
+## 2026-06-18 — L000 clean lofi application shell
+
+- Replaced the production server with home, styles, health, and 404-only routes.
+- Replaced runtime configuration and Render placeholders with lofi-specific names.
+- Removed auth, payments, credits, dashboards, social promotion, images, production persistence/domain/services, old migrations, production runbooks/spec, and legacy tests.
+- Added focused shell and runtime configuration tests.
+
+Verification: `npm run check` passed with 5 focused shell tests. Route-level smoke coverage verified home, styles, health, 404 behavior, and legacy-route removal. Interactive browser smoke was unavailable because the sandbox denied local port binding.

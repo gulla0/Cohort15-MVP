@@ -14,8 +14,8 @@ Decided:
 - Reset canonical planning to the pre-production lofi MVP.
 - Preserve the dependency-free Node/repository/Supabase patterns and replace the production runtime flow incrementally.
 - Delete stale production-MVP task and feedback artifacts from the active workflow; Git history remains the archive.
-- Keep the old production spec only as explicitly historical reference.
+- Remove the old production spec and runtime artifacts; Git history is the only archive.
 - Use a new Supabase project, new Render service, lofi-specific tables, Resend, and `cohort15.com`.
 - Start implementation with L001 and execute tasks one at a time in later chats.
 
-No product code was implemented in this setup session.
+Follow-up cleanup established a runnable lofi-only shell and removed the production-MVP runtime before L001.

@@ -1,60 +1,65 @@
-import assert from 'node:assert/strict';
 import test from 'node:test';
-import { handleRequest } from '../src/server/app.mjs';
-import { getFoundationSummary } from '../src/domain/constants.mjs';
+import assert from 'node:assert/strict';
+import { createRequestHandler } from '../src/server/app.mjs';
+import { renderHomePage } from '../src/ui/home.mjs';
 
-async function invoke(path) {
-  const chunks = [];
-  const res = {
-    statusCode: 0,
-    headers: {},
-    writeHead(statusCode, headers) {
-      this.statusCode = statusCode;
-      this.headers = headers;
-    },
-    end(body) {
-      chunks.push(body ?? '');
-    }
-  };
+function invoke(handler, { url = '/', method = 'GET' } = {}) {
+  return new Promise((resolve, reject) => {
+    const req = { url, method, headers: {} };
+    const response = {
+      status: undefined,
+      headers: undefined,
+      body: '',
+      writeHead(status, headers) {
+        this.status = status;
+        this.headers = headers;
+      },
+      end(body = '') {
+        this.body = String(body);
+        resolve(this);
+      }
+    };
 
-  await handleRequest({ url: path }, res);
-
-  return {
-    status: res.statusCode,
-    headers: res.headers,
-    body: chunks.join('')
-  };
+    Promise.resolve(handler(req, response)).catch(reject);
+  });
 }
 
-test('foundation summary exposes the initial app areas', () => {
-  assert.deepEqual(getFoundationSummary().areas, ['domain', 'persistence', 'server', 'ui']);
+const config = Object.freeze({
+  appEnv: 'test',
+  appUrl: 'http://localhost:3000',
+  googleAnalyticsId: 'G-TEST'
 });
 
-test('server renders the MVP foundation shell and health endpoint', async () => {
-  const home = await invoke('/');
+test('lofi home renders branded foundation without legacy product surfaces', () => {
+  const html = renderHomePage({ googleAnalyticsId: 'G-TEST' });
+
+  assert.match(html, /Form small, high-intent online groups/);
+  assert.match(html, /seven days/);
+  assert.match(html, /G-TEST/);
+  assert.doesNotMatch(html, /Sign in|Buy Credits|Stripe|Dashboard|event image/i);
+});
+
+test('shell exposes only home, styles, health, and 404 routes', async () => {
+  const handler = createRequestHandler({ config });
+
+  const home = await invoke(handler);
   assert.equal(home.status, 200);
   assert.match(home.body, /Cohort15/);
-  assert.match(home.body, /href="\/credits\/buy">Buy Credits<\/a>/);
 
-  const health = await invoke('/health');
-  assert.equal(health.status, 200);
-  assert.equal(JSON.parse(health.body).ok, true);
-});
-
-test('buy credits page is reachable and requires an account before checkout', async () => {
-  const page = await invoke('/credits/buy');
-  assert.equal(page.status, 200);
-  assert.match(page.body, /<h1 id="page-title">Buy Credits<\/h1>/);
-  assert.match(page.body, /Choose a one-time credit package/);
-  assert.match(page.body, /Sign in to buy credits/);
-  assert.doesNotMatch(page.body, /payment succeeded/i);
-});
-
-test('primary navigation keeps buy credits aligned with other links', async () => {
-  const styles = await invoke('/assets/styles.css');
-
+  const styles = await invoke(handler, { url: '/assets/styles.css' });
   assert.equal(styles.status, 200);
-  assert.match(styles.body, /\.topbar-links\s*{[^}]*align-items:\s*center;/s);
-  assert.match(styles.body, /\.topbar-links a\s*{[^}]*display:\s*inline-flex;[^}]*align-items:\s*center;[^}]*min-height:\s*34px;/s);
-  assert.match(styles.body, /@media \(max-width: 760px\)\s*{[\s\S]*\.topbar-links\s*{[^}]*justify-content:\s*flex-start;/);
+  assert.match(styles.headers['content-type'], /text\/css/);
+
+  const health = await invoke(handler, { url: '/health' });
+  assert.equal(health.status, 200);
+  assert.deepEqual(JSON.parse(health.body), {
+    ok: true,
+    app: 'cohort15-lofi-mvp',
+    environment: 'test'
+  });
+
+  for (const legacyPath of ['/auth/sign-in', '/credits/buy', '/dashboard', '/admin/expire-cohorts']) {
+    const response = await invoke(handler, { url: legacyPath });
+    assert.equal(response.status, 404);
+  }
 });

@@ -6,7 +6,7 @@ Cohort15's lofi MVP is a public interest-gathering application deployed before t
 
 Product behavior source: `docs/cohort15-lofi-mvp-spec.md`.
 
-The prior credit/auth/payment specification remains historical context in `docs/cohort15-mvp-spec-v3.md`; it is not authoritative for this branch.
+The prior credit/auth/payment specification and implementation remain available only through Git history; they are not authoritative for this branch.
 
 ## Goal
 
@@ -42,6 +42,7 @@ Deploy the smallest real product that validates:
 
 ### Phase 1 — Domain And Data Isolation
 
+- L000: establish the clean lofi application shell. (complete)
 - L001: simplify the lofi domain and validation policy.
 - L002: add isolated lofi persistence and Supabase migration.
 
@@ -105,4 +106,4 @@ Explicitly defer:
 
 ## First Ready Task
 
-Start with L001. It establishes the field and lifecycle contract required by every later implementation task.
+L000 is complete. Start with L001; it establishes the field and lifecycle contract required by every later implementation task.

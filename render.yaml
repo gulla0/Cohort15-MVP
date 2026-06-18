@@ -1,50 +1,19 @@
 services:
   - type: web
-    name: cohort15-mvp
+    name: cohort15-lofi-mvp
     runtime: node
     plan: starter
+    branch: codex/do-not-merge-lofi-mvp
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /
+    healthCheckPath: /health
     autoDeploy: false
     envVars:
       - key: NODE_VERSION
         value: "24"
-      - key: COHORT15_APP_ENV
+      - key: COHORT15_LOFI_APP_ENV
         value: production
-      - key: COHORT15_APP_URL
-        value: https://cohort15-mvp.onrender.com
-      - key: COHORT15_UPLOAD_MODE
-        value: disabled
-      - key: COHORT15_SESSION_SECRET
-        sync: false
-      - key: COHORT15_ADMIN_EMAILS
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
-      - key: SUPABASE_ENABLE_MAGIC_LINK
-        value: "false"
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: STRIPE_PRICE_6_CREDITS
-        sync: false
-      - key: STRIPE_PRICE_14_CREDITS
-        sync: false
-      - key: LINKEDIN_CLIENT_ID
-        sync: false
-      - key: LINKEDIN_CLIENT_SECRET
-        sync: false
-      - key: X_API_KEY
-        sync: false
-      - key: X_API_SECRET
-        sync: false
-      - key: EMAIL_PROVIDER_API_KEY
-        sync: false
-      - key: EMAIL_FROM_ADDRESS
-        sync: false
+      - key: COHORT15_LOFI_APP_URL
+        value: https://cohort15.com
+      - key: COHORT15_LOFI_GA_MEASUREMENT_ID
+        value: G-LF22TLDSBV

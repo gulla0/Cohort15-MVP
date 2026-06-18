@@ -5,8 +5,9 @@
 ## Execution Graph
 
 ```text
-L001 Lofi domain and validation
-  └─ L002 Isolated persistence and Supabase migration
+L000 Clean lofi application shell (done)
+  └─ L001 Lofi domain and validation
+       └─ L002 Isolated persistence and Supabase migration
        ├─ L003 Anonymous cohort creation
        └─ L004 Landing, listing, and lifecycle views
             └──────────────┐
@@ -20,9 +21,17 @@ L009 ──────────────────────── L0
 
 ## Atomic Task Contracts
 
-### L001 — Define the lofi domain and validation policy
+### L000 — Establish the clean lofi application shell
 
 - Depends on: none
+- Status: done
+- Owned: minimal config/server/UI shell, focused tests, legacy runtime deletion, lofi deployment placeholders
+- Delivered: runnable home/styles/health shell with auth, credits, payments, dashboards, social, images, old persistence/domain/services, migrations, runbooks, and tests removed
+- Stops before: lofi domain and product behavior
+
+### L001 — Define the lofi domain and validation policy
+
+- Depends on: L000
 - Owns: domain constants, models, validation, focused tests
 - Delivers: seven-day lifecycle, quorum 1–15, no participant cap, normalized creator email, approved links, meeting timing, final-meeting link cutoff
 - Stops before: persistence and HTTP integration
@@ -66,7 +75,7 @@ L009 ──────────────────────── L0
 
 - Depends on: L002, L006
 - Owns: runtime config, startup, `.env.example`, `render.yaml`, deployment docs/tests
-- Delivers: lofi-only environment contract with no auth/Stripe/social/image dependencies
+- Delivers: finalized lofi-only Supabase/Resend environment contract
 - Stops before: provider or DNS changes
 
 ### L008 — Complete lofi privacy, abuse, and end-to-end verification

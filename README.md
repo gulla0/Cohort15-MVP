@@ -6,7 +6,7 @@ Visitors will be able to create cohort requests or show interest with a mandator
 
 ## Setup Status
 
-Planning is complete; product implementation has not started. The current source still contains reusable production-MVP code that L001–L008 will simplify task by task.
+Planning and the clean lofi shell are complete. Product behavior begins with L001; no production-MVP runtime code remains in this branch.
 
 - Product rules: `docs/cohort15-lofi-mvp-spec.md`
 - Plan: `plan.md`
