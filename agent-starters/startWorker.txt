@@ -22,11 +22,12 @@ WORKER RULES
 6. Inspect only files needed for the assigned task.
 7. Do not make product, architecture, or workflow decisions.
 8. If implementation requires a decision outside the task contract, stop and report the blocker to the manager.
-9. Run the narrowest meaningful verification available for the task. Use `npm run check` only when assigned or when your scoped changes affect shared workflow artifacts.
-10. If `npm run check` fails because of the workflow guardrail, report the stale feedback/index mismatch to the manager; do not expand tracker edits unless authorized.
-11. Do not create git commits unless the manager explicitly includes commit responsibility in the task contract.
-12. Return concrete evidence, not broad claims.
-13. If the task reveals required human action outside the repository, report it to the manager. If the task contract authorizes you to document that work, create or update the checklist only in `docs/human-tasks/`, include a `## Human Setup Checklist` section, and register the file in `docs/human-tasks/README.md`. Do not expand your write scope to do this without manager authorization.
+9. Read every assigned input before implementation. If an input is missing, stale, or contradicts the canonical specification, stop and report the exact path and conflict.
+10. Run the narrowest meaningful verification available for the task. Use `npm run check` only when assigned or when your scoped changes affect shared workflow artifacts.
+11. If `npm run check` fails because of the workflow guardrail, report the exact tracker mismatch to the manager; do not expand tracker edits unless authorized.
+12. Do not create git commits unless the manager explicitly includes commit responsibility in the task contract.
+13. Return concrete evidence, not broad claims.
+14. If the task reveals required human action outside the repository, report it to the manager. If the task contract authorizes you to document that work, create or update the checklist only in `docs/human-tasks/`, include a `## Human Setup Checklist` section, and register the file in `docs/human-tasks/README.md`. Do not expand your write scope to do this without manager authorization.
 
 ==================================================
 REQUIRED TASK CONTRACT

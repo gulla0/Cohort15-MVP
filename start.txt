@@ -110,7 +110,7 @@ After approval, assume the correct manager role by following its starter prompt.
 
 The manager owns planning, task selection, worker delegation, verification, tracker updates, and user-facing completion report.
 
-Managers should use `npm run check` for final verification when their work changes product code or agent workflow artifacts. That command includes the agent workflow guardrail, which fails if feedback issues marked `done` in `agent/feedback/issue-index.md` are not reflected in `agent/knowledge/index.md`.
+Managers should use `npm run check` for final verification when their work changes product code or agent workflow artifacts. The workflow guard validates task contracts and dependencies, task-status/graph alignment, ready-task input existence, human-task placement/indexing, and feedback-to-knowledge consistency.
 
 When manager-role work completes successfully, the manager should create an intentional git commit for the completed task or issue wave after verification and tracker updates. Do not include unrelated user changes in the commit.
 

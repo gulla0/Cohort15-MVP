@@ -8,15 +8,14 @@
 L000 Clean lofi application shell (done)
   └─ L001 Lofi domain and validation
        └─ L002 Isolated persistence and Supabase migration
-       ├─ L003 Anonymous cohort creation
-       └─ L004 Landing, listing, and lifecycle views
-            └──────────────┐
-L003 ──────────────────────┴─ L005 Anonymous interest and quorum unlock
-L003 + L005 ───────────────── L006 Resend notifications
-L002 + L006 ───────────────── L007 Isolated production config/deployment
-L004 + L005 + L006 + L007 ── L008 Privacy, abuse, and end-to-end verification
-L008 ──────────────────────── L009 Human provider setup and deployment
-L009 ──────────────────────── L010 Production smoke test
+            └─ L003 Anonymous cohort creation
+                 └─ L004 Landing, listing, and lifecycle views
+                      └─ L005 Anonymous interest and quorum unlock
+                           └─ L006 Resend notifications
+                                └─ L007 Isolated production config/deployment
+                                     └─ L008 Privacy, abuse, and end-to-end verification
+                                          └─ L009 Human provider setup and deployment
+                                               └─ L010 Production smoke test
 ```
 
 ## Atomic Task Contracts
@@ -33,55 +32,55 @@ L009 ──────────────────────── L0
 
 - Depends on: L000
 - Owns: domain constants, models, validation, focused tests
-- Delivers: enumerated creation fields, seven-day lifecycle, quorum 1–15, no participant cap, normalized creator email, exact approved hosts, public meeting schedule, and final-meeting link cutoff
+- Delivers: exact records/enums, all validation limits, seven-day lifecycle, quorum 1–15, recurrence/month-end/DST behavior, exact approved hosts, public schedule serialization, and final-meeting link cutoff
 - Stops before: persistence and HTTP integration
 
 ### L002 — Add isolated lofi persistence and Supabase migration
 
 - Depends on: L001
 - Owns: lofi repositories, Supabase mapping, `cohort15_lofi_*` migration, persistence tests
-- Delivers: anonymous cohort/interest persistence, private emails, duplicate database constraint, notification outcome storage
+- Delivers: three isolated lofi tables, private emails, atomic concurrent interest/quorum transition, duplicate/idempotency constraints, and notification outcome storage; no rate-limit table
 - Stops before: public forms and live provider setup
 
 ### L003 — Build anonymous cohort creation
 
 - Depends on: L002
 - Owns: create service/route/form, timezone capture, honeypot, five-per-hour IP limit, tests
-- Delivers: no-auth creation and redirect to public detail
+- Delivers: no-auth creation, documented validation/status responses, hashed-IP five-success rolling limit, honeypot handling, and 303 redirect
 - Stops before: interest and live email
 
 ### L004 — Build the landing page, listing, and lifecycle views
 
-- Depends on: L002
+- Depends on: L003
 - Owns: supplied landing-page adaptation, public browsing, filters, sorting, local-time rendering, safe link display, tests
 - Delivers: full listing on `/`, All/Active/Expired filters, active-first default, persistent expired posts, and meeting schedules visible throughout
 - Stops before: form mutations
 
 ### L005 — Build anonymous interest and quorum unlock
 
-- Depends on: L003, L004
+- Depends on: L004
 - Owns: interest service/route/form, duplicate and creator exclusion, honeypot, ten-per-hour IP limit, tests
-- Delivers: email-only interest and immediate public link unlock at quorum
+- Delivers: email-only interest, atomic conflict handling, hashed-IP ten-success rolling limit, and immediate public link unlock at quorum
 - Stops before: notification delivery
 
 ### L006 — Add Resend confirmation and quorum notifications
 
-- Depends on: L003, L005
+- Depends on: L005
 - Owns: email adapter/composition/config/integration, delivery outcomes, tests
 - Delivers: creator confirmation, participant confirmation, quorum notifications
 - Stops before: live Resend dashboard configuration
 
 ### L007 — Isolate lofi production configuration and deployment
 
-- Depends on: L002, L006
+- Depends on: L006
 - Owns: runtime config, startup, `.env.example`, `render.yaml`, deployment docs/tests
 - Delivers: finalized lofi-only Supabase/Resend environment contract
 - Stops before: provider or DNS changes
 
 ### L008 — Complete lofi privacy, abuse, and end-to-end verification
 
-- Depends on: L004, L005, L006, L007
-- Owns: integration tests, privacy/abuse coverage, obsolete runtime route removal, local smoke verification
+- Depends on: L007
+- Owns: integration tests, privacy/abuse/concurrency coverage, launch-blocking fixes, local smoke verification
 - Delivers: local launch gate with `npm run check` passing
 - Stops before: external deployment
 
@@ -101,7 +100,7 @@ L009 ──────────────────────── L0
 
 ## Execution Rules
 
-- Execute one task at a time unless a manager proves write scopes are disjoint.
+- Execute exactly one task per implementation chat; do not create parallel task waves.
 - Each implementation chat starts through `start.txt` or directly with `agent-starters/startNewManager.txt`.
 - The manager selects the next unblocked task from `tasks.json`; workers do not select tasks.
 - Update `tasks.json`, `agent/progress/task-status.md`, session notes, and change log only after implementation and verification.

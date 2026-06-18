@@ -28,3 +28,14 @@ Verification: `npm run check` passed with 5 focused shell tests. Route-level smo
 - Aligned task contracts, graph, plan, and knowledge index with those decisions.
 
 Verification: `npm run check` passed with 5 tests.
+
+## 2026-06-18 — End-to-end agent readiness hardening
+
+- Completed the domain, validation, recurrence, lifecycle, route, ordering, persistence, abuse, and notification policies.
+- Corrected stale and contradictory L002 inputs.
+- Replaced generic task write scopes with concrete paths and strengthened acceptance boundaries through L010.
+- Updated setup-manager, implementation-manager, worker, router, usage, knowledge, and README guidance.
+- Added automated task-ledger, dependency-cycle, tracker-alignment, graph-coverage, and ready-input checks.
+- Linearized the task graph to one task per chat with no parallel shared-file wave.
+
+Verification: `npm run check` passed with 11 aligned tasks and 5 shell tests.

@@ -17,6 +17,8 @@ Planning and the clean lofi shell are complete. Product behavior begins with L00
 
 Next ready task: L001.
 
+The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
+
 ## Intended Stack
 
 - dependency-free Node.js 24 HTTP server and ES modules

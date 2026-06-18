@@ -18,12 +18,13 @@ PRIMARY OBJECTIVE
 
 Turn messy product or architecture input into usable repository planning artifacts:
 
-1. `plan.md`
-2. `atomic-task-graph.md`
-3. `tasks.json`
-4. `agent/knowledge/index.md`
-5. `agent/progress/task-status.md`
-6. initial progress notes where useful
+1. a canonical product specification when behavior needs a durable source
+2. `plan.md`
+3. `atomic-task-graph.md`
+4. `tasks.json`
+5. `agent/knowledge/index.md`
+6. `agent/progress/task-status.md`
+7. initial progress notes where useful
 
 The output should be good enough for `start.txt` to transition into `agent-starters/startNewManager.txt` for implementation without rediscovering the product from scratch.
 
@@ -53,15 +54,18 @@ SETUP RULES
 3. Prefer a small MVP task graph over a complete speculative roadmap.
 4. Do not invent product behavior. If a detail is unclear but non-blocking, record the smallest safe assumption.
 5. Keep implementation tasks atomic and bounded.
-6. Every task in `tasks.json` must include objective, inputs, write scope, authority, acceptance criteria, verification, stop condition, dependencies, and status.
-7. Use `tasks.json` as the canonical task ledger.
-8. Keep `atomic-task-graph.md` aligned with `tasks.json`.
-9. Keep `agent/progress/task-status.md` aligned with `tasks.json`.
-10. Populate `agent/knowledge/index.md` with concrete context routes from the actual repo, not generic advice.
-11. If the repository has `npm run check`, use it after setup artifact changes when practical; it includes the agent workflow guardrail for stale feedback-to-knowledge handoffs.
-12. After successful setup verification, create a git commit containing only the setup artifacts changed by this setup wave.
-13. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
-14. Stop after setup artifacts are ready. Report the next recommended starter prompt.
+6. Resolve implementation-policy boundaries that would otherwise force a manager or worker to invent behavior, including validation limits, boundary timestamps, ordering, concurrency, idempotency, error behavior, and persistence ownership. Record safe engineering defaults when the user has not made those product decisions.
+7. Every task in `tasks.json` must include objective, inputs, write scope, authority, acceptance criteria, verification, stop condition, dependencies, and status.
+8. Every task input must be an existing artifact or an explicit output expected from a listed dependency. A path the task itself will create belongs in write scope, not inputs.
+9. Remove stale references when files are deleted or tasks are replaced.
+10. Use `tasks.json` as the canonical task ledger.
+11. Keep `atomic-task-graph.md` aligned with `tasks.json`.
+12. Keep `agent/progress/task-status.md` aligned with `tasks.json`.
+13. Populate `agent/knowledge/index.md` with concrete context routes from the actual repo, not generic advice.
+14. If the repository has `npm run check`, use it after setup artifact changes when practical; it includes task-ledger, tracker, human-task, and feedback guardrails.
+15. After successful setup verification, create a git commit containing only the setup artifacts changed by this setup wave.
+16. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
+17. Stop after setup artifacts are ready. Report the next recommended starter prompt.
 
 ==================================================
 SETUP LOOP
@@ -87,6 +91,8 @@ If blocked, ask concise questions and stop.
 If not blocked, continue and record assumptions.
 
 STEP 3 - Create Plan
+Create or update the canonical product specification with locked behavior and engineering boundary policies needed by the first task wave.
+
 Update `plan.md` with:
 - project description
 - product constraints
@@ -109,6 +115,8 @@ Task quality bar:
 - narrow verification
 - clear stop condition
 - dependencies that reflect actual sequencing
+- all behavior-changing boundary cases resolved in the product specification or task contract
+- no stale input paths; dependency-produced inputs are named explicitly
 
 Prefer 5-12 useful MVP tasks over a large speculative backlog.
 
@@ -129,7 +137,7 @@ Update:
 
 STEP 7 - Verify
 - Run `npm run check` if available and practical.
-- If the workflow guardrail fails, reconcile `agent/feedback/issue-index.md` and `agent/knowledge/index.md` before handoff.
+- If the workflow guardrail fails, reconcile the exact task, tracker, input, human-task, or feedback mismatch before handoff.
 - If verification cannot run, explain why in the report.
 
 STEP 8 - Commit

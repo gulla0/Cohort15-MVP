@@ -132,6 +132,6 @@ While acting as the router, the agent does not own:
 
 Those belong to the selected manager role after approval.
 
-Managers should know that `npm run check` includes the agent workflow guardrail. It fails when a feedback issue marked `done` in `agent/feedback/issue-index.md` is not reflected in `agent/knowledge/index.md`; manager closeout should fix or report that mismatch.
+Managers should know that `npm run check` includes task-ledger/dependency validation, readable tracker alignment, ready-input existence checks, human-task rules, and feedback-to-knowledge consistency. Manager closeout should fix or precisely report any mismatch.
 
 Managers should commit successful completed work after verification and tracker updates. Commits must include only the files changed for the completed task or issue wave, not unrelated user work.

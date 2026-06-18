@@ -54,7 +54,7 @@ agent-starters/startFeedbackResolutionManager.txt
 
 This resolves issue-local task graphs and updates feedback trackers.
 
-Before handoff, feedback resolution should run `npm run check` and fix any agent workflow guardrail failure. The guardrail checks that issues marked `done` in `agent/feedback/issue-index.md` are reflected in `agent/knowledge/index.md`.
+Before handoff, feedback resolution should run `npm run check` and fix any agent workflow guardrail failure. The guardrail validates task contracts/dependencies, tracker alignment, ready inputs, human-task rules, and feedback-to-knowledge consistency.
 
 After successful feedback intake or resolution, the manager should commit the completed issue wave and include the commit hash in the handoff report.
 
@@ -72,7 +72,7 @@ Update `agent/knowledge/index.md` when an agent learns reusable context such as:
 
 Do not treat the index as proof. Verify against code before marking work done.
 
-Resolved feedback issues are checked by `npm run check`: every `done` issue in `agent/feedback/issue-index.md` must be mentioned in `agent/knowledge/index.md`.
+`npm run check` also verifies that every `done` feedback issue in `agent/feedback/issue-index.md` is mentioned in `agent/knowledge/index.md`.
 
 ## Adding A Main Task
 

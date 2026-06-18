@@ -61,37 +61,33 @@
       "dependencies": [
         "L000"
       ],
-      "objective": "Replace production-MVP domain assumptions with the anonymous lofi cohort, lifecycle, email, scheduling, quorum, and public-link rules.",
+      "objective": "Implement the complete anonymous lofi cohort domain, validation, recurrence, lifecycle, quorum, and public-serialization policy.",
       "inputs": [
-        "docs/cohort15-lofi-mvp-spec.md",
-        "src/domain/constants.mjs",
-        "src/domain/models.mjs",
-        "src/domain/validation.mjs",
-        "tests/domain-validation.test.mjs"
+        "docs/cohort15-lofi-mvp-spec.md"
       ],
       "write_scope": [
         "src/domain/constants.mjs",
         "src/domain/models.mjs",
         "src/domain/validation.mjs",
-        "focused domain tests"
+        "tests/domain-validation.test.mjs"
       ],
       "authority": [
         "Do not introduce credits, maximum participants, images, social status, or authenticated link-authorization fields into the lofi domain.",
-        "Keep categories, audience, skill level, recurrence, duration, meeting count, and approved meeting hosts where reusable.",
+        "Implement the exact categories, audience, skill level, recurrence, duration, meeting count, and approved meeting-host policies from the specification.",
         "Do not change persistence, routes, or UI in this task."
       ],
       "acceptance_criteria": [
-        "Cohorts require a normalized private creator email.",
-        "Quorum accepts integers from 1 through 15 with no participant maximum.",
-        "Expiry defaults to seven days and the first meeting must be later than expiry.",
-        "Meeting links accept only HTTPS links on the exact host allowlist documented in the lofi specification.",
-        "Categories, skill levels, recurrence, and meeting-count rules match the enumerated creation-form contract.",
-        "Lifecycle helpers define active/expired state and hide a successful link after the final meeting ends.",
-        "Focused tests cover valid and rejected boundary cases."
+        "Cohort, interest, and notification-delivery records expose exactly the fields and enums in the lofi specification.",
+        "Normalization and validation implement every email, text-length, unknown-field, quorum, duration, meeting-count, timezone, date, and link rule in the specification.",
+        "Expiry is exactly 168 hours and firstMeetingAt must be strictly later.",
+        "Daily, weekly, biweekly, and monthly recurrence implement the documented calendar, month-clamping, and DST rules through finalMeetingEndsAt.",
+        "Collection and quorum states are derived according to the documented boundary instants.",
+        "Public serialization always includes schedule metadata, never includes emails, and includes the meeting link only from quorum until finalMeetingEndsAt.",
+        "Focused tests cover minimum, maximum, equality, invalid-date, month-end, spring-forward, fall-back, normalization, and privacy boundaries."
       ],
       "verification": [
         "Run node --test tests/domain-validation.test.mjs",
-        "Run npm run lint"
+        "Run npm run check"
       ],
       "stop_condition": "Stop when the lofi domain contract is tested without integrating persistence or HTTP routes.",
       "evidence": "Pending.",
@@ -105,42 +101,46 @@
       "dependencies": [
         "L001"
       ],
-      "objective": "Persist anonymous lofi cohorts, interests, notification outcomes, and rate-limit data through reusable repositories and a migration that cannot mix with production-MVP tables.",
+      "objective": "Persist anonymous lofi cohorts, interests, and notification outcomes through repositories and an isolated Supabase migration; rate limiting remains process-local.",
       "inputs": [
+        "docs/cohort15-lofi-mvp-spec.md",
+        "src/domain/constants.mjs",
+        "src/domain/models.mjs",
+        "src/domain/validation.mjs"
+      ],
+      "write_scope": [
         "src/persistence/store.mjs",
         "src/persistence/repositories.mjs",
         "src/persistence/supabase-postgres.mjs",
-        "supabase/migrations/20260617000000_cohort15_core.sql",
-        "docs/cohort15-lofi-mvp-spec.md"
-      ],
-      "write_scope": [
-        "lofi persistence schema and repositories",
-        "lofi Supabase adapter mapping",
-        "new lofi-specific SQL migration",
-        "focused persistence tests",
-        "persistence documentation"
+        "supabase/migrations/20260618000000_cohort15_lofi.sql",
+        "tests/persistence.test.mjs",
+        "tests/supabase-postgres.test.mjs",
+        "src/persistence/README.md"
       ],
       "authority": [
         "Create new table names prefixed cohort15_lofi_.",
-        "Do not alter, drop, read, or write existing cohort15 production-MVP tables.",
+        "Create only cohorts, interests, and notification-delivery tables; do not create users, auth, credits, purchases, images, social posts, or rate-limit tables.",
         "Enforce unique normalized interest email per cohort at repository and database levels.",
+        "Make interest insertion and the quorum transition atomic with equivalent in-memory and Supabase RPC behavior.",
         "Keep service-role credentials server-only."
       ],
       "acceptance_criteria": [
-        "A clean store persists cohorts and interests without users, credits, purchases, images, or social posts.",
+        "A clean local store persists cohorts, interests, and notification deliveries only.",
         "Database uniqueness prevents duplicate interest by cohort and normalized email.",
         "Creator and participant emails remain non-public repository fields.",
-        "Notification delivery outcomes can be recorded without blocking submissions.",
-        "The new migration is isolated from the existing production migration."
+        "Atomic interest acceptance rejects creator, duplicate, expired, and already-met submissions and returns whether this write reached quorum.",
+        "Exactly one concurrent interest transition can set quorumMetAt.",
+        "Notification idempotency keys are unique and delivery outcomes can be recorded without blocking submissions.",
+        "The migration contains only cohort15_lofi_ objects and enables RLS without browser policies."
       ],
       "verification": [
         "Run focused persistence and Supabase adapter tests",
         "Inspect migration for cohort15_lofi_ table isolation",
-        "Run npm run lint"
+        "Run npm run check"
       ],
       "stop_condition": "Stop when isolated data access is tested; do not build forms or deploy a live database.",
       "evidence": "Pending.",
-      "notes": "Uses a new Supabase project in production."
+      "notes": "Uses a new Supabase project in production. No deleted production migration is an input."
     },
     {
       "id": "L003",
@@ -152,23 +152,26 @@
       ],
       "objective": "Allow any visitor to create a cohort with the retained form fields, mandatory private creator email, no auth, and lightweight abuse controls.",
       "inputs": [
-        "src/services/create-cohort.mjs",
+        "docs/cohort15-lofi-mvp-spec.md",
+        "src/domain/validation.mjs",
+        "src/persistence/repositories.mjs",
         "src/server/app.mjs",
-        "src/ui/create-cohort.mjs",
-        "src/ui/styles.css",
-        "docs/cohort15-lofi-mvp-spec.md"
+        "src/ui/styles.css"
       ],
       "write_scope": [
-        "cohort creation service",
-        "GET and POST create routes",
-        "create form UI",
-        "honeypot and rate-limit helper",
-        "focused create tests"
+        "src/services/create-cohort.mjs",
+        "src/services/rate-limit.mjs",
+        "src/ui/create-cohort.mjs",
+        "src/server/app.mjs",
+        "src/ui/styles.css",
+        "tests/create-cohort.test.mjs",
+        "tests/rate-limit.test.mjs"
       ],
       "authority": [
         "Do not introduce auth, credits, image upload, or social outbox behavior into creation.",
         "Accept creator email privately and normalize it.",
         "Limit accepted cohort creations to five per IP per rolling hour.",
+        "Use the documented in-memory hashed-IP rolling-window and honeypot behavior.",
         "Redirect successful creation to the cohort detail page.",
         "Do not implement interest submission or email delivery."
       ],
@@ -177,12 +180,14 @@
         "The form implements every required and optional field enumerated in the lofi specification, with no creator-name, image, or maximum-participant field.",
         "Friendly email-use and approved-link safety notes are visible.",
         "The browser timezone is captured automatically and submitted meeting time is converted correctly.",
-        "Honeypot submissions and requests over the creation limit are rejected.",
-        "A successful request redirects to its public detail page without displaying creator email."
+        "Validation and conflict responses use the documented HTTP status codes without echoing private values.",
+        "Creation enforces the documented media type, 64 KiB body limit, and browser Origin policy.",
+        "Honeypot submissions create nothing; the sixth successful creation within a rolling hour returns 429 with Retry-After.",
+        "POST /cohorts responds 303 to public detail without displaying creator email or placing it in the URL."
       ],
       "verification": [
         "Run focused create service and route tests",
-        "Run npm run lint"
+        "Run npm run check"
       ],
       "stop_condition": "Stop when anonymous creation and redirect work locally; leave notifications to L006.",
       "evidence": "Pending.",
@@ -194,35 +199,38 @@
       "status": "not_started",
       "phase": "Public Product Flow",
       "dependencies": [
-        "L002"
+        "L003"
       ],
       "objective": "Turn the current early-interest design into the lofi landing page with the full public listing, active-first sorting, filters, local meeting times, and safe link visibility.",
       "inputs": [
         "/Users/gzero/Desktop/cohort15/Marketing/early-interest-landing-page/index.html",
+        "docs/cohort15-lofi-mvp-spec.md",
+        "src/domain/validation.mjs",
+        "src/persistence/repositories.mjs",
         "src/ui/home.mjs",
-        "src/ui/cohorts.mjs",
         "src/ui/styles.css",
-        "src/services/event-browsing.mjs",
         "src/server/app.mjs"
       ],
       "write_scope": [
-        "landing and listing renderers",
-        "public browsing service",
-        "home/feed/detail GET routes",
-        "styles",
-        "focused browsing/UI tests"
+        "src/services/event-browsing.mjs",
+        "src/ui/home.mjs",
+        "src/ui/cohorts.mjs",
+        "src/server/app.mjs",
+        "src/ui/styles.css",
+        "tests/event-browsing.test.mjs"
       ],
       "authority": [
         "Reuse the supplied page's visual language and Google Analytics ID G-LF22TLDSBV.",
         "Show all listings by default with active listings before expired listings.",
         "Support All, Active, and Expired filters.",
+        "Use the exact status query, ordering, tie-breaker, and route contract from the specification.",
         "Never render email addresses.",
         "Do not implement form mutations in this task."
       ],
       "acceptance_criteria": [
         "The home page explains the product and exposes Create a cohort and browsing actions.",
         "The full cohort listing appears on the landing page.",
-        "All/Active/Expired filters work and default All sorts active first.",
+        "All/Active/Expired filters work; invalid filters use All; ordering and deterministic ties match the specification.",
         "Exact interest count and quorum progress are public.",
         "Meeting date, time, duration, recurrence, and meeting count remain public before quorum, after quorum, and after listing expiry.",
         "Meeting times are labeled and rendered in each visitor's local timezone.",
@@ -232,11 +240,11 @@
       "verification": [
         "Run focused event browsing and UI tests",
         "Verify rendered HTML contains the Google Analytics measurement ID",
-        "Run npm run lint"
+        "Run npm run check"
       ],
       "stop_condition": "Stop when read-only public pages match the lofi contract.",
       "evidence": "Pending.",
-      "notes": "The separate /cohorts route may remain as a redirect or compatible view."
+      "notes": "GET /cohorts is a compatibility redirect to the landing-page listing; do not build a second listing UI."
     },
     {
       "id": "L005",
@@ -244,44 +252,47 @@
       "status": "not_started",
       "phase": "Public Product Flow",
       "dependencies": [
-        "L003",
         "L004"
       ],
       "objective": "Collect email-only interest without auth, prevent duplicates and creator self-interest, and unlock the public meeting link at quorum.",
       "inputs": [
-        "src/services/show-interest.mjs",
-        "src/server/app.mjs",
-        "src/ui/cohorts.mjs",
+        "docs/cohort15-lofi-mvp-spec.md",
+        "src/domain/validation.mjs",
         "src/persistence/repositories.mjs",
-        "docs/cohort15-lofi-mvp-spec.md"
+        "src/server/app.mjs",
+        "src/ui/cohorts.mjs"
       ],
       "write_scope": [
-        "interest service",
-        "interest POST route",
-        "detail-page interest form",
-        "interest abuse controls",
-        "focused interest/quorum tests"
+        "src/services/show-interest.mjs",
+        "src/services/rate-limit.mjs",
+        "src/ui/cohorts.mjs",
+        "src/server/app.mjs",
+        "tests/show-interest.test.mjs",
+        "tests/rate-limit.test.mjs"
       ],
       "authority": [
         "Normalize email before comparison and persistence.",
         "Reject creator email and duplicate cohort/email pairs.",
         "Limit accepted interest submissions to ten per IP per rolling hour.",
+        "Use the repository's atomic interest/quorum operation and documented HTTP conflict statuses.",
         "Close interest submission once quorum is met.",
         "Do not send emails in this task."
       ],
       "acceptance_criteria": [
         "Open below-quorum cohorts show one email field and one interest button.",
         "Friendly email-use consent text and a honeypot are present.",
-        "Creator and duplicate email submissions do not increment counts.",
+        "Creator, duplicate, expired, and already-met submissions return 409 and do not increment counts or rate allowances.",
         "Quorum is based only on accepted interests.",
-        "Reaching quorum makes the approved meeting link public immediately.",
+        "Exactly one accepted concurrent interest reaches quorum, sets quorumMetAt, and makes the approved meeting link public immediately.",
         "The interest form is absent after quorum or expiry.",
-        "No email or IP address appears in public HTML or logs."
+        "Interest submission enforces the documented media type, 64 KiB body limit, and browser Origin policy.",
+        "The eleventh successful interest write within a rolling hour returns 429 with Retry-After.",
+        "POST interest follows the documented 303 redirect and no email or IP address appears in public HTML, URLs, or logs."
       ],
       "verification": [
         "Run focused show-interest and route tests",
         "Run a create-to-quorum integration test",
-        "Run npm run lint"
+        "Run npm run check"
       ],
       "stop_condition": "Stop when the anonymous quorum flow works without notification delivery.",
       "evidence": "Pending.",
@@ -293,7 +304,6 @@
       "status": "not_started",
       "phase": "Notifications and Production Runtime",
       "dependencies": [
-        "L003",
         "L005"
       ],
       "objective": "Send creator and participant confirmations plus quorum-met notifications through a small Resend adapter.",
@@ -305,12 +315,13 @@
         "src/persistence/repositories.mjs"
       ],
       "write_scope": [
-        "email adapter",
-        "notification composition/service",
-        "create and interest integration",
-        "runtime email config",
-        "delivery outcome persistence",
-        "focused email tests"
+        "src/email/resend.mjs",
+        "src/services/notifications.mjs",
+        "src/services/create-cohort.mjs",
+        "src/services/show-interest.mjs",
+        "src/config/runtime.mjs",
+        "src/persistence/repositories.mjs",
+        "tests/notifications.test.mjs"
       ],
       "authority": [
         "Use updates@cohort15.com as sender and cohort15dotcom@gmail.com as reply-to.",
@@ -319,17 +330,19 @@
         "A provider failure must not roll back an accepted cohort or interest submission."
       ],
       "acceptance_criteria": [
-        "Creators receive a creation confirmation.",
-        "Participants receive an interest confirmation.",
+        "Creators receive one creation confirmation after persistence succeeds.",
+        "Participants receive one interest confirmation after persistence succeeds.",
         "At quorum, the creator and all accepted participants receive a quorum notification with public cohort/meeting details.",
-        "Repeated requests do not duplicate quorum notifications.",
-        "Delivery failures are recorded safely and submissions remain accepted.",
+        "The quorum-reaching participant receives separate participant-confirmation and quorum deliveries.",
+        "Deterministic idempotency keys and unique persistence prevent duplicate notifications.",
+        "Each recipient is sent separately; delivery failures are sanitized, recorded, and never roll back submissions.",
+        "Each provider request uses the documented five-second timeout with no automatic retry.",
         "Tests use a fake adapter and make no live email calls."
       ],
       "verification": [
         "Run focused email adapter and notification tests",
         "Run create/interest integration tests with a fake email provider",
-        "Run npm run lint"
+        "Run npm run check"
       ],
       "stop_condition": "Stop when transactional notification behavior is tested; do not configure the live Resend dashboard.",
       "evidence": "Pending.",
@@ -341,7 +354,6 @@
       "status": "not_started",
       "phase": "Notifications and Production Runtime",
       "dependencies": [
-        "L002",
         "L006"
       ],
       "objective": "Make the lofi runtime start with only its own Render, Supabase, Resend, analytics, and app URL settings and no production-MVP service dependencies.",
@@ -354,16 +366,18 @@
         "docs/human-tasks/lofi-mvp-launch.md"
       ],
       "write_scope": [
-        "runtime config",
-        "startup wiring",
+        "src/config/runtime.mjs",
+        "src/server/app.mjs",
         ".env.example",
         "render.yaml",
-        "README deployment section",
-        "runtime config tests"
+        "README.md",
+        "docs/human-tasks/lofi-mvp-launch.md",
+        "tests/runtime-config.test.mjs"
       ],
       "authority": [
         "Name the Render service cohort15-lofi-mvp and target this branch until merge/deployment policy changes.",
         "Require lofi-specific Supabase URL/service key and Resend key only in production.",
+        "Use exactly COHORT15_LOFI_APP_ENV, COHORT15_LOFI_APP_URL, COHORT15_LOFI_GA_MEASUREMENT_ID, COHORT15_LOFI_SUPABASE_URL, COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY, COHORT15_LOFI_RESEND_API_KEY, COHORT15_LOFI_EMAIL_FROM, and COHORT15_LOFI_EMAIL_REPLY_TO.",
         "Do not add production requirements for Supabase Auth, sessions, admin, Stripe, social publishing, or uploads.",
         "Do not create provider resources or change DNS."
       ],
@@ -372,7 +386,7 @@
         "Production config has no auth, Stripe, credit, social, or upload requirement.",
         "The service binds to Render's host/port and exposes a health endpoint.",
         "Configuration documentation clearly forbids credential reuse with the production MVP.",
-        "Render and env examples are lofi-specific."
+        "Render and env examples use exactly the variable names in the human launch runbook and reject missing production Supabase/Resend values."
       ],
       "verification": [
         "Run focused runtime configuration tests",
@@ -388,12 +402,9 @@
       "status": "not_started",
       "phase": "Launch Verification",
       "dependencies": [
-        "L004",
-        "L005",
-        "L006",
         "L007"
       ],
-      "objective": "Verify the complete lofi behavior and remove inactive production-MVP runtime surfaces that could expose stale flows.",
+      "objective": "Verify the complete lofi behavior, privacy boundaries, abuse controls, concurrency semantics, and absence of deferred product surfaces.",
       "inputs": [
         "src",
         "tests",
@@ -401,20 +412,19 @@
         "docs/cohort15-lofi-mvp-spec.md"
       ],
       "write_scope": [
-        "end-to-end tests",
-        "privacy and abuse tests",
-        "dead lofi runtime route removal",
-        "small launch-blocking fixes",
-        "README verification guide"
+        "tests/lofi-mvp-verification.test.mjs",
+        "tests/privacy-abuse.test.mjs",
+        "src modules requiring launch-blocking fixes",
+        "README.md"
       ],
       "authority": [
-        "Remove obsolete auth, dashboard, credit, payment, image, and social routes from the lofi runtime.",
-        "Delete source files only after proving they are unused by the lofi app.",
+        "Keep auth, dashboard, credit, payment, image, admin, and social routes absent from the lofi runtime.",
         "Do not broaden product scope or add an admin UI."
       ],
       "acceptance_criteria": [
         "Automated tests cover create, browse, filter, interest, duplicate rejection, creator rejection, quorum unlock, seven-day expiry, final-meeting link hiding, and local-time labels.",
         "Tests cover both IP limits and honeypots.",
+        "Tests cover body-size, media-type, Origin, concurrency, and notification-idempotency boundaries.",
         "Rendered pages and logs do not expose emails, IPs, secrets, or pre-quorum links.",
         "Auth, credit, payment, social, image, dashboard, and admin routes remain absent from the lofi runtime.",
         "npm run check passes."
@@ -425,7 +435,7 @@
       ],
       "stop_condition": "Stop when local launch verification passes and only external setup remains.",
       "evidence": "Pending.",
-      "notes": "This is the local launch gate."
+      "notes": "This is the local launch gate; legacy product surfaces were removed in L000 and must remain absent."
     },
     {
       "id": "L009",
@@ -438,7 +448,7 @@
       "objective": "Complete the documented human setup for a new Supabase project, Render service, Resend sender domain/key, and cohort15.com cutover.",
       "inputs": [
         "docs/human-tasks/lofi-mvp-launch.md",
-        "supabase lofi migration",
+        "supabase/migrations/20260618000000_cohort15_lofi.sql",
         "render.yaml"
       ],
       "write_scope": [

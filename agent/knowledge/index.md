@@ -36,7 +36,15 @@ Git history contains the later production MVP. It must not override the lofi spe
 | Browse flow | `src/ui/home.mjs`, `src/ui/styles.css` shell only | L004 adds listings, filters, detail views, local times, and public quorum progress. |
 | Interest flow | not yet created | L005 adds normalized email-only interest and public link unlock. |
 | Email | No lofi adapter yet | L006 adds a small Resend HTTP adapter with fake-provider tests. |
-| Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration and stale route removal. |
+| Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration, privacy, abuse, concurrency, and launch verification. |
+
+## Locked Implementation Policy
+
+- `docs/cohort15-lofi-mvp-spec.md` resolves validation limits, email syntax, required fields, recurrence count, monthly month-end behavior, DST behavior, lifecycle boundary instants, ordering, routes, HTTP statuses, rate-limit accounting, persistence concurrency, and notification idempotency.
+- Task inputs are existing artifacts or outputs promised by listed dependencies. A task's own new files belong in write scope.
+- `npm run check` validates task contracts, dependency integrity/cycles, readable tracker alignment, graph coverage, and the existence of every ready task input.
+- Future managers should ask the user only when canonical artifacts leave an observable product, persistence, security/privacy, or acceptance decision unresolved.
+- The task graph is intentionally linear from L001 through L010. Execute one task per chat; do not create parallel task waves.
 
 ## Reusable Decisions
 

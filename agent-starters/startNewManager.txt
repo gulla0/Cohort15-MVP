@@ -30,6 +30,10 @@ Rules:
 - Do not reread broad planning artifacts unless task state is inconsistent or insufficient.
 - Infer task completion only from actual code and verification.
 - Pick the next task wave from unblocked tasks in `tasks.json`.
+- Before declaring a selected task unclear, read every task input and any canonical specification it references. Do not ask the user for a decision already recorded there.
+- Verify each selected-task input exists. A missing input is a tracker defect unless a completed dependency explicitly produced it; fix setup drift before implementation.
+- Distinguish product ambiguity from implementation choice. Stop for an unresolved behavior that changes product results, security/privacy, persisted data, or acceptance criteria. Make ordinary reversible implementation choices when the task contract and canonical specification define the observable behavior.
+- A task is worker-ready only when its objective, inputs, write scope, authority, acceptance criteria, verification, stop condition, dependencies, and boundary behavior form a complete contract.
 - Prefer the smallest critical-path wave that can be verified cleanly.
 - Spawn parallel workers only when write scopes are disjoint and assumptions do not overlap materially.
 - Do not let workers update canonical progress files. If they do, treat those edits as advisory and normalize them yourself.
@@ -45,7 +49,7 @@ Wave closeout:
 6. Append `agent/progress/change-log.md`.
 7. Update `agent/progress/blockers.md` if needed.
 8. Update `agent/knowledge/index.md` if reusable context changed.
-9. Run `npm run check` when practical before handoff. This includes the agent workflow guardrail for stale feedback-to-knowledge handoffs.
-10. If the workflow guardrail fails, reconcile `agent/feedback/issue-index.md` and `agent/knowledge/index.md` or report why the mismatch is outside the task scope.
+9. Run `npm run check` when practical before handoff. This validates task contracts/dependencies, tracker alignment, ready inputs, human-task rules, and feedback context.
+10. If the workflow guardrail fails, reconcile the exact mismatch or report why it is outside the task scope.
 11. If the task wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for this task wave and exclude unrelated user changes.
 12. Report completed tasks, verification, commit hash, next task, and blockers.

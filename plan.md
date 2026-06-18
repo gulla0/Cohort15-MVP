@@ -24,7 +24,7 @@ Deploy the smallest real product that validates:
 - Store real data in a new, isolated Supabase project.
 - Deploy through a separate Render service and replace the Netlify page at `cohort15.com`.
 - Keep creator and participant emails private.
-- Use the existing approved meeting-provider allowlist and HTTPS-only validation.
+- Use the exact meeting-provider host allowlist and HTTPS-only validation in the lofi specification.
 - Collection lasts seven days; first meeting occurs after that window.
 - Run `npm run check` after workflow or human-task documentation changes.
 
@@ -36,7 +36,8 @@ Deploy the smallest real product that validates:
 - Compute active/expired listing state from `expiresAt` on reads so expiry does not require a paid scheduler.
 - Use Resend's HTTP API from the server for transactional email.
 - Keep submission success independent from email delivery; persist or log delivery outcomes without exposing PII.
-- Implement in-memory rolling IP limits suitable for one initial Render instance. Document that scaling to multiple instances requires a shared limiter.
+- Implement separate in-memory rolling IP limits over SHA-256 IP digests, counting successful writes only, suitable for one initial Render instance. Scaling to multiple instances requires a shared limiter.
+- Treat `docs/cohort15-lofi-mvp-spec.md` as the complete implementation-policy source for validation limits, recurrence/DST behavior, lifecycle boundaries, routes, ordering, persistence concurrency, notification idempotency, and HTTP errors.
 
 ## Execution Phases
 
@@ -51,7 +52,7 @@ Exit: anonymous lofi cohorts/interests can be validated and persisted without to
 ### Phase 2 — Public Product Flow
 
 - L003: build anonymous cohort creation with abuse controls.
-- L004: rebuild the landing page and public listing/lifecycle views.
+- L004: after creation works, rebuild the landing page and public listing/lifecycle views.
 - L005: build anonymous interest and quorum-driven public link behavior.
 
 Exit: the complete create → browse → interest → quorum flow works locally with private emails.
@@ -103,6 +104,10 @@ Explicitly defer:
 - Public meeting links can be copied by anyone while visible; the provider allowlist reduces unsafe destinations but does not make public rooms private.
 - The clean shell has removed legacy source modules; future tasks create only the lofi modules named in their task contracts.
 - Provider dashboards and DNS changes are human tasks documented in `docs/human-tasks/lofi-mvp-launch.md`.
+
+## Open Implementation Questions
+
+None. Reversible internal code organization remains at the implementing manager's discretion, but observable behavior, persisted data, security/privacy boundaries, and acceptance rules are locked in the specification and task contracts.
 
 ## First Ready Task
 

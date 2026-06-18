@@ -26,3 +26,15 @@ Follow-up cleanup established a runnable lofi-only shell and removed the product
 - Enumerated every retained creation-form field and allowed enum value in the product spec.
 - Locked the exact HTTPS meeting-link host allowlist in canonical artifacts.
 - Removed stale assumptions left by the legacy-source cleanup.
+
+## 2026-06-18 — End-to-end implementation readiness hardening
+
+- Resolved all remaining L001 implementation policies: record fields, text/email limits, duration/count limits, strict date boundaries, recurrence month-end behavior, DST behavior, public serialization, routes, ordering, and HTTP statuses.
+- Defined the three-table persistence boundary, RLS posture, atomic concurrent interest/quorum RPC semantics, and notification idempotency.
+- Confirmed rate limits are separate in-memory rolling windows over hashed IPs and are not database data.
+- Corrected L002's deleted migration reference to `supabase/migrations/20260618000000_cohort15_lofi.sql`.
+- Made task write scopes concrete and strengthened manager/worker readiness rules.
+- Expanded the workflow checker to validate task contracts, dependencies/cycles, tracker alignment, graph coverage, and ready-task input existence.
+- Linearized L001 through L010 so every implementation chat has exactly one next task and no shared-file parallel wave.
+
+No open implementation questions remain before L001.
