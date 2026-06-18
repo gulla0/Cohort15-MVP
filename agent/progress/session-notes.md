@@ -19,3 +19,10 @@ Decided:
 - Start implementation with L001 and execute tasks one at a time in later chats.
 
 Follow-up cleanup established a runnable lofi-only shell and removed the production-MVP runtime before L001.
+
+## 2026-06-18 — Decision capture audit
+
+- Confirmed meeting schedule details are public throughout, including before quorum.
+- Enumerated every retained creation-form field and allowed enum value in the product spec.
+- Locked the exact HTTPS meeting-link host allowlist in canonical artifacts.
+- Removed stale assumptions left by the legacy-source cleanup.

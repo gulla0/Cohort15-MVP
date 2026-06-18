@@ -101,7 +101,7 @@ Explicitly defer:
 - A single Render instance is acceptable for launch; in-memory rate limiting resets on deploy and is not shared across instances.
 - Email confirmation is informational, not identity verification.
 - Public meeting links can be copied by anyone while visible; the provider allowlist reduces unsafe destinations but does not make public rooms private.
-- Existing source modules can remain in the repository temporarily if they are removed from the lofi runtime path. Physical deletion should be bounded to files proven unused by the new flow.
+- The clean shell has removed legacy source modules; future tasks create only the lofi modules named in their task contracts.
 - Provider dashboards and DNS changes are human tasks documented in `docs/human-tasks/lofi-mvp-launch.md`.
 
 ## First Ready Task

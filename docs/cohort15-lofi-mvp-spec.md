@@ -14,6 +14,26 @@ This branch ships a lightweight public validation product before the authenticat
 6. The collection window ends seven days after creation. Every listing then displays as expired but remains browsable.
 7. A successful cohort's meeting link remains public until its final meeting ends, then is hidden. Public meeting date/time details remain visible.
 
+## Cohort Creation Form Contract
+
+The creation form requires:
+
+- creator email — private, trimmed, and normalized to lowercase;
+- title;
+- description;
+- category — `learn`, `build`, `practice`, `accountability`, `open_source`, or `explore`;
+- topic;
+- target audience;
+- target skill level — `beginner`, `intermediate`, `advanced`, or `any`;
+- minimum quorum — integer from 1 through 15;
+- approved HTTPS meeting link;
+- first meeting date and time, interpreted using the creator's automatically detected browser timezone;
+- meeting duration in minutes;
+- recurrence — `none`, `daily`, `weekly`, `biweekly`, or `monthly`; and
+- meeting count.
+
+Additional details are optional. There is no creator name, image, or maximum-participant field. One-time cohorts have one meeting; recurring cohorts have at least two.
+
 ## Locked Product Decisions
 
 - No authentication, credits, payments, dashboards, creator editing, or creator deletion.
@@ -26,8 +46,9 @@ This branch ships a lightweight public validation product before the authenticat
 - The creator does not count toward quorum and cannot show interest using the creator email.
 - Collection expiry is exactly seven days after creation.
 - The first meeting must occur after the seven-day collection window.
+- Meeting date, time, duration, recurrence, and meeting count are public throughout the listing lifecycle, before and after quorum.
 - The browser's timezone converts the creator's local date/time into an absolute timestamp. Viewers see meeting times in their own local timezone and are told that the displayed time is local.
-- Approved meeting links are HTTPS links on the existing Google Meet, Zoom, Microsoft Teams, Discord, or Slack host allowlist. The form explains that the restriction protects users from unsafe links.
+- Approved meeting links must use HTTPS and one of these exact hosts or their subdomains: `meet.google.com`, `zoom.us`, `zoom.com`, `teams.microsoft.com`, `teams.live.com`, `discord.com`, `discord.gg`, or `slack.com`. The form explains that the restriction protects users from unsafe links.
 - All listings remain visible. The default view includes all listings, sorted active first, and supports All, Active, and Expired filters.
 - Exact interest count and quorum progress are public. Email addresses are never public.
 - The landing page reuses the current early-interest page's visual style and Google Analytics measurement ID `G-LF22TLDSBV`.
@@ -68,4 +89,3 @@ Do not send expiry emails. Email delivery failures must not erase an otherwise v
 Reuse the dependency-free Node.js server, server-rendered UI approach, domain validation patterns, repository abstraction, Supabase REST adapter patterns, meeting-link allowlist, local-time rendering, tests, and agent workflow.
 
 Retire from the lofi runtime path: Supabase Auth, sessions, CSRF tied to signed-in users, credits and Stripe, admin dashboards, social outbox/publishing, image upload/storage, and authenticated private-link authorization.
-

@@ -84,7 +84,8 @@
         "Cohorts require a normalized private creator email.",
         "Quorum accepts integers from 1 through 15 with no participant maximum.",
         "Expiry defaults to seven days and the first meeting must be later than expiry.",
-        "Meeting links accept only HTTPS links on the existing approved host allowlist.",
+        "Meeting links accept only HTTPS links on the exact host allowlist documented in the lofi specification.",
+        "Categories, skill levels, recurrence, and meeting-count rules match the enumerated creation-form contract.",
         "Lifecycle helpers define active/expired state and hide a successful link after the final meeting ends.",
         "Focused tests cover valid and rejected boundary cases."
       ],
@@ -173,7 +174,7 @@
       ],
       "acceptance_criteria": [
         "Creation works without a session.",
-        "The form keeps current content/schedule fields except image and maximum participants and adds creator email.",
+        "The form implements every required and optional field enumerated in the lofi specification, with no creator-name, image, or maximum-participant field.",
         "Friendly email-use and approved-link safety notes are visible.",
         "The browser timezone is captured automatically and submitted meeting time is converted correctly.",
         "Honeypot submissions and requests over the creation limit are rejected.",
@@ -223,6 +224,7 @@
         "The full cohort listing appears on the landing page.",
         "All/Active/Expired filters work and default All sorts active first.",
         "Exact interest count and quorum progress are public.",
+        "Meeting date, time, duration, recurrence, and meeting count remain public before quorum, after quorum, and after listing expiry.",
         "Meeting times are labeled and rendered in each visitor's local timezone.",
         "Meeting links obey quorum and final-meeting visibility rules.",
         "Expired listings remain visible."

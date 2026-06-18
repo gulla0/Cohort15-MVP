@@ -19,3 +19,12 @@ Verification: `npm run check` passed with 85 tests.
 - Added focused shell and runtime configuration tests.
 
 Verification: `npm run check` passed with 5 focused shell tests. Route-level smoke coverage verified home, styles, health, 404 behavior, and legacy-route removal. Interactive browser smoke was unavailable because the sandbox denied local port binding.
+
+## 2026-06-18 — Product decision capture audit
+
+- Added the complete cohort creation-form field contract and enum values.
+- Added the exact approved meeting-link hosts.
+- Clarified that meeting schedule details are public throughout while only the link is quorum-gated.
+- Aligned task contracts, graph, plan, and knowledge index with those decisions.
+
+Verification: `npm run check` passed with 5 tests.

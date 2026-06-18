@@ -41,7 +41,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 ## Reusable Decisions
 
 - Stack remains dependency-free Node.js ES modules with server-rendered HTML.
-- Approved meeting hosts already exist in `ALLOWED_MEETING_LINK_HOSTS`: Google Meet, Zoom, Microsoft Teams, Discord, and Slack.
+- The exact meeting hosts are locked in the lofi spec: `meet.google.com`, `zoom.us`, `zoom.com`, `teams.microsoft.com`, `teams.live.com`, `discord.com`, `discord.gg`, and `slack.com`, including their subdomains and HTTPS only.
 - Existing browser-local time enhancement can be reused, but creation must submit the browser timezone/absolute timestamp explicitly.
 - The removed Supabase adapter pattern remains available in Git history; L002 may reuse the server-side REST approach with a new project and lofi-only table names.
 - The supplied marketing source is `/Users/gzero/Desktop/cohort15/Marketing/early-interest-landing-page/index.html`; reuse its visual language and Google Analytics ID `G-LF22TLDSBV` without editing that external file.
@@ -53,6 +53,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 - Never point lofi configuration at an existing production-MVP Supabase project or Render service.
 - Do not reuse old T-task backlog or prior feedback issues; Git history is the archive.
 - Public meeting links remain visible from quorum until the final meeting ends, even if the seven-day collection listing has expired.
+- Meeting schedule details are public throughout; only the approved meeting link is gated by quorum and final-meeting timing.
 - Expiry is computed from time on reads; no scheduler or expiry email is required.
 
 ## Current State

@@ -33,7 +33,7 @@ L009 ──────────────────────── L0
 
 - Depends on: L000
 - Owns: domain constants, models, validation, focused tests
-- Delivers: seven-day lifecycle, quorum 1–15, no participant cap, normalized creator email, approved links, meeting timing, final-meeting link cutoff
+- Delivers: enumerated creation fields, seven-day lifecycle, quorum 1–15, no participant cap, normalized creator email, exact approved hosts, public meeting schedule, and final-meeting link cutoff
 - Stops before: persistence and HTTP integration
 
 ### L002 — Add isolated lofi persistence and Supabase migration
@@ -54,7 +54,7 @@ L009 ──────────────────────── L0
 
 - Depends on: L002
 - Owns: supplied landing-page adaptation, public browsing, filters, sorting, local-time rendering, safe link display, tests
-- Delivers: full listing on `/`, All/Active/Expired filters, active-first default, persistent expired posts
+- Delivers: full listing on `/`, All/Active/Expired filters, active-first default, persistent expired posts, and meeting schedules visible throughout
 - Stops before: form mutations
 
 ### L005 — Build anonymous interest and quorum unlock
