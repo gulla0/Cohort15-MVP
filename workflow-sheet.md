@@ -2,19 +2,19 @@
 
 ## Current Phase
 
-Public Product Flow
+Notifications and Production Runtime
 
 ## Current Critical Path
 
 L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
 
-Next ready task: L006.
+Next ready task: L007.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L006 | L005 is complete and every current input exists | Add Resend confirmation and quorum notifications. |
+| L007 | L006 is complete and every current input exists | Isolate lofi production configuration and deployment. |
 
 ## Known Parallelism
 

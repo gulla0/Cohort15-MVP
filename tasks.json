@@ -301,7 +301,7 @@
     {
       "id": "L006",
       "title": "Add Resend confirmation and quorum notifications",
-      "status": "not_started",
+      "status": "done",
       "phase": "Notifications and Production Runtime",
       "dependencies": [
         "L005"
@@ -320,7 +320,9 @@
         "src/services/create-cohort.mjs",
         "src/services/show-interest.mjs",
         "src/config/runtime.mjs",
+        "src/server/app.mjs",
         "src/persistence/repositories.mjs",
+        ".env.example",
         "tests/notifications.test.mjs"
       ],
       "authority": [
@@ -345,8 +347,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when transactional notification behavior is tested; do not configure the live Resend dashboard.",
-      "evidence": "Pending.",
-      "notes": "Live domain and key setup is L009."
+      "evidence": "2026-06-18: Resend HTTP adapter, deterministic delivery orchestration, creator/participant confirmations, per-recipient quorum notifications, sanitized failure outcomes, and fake-provider integration coverage implemented; npm run check passed.",
+      "notes": "Complete. Live domain and key setup remains L009; L007 is next."
     },
     {
       "id": "L007",

@@ -96,3 +96,13 @@ Verification: `node --test tests/event-browsing.test.mjs` passed with 3 tests; f
 - Added a separate ten-success-per-IP rolling limiter and focused concurrency, lifecycle, privacy, route, and limit tests.
 
 Verification: `node --test tests/show-interest.test.mjs tests/rate-limit.test.mjs` passed with 7 tests; full `npm run check` passed with 39 tests.
+
+## 2026-06-18 — L006 Resend confirmation and quorum notifications
+
+- Added the Resend HTTP adapter with fixed sender/reply-to, separate recipients, provider idempotency keys, and a five-second timeout.
+- Added persisted, deterministic creator confirmation, participant confirmation, and quorum notification orchestration.
+- Added per-recipient quorum fanout with public schedule/link details and separate confirmation for the quorum-reaching participant.
+- Sanitized and persisted provider failures while preserving successful cohort and interest submissions.
+- Added fake-provider adapter, idempotency, fanout, privacy, and failure-isolation tests.
+
+Verification: focused notification/create/interest tests passed with 14 tests; full `npm run check` passed with 44 tests.

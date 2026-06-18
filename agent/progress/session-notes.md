@@ -99,3 +99,13 @@ Focused event browsing/UI tests and the full 34-test repository check passed. L0
 - Kept notification delivery outside this task for L006.
 
 Focused interest/rate-limit tests and the full 39-test repository suite passed. L006 is next.
+
+## 2026-06-18 — L006 Resend notifications
+
+- Added a dependency-free Resend HTTP adapter with fixed sender/reply-to, one recipient per request, provider idempotency headers, and a five-second timeout.
+- Added deterministic delivery orchestration for creator and participant confirmations plus creator/all-participant quorum notifications.
+- Persisted pending deliveries before provider calls and recorded sanitized sent/failed outcomes without rolling back accepted submissions.
+- Kept expiry email, retry infrastructure, live credentials, and provider dashboard work out of scope.
+- Added fake-provider coverage for message composition, duplicate suppression, quorum fanout, private recipients, and failure isolation.
+
+Focused notification/create/interest tests and the full 44-test repository suite passed. L007 is next.

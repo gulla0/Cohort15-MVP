@@ -15,7 +15,7 @@ The clean lofi shell, domain policy, isolated persistence layer, and anonymous c
 - Current status: `agent/progress/task-status.md`
 - Provider setup: `docs/human-tasks/lofi-mvp-launch.md`
 
-Next ready task: L006.
+Next ready task: L007.
 
 The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
 

@@ -14,7 +14,7 @@ export class HoneypotSubmissionError extends Error {
   }
 }
 
-export function createCohortService({ repositories, limiter }) {
+export function createCohortService({ repositories, limiter, notifications = null }) {
   if (!repositories?.createCohort) throw new TypeError('repositories are required');
   if (!limiter?.run) throw new TypeError('limiter is required');
 
@@ -33,7 +33,11 @@ export function createCohortService({ repositories, limiter }) {
       if (unknown) throw new DomainValidationError(unknown, 'is not allowed');
 
       const submission = Object.fromEntries(SUBMISSION_FIELDS.map((field) => [field, input[field]]));
-      return limiter.run(clientIp, () => repositories.createCohort(submission));
+      const cohort = await limiter.run(clientIp, () => repositories.createCohort(submission));
+      if (notifications) {
+        try { await notifications.cohortCreated(cohort); } catch { /* submission already succeeded */ }
+      }
+      return cohort;
     },
   });
 }

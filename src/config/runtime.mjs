@@ -47,7 +47,8 @@ export function loadRuntimeConfig(env = process.env) {
     appUrl: parseAppUrl(env.COHORT15_LOFI_APP_URL, isProduction),
     host: env.HOST?.trim() || '0.0.0.0',
     port: parsePort(env.PORT),
-    googleAnalyticsId: env.COHORT15_LOFI_GA_MEASUREMENT_ID?.trim() || 'G-LF22TLDSBV'
+    googleAnalyticsId: env.COHORT15_LOFI_GA_MEASUREMENT_ID?.trim() || 'G-LF22TLDSBV',
+    resendApiKey: env.COHORT15_LOFI_RESEND_API_KEY?.trim() || ''
   });
 }
 
@@ -56,6 +57,7 @@ export function listRuntimeEnvVars() {
     'COHORT15_LOFI_APP_ENV',
     'COHORT15_LOFI_APP_URL',
     'COHORT15_LOFI_GA_MEASUREMENT_ID',
+    'COHORT15_LOFI_RESEND_API_KEY',
     'HOST',
     'NODE_ENV',
     'NODE_VERSION',

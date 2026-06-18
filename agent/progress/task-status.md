@@ -10,10 +10,10 @@
 | L003 | Build anonymous cohort creation | done | yes | Form, service, route policy, timezone capture, honeypot, and five-success IP limit verified. |
 | L004 | Build the landing page, listing, and lifecycle views | done | yes | Landing listing, filters, detail lifecycle views, local times, privacy, and safe link visibility verified. |
 | L005 | Build anonymous interest and quorum unlock | done | yes | Email-only interest, request guards, conflicts, atomic quorum unlock, privacy, and ten-success IP limit verified. |
-| L006 | Add Resend confirmation and quorum notifications | not_started | yes | Pending |
-| L007 | Isolate lofi production configuration and deployment | not_started | no | Pending |
+| L006 | Add Resend confirmation and quorum notifications | done | yes | Resend adapter, idempotent delivery records, confirmations, quorum fanout, sanitized failures, and fake-provider tests verified. |
+| L007 | Isolate lofi production configuration and deployment | not_started | yes | Pending |
 | L008 | Complete lofi privacy, abuse, and end-to-end verification | not_started | no | Pending |
 | L009 | Create isolated provider resources and deploy | not_started | no | Pending |
 | L010 | Run production lofi smoke test | not_started | no | Pending |
 
-Next ready task: L006.
+Next ready task: L007.

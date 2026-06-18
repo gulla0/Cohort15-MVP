@@ -11,7 +11,7 @@ L000 Clean lofi application shell (done)
             └─ L003 Anonymous cohort creation (done)
                  └─ L004 Landing, listing, and lifecycle views (done)
                       └─ L005 Anonymous interest and quorum unlock (done)
-                           └─ L006 Resend notifications (not_started)
+                           └─ L006 Resend notifications (done)
                                 └─ L007 Isolated production config/deployment (not_started)
                                      └─ L008 Privacy, abuse, and end-to-end verification (not_started)
                                           └─ L009 Human provider setup and deployment (not_started)
@@ -70,6 +70,7 @@ L000 Clean lofi application shell (done)
 ### L006 — Add Resend confirmation and quorum notifications
 
 - Depends on: L005
+- Status: done
 - Owns: email adapter/composition/config/integration, delivery outcomes, tests
 - Delivers: creator confirmation, participant confirmation, quorum notifications
 - Stops before: live Resend dashboard configuration

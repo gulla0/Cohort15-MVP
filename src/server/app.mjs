@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadRuntimeConfig } from '../config/runtime.mjs';
+import { createResendEmailProvider } from '../email/resend.mjs';
 import { DomainValidationError } from '../domain/validation.mjs';
 import { createLofiStore } from '../persistence/store.mjs';
 import {
@@ -11,6 +12,7 @@ import {
 import { createCohortService, HoneypotSubmissionError } from '../services/create-cohort.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
 import { createShowInterestService, InterestHoneypotSubmissionError } from '../services/show-interest.mjs';
+import { createNotificationService } from '../services/notifications.mjs';
 import {
   clientIpFromRequest, createRollingWindowLimiter, RateLimitExceededError,
 } from '../services/rate-limit.mjs';
@@ -62,13 +64,21 @@ export function createRequestHandler(options = {}) {
     limit: 5,
     windowMs: 60 * 60 * 1000,
   });
-  const cohortCreator = options.cohortCreator ?? createCohortService({ repositories, limiter: creationLimiter });
+  const emailProvider = options.emailProvider ?? createResendEmailProvider({ apiKey: config.resendApiKey });
+  const notifications = options.notifications ?? createNotificationService({
+    repositories, emailProvider, appUrl: config.appUrl,
+  });
+  const cohortCreator = options.cohortCreator ?? createCohortService({
+    repositories, limiter: creationLimiter, notifications,
+  });
   const eventBrowsing = options.eventBrowsing ?? createEventBrowsingService({ repositories });
   const interestLimiter = options.interestLimiter ?? createRollingWindowLimiter({
     limit: 10,
     windowMs: 60 * 60 * 1000,
   });
-  const showInterest = options.showInterest ?? createShowInterestService({ repositories, limiter: interestLimiter });
+  const showInterest = options.showInterest ?? createShowInterestService({
+    repositories, limiter: interestLimiter, notifications,
+  });
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');

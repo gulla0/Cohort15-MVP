@@ -111,6 +111,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L006.
+Next ready task: L007.
 
-L000–L005 are complete. L006 adds transactional confirmation and quorum notifications through Resend.
+L000–L006 are complete. L007 isolates production configuration and deployment behavior.
