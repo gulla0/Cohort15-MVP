@@ -6,7 +6,7 @@
 
 ```text
 L000 Clean lofi application shell (done)
-  └─ L001 Lofi domain and validation
+  └─ L001 Lofi domain and validation (done)
        └─ L002 Isolated persistence and Supabase migration
             └─ L003 Anonymous cohort creation
                  └─ L004 Landing, listing, and lifecycle views
@@ -31,6 +31,7 @@ L000 Clean lofi application shell (done)
 ### L001 — Define the lofi domain and validation policy
 
 - Depends on: L000
+- Status: done
 - Owns: domain constants, models, validation, focused tests
 - Delivers: exact records/enums, all validation limits, seven-day lifecycle, quorum 1–15, recurrence/month-end/DST behavior, exact approved hosts, public schedule serialization, and final-meeting link cutoff
 - Stops before: persistence and HTTP integration

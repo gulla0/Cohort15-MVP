@@ -38,3 +38,14 @@ Follow-up cleanup established a runnable lofi-only shell and removed the product
 - Linearized L001 through L010 so every implementation chat has exactly one next task and no shared-file parallel wave.
 
 No open implementation questions remain before L001.
+
+## 2026-06-18 — L001 domain and validation
+
+- Added exact cohort, interest, and notification-delivery domain records and enums.
+- Implemented normalization and all specified field, email, enum, number, timezone, local-date, and meeting-link validation boundaries.
+- Implemented calendar-based daily, weekly, biweekly, and month-clamped recurrence with spring-forward and fall-back behavior.
+- Added derived collection/quorum state, final-meeting calculation, public schedule serialization, and quorum-gated meeting-link visibility.
+- Added deterministic notification idempotency keys without raw recipient emails.
+- Kept persistence, HTTP routes, and UI outside this task wave.
+
+Verification completed with 12 focused domain tests and the full repository check. L002 is next.

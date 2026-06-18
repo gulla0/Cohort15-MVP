@@ -39,3 +39,14 @@ Verification: `npm run check` passed with 5 tests.
 - Linearized the task graph to one task per chat with no parallel shared-file wave.
 
 Verification: `npm run check` passed with 11 aligned tasks and 5 shell tests.
+
+## 2026-06-18 — L001 lofi domain and validation policy
+
+- Added lofi constants and exact cohort, interest, and notification-delivery factories.
+- Added Unicode-aware normalization and validation for every creation field.
+- Added dependency-free IANA timezone conversion, DST handling, recurrence generation, and lifecycle derivation.
+- Added privacy-safe public cohort serialization with final-meeting link cutoff.
+- Added deterministic notification idempotency key generation.
+- Added focused boundary, invalid-date, month-end, DST, lifecycle, normalization, and privacy tests.
+
+Verification: `node --test tests/domain-validation.test.mjs` passed with 12 tests; `npm run check` passed with 17 tests.

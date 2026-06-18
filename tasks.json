@@ -56,7 +56,7 @@
     {
       "id": "L001",
       "title": "Define the lofi domain and validation policy",
-      "status": "not_started",
+      "status": "done",
       "phase": "Domain and Data Isolation",
       "dependencies": [
         "L000"
@@ -90,8 +90,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when the lofi domain contract is tested without integrating persistence or HTTP routes.",
-      "evidence": "Pending.",
-      "notes": "First ready task."
+      "evidence": "2026-06-18: domain records, normalization/validation, timezone-aware recurrence, lifecycle derivation, public serialization, and focused boundary/privacy tests implemented; npm run check passed.",
+      "notes": "Complete. L002 is the next ready task."
     },
     {
       "id": "L002",
