@@ -8,7 +8,7 @@
 L000 Clean lofi application shell (done)
   └─ L001 Lofi domain and validation (done)
        └─ L002 Isolated persistence and Supabase migration (done)
-            └─ L003 Anonymous cohort creation (not_started)
+            └─ L003 Anonymous cohort creation (done)
                  └─ L004 Landing, listing, and lifecycle views (not_started)
                       └─ L005 Anonymous interest and quorum unlock (not_started)
                            └─ L006 Resend notifications (not_started)
@@ -46,6 +46,7 @@ L000 Clean lofi application shell (done)
 ### L003 — Build anonymous cohort creation
 
 - Depends on: L002
+- Status: done
 - Owns: create service/route/form, timezone capture, honeypot, five-per-hour IP limit, tests
 - Delivers: no-auth creation, documented validation/status responses, hashed-IP five-success rolling limit, honeypot handling, and 303 redirect
 - Stops before: interest and live email

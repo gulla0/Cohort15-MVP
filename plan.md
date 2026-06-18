@@ -111,6 +111,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L003.
+Next ready task: L004.
 
-L000–L002 are complete. L003 starts the anonymous public product flow on top of the verified domain and persistence boundaries.
+L000–L003 are complete. L004 adds public browsing and lifecycle views on top of anonymous creation.

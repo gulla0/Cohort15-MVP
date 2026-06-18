@@ -29,10 +29,10 @@ Git history contains the later production MVP. It must not override the lofi spe
 
 | Area | Current files | Lofi direction |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Clean lofi-only Node shell with home, styles, health, and 404 behavior. |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Lofi Node server with home, creation, styles, health, and 404 behavior. |
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L001 implements the seven-day anonymous lofi domain, validation, recurrence, lifecycle, and public serialization. |
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L002 provides local repositories, a server-only PostgREST adapter, and isolated `cohort15_lofi_*` tables/RPC. |
-| Create flow | not yet created | L003 adds private creator email, retained form fields, timezone capture, and abuse controls. |
+| Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L003 provides anonymous creation, private normalized email, timezone capture, request guards, honeypot, and five-success IP limiting. |
 | Browse flow | `src/ui/home.mjs`, `src/ui/styles.css` shell only | L004 adds listings, filters, detail views, local times, and public quorum progress. |
 | Interest flow | not yet created | L005 adds normalized email-only interest and public link unlock. |
 | Email | No lofi adapter yet | L006 adds a small Resend HTTP adapter with fake-provider tests. |
@@ -71,4 +71,5 @@ Git history contains the later production MVP. It must not override the lofi spe
 - Planning reset and clean shell L000 completed on 2026-06-18.
 - L001 domain and validation policy completed on 2026-06-18 with focused boundary, DST, lifecycle, and privacy coverage.
 - L002 isolated local/Supabase persistence completed on 2026-06-18 with atomic interest/quorum, RLS, privacy, concurrency, and idempotency coverage.
-- Next ready task: L003.
+- L003 anonymous creation completed on 2026-06-18 with form/route policy, timezone capture, honeypot, and hashed-IP rate-limit coverage.
+- Next ready task: L004.

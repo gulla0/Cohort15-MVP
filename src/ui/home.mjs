@@ -38,8 +38,8 @@ export function renderHomePage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
           <p class="eyebrow">Small groups. Clear intent.</p>
           <h1 id="hero-title">Form small, high-intent online groups.</h1>
           <p class="lede">Propose a focused cohort, gather interest for seven days, and unlock the meeting when enough people are ready.</p>
-          <div class="button-row" aria-label="Planned Cohort15 actions">
-            <span class="button-link" aria-disabled="true">Create a cohort — coming soon</span>
+          <div class="button-row" aria-label="Cohort15 actions">
+            <a class="button-link" href="/cohorts/new">Create a cohort</a>
             <span class="button-link secondary" aria-disabled="true">Browse cohorts — coming soon</span>
           </div>
         </div>

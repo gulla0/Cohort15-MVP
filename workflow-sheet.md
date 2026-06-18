@@ -8,13 +8,13 @@ Public Product Flow
 
 L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
 
-Next ready task: L003.
+Next ready task: L004.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L003 | L002 is complete and every current input exists | Build anonymous cohort creation and its abuse controls. |
+| L004 | L003 is complete and every current input exists | Build landing-page browsing and lifecycle views. |
 
 ## Known Parallelism
 

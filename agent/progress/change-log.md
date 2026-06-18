@@ -67,3 +67,12 @@ Verification: `node --test tests/persistence.test.mjs tests/supabase-postgres.te
 - Added automated next-ready-task checks for the README, plan, workflow sheet, and readable task status.
 - Added exact task-status validation for the atomic task graph.
 - Expanded manager closeout instructions to keep all status-facing workflow artifacts aligned.
+
+## 2026-06-18 — L003 anonymous cohort creation
+
+- Added the complete anonymous creation form, browser timezone capture, private-email consent, and approved-link guidance.
+- Added repository-backed creation behavior and request guards for media type, body size, Origin, and privacy-safe validation failures.
+- Added a hidden honeypot and a concurrency-safe, hashed-IP rolling limiter that counts five successful writes per hour.
+- Added focused creation service, HTTP route, timezone, honeypot, privacy, and limiter tests.
+
+Verification: focused creation/rate-limit/shell tests passed; full `npm run check` passed with 31 tests.

@@ -145,7 +145,7 @@
     {
       "id": "L003",
       "title": "Build anonymous cohort creation",
-      "status": "not_started",
+      "status": "done",
       "phase": "Public Product Flow",
       "dependencies": [
         "L002"
@@ -190,7 +190,7 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when anonymous creation and redirect work locally; leave notifications to L006.",
-      "evidence": "Pending.",
+      "evidence": "2026-06-18: anonymous creation form/service/route, browser timezone capture, request-policy guards, honeypot, and hashed-IP five-success rolling limit verified.",
       "notes": "Five accepted creations per IP per hour."
     },
     {

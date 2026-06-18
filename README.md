@@ -6,7 +6,7 @@ Visitors will be able to create cohort requests or show interest with a mandator
 
 ## Setup Status
 
-The clean lofi shell, domain policy, and isolated persistence layer are complete. Anonymous public product flows begin with L003; no production-MVP runtime code remains in this branch.
+The clean lofi shell, domain policy, isolated persistence layer, and anonymous cohort creation flow are complete. Public browsing and lifecycle views are next; no production-MVP runtime code remains in this branch.
 
 - Product rules: `docs/cohort15-lofi-mvp-spec.md`
 - Plan: `plan.md`
@@ -15,7 +15,7 @@ The clean lofi shell, domain policy, and isolated persistence layer are complete
 - Current status: `agent/progress/task-status.md`
 - Provider setup: `docs/human-tasks/lofi-mvp-launch.md`
 
-Next ready task: L003.
+Next ready task: L004.
 
 The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
 

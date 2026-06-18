@@ -61,6 +61,16 @@ Verification completed with 12 focused domain tests and the full repository chec
 
 Verification completed with 8 focused persistence/Supabase tests and the full repository check. L003 is next.
 
+## 2026-06-18 — L003 anonymous cohort creation
+
+- Added the complete no-auth cohort creation form with private-email consent, approved-link safety guidance, automatic browser timezone capture, and no legacy creator/image/maximum fields.
+- Added a creation service that applies the canonical domain validation and persists through the repository boundary.
+- Added POST request guards for form media type, 64 KiB bodies, browser Origin matching, generic privacy-safe validation responses, and 303 public-detail redirects.
+- Added separate in-memory rolling-window infrastructure that retains SHA-256 IP digests, serializes same-IP attempts, counts successful writes only, and trusts Render forwarding only in production.
+- Added a hidden honeypot and a five-success-per-IP creation limit with Retry-After responses.
+
+Focused creation, route, rate-limit, and shell tests passed. L004 is next.
+
 ## 2026-06-18 — Workflow status-alignment hardening
 
 - Corrected stale next-task guidance in the README, plan, workflow sheet, and atomic task graph.
