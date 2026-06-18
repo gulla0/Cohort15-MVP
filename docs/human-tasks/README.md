@@ -1,16 +1,20 @@
 # Human Tasks
 
-This directory is the single location for work that requires a person to use an external provider dashboard, manage credentials, make a deployment decision, or perform production verification that cannot be completed from the repository alone.
+This directory is the only location for external dashboard, credential, DNS, operational-decision, and production-verification instructions.
 
-## Current Task Files
+## Current Lofi MVP Task
 
-- `deployment-render.md` — create and verify the Render service, choose the production URL, deploy, and roll back if needed.
-- `production-config.md` — configure production environment variables, authentication providers, admin access, social/email providers, and production verification.
-- `stripe-checkout.md` — configure Stripe products, prices, secrets, redirects, and test-mode Checkout verification.
-- `supabase-postgres.md` — create/configure Supabase, apply the production schema, configure Render, and verify connectivity.
+- `lofi-mvp-launch.md` — create isolated Supabase, Render, and Resend resources; verify the generated deployment; replace the Netlify site at `cohort15.com`; run non-secret launch checks.
+
+## Historical Production-MVP References
+
+These are not active on the lofi branch and must not be used to configure lofi resources:
+
+- `deployment-render.md`
+- `production-config.md`
+- `stripe-checkout.md`
+- `supabase-postgres.md`
 
 ## Repository Rule
 
-Put every new human-action checklist or runbook in `docs/human-tasks/`, include a `## Human Setup Checklist` section, and add its filename to the Current Task Files list above. Product specifications, implementation documentation, and automated agent tasks remain in their existing locations. When a feature needs both implementation documentation and human setup, keep the human checklist here and link to it from the implementation documentation.
-
-Never commit credentials or paste secrets into task files, issues, logs, or chat.
+Every human-task document must include `## Human Setup Checklist`, contain no credentials or secret values, and be listed here. Never paste secrets into chat, logs, issues, or committed files.

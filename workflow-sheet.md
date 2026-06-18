@@ -1,29 +1,32 @@
-# workflow-sheet.md
-
-Use this as a lightweight operational worksheet for the current repo.
+# Lofi MVP Workflow Sheet
 
 ## Current Phase
 
-TODO
+Domain and Data Isolation
 
 ## Current Critical Path
 
-TODO
+L001 → L002 → L003/L004 → L005 → L006 → L007 → L008 → L009 → L010
 
 ## Ready Task Candidates
 
-| Task ID | Why Ready | Notes |
+| Task | Why ready | Notes |
 |---|---|---|
-| T001 | No dependencies | Starter placeholder |
+| L001 | No dependencies | Define and test the lofi domain before integration work. |
 
 ## Known Parallelism
 
-| Task IDs | Why They Can Run In Parallel | Write Scope Separation |
+| Tasks | Why parallelizable | Constraint |
 |---|---|---|
-| TODO | TODO | TODO |
+| L003 and L004 | Creation mutation and read-only landing/listing have mostly distinct services/UI. | Execute one at a time by default; coordinate shared `src/server/app.mjs` and styles. |
 
 ## Known Coupling
 
-| Task IDs / Areas | Why Coupled | Sequencing Note |
+| Tasks / areas | Why coupled | Sequencing |
 |---|---|---|
-| TODO | TODO | TODO |
+| L001 and L002 | Persistence must encode the final domain fields and constraints. | Complete L001 first. |
+| L003, L004, L005 | All touch routes and public cohort UI. | Integrate creation and browsing before interest. |
+| L005 and L006 | Quorum notifications depend on accepted-interest and activation semantics. | Complete L005 first. |
+| L007 and L009 | Provider setup depends on finalized environment names and deployment config. | Complete L007/L008 before dashboard work. |
+
+`tasks.json` remains canonical.

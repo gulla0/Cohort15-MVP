@@ -9,1296 +9,450 @@
   ],
   "tasks": [
     {
-      "id": "T001",
-      "title": "Scaffold runnable app foundation",
-      "status": "done",
-      "phase": "Product Scaffold And Domain Foundation",
+      "id": "L001",
+      "title": "Define the lofi domain and validation policy",
+      "status": "not_started",
+      "phase": "Domain and Data Isolation",
       "dependencies": [],
-      "objective": "Choose a pragmatic web app stack for this empty product repo and create the minimal runnable application, lint/test scripts, and README setup notes.",
+      "objective": "Replace production-MVP domain assumptions with the anonymous lofi cohort, lifecycle, email, scheduling, quorum, and public-link rules.",
       "inputs": [
-        "docs/cohort15-mvp-spec-v3.md",
-        "plan.md",
-        "repository tree"
+        "docs/cohort15-lofi-mvp-spec.md",
+        "src/domain/constants.mjs",
+        "src/domain/models.mjs",
+        "src/domain/validation.mjs",
+        "tests/domain-validation.test.mjs"
       ],
       "write_scope": [
-        "product source files",
-        "package and dependency manifests",
-        "framework config files",
-        "test harness files",
-        "README.md"
-      ],
-      "authority": [
-        "May choose the initial product stack because no stack is specified in the repo",
-        "Keep the scaffold minimal and runnable",
-        "Do not implement full product flows in this task"
-      ],
-      "acceptance_criteria": [
-        "A local development app can start successfully",
-        "Baseline lint/type/test or equivalent checks are configured",
-        "README.md documents install, run, and verification commands",
-        "The app has a clear source directory structure for domain, persistence, and UI work"
-      ],
-      "verification": [
-        "Run the documented baseline verification command",
-        "Start the app locally or run a framework-provided smoke check"
-      ],
-      "stop_condition": "Stop once the foundation is runnable and ready for domain work.",
-      "evidence": "2026-05-30 00:13 EDT: Added dependency-free Node.js app scaffold with src/domain, src/persistence, src/server, src/ui, scripts/lint.mjs, tests/foundation.test.mjs, and README commands. `npm run check` passed. Dev server started at http://localhost:3000 and in-app browser verified title/H1/scaffold sections.",
-      "notes": "Selected dependency-free Node.js HTTP + ES modules foundation to keep the scaffold runnable without network dependency installation."
-    },
-    {
-      "id": "T002",
-      "title": "Implement domain types and validation rules",
-      "status": "done",
-      "phase": "Product Scaffold And Domain Foundation",
-      "dependencies": [
-        "T001"
-      ],
-      "objective": "Add typed Cohort15 domain models and validation for event fields, recurrence, quorum, participant cap, expiry default, and link visibility policy.",
-      "inputs": [
-        "docs/cohort15-mvp-spec-v3.md",
-        "app source from T001"
-      ],
-      "write_scope": [
-        "domain/model modules",
-        "validation modules",
+        "src/domain/constants.mjs",
+        "src/domain/models.mjs",
+        "src/domain/validation.mjs",
         "focused domain tests"
       ],
       "authority": [
-        "Implement only behavior specified in the MVP spec",
-        "Record any non-blocking product assumptions in code comments or docs",
-        "Do not add persistence or UI integration in this task"
+        "Remove credits, maximum participants, images, social status, and authenticated link-authorization fields from the lofi domain path.",
+        "Keep categories, audience, skill level, recurrence, duration, meeting count, and approved meeting hosts where reusable.",
+        "Do not change persistence, routes, or UI in this task."
       ],
       "acceptance_criteria": [
-        "Event, EventInterest, CreditTransaction, and SocialPost concepts are represented in typed code",
-        "Allowed enum values match the spec",
-        "Participant cap, recurrence, meeting count, required link, and expiry defaults are validated",
-        "Private link visibility policy is represented without leaking links for open events"
+        "Cohorts require a normalized private creator email.",
+        "Quorum accepts integers from 1 through 15 with no participant maximum.",
+        "Expiry defaults to seven days and the first meeting must be later than expiry.",
+        "Meeting links accept only HTTPS links on the existing approved host allowlist.",
+        "Lifecycle helpers define active/expired state and hide a successful link after the final meeting ends.",
+        "Focused tests cover valid and rejected boundary cases."
       ],
       "verification": [
-        "Run focused domain validation tests",
-        "Run type checks if available"
+        "Run node --test tests/domain-validation.test.mjs",
+        "Run npm run lint"
       ],
-      "stop_condition": "Stop before persistence or UI integration.",
-      "evidence": "2026-05-30 00:18 EDT: Added JSDoc domain model typedefs, spec-aligned enum constants, event and related-object validators, 14-day expiry defaulting, and locked-link viewer serialization policy. `npm run check` passed.",
-      "notes": "Private links remain hidden for open events; active-event links are visible only to the creator or interested viewers supplied to the serializer."
+      "stop_condition": "Stop when the lofi domain contract is tested without integrating persistence or HTTP routes.",
+      "evidence": "Pending.",
+      "notes": "First ready task."
     },
     {
-      "id": "T003",
-      "title": "Add persistence schema and credit ledger primitives",
-      "status": "done",
-      "phase": "Product Scaffold And Domain Foundation",
+      "id": "L002",
+      "title": "Add isolated lofi persistence and Supabase migration",
+      "status": "not_started",
+      "phase": "Domain and Data Isolation",
       "dependencies": [
-        "T002"
+        "L001"
       ],
-      "objective": "Create storage for users, events, event interests, credit transactions, and social posts, with auditable credit balance helpers.",
-      "inputs": [
-        "domain model from T002",
-        "selected persistence layer from T001"
-      ],
-      "write_scope": [
-        "database schema or migrations",
-        "seed/demo data",
-        "repository/data-access modules",
-        "credit ledger service",
-        "persistence tests"
-      ],
-      "authority": [
-        "Credit balances must be derived from auditable transaction records or kept consistent with them",
-        "Do not silently mutate balances without transaction records",
-        "Do not implement user-facing create or interest flows in this task"
-      ],
-      "acceptance_criteria": [
-        "Users, events, interests, credit transactions, and social posts can be persisted",
-        "Hold, consume, refund, and grant transaction types are supported for MVP",
-        "The schema leaves a clear path for a later purchase transaction source without requiring USD payments now",
-        "Balance helpers correctly account for held and available credits",
-        "Seed/demo users can receive starting credits through grant transactions"
-      ],
-      "verification": [
-        "Run persistence or repository tests for credit hold/consume/refund behavior",
-        "Run migration/schema validation if available"
-      ],
-      "stop_condition": "Stop before user-facing create/interest flows.",
-      "evidence": "2026-05-30 00:28 EDT: Added dependency-free in-memory persistence schema/repositories for users, events, interests, credit transactions, and social posts; demo seed grants; and credit ledger primitives for grant, hold, consume, refund, and derived balances. `npm run check` passed.",
-      "notes": "Schema module records purchase-source extensibility; production Stripe purchase fulfillment is now covered by T020-T021."
-    },
-    {
-      "id": "T004",
-      "title": "Build create cohort flow",
-      "status": "done",
-      "phase": "Core Cohort Flow",
-      "dependencies": [
-        "T003"
-      ],
-      "objective": "Let an authenticated or demo user create a cohort event by holding 2 credits and creating an open event with expiresAt equal to createdAt plus 14 days.",
-      "inputs": [
-        "event form requirements from docs/cohort15-mvp-spec-v3.md",
-        "credit ledger primitives from T003"
-      ],
-      "write_scope": [
-        "create-event UI",
-        "create-event route/action/controller",
-        "event creation service",
-        "create-flow tests"
-      ],
-      "authority": [
-        "Require enough available credits before event creation",
-        "Hide lockedEventLink from public outputs",
-        "Do not implement participant interest or expiry automation in this task"
-      ],
-      "acceptance_criteria": [
-        "Creator with fewer than 2 available credits cannot create an event",
-        "Creator with at least 2 available credits creates an open event",
-        "Creation records a 2-credit hold transaction",
-        "Event expiry defaults to 14 days after creation",
-        "Validation errors are surfaced for invalid event inputs"
-      ],
-      "verification": [
-        "Run create-flow unit/integration tests",
-        "Manually smoke test the create flow if a UI exists"
-      ],
-      "stop_condition": "Stop before participant interest and quorum handling.",
-      "evidence": "2026-05-30 00:33 EDT: Added create cohort service, demo-backed create form route, UI rendering for creation errors/success, and tests for 2-credit creator holds, default expiry, insufficient credits, validation errors, and hidden private links. `npm run check` passed.",
-      "notes": "Create flow uses demo users from seed data as the temporary auth path and stops before feed/detail, participant interest, and quorum handling."
-    },
-    {
-      "id": "T005",
-      "title": "Build public event feed and detail visibility",
-      "status": "done",
-      "phase": "Core Cohort Flow",
-      "dependencies": [
-        "T004"
-      ],
-      "objective": "Show open and active cohort events in a public feed and event detail page while hiding lockedEventLink until quorum unlocks it for authorized users.",
-      "inputs": [
-        "event fields from docs/cohort15-mvp-spec-v3.md",
-        "create flow from T004"
-      ],
-      "write_scope": [
-        "event feed UI/routes",
-        "event detail UI/routes",
-        "event visibility serializers or data loaders",
-        "visibility tests"
-      ],
-      "authority": [
-        "Do not expose private online links for open events",
-        "Keep filtering/search minimal unless required by existing UI",
-        "Do not implement interest mutation behavior in this task"
-      ],
-      "acceptance_criteria": [
-        "Feed lists public event fields for open and active events",
-        "Detail page shows complete public cohort information",
-        "Open events show a locked-link placeholder instead of the private link",
-        "Active events reveal the private link only according to the chosen authorization policy"
-      ],
-      "verification": [
-        "Run visibility tests",
-        "Manually inspect feed/detail pages if a UI exists"
-      ],
-      "stop_condition": "Stop before interest mutation behavior.",
-      "evidence": "2026-05-30 00:41 EDT: Added event browsing service, public `GET /cohorts` feed, `GET /cohorts/:id` detail route, feed/detail UI rendering, and visibility tests for open/active events, hidden locked links, and authorized active-link viewers. `npm run check` passed.",
-      "notes": "Active event links are revealed through the existing conservative authorization policy when the current viewer is the creator or an active interested participant; interest mutation remains T006."
-    },
-    {
-      "id": "T006",
-      "title": "Build show-interest and quorum unlock flow",
-      "status": "done",
-      "phase": "Core Cohort Flow",
-      "dependencies": [
-        "T005"
-      ],
-      "objective": "Let participants hold 1 credit to show interest, prevent duplicate or over-capacity interest, and activate the cohort when active interest count reaches minQuorum.",
-      "inputs": [
-        "EventInterest rules from docs/cohort15-mvp-spec-v3.md",
-        "CreditTransaction rules from docs/cohort15-mvp-spec-v3.md",
-        "event detail flow from T005"
-      ],
-      "write_scope": [
-        "interest action/controller/service",
-        "quorum service",
-        "credit ledger integration",
-        "event detail interest UI",
-        "interest and quorum tests"
-      ],
-      "authority": [
-        "Participants must have at least 1 available credit to show interest",
-        "Do not allow duplicate active interest for the same user and event",
-        "Do not exceed maxParticipants",
-        "Consume held creator and participant credits only when quorum is met"
-      ],
-      "acceptance_criteria": [
-        "Showing interest records a 1-credit hold and active interest",
-        "Duplicate and over-capacity interest attempts are rejected",
-        "When active interest count reaches minQuorum, event status becomes active",
-        "Quorum consumes held creator and participant credits",
-        "Private event link becomes visible only after activation"
-      ],
-      "verification": [
-        "Run interest/quorum tests",
-        "Manually smoke test interest and unlock if a UI exists"
-      ],
-      "stop_condition": "Stop before expiry automation.",
-      "evidence": "2026-05-30 00:48 EDT: Added show-interest/quorum service, POST interest route, event detail interest UI, consumed-interest link authorization, and tests for 1-credit holds, duplicate/cap rejection, quorum activation, credit consumption, and unlocked private link rendering. `npm run check` passed. Browser smoke tested create -> detail -> stake interest -> quorum unlock on `http://localhost:3001`.",
-      "notes": "Quorum activation consumes creator and participant holds, changes active interests to consumed, and keeps consumed participants authorized to view active private links."
-    },
-    {
-      "id": "T007",
-      "title": "Build expiry and refund processing",
-      "status": "done",
-      "phase": "Core Cohort Flow",
-      "dependencies": [
-        "T006"
-      ],
-      "objective": "Expire open events past expiresAt that have not met quorum and refund all held creator and participant credits.",
-      "inputs": [
-        "expiry rule from docs/cohort15-mvp-spec-v3.md",
-        "credit ledger from T003",
-        "interest flow from T006"
-      ],
-      "write_scope": [
-        "expiry job/service",
-        "manual admin/dev trigger if needed",
-        "credit refund logic",
-        "expiry tests"
-      ],
-      "authority": [
-        "Only open events past expiresAt should be expired",
-        "Active events must not be refunded by expiry processing",
-        "Refund all held credits through refund transaction records"
-      ],
-      "acceptance_criteria": [
-        "Expired events change status to expired",
-        "Creator and participant holds are refunded",
-        "Interest records become refunded or otherwise clearly non-active",
-        "Private event link remains hidden after expiry"
-      ],
-      "verification": [
-        "Run expiry/refund tests",
-        "Run a manual expiry trigger against seeded data if available"
-      ],
-      "stop_condition": "Stop before dashboards and social promotion outbox.",
-      "evidence": "2026-05-30 00:59 EDT: Added expiry processing service, dev/admin POST trigger, and tests for overdue open event expiry, creator/participant refund transactions, refunded interests, active/future event exclusion, and expired cohorts staying non-public. `npm run check` passed; browser smoke confirmed local app still renders.",
-      "notes": "Expiry processing is idempotent by only selecting currently open events whose expiresAt is at or before the processing time."
-    },
-    {
-      "id": "T008",
-      "title": "Build social promotion outbox",
-      "status": "done",
-      "phase": "MVP Surfaces And Promotion Outbox",
-      "dependencies": [
-        "T004"
-      ],
-      "objective": "Generate a public-safe local social post/outbox record when a cohort is created, containing required public fields and excluding the private link.",
-      "inputs": [
-        "social promotion section from docs/cohort15-mvp-spec-v3.md",
-        "event creation flow from T004"
-      ],
-      "write_scope": [
-        "social post outbox model/service",
-        "create flow integration",
-        "social promotion tests",
-        "optional local outbox UI or dev view"
-      ],
-      "authority": [
-        "Do not add real external social API posting in this local-outbox task; production publishing is covered by T022-T024",
-        "Social content must never include lockedEventLink",
-        "Status may be pending, posted, or failed according to local/mock behavior"
-      ],
-      "acceptance_criteria": [
-        "New events create a local social-promotion outbox record",
-        "Post text includes event title, topic, target skill level, short description, quorum needed, and public event page link",
-        "Post text excludes private event links",
-        "Event socialPostStatus is kept consistent with local/mock posting result"
-      ],
-      "verification": [
-        "Run social promotion tests",
-        "Inspect generated post content for a seeded or newly created event"
-      ],
-      "stop_condition": "Stop after local/mock promotion is represented and verifiable.",
-      "evidence": "2026-05-30 00:59 EDT: Added local social promotion service, integrated create cohort with pending social post creation, and tests confirming required public fields and public page URL are included while private links are excluded. `npm run check` passed.",
-      "notes": "This task created the local public-safe outbox record. Production publishing to LinkedIn, X, and Email is now covered by T022-T024."
-    },
-    {
-      "id": "T009",
-      "title": "Build creator and participant dashboards",
-      "status": "done",
-      "phase": "MVP Surfaces And Promotion Outbox",
-      "dependencies": [
-        "T006"
-      ],
-      "objective": "Provide dashboard views for creators and participants showing relevant cohorts, statuses, credit holds, and unlocked links where allowed.",
-      "inputs": [
-        "event data from T004",
-        "interest data from T006",
-        "credit data from T003"
-      ],
-      "write_scope": [
-        "creator dashboard UI/routes",
-        "participant dashboard UI/routes",
-        "dashboard data loaders",
-        "dashboard tests"
-      ],
-      "authority": [
-        "Keep dashboards focused on MVP status and credit visibility",
-        "Do not add analytics beyond what is needed to understand cohort state",
-        "Respect private link visibility rules"
-      ],
-      "acceptance_criteria": [
-        "Creator dashboard lists owned cohorts and statuses",
-        "Creator dashboard shows relevant credit hold/consume/refund state",
-        "Participant dashboard lists cohorts where the user showed interest",
-        "Unlocked links appear only when the event is active and the user is authorized"
-      ],
-      "verification": [
-        "Run dashboard tests",
-        "Manually inspect dashboards with seeded creator and participant data if a UI exists"
-      ],
-      "stop_condition": "Stop before broad polish or analytics.",
-      "evidence": "2026-05-30 00:59 EDT: Added dashboard data service, creator and participant dashboard routes/UI, and tests for owned/interested cohorts, credit held/consume/refund summaries, and authorized unlocked links. `npm run check` passed; browser smoke checked `/dashboard/creator` and `/dashboard/participant`.",
-      "notes": "Dashboards use demo query-param user selection until regular auth is specified, matching existing create/detail MVP assumptions."
-    },
-    {
-      "id": "T010",
-      "title": "Add MVP verification pass and docs",
-      "status": "done",
-      "phase": "MVP Surfaces And Promotion Outbox",
-      "dependencies": [
-        "T007",
-        "T008",
-        "T009"
-      ],
-      "objective": "Add final coverage and documentation for the core success path, expiry path, credit accounting, and local operation.",
-      "inputs": [
-        "completed MVP tasks",
-        "README.md",
-        "docs/cohort15-mvp-spec-v3.md"
-      ],
-      "write_scope": [
-        "tests",
-        "README.md",
-        "developer docs",
-        "small defects found during verification"
-      ],
-      "authority": [
-        "May fix small defects discovered while verifying existing MVP behavior",
-        "Do not add new product feature scope",
-        "Document unresolved assumptions rather than silently broadening scope"
-      ],
-      "acceptance_criteria": [
-        "Core success path is covered by automated tests or documented manual verification",
-        "Expiry/refund path is covered by automated tests or documented manual verification",
-        "Credit ledger behavior is covered by tests",
-        "README documents setup, run, test, seed/demo data, MVP boundary, production credit package assumptions, and known assumptions"
-      ],
-      "verification": [
-        "Run the full documented verification suite",
-        "Manually exercise the MVP flow if UI automation is not available"
-      ],
-      "stop_condition": "Stop once the MVP can be handed to user testing.",
-      "evidence": "2026-05-30 07:42 EDT: Added MVP verification coverage for the full create/promote/quorum/dashboard success path and the create/interest/expiry/refund path; expanded README with demo data, MVP flow, local expiry, social outbox, credit package assumptions, and known assumptions. `npm run check` passed with 36 tests. Dev server started at `http://localhost:3000`; in-app browser smoke verified create page and successful cohort creation without exposing the private link in the success state.",
-      "notes": "Manual browser feed/unlock follow-up was stopped by the browser URL policy after creation; the new automated verification test covers feed, detail, quorum unlock, dashboards, and expiry/refund end to end."
-    },
-    {
-      "id": "T011",
-      "title": "Add durable persistence adapter",
-      "status": "done",
-      "phase": "Post-MVP Hardening",
-      "dependencies": [
-        "T010"
-      ],
-      "objective": "Replace or augment the in-memory repositories with a durable local persistence adapter while preserving the existing repository contracts and credit ledger semantics.",
-      "inputs": [
-        "src/persistence/schema.mjs",
-        "src/persistence/repositories.mjs",
-        "src/persistence/credit-ledger.mjs",
-        "src/persistence/seeds.mjs",
-        "tests/persistence-ledger.test.mjs",
-        "tests/mvp-verification.test.mjs"
-      ],
-      "write_scope": [
-        "persistence adapter modules",
-        "schema or migration files",
-        "app initialization wiring",
-        "persistence tests",
-        "README persistence notes"
-      ],
-      "authority": [
-        "May introduce a durable local database dependency if needed",
-        "Must keep credit balances derived from transaction records",
-        "Must keep existing service-level behavior compatible with current tests",
-        "Do not implement auth, payment, or social API behavior in this task"
-      ],
-      "acceptance_criteria": [
-        "Users, events, interests, credit transactions, and social posts persist across app restarts when durable mode is enabled",
-        "Existing in-memory test setup remains available or tests are updated to use an isolated durable store",
-        "Credit hold, consume, refund, grant, and future purchase transaction semantics remain auditable",
-        "README documents how local persistence is configured and reset"
-      ],
-      "verification": [
-        "Run persistence tests covering restart/reload behavior",
-        "Run the full documented verification suite"
-      ],
-      "stop_condition": "Stop once durable persistence is available behind the repository boundary and documented.",
-      "evidence": "2026-05-31 08:55 EDT: Added a dependency-free JSON file store behind the repository boundary, wired durable mode through COHORT15_PERSISTENCE_FILE, kept in-memory repositories available, documented configuration/reset behavior, and added reload coverage proving records and ledger balances survive repository reinitialization without duplicate seed grants. `npm run check` passed with 44 tests.",
-      "notes": "Durable persistence is available as local JSON-file mode; later auth and purchase tasks can rely on stable user, ledger, event, interest, and outbox records while preserving derived credit balance semantics."
-    },
-    {
-      "id": "T012",
-      "title": "Replace demo user selection with regular auth boundary",
-      "status": "done",
-      "phase": "Post-MVP Hardening",
-      "dependencies": [
-        "T011"
-      ],
-      "objective": "Add a regular authentication boundary so create, interest, dashboard, and private-link authorization use the signed-in user instead of demo query parameters or default users.",
-      "inputs": [
-        "docs/cohort15-mvp-spec-v3.md",
-        "src/server/app.mjs",
-        "src/services/create-cohort.mjs",
-        "src/services/show-interest.mjs",
-        "src/services/event-browsing.mjs",
-        "src/services/dashboards.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "auth/session modules",
-        "server route guards",
-        "UI sign-in/sign-out affordances",
-        "service call-site user resolution",
-        "auth and authorization tests",
-        "README auth notes"
-      ],
-      "authority": [
-        "May choose the simplest local auth/session approach that fits the dependency-free app unless the user specifies a provider",
-        "Must remove user-controlled query/default-user paths from protected mutations and dashboards",
-        "Must preserve conservative private-link authorization",
-        "Do not implement OAuth provider integrations unless explicitly chosen"
-      ],
-      "acceptance_criteria": [
-        "Unauthenticated users cannot create cohorts, show interest, or view dashboards",
-        "Authenticated users can create cohorts and show interest using their own user id",
-        "Creator and participant dashboards are scoped to the signed-in user",
-        "Private links remain visible only to authorized signed-in creators or committed participants",
-        "Demo users remain available only through an explicit local development path if retained"
-      ],
-      "verification": [
-        "Run auth route and service integration tests",
-        "Run the full documented verification suite"
-      ],
-      "stop_condition": "Stop once user identity is resolved through the auth boundary for all protected MVP flows.",
-      "evidence": "2026-06-16 12:48 EDT: Added dependency-free local session auth with explicit sign-in/sign-out, guarded create/interest/dashboard routes, removed protected-flow query/default demo identity resolution, scoped private-link viewing to the signed-in user, updated auth flow tests and README notes, and verified with focused auth route coverage plus full project checks.",
-      "notes": "Provider choice remains open. Current auth is a local session-cookie boundary over seeded local users; OAuth/provider integration is intentionally deferred."
-    },
-    {
-      "id": "T013",
-      "title": "Choose and document production deployment target",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T012",
-        "T016"
-      ],
-      "objective": "Select the first production host and document the runtime, deploy, start, health check, rollback, and app URL assumptions.",
-      "inputs": [
-        "README.md",
-        "package.json",
-        "src/server/app.mjs",
-        "plan.md"
-      ],
-      "write_scope": [
-        "deployment documentation",
-        "minimal host configuration if needed",
-        "README.md",
-        "plan.md"
-      ],
-      "authority": [
-        "Select a concrete target instead of leaving deployment generic",
-        "Do not commit credentials",
-        "Keep deployment-specific behavior out of core domain logic unless needed for runtime configuration",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "A specific production deployment target is documented",
-        "Runtime and start commands are documented",
-        "App URL/domain assumptions are documented",
-        "Rollback or redeploy basics are documented",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Review deployment docs for concrete target, commands, and assumptions",
-        "Run npm run check if workflow artifacts changed"
-      ],
-      "stop_condition": "Stop once the first production target and runbook are explicit.",
-      "evidence": "2026-06-17 EDT: Chose Render Web Service `cohort15-mvp` as the first production target, added the runbook now at `docs/human-tasks/deployment-render.md` with current official Render links and a human setup checklist, added `render.yaml`, documented runtime/start/health/rollback/app URL assumptions, and verified with `npm run check`.",
-      "notes": "Render is the selected deployment target. Use `https://cohort15-mvp.onrender.com` unless Render assigns a different URL; optional custom domain assumption is `https://app.cohort15.com` after DNS verification."
-    },
-    {
-      "id": "T014",
-      "title": "Add production configuration and secrets boundary",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T013"
-      ],
-      "objective": "Define safe runtime configuration for production, including Supabase, Stripe, social publishing, admin access, cookies, app URL, upload behavior, and local/demo mode separation.",
-      "inputs": [
-        "src/server/app.mjs",
-        "README.md",
-        "package.json"
-      ],
-      "write_scope": [
-        "configuration module",
-        "startup validation",
-        "example env documentation",
-        "config tests"
-      ],
-      "authority": [
-        "Do not commit real secrets",
-        "Production mode must not silently fall back to demo/local defaults",
-        "Keep local development explicit and easy to run",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Required and optional env vars are documented",
-        "Production config fails clearly when required values are missing",
-        "Local development remains explicit",
-        "Secrets are never logged or committed",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused config tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once configuration and secret handling are explicit, tested, and documented.",
-      "evidence": "2026-06-17 EDT: Added `src/config/runtime.mjs` production-mode validation, wired server startup through the runtime config, documented required Render/Supabase/Stripe/social/email/admin/upload env vars in `.env.example` and `docs/human-tasks/production-config.md`, expanded `render.yaml` with non-secret values plus `sync: false` secret placeholders, and verified with focused config tests plus `npm run check`.",
-      "notes": "Production mode is enabled by `COHORT15_APP_ENV=production` or `NODE_ENV=production`; startup fails clearly when required values are missing, local JSON persistence is configured, or local upload storage is selected."
-    },
-    {
-      "id": "T015",
-      "title": "Integrate Supabase Auth account boundary",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T014"
-      ],
-      "objective": "Implement production authentication with Supabase Auth using Google login, GitHub login, and optional magic-link/email login while preserving local seeded auth only for development.",
-      "inputs": [
-        "src/auth/session.mjs",
-        "src/server/app.mjs",
-        "src/ui/auth.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "auth adapter modules",
-        "auth routes/callback handling",
-        "session integration",
-        "auth UI",
-        "auth tests",
-        "docs"
-      ],
-      "authority": [
-        "Use Supabase Auth for production",
-        "Enable Google and GitHub login assumptions in docs/config",
-        "Support optional magic-link/email login if configured",
-        "Do not expose seeded demo sign-in in production",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Production users can sign in and sign out through Supabase Auth",
-        "Protected routes resolve identity from Supabase-backed sessions in production",
-        "Seeded local users are restricted to development mode",
-        "Anonymous and wrong-user access are rejected",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused auth route tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once production auth identity replaces demo users for production protected flows.",
-      "evidence": "2026-06-17 EDT: Added dependency-free Supabase Auth OAuth/PKCE adapter, production provider sign-in routes for Google and GitHub, Supabase callback-to-app-session handling, production local-seeded-auth lockout, optional magic-link configuration, setup docs, and focused Supabase auth route tests. `npm run check` passed with 69 tests.",
-      "notes": "Production auth uses Supabase Auth with Google and GitHub as required providers; magic-link/email remains optional behind `SUPABASE_ENABLE_MAGIC_LINK`."
-    },
-    {
-      "id": "T016",
-      "title": "Repair time-sensitive MVP verification tests",
-      "status": "done",
-      "phase": "Launch Readiness",
-      "dependencies": [
-        "T011"
-      ],
-      "objective": "Make create-flow and MVP verification tests deterministic so the 14-day quorum-window rule does not fail as calendar time advances.",
-      "inputs": [
-        "tests/create-cohort.test.mjs",
-        "tests/mvp-verification.test.mjs",
-        "src/server/app.mjs",
-        "src/services/create-cohort.mjs",
-        "src/domain/validation.mjs"
-      ],
-      "write_scope": [
-        "test fixtures",
-        "test-only clock injection if needed",
-        "small app wiring changes needed to support deterministic tests"
-      ],
-      "authority": [
-        "May update stale firstMeetingAt fixtures or inject a fixed clock",
-        "Must preserve the rule that first meetings occur after the 14-day quorum window",
-        "Do not weaken production validation to satisfy stale tests"
-      ],
-      "acceptance_criteria": [
-        "Create-flow route tests pass regardless of the real current date",
-        "MVP success-path verification passes regardless of the real current date",
-        "MVP expiry-path verification passes regardless of the real current date",
-        "The full documented verification suite passes"
-      ],
-      "verification": [
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once the stale date dependency is removed and the full verification suite passes.",
-      "evidence": "2026-06-12 21:02 EDT: Added request-handler option injection so route-level tests can use a fixed clock, wired stale create/MVP verification tests to 2026-06-01, and preserved production first-meeting validation. `npm run check` passed with 44 tests.",
-      "notes": "Current failure observed on 2026-06-13: tests use 2026-06-20 first meetings, which are now inside the required 14-day quorum window."
-    },
-    {
-      "id": "T017",
-      "title": "Add Supabase Postgres production persistence adapter",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T014",
-        "T015"
-      ],
-      "objective": "Move production persistence from local JSON to Supabase Postgres while preserving repository contracts and transaction-derived credit ledger semantics.",
+      "objective": "Persist anonymous lofi cohorts, interests, notification outcomes, and rate-limit data through reusable repositories and a migration that cannot mix with production-MVP tables.",
       "inputs": [
         "src/persistence/store.mjs",
         "src/persistence/repositories.mjs",
-        "src/persistence/schema.mjs",
-        "src/persistence/credit-ledger.mjs",
-        "README.md"
+        "src/persistence/supabase-postgres.mjs",
+        "supabase/migrations/20260617000000_cohort15_core.sql",
+        "docs/cohort15-lofi-mvp-spec.md"
       ],
       "write_scope": [
-        "Supabase Postgres adapter",
-        "schema/migrations or SQL docs",
-        "repository wiring",
-        "persistence tests",
-        "docs"
+        "lofi persistence schema and repositories",
+        "lofi Supabase adapter mapping",
+        "new lofi-specific SQL migration",
+        "focused persistence tests",
+        "persistence documentation"
       ],
       "authority": [
-        "Use Supabase Postgres as the selected production datastore",
-        "Preserve auditable credit transactions",
-        "Do not embed Supabase service credentials in source",
-        "Keep local JSON or in-memory mode available for development/tests",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
+        "Create new table names prefixed cohort15_lofi_.",
+        "Do not alter, drop, read, or write existing cohort15 production-MVP tables.",
+        "Enforce unique normalized interest email per cohort at repository and database levels.",
+        "Keep service-role credentials server-only."
       ],
       "acceptance_criteria": [
-        "Users, cohorts, interests, credit transactions, social posts, purchases, and auth-linked records persist in Supabase Postgres",
-        "Credit balances remain transaction-derived",
-        "Credit hold/consume/refund/purchase writes are safe under concurrent requests",
-        "Migration/init docs exist",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
+        "A clean store persists cohorts and interests without users, credits, purchases, images, or social posts.",
+        "Database uniqueness prevents duplicate interest by cohort and normalized email.",
+        "Creator and participant emails remain non-public repository fields.",
+        "Notification delivery outcomes can be recorded without blocking submissions.",
+        "The new migration is isolated from the existing production migration."
       ],
       "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused persistence tests",
-        "Run npm run check"
+        "Run focused persistence and Supabase adapter tests",
+        "Inspect migration for cohort15_lofi_ table isolation",
+        "Run npm run lint"
       ],
-      "stop_condition": "Stop once production persistence is selectable, documented, and covered by tests or a documented integration path.",
-      "evidence": "2026-06-17 EDT: Added dependency-free Supabase Postgres production persistence via server-side REST hydration/write-through, production startup selection without demo seed users, SQL migration/runbook docs, purchase/auth-linked persistence fields, and focused Supabase persistence tests. npm run check passed with 72 tests.",
-      "notes": "Production mode hydrates repository state from Supabase Postgres using server-only SUPABASE_SERVICE_ROLE_KEY. Local in-memory and JSON stores remain available for development/tests. SQL migration includes purchase table and credit RPC helpers using advisory locks for concurrent credit transaction safety."
-    },
-    {
-      "id": "T018",
-      "title": "Harden production sessions and CSRF behavior",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T015",
-        "T017"
-      ],
-      "objective": "Make authenticated browser mutations launch-safe with production cookie/session settings and CSRF protection or an explicit equivalent strategy.",
-      "inputs": [
-        "src/auth/session.mjs",
-        "src/server/app.mjs",
-        "src/ui/*.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "session/cookie handling",
-        "CSRF tokens or equivalent controls",
-        "route tests",
-        "docs"
-      ],
-      "authority": [
-        "Production cookies must assume HTTPS",
-        "Mutating routes must reject invalid auth/session state",
-        "Do not log session tokens or CSRF tokens",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Secure production cookie behavior is documented and implemented",
-        "Session expiration and sign-out invalidation are documented",
-        "POST routes have CSRF protection or an explicitly tested equivalent",
-        "Tests cover missing or invalid session/CSRF cases",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused auth/security route tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once session and mutation protection are production-MVP safe.",
-      "evidence": "2026-06-17 EDT: Added expiring opaque server-side sessions with production Secure/HttpOnly/SameSite=Lax cookies, per-session CSRF tokens in signed-in forms, production CSRF rejection for protected browser mutations, production admin POST fail-closed behavior pending T019, sign-out invalidation, session expiry tests, and session/CSRF docs. npm run check passed with 77 tests.",
-      "notes": "Production sessions expire after 8 hours. CSRF protection is enforced in production for signed-in cohort creation, show-interest, and sign-out form posts; production admin mutation is disabled until T019 adds authorization; local development keeps the simple seeded-user workflow."
-    },
-    {
-      "id": "T019",
-      "title": "Secure admin and operational endpoints",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T014",
-        "T015",
-        "T018"
-      ],
-      "objective": "Lock down administrative operations including cohort expiry, social publishing operations, and payment/social operational retries.",
-      "inputs": [
-        "src/server/app.mjs",
-        "src/services/expire-cohorts.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "admin authorization checks",
-        "admin role/config handling",
-        "route tests",
-        "operational docs"
-      ],
-      "authority": [
-        "Admin status must not come from client-controlled input",
-        "Protect /admin/expire-cohorts before public launch",
-        "Use Supabase-authenticated admin identity or a documented operational credential",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Unauthenticated and non-admin users cannot invoke admin operations",
-        "Authorized admin or operational callers can process expiry",
-        "Admin authorization is tested and documented",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused admin route tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once all operational endpoints are protected and documented.",
-      "evidence": "2026-06-17 EDT: Added server-configured admin authorization using authenticated account email membership in COHORT15_ADMIN_EMAILS, protected POST /admin/expire-cohorts from unauthenticated and non-admin callers, required production CSRF validation, added focused authorization tests, and documented exact Render/Supabase operator setup and verification checkpoints. npm run check passed with 80 tests.",
-      "notes": "Admin role is derived case-insensitively from the persisted signed-in user email and server-side runtime config, never request input. The expiry operation remains an authenticated operational trigger rather than a scheduler."
-    },
-    {
-      "id": "T020",
-      "title": "Implement Stripe credit purchase packages",
-      "status": "done",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T014",
-        "T015",
-        "T017"
-      ],
-      "objective": "Replace the Buy Credits placeholder with real Stripe-backed purchases for the MVP packages: $6 for 6 credits and $12 for 14 credits.",
-      "inputs": [
-        "src/persistence/credit-ledger.mjs",
-        "src/server/app.mjs",
-        "src/ui/dashboards.mjs",
-        "src/ui/home.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "Stripe checkout integration",
-        "purchase service",
-        "purchase routes/UI",
-        "credit ledger purchase transactions",
-        "tests",
-        "docs"
-      ],
-      "authority": [
-        "Use Stripe as the selected payment provider",
-        "Do not store card data",
-        "Do not grant credits until payment success is verified",
-        "Do not hard-code Stripe secrets",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Authenticated users can select both MVP credit packages",
-        "Stripe checkout or payment flow is initiated with configured prices",
-        "Successful verified payment creates auditable purchase credit transactions",
-        "Failed/cancelled payments do not grant credits",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused purchase tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once Stripe-backed package purchases work in production mode and local/test mode is documented.",
-      "evidence": "2026-06-17 EDT: Replaced the Buy Credits placeholder with authenticated $6/6-credit and $12/14-credit package selection, dependency-free Stripe-hosted Checkout Session creation, server-side paid Session verification, pending/paid purchase persistence, and auditable purchase credit transactions. Added failed/cancelled/mismatch protections, focused route/service tests, and an operator-grade Stripe setup checklist. npm run check passed with 85 tests.",
-      "notes": "T020 verifies paid Checkout Sessions on the authenticated browser return and avoids repeat grants in the running repository. T021 remains required for signed webhook fulfillment, durable provider-event idempotency, and reconciliation when a paid browser does not return."
-    },
-    {
-      "id": "T021",
-      "title": "Add Stripe webhook idempotency and purchase reconciliation",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T020"
-      ],
-      "objective": "Make Stripe purchase fulfillment reliable by handling webhooks, duplicate events, pending/failed states, and reconciliation metadata.",
-      "inputs": [
-        "src/server/app.mjs",
-        "src/persistence/schema.mjs",
-        "src/persistence/repositories.mjs",
-        "src/persistence/credit-ledger.mjs"
-      ],
-      "write_scope": [
-        "webhook route",
-        "purchase state persistence",
-        "idempotency checks",
-        "reconciliation docs",
-        "tests"
-      ],
-      "authority": [
-        "Verify Stripe webhook signatures in production",
-        "Store provider event/payment IDs",
-        "Prevent duplicate credit grants",
-        "Do not log sensitive payment payloads",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Duplicate Stripe events do not double-grant credits",
-        "Failed/cancelled/pending payment states are represented",
-        "Purchase grant happens only after verified payment success",
-        "Operational reconciliation fields are documented",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused webhook/idempotency tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once Stripe fulfillment is idempotent and auditable.",
+      "stop_condition": "Stop when isolated data access is tested; do not build forms or deploy a live database.",
       "evidence": "Pending.",
-      "notes": "This is required because credits are money-adjacent and cannot rely only on a success redirect."
+      "notes": "Uses a new Supabase project in production."
     },
     {
-      "id": "T022",
-      "title": "Configure MVP social channels",
+      "id": "L003",
+      "title": "Build anonymous cohort creation",
       "status": "not_started",
-      "phase": "Production MVP Readiness",
+      "phase": "Public Product Flow",
       "dependencies": [
-        "T014"
+        "L002"
       ],
-      "objective": "Define the MVP social publishing scope and credentials for LinkedIn, X, and Email.",
+      "objective": "Allow any visitor to create a cohort with the retained form fields, mandatory private creator email, no auth, and lightweight abuse controls.",
       "inputs": [
-        "src/services/social-promotion.mjs",
-        "README.md",
-        "plan.md"
-      ],
-      "write_scope": [
-        "social configuration docs",
-        "channel constants/config",
-        "format constraints"
-      ],
-      "authority": [
-        "Limit MVP live publishing to LinkedIn, X, and Email",
-        "Keep dry-run mode available",
-        "Do not include private links in any social content",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "LinkedIn, X, and Email are documented as launch channels",
-        "Required credentials/env vars are documented",
-        "Dry-run vs live behavior is documented",
-        "Per-channel content constraints are recorded",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Review docs/config for selected channels",
-        "Run npm run check if workflow artifacts changed"
-      ],
-      "stop_condition": "Stop once selected social channels and configuration requirements are explicit.",
-      "evidence": "Pending.",
-      "notes": "Highest-return MVP socials are LinkedIn, X, and Email."
-    },
-    {
-      "id": "T023",
-      "title": "Implement LinkedIn, X, and Email social publishing adapters",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T017",
-        "T022"
-      ],
-      "objective": "Publish pending social outbox records through adapter-backed LinkedIn, X, and Email channels with persisted status handling and no private-link leakage.",
-      "inputs": [
-        "src/services/social-promotion.mjs",
-        "src/persistence/repositories.mjs",
-        "src/server/app.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "social adapter boundary",
-        "LinkedIn adapter",
-        "X adapter",
-        "Email adapter",
-        "outbox processor",
-        "status persistence",
-        "tests",
-        "docs"
-      ],
-      "authority": [
-        "Do not hard-code social credentials",
-        "Preserve dry-run mode for testing",
-        "Never send private event links",
-        "Keep adapters bounded to selected MVP channels",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Pending posts can be processed through configured LinkedIn, X, and Email adapters",
-        "Posted/failed status is persisted",
-        "Failures are captured without leaking secrets",
-        "Tests prove private links are never published",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused social publishing tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once selected MVP channels can publish or dry-run through configured adapters.",
-      "evidence": "Pending.",
-      "notes": "This expands the local social outbox into real MVP publishing."
-    },
-    {
-      "id": "T024",
-      "title": "Add admin controls for social publishing",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T019",
-        "T023"
-      ],
-      "objective": "Restrict live social publishing and retry operations to admin or operational authorization.",
-      "inputs": [
-        "src/server/app.mjs",
-        "src/services/social-promotion.mjs",
-        "src/ui/dashboards.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "admin social routes or controls",
-        "retry/process handlers",
-        "authorization tests",
-        "docs"
-      ],
-      "authority": [
-        "Live posting must require admin/operational authorization",
-        "Do not expose secrets or private links in admin UI/logs",
-        "Keep dry-run available for local verification",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Admins can process or retry pending social posts",
-        "Non-admin users cannot trigger live publishing",
-        "Failures are visible without exposing secrets/private links",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused admin social tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once live social publishing is operationally controlled.",
-      "evidence": "Pending.",
-      "notes": "Social publishing is MVP scope, but live posting should not be uncontrolled."
-    },
-    {
-      "id": "T025",
-      "title": "Define production credit bootstrap policy",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T015",
-        "T017",
-        "T020"
-      ],
-      "objective": "Remove production reliance on demo seed grants by defining how real users receive credits at launch.",
-      "inputs": [
-        "src/persistence/seeds.mjs",
-        "src/persistence/credit-ledger.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "credit bootstrap service/config",
-        "seed behavior changes",
-        "docs",
-        "tests"
-      ],
-      "authority": [
-        "Production must not silently grant demo credits",
-        "All grants or purchases must be ledger-backed",
-        "Document whether launch users start with free credits or must buy credits",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "New-user credit policy is documented",
-        "Demo seed grants are development-only",
-        "Production credits come from Stripe purchases or explicit admin/launch grants",
-        "Tests cover production seed behavior",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused credit bootstrap tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once production starting credit behavior is explicit and auditable.",
-      "evidence": "Pending.",
-      "notes": "Needed because real payments are MVP scope and seeded local grants cannot be the production funding model."
-    },
-    {
-      "id": "T026",
-      "title": "Harden or constrain production image uploads",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T014",
-        "T017"
-      ],
-      "objective": "Make event image uploads safe for production, or explicitly disable custom uploads in production while preserving default/URL image behavior.",
-      "inputs": [
+        "src/services/create-cohort.mjs",
         "src/server/app.mjs",
         "src/ui/create-cohort.mjs",
         "src/ui/styles.css",
-        "README.md"
+        "docs/cohort15-lofi-mvp-spec.md"
       ],
       "write_scope": [
-        "upload storage/config",
-        "validation hardening",
-        "static serving policy",
-        "tests",
-        "docs"
+        "cohort creation service",
+        "GET and POST create routes",
+        "create form UI",
+        "honeypot and rate-limit helper",
+        "focused create tests"
       ],
       "authority": [
-        "Prevent path traversal and arbitrary overwrite",
-        "Only approved image types and sizes may be accepted",
-        "Document production storage behavior",
-        "Do not commit uploaded user content",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
+        "Remove auth, credits, image upload, and social outbox behavior from creation.",
+        "Accept creator email privately and normalize it.",
+        "Limit accepted cohort creations to five per IP per rolling hour.",
+        "Redirect successful creation to the cohort detail page.",
+        "Do not implement interest submission or email delivery."
       ],
       "acceptance_criteria": [
-        "Production upload mode is documented",
-        "Uploads are safely stored or disabled in production",
-        "File type/size/path protections are tested",
-        "Default image behavior still works",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
+        "Creation works without a session.",
+        "The form keeps current content/schedule fields except image and maximum participants and adds creator email.",
+        "Friendly email-use and approved-link safety notes are visible.",
+        "The browser timezone is captured automatically and submitted meeting time is converted correctly.",
+        "Honeypot submissions and requests over the creation limit are rejected.",
+        "A successful request redirects to its public detail page without displaying creator email."
       ],
       "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused upload tests",
-        "Run npm run check"
+        "Run focused create service and route tests",
+        "Run npm run lint"
       ],
-      "stop_condition": "Stop once production upload behavior is safe or intentionally constrained.",
+      "stop_condition": "Stop when anonymous creation and redirect work locally; leave notifications to L006.",
       "evidence": "Pending.",
-      "notes": "Current local uploads are useful for MVP testing but need a production storage/safety decision."
+      "notes": "Five accepted creations per IP per hour."
     },
     {
-      "id": "T027",
-      "title": "Add production logging, audit, and health checks",
+      "id": "L004",
+      "title": "Build the landing page, listing, and lifecycle views",
       "status": "not_started",
-      "phase": "Production MVP Readiness",
+      "phase": "Public Product Flow",
       "dependencies": [
-        "T014",
-        "T017",
-        "T019",
-        "T021",
-        "T023"
+        "L002"
       ],
-      "objective": "Add minimal operational visibility for health, errors, auth/admin failures, credit ledger movements, Stripe purchases, and social publishing without leaking sensitive data.",
+      "objective": "Turn the current early-interest design into the lofi landing page with the full public listing, active-first sorting, filters, local meeting times, and safe link visibility.",
       "inputs": [
+        "/Users/gzero/Desktop/cohort15/Marketing/early-interest-landing-page/index.html",
+        "src/ui/home.mjs",
+        "src/ui/cohorts.mjs",
+        "src/ui/styles.css",
+        "src/services/event-browsing.mjs",
+        "src/server/app.mjs"
+      ],
+      "write_scope": [
+        "landing and listing renderers",
+        "public browsing service",
+        "home/feed/detail GET routes",
+        "styles",
+        "focused browsing/UI tests"
+      ],
+      "authority": [
+        "Reuse the supplied page's visual language and Google Analytics ID G-LF22TLDSBV.",
+        "Show all listings by default with active listings before expired listings.",
+        "Support All, Active, and Expired filters.",
+        "Never render email addresses.",
+        "Do not implement form mutations in this task."
+      ],
+      "acceptance_criteria": [
+        "The home page explains the product and exposes Create a cohort and browsing actions.",
+        "The full cohort listing appears on the landing page.",
+        "All/Active/Expired filters work and default All sorts active first.",
+        "Exact interest count and quorum progress are public.",
+        "Meeting times are labeled and rendered in each visitor's local timezone.",
+        "Meeting links obey quorum and final-meeting visibility rules.",
+        "Expired listings remain visible."
+      ],
+      "verification": [
+        "Run focused event browsing and UI tests",
+        "Verify rendered HTML contains the Google Analytics measurement ID",
+        "Run npm run lint"
+      ],
+      "stop_condition": "Stop when read-only public pages match the lofi contract.",
+      "evidence": "Pending.",
+      "notes": "The separate /cohorts route may remain as a redirect or compatible view."
+    },
+    {
+      "id": "L005",
+      "title": "Build anonymous interest and quorum unlock",
+      "status": "not_started",
+      "phase": "Public Product Flow",
+      "dependencies": [
+        "L003",
+        "L004"
+      ],
+      "objective": "Collect email-only interest without auth, prevent duplicates and creator self-interest, and unlock the public meeting link at quorum.",
+      "inputs": [
+        "src/services/show-interest.mjs",
         "src/server/app.mjs",
-        "src/persistence/credit-ledger.mjs",
-        "src/services/social-promotion.mjs",
-        "README.md"
+        "src/ui/cohorts.mjs",
+        "src/persistence/repositories.mjs",
+        "docs/cohort15-lofi-mvp-spec.md"
       ],
       "write_scope": [
-        "structured logging helpers",
-        "health/readiness behavior",
-        "audit events",
-        "monitoring docs",
-        "tests where practical"
+        "interest service",
+        "interest POST route",
+        "detail-page interest form",
+        "interest abuse controls",
+        "focused interest/quorum tests"
       ],
       "authority": [
-        "Do not log private links, secrets, session tokens, CSRF tokens, or payment details",
-        "Keep logging minimal and useful",
-        "Document monitoring expectations",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
+        "Normalize email before comparison and persistence.",
+        "Reject creator email and duplicate cohort/email pairs.",
+        "Limit accepted interest submissions to ten per IP per rolling hour.",
+        "Close interest submission once quorum is met.",
+        "Do not send emails in this task."
       ],
       "acceptance_criteria": [
-        "Health endpoint is production-suitable",
-        "Errors are logged",
-        "Payment, credit, admin expiry, and social publish actions have minimal audit trail",
-        "Sensitive values are excluded from logs",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
+        "Open below-quorum cohorts show one email field and one interest button.",
+        "Friendly email-use consent text and a honeypot are present.",
+        "Creator and duplicate email submissions do not increment counts.",
+        "Quorum is based only on accepted interests.",
+        "Reaching quorum makes the approved meeting link public immediately.",
+        "The interest form is absent after quorum or expiry.",
+        "No email or IP address appears in public HTML or logs."
       ],
       "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused logging/privacy tests where practical",
-        "Run npm run check"
+        "Run focused show-interest and route tests",
+        "Run a create-to-quorum integration test",
+        "Run npm run lint"
       ],
-      "stop_condition": "Stop once MVP operations are diagnosable without leaking sensitive data.",
+      "stop_condition": "Stop when the anonymous quorum flow works without notification delivery.",
       "evidence": "Pending.",
-      "notes": "This replaces generic logging with launch-specific audit needs."
+      "notes": "Ten accepted interests per IP per hour."
     },
     {
-      "id": "T028",
-      "title": "Decide and implement MVP lifecycle controls",
+      "id": "L006",
+      "title": "Add Resend confirmation and quorum notifications",
       "status": "not_started",
-      "phase": "Production MVP Readiness",
+      "phase": "Notifications and Production Runtime",
       "dependencies": [
-        "T019"
+        "L003",
+        "L005"
       ],
-      "objective": "Implement or explicitly defer launch lifecycle actions for cancelled and completed cohorts, with at minimum an operational cancellation/refund path if needed.",
+      "objective": "Send creator and participant confirmations plus quorum-met notifications through a small Resend adapter.",
       "inputs": [
-        "src/services/expire-cohorts.mjs",
+        "docs/cohort15-lofi-mvp-spec.md",
+        "src/services/create-cohort.mjs",
+        "src/services/show-interest.mjs",
+        "src/config/runtime.mjs",
+        "src/persistence/repositories.mjs"
+      ],
+      "write_scope": [
+        "email adapter",
+        "notification composition/service",
+        "create and interest integration",
+        "runtime email config",
+        "delivery outcome persistence",
+        "focused email tests"
+      ],
+      "authority": [
+        "Use updates@cohort15.com as sender and cohort15dotcom@gmail.com as reply-to.",
+        "Do not send expiry emails or marketing broadcasts.",
+        "Do not expose the API key or recipient list in logs.",
+        "A provider failure must not roll back an accepted cohort or interest submission."
+      ],
+      "acceptance_criteria": [
+        "Creators receive a creation confirmation.",
+        "Participants receive an interest confirmation.",
+        "At quorum, the creator and all accepted participants receive a quorum notification with public cohort/meeting details.",
+        "Repeated requests do not duplicate quorum notifications.",
+        "Delivery failures are recorded safely and submissions remain accepted.",
+        "Tests use a fake adapter and make no live email calls."
+      ],
+      "verification": [
+        "Run focused email adapter and notification tests",
+        "Run create/interest integration tests with a fake email provider",
+        "Run npm run lint"
+      ],
+      "stop_condition": "Stop when transactional notification behavior is tested; do not configure the live Resend dashboard.",
+      "evidence": "Pending.",
+      "notes": "Live domain and key setup is L009."
+    },
+    {
+      "id": "L007",
+      "title": "Isolate lofi production configuration and deployment",
+      "status": "not_started",
+      "phase": "Notifications and Production Runtime",
+      "dependencies": [
+        "L002",
+        "L006"
+      ],
+      "objective": "Make the lofi runtime start with only its own Render, Supabase, Resend, analytics, and app URL settings and no production-MVP service dependencies.",
+      "inputs": [
+        "src/config/runtime.mjs",
         "src/server/app.mjs",
-        "src/ui/dashboards.mjs",
-        "README.md"
-      ],
-      "write_scope": [
-        "lifecycle decision doc",
-        "cancel/complete services if implemented",
-        "route/UI controls if implemented",
-        "tests"
-      ],
-      "authority": [
-        "Preserve credit accounting",
-        "Unauthorized lifecycle actions must be rejected",
-        "Do not add broad moderation tooling",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Launch decision for cancellation/completion is documented",
-        "If implemented, open cohort cancellation refunds held credits",
-        "If implemented, active cohort completion does not refund consumed credits",
-        "If deferred, operational workaround and risk are documented",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run focused lifecycle tests if implemented",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop once lifecycle launch scope is implemented or explicitly deferred.",
-      "evidence": "Pending.",
-      "notes": "Existing T015 planned lifecycle work should be handled here for production MVP scope."
-    },
-    {
-      "id": "T029",
-      "title": "Complete production MVP security and privacy review",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T018",
-        "T019",
-        "T021",
-        "T024",
-        "T026",
-        "T027",
-        "T028"
-      ],
-      "objective": "Review launch-critical behavior after real auth, Supabase persistence, Stripe payments, selected social publishing, admin controls, uploads, and logging are in place.",
-      "inputs": [
-        "src/domain",
-        "src/persistence",
-        "src/services",
-        "src/server",
-        "src/ui",
-        "tests",
-        "README.md"
-      ],
-      "write_scope": [
-        "security review notes",
-        "focused fixes for blockers",
-        "residual risk docs"
-      ],
-      "authority": [
-        "Fix confirmed launch blockers within scope",
-        "Track or document accepted residual risks",
-        "Verify private links are not exposed publicly or through social/logs",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
-      ],
-      "acceptance_criteria": [
-        "Auth/session/CSRF reviewed",
-        "Private-link leakage reviewed",
-        "Credit ledger and Stripe fulfillment reviewed",
-        "Admin authorization reviewed",
-        "Social publishing reviewed",
-        "Upload behavior reviewed",
-        "Logging privacy reviewed",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
-      ],
-      "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run npm run check",
-        "Run any focused security/privacy tests added during review"
-      ],
-      "stop_condition": "Stop once launch-blocking privacy/security findings are fixed or explicitly accepted.",
-      "evidence": "Pending.",
-      "notes": "This replaces the prior generic T022 and must run after the real production integrations exist."
-    },
-    {
-      "id": "T030",
-      "title": "Run production MVP smoke test",
-      "status": "not_started",
-      "phase": "Production MVP Readiness",
-      "dependencies": [
-        "T029"
-      ],
-      "objective": "Create and run the final production-MVP smoke checklist against the selected production-like environment.",
-      "inputs": [
+        ".env.example",
+        "render.yaml",
         "README.md",
-        "USAGE.md",
-        "tests",
-        "deployment docs"
+        "docs/human-tasks/lofi-mvp-launch.md"
       ],
       "write_scope": [
-        "smoke checklist",
-        "verification notes",
-        "small blocker fixes if found"
+        "runtime config",
+        "startup wiring",
+        ".env.example",
+        "render.yaml",
+        "README deployment section",
+        "runtime config tests"
       ],
       "authority": [
-        "Smoke against the selected deployment target or a faithful production-like environment",
-        "Do not mark launch-ready with unreviewed payment/auth/social failures",
-        "If human/provider setup is required, first provide a Human Setup Checklist with official/current links, dashboard paths, exact callback/webhook/redirect URLs, local file paths, env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user."
+        "Name the Render service cohort15-lofi-mvp and target this branch until merge/deployment policy changes.",
+        "Require lofi-specific Supabase URL/service key and Resend key only in production.",
+        "Remove production requirements for Supabase Auth, sessions, admin, Stripe, social publishing, and uploads.",
+        "Do not create provider resources or change DNS."
       ],
       "acceptance_criteria": [
-        "Sign up/sign in/sign out works",
-        "Stripe purchase grants credits after verified success",
-        "Create, feed/search/detail, interest, quorum, dashboard, expiry/refund, and private-link authorization work",
-        "LinkedIn, X, and Email social publishing is verified in dry-run or approved live mode",
-        "Admin operations are protected",
-        "Logs do not leak private links or secrets",
-        "Human setup requirements are documented with exact provider links, dashboard navigation, local file paths, env var names, secret warnings, verification steps, and continue/block checkpoints before implementation depends on external setup."
+        "Production startup cannot silently use local/demo persistence.",
+        "Production config has no auth, Stripe, credit, social, or upload requirement.",
+        "The service binds to Render's host/port and exposes a health endpoint.",
+        "Configuration documentation clearly forbids credential reuse with the production MVP.",
+        "Render and env examples are lofi-specific."
       ],
       "verification": [
-        "Verify any human setup checklist is current, specific, and avoids asking the user to paste secrets into chat.",
-        "Run documented smoke checklist",
-        "Run npm run check after any fixes"
+        "Run focused runtime configuration tests",
+        "Run npm run check"
       ],
-      "stop_condition": "Stop once production MVP smoke passes or launch blockers are reported.",
+      "stop_condition": "Stop when local code/config is deployment-ready; provider dashboards remain a human task.",
       "evidence": "Pending.",
-      "notes": "Final launch gate for MVP production readiness."
+      "notes": "External setup is documented in docs/human-tasks/lofi-mvp-launch.md."
+    },
+    {
+      "id": "L008",
+      "title": "Complete lofi privacy, abuse, and end-to-end verification",
+      "status": "not_started",
+      "phase": "Launch Verification",
+      "dependencies": [
+        "L004",
+        "L005",
+        "L006",
+        "L007"
+      ],
+      "objective": "Verify the complete lofi behavior and remove inactive production-MVP runtime surfaces that could expose stale flows.",
+      "inputs": [
+        "src",
+        "tests",
+        "README.md",
+        "docs/cohort15-lofi-mvp-spec.md"
+      ],
+      "write_scope": [
+        "end-to-end tests",
+        "privacy and abuse tests",
+        "dead lofi runtime route removal",
+        "small launch-blocking fixes",
+        "README verification guide"
+      ],
+      "authority": [
+        "Remove obsolete auth, dashboard, credit, payment, image, and social routes from the lofi runtime.",
+        "Delete source files only after proving they are unused by the lofi app.",
+        "Do not broaden product scope or add an admin UI."
+      ],
+      "acceptance_criteria": [
+        "Automated tests cover create, browse, filter, interest, duplicate rejection, creator rejection, quorum unlock, seven-day expiry, final-meeting link hiding, and local-time labels.",
+        "Tests cover both IP limits and honeypots.",
+        "Rendered pages and logs do not expose emails, IPs, secrets, or pre-quorum links.",
+        "Old auth/credits/payments/social/images are unreachable in the lofi runtime.",
+        "npm run check passes."
+      ],
+      "verification": [
+        "Run npm run check",
+        "Run a local browser smoke test for primary mobile and desktop flows"
+      ],
+      "stop_condition": "Stop when local launch verification passes and only external setup remains.",
+      "evidence": "Pending.",
+      "notes": "This is the local launch gate."
+    },
+    {
+      "id": "L009",
+      "title": "Create isolated provider resources and deploy",
+      "status": "not_started",
+      "phase": "Launch Verification",
+      "dependencies": [
+        "L008"
+      ],
+      "objective": "Complete the documented human setup for a new Supabase project, Render service, Resend sender domain/key, and cohort15.com cutover.",
+      "inputs": [
+        "docs/human-tasks/lofi-mvp-launch.md",
+        "supabase lofi migration",
+        "render.yaml"
+      ],
+      "write_scope": [
+        "provider dashboards and DNS only; repository changes only for discovered configuration corrections"
+      ],
+      "authority": [
+        "Follow the human setup checklist and never paste credentials into chat or commit them.",
+        "Do not select or modify the existing production-MVP Supabase project or Render service.",
+        "Keep the Netlify site available until the Render generated URL passes smoke verification."
+      ],
+      "acceptance_criteria": [
+        "A new Supabase project contains only the lofi schema.",
+        "A new Render service deploys the lofi branch with lofi-only environment variables.",
+        "Resend verifies cohort15.com and sends from updates@cohort15.com.",
+        "The generated Render URL passes health and primary-flow checks.",
+        "cohort15.com resolves to the new Render service over HTTPS."
+      ],
+      "verification": [
+        "Perform the non-secret checks in docs/human-tasks/lofi-mvp-launch.md",
+        "Record only provider resource names, URLs, and pass/fail status"
+      ],
+      "stop_condition": "Stop when the domain cutover is verified or report the exact human/provider blocker.",
+      "evidence": "Pending.",
+      "notes": "This task necessarily requires the user to operate provider dashboards."
+    },
+    {
+      "id": "L010",
+      "title": "Run production lofi smoke test",
+      "status": "not_started",
+      "phase": "Launch Verification",
+      "dependencies": [
+        "L009"
+      ],
+      "objective": "Verify the deployed cohort15.com experience and database/email side effects without touching production-MVP resources.",
+      "inputs": [
+        "https://cohort15.com",
+        "docs/human-tasks/lofi-mvp-launch.md",
+        "README.md"
+      ],
+      "write_scope": [
+        "smoke-test evidence",
+        "small blocker fixes if authorized",
+        "task/progress closeout"
+      ],
+      "authority": [
+        "Use test email addresses controlled by the operator.",
+        "Do not expose test emails in committed evidence.",
+        "Do not mark complete if data appears in a production-MVP database."
+      ],
+      "acceptance_criteria": [
+        "Landing, creation, detail redirect, interest, quorum unlock, filters, expiry rendering, and meeting-link timing pass in production.",
+        "Creator, participant, and quorum emails arrive with correct sender/reply-to.",
+        "Supabase rows appear only in the isolated lofi project.",
+        "Analytics loads and HTTPS/domain routing are correct.",
+        "No launch-blocking privacy or abuse failure remains."
+      ],
+      "verification": [
+        "Run the production checklist in docs/human-tasks/lofi-mvp-launch.md",
+        "Run npm run check after any repository fix"
+      ],
+      "stop_condition": "Stop when the production smoke passes or launch blockers are documented precisely.",
+      "evidence": "Pending.",
+      "notes": "Final lofi launch gate."
     }
   ]
 }

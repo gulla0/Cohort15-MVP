@@ -1,187 +1,62 @@
 # Knowledge Index
 
-This file helps agents decide what context to load before planning or execution.
-
-It is advisory. Code, verified behavior, and canonical ledgers override this index when they disagree.
+Advisory context router for the lofi MVP branch. Verify against code and `tasks.json` before acting.
 
 ## Canonical Artifacts
 
 | Artifact | Purpose | Authority |
 |---|---|---|
-| `docs/cohort15-mvp-spec-v3.md` | Cohort15 product rules and MVP scope | Product behavior source |
-| `plan.md` | Product constraints, phases, MVP cut, and assumptions | Product planning source |
-| `atomic-task-graph.md` | Human-readable dependency graph | Planning reference |
-| `tasks.json` | Machine-readable task ledger | Canonical task status and task contracts |
-| `agent/progress/task-status.md` | Human-readable task status | Derived/working view |
-| `agent/progress/session-notes.md` | Handoff and decisions | Supporting log |
-| `agent/progress/change-log.md` | Append-only setup/implementation log | Supporting log |
-| `agent/progress/blockers.md` | Known blockers | Supporting log |
-| `agent/feedback/issue-index.md` | Feedback backlog | Canonical issue-level feedback status |
+| `docs/cohort15-lofi-mvp-spec.md` | Locked lofi product behavior | Product source |
+| `plan.md` | Scope, architecture direction, phases, risks | Planning source |
+| `tasks.json` | Atomic task contracts and status | Canonical task ledger |
+| `atomic-task-graph.md` | Readable dependency graph | Derived planning view |
+| `agent/progress/task-status.md` | Readable status | Derived status view |
+| `docs/human-tasks/lofi-mvp-launch.md` | Separate Supabase/Render/Resend/DNS setup | Human operations source |
 
-## Repository Areas
+`docs/cohort15-mvp-spec-v3.md` and Git history describe the later production MVP. They are historical on this branch and must not override the lofi spec.
 
-| Area | Files / Directories | Notes | Confidence |
-|---|---|---|---|
-| Agent routing and role prompts | `start.txt`, `agent/router/intent-router.md`, `agent-starters/*.txt` | Defines router, setup manager, implementation manager, feedback managers, and worker roles. | high |
-| Product specification | `docs/cohort15-mvp-spec-v3.md` | Defines Cohort15 MVP rules, fields, validation, lifecycle, flows, and scope. | high |
-| Main planning artifacts | `plan.md`, `atomic-task-graph.md`, `tasks.json` | Initialized for Cohort15 MVP. `tasks.json` is canonical. | high |
-| Progress tracking | `agent/progress/*.md` | Tracks task status, session decisions, blockers, and changes. | high |
-| Feedback tracking | `agent/feedback/*`, `templates/feedback-issue/*` | Issue-local feedback workflow exists. ISSUE-001, ISSUE-002, ISSUE-003, and ISSUE-004 were resolved on 2026-05-30. ISSUE-005 was resolved on 2026-05-31 by unifying the combined dashboard credit account presentation. ISSUE-006 was resolved on 2026-06-13 by tightening cohort creation recurrence, meeting-link, first-meeting, and creator-field behavior. ISSUE-007 was resolved on 2026-06-12 by redesigning public cohort cards around participant decision cues and browser-local time. ISSUE-008 was resolved on 2026-06-13 by adding public-safe word search on `/cohorts?q=`. ISSUE-009 was resolved on 2026-06-13 by adopting credit terminology across app, tests, docs, planning, and feedback artifacts. ISSUE-010 was resolved on 2026-06-16 by adding realistic create-form placeholders and a validated local image file picker. ISSUE-011 was resolved on 2026-06-16 by adding exact-first fuzzy public cohort search ranking. ISSUE-012 was resolved on 2026-06-16 by adding a Buy Credits nav placeholder route that does not collect payment or grant credits. ISSUE-013 was resolved on 2026-06-16 by lightening create-form placeholders and hiding them on focus. ISSUE-014 was resolved on 2026-06-16 by aligning the Buy Credits nav item with shared topbar links on desktop and mobile. | high |
-| Product application code | `package.json`, `src/domain`, `src/persistence`, `src/services`, `src/server`, `src/ui`, `tests`, `scripts`, `public/assets/default-cohort.png` | T001 created a dependency-free Node.js HTTP + ES modules foundation; T003 added in-memory persistence repositories and credit ledger primitives; T004 added the create cohort service and demo-backed create route; T005 added public cohort feed/detail routes and visibility service; T006 added show-interest/quorum activation; T007-T009 added expiry/refunds, local social outbox, and dashboards; T010 added MVP end-to-end verification coverage and README handoff docs. Feedback resolution added event images, clearer navigation/copy, participant-default interest flow, first-meeting validation, a combined `/dashboard` route with legacy dashboard URLs preserved, one Account Credits summary on `/dashboard`, daily cohort recurrence, meeting-link provider allowlisting, no visible creator selector on `/cohorts/new`, public cohort cards with service-backed capacity summaries, Starts/Open spots/Quorum decision fields, compact imagery, browser-local time enhancement, `/cohorts?q=` word search and exact-first fuzzy ranking across public-safe cohort fields, repo-wide credit terminology with local JSON compatibility normalization, and a multipart create-form image picker that stores validated local uploads under `/assets/uploads`. T011 added dependency-free durable local JSON-file persistence behind the repository boundary through `COHORT15_PERSISTENCE_FILE`; T016 repaired stale date-sensitive route tests with fixed-clock request handler option injection; T012 added local session-cookie auth. T013 chose Render Web Service `cohort15-mvp` as the first production target with `render.yaml`, `docs/human-tasks/deployment-render.md`, Node 24, `npm install`, `npm start`, `/` health checks, and app URL assumptions. T014 added `src/config/runtime.mjs`, `.env.example`, `docs/human-tasks/production-config.md`, and production startup validation for required Supabase, Stripe, social, email, admin, upload, session, and app URL env vars. T015 added dependency-free Supabase Auth OAuth/PKCE routing for Google and GitHub, production callback-to-app-session handling, production local-auth lockout, and optional magic-link configuration. T017 added dependency-free Supabase Postgres production persistence through server-side REST hydration/write-through, `supabase/migrations/20260617000000_cohort15_core.sql`, `docs/human-tasks/supabase-postgres.md`, production startup state selection without demo seed users, purchase repository/table scaffolding, and auth-linked user fields. T018 added expiring opaque server-side sessions with production Secure/HttpOnly/SameSite=Lax cookies and per-session CSRF tokens. T019 added authenticated email-based admin authorization for expiry operations through server-side `COHORT15_ADMIN_EMAILS`. T020 added Stripe-hosted package checkout, server-side paid Session verification, purchase persistence, and auditable purchase credit transactions. T021-T030 remain for Stripe webhooks, LinkedIn/X/Email publishing, production credit bootstrap, upload hardening, logging/audit, lifecycle decision, security review, and smoke testing. | high |
+## Agent Workflow
 
-## Context Routes
+- `start.txt` is the user-facing router. It classifies setup, main implementation, change/fix, feedback intake, or feedback resolution.
+- Setup/bootstrap transitions to `agent-starters/startSetupManager.txt`.
+- Main implementation transitions to `agent-starters/startNewManager.txt`.
+- Managers select work from `tasks.json`, own integration and tracker updates, and may delegate bounded work with `agent-starters/startWorker.txt`.
+- Workers do not choose tasks, update canonical trackers, or commit unless explicitly authorized.
+- Successful task waves require focused verification, `npm run check`, aligned trackers, and an intentional commit.
+- Human dashboard, credential, DNS, and production verification work belongs only in `docs/human-tasks/`.
 
-Use these routes to avoid broad rediscovery.
+## Application Architecture
 
-## Human Setup Routing Rule
+| Area | Current files | Lofi direction |
+|---|---|---|
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Reuse Node HTTP routing/startup; remove auth, credits, payments, admin, uploads, and social from the runtime path. |
+| Domain | `src/domain/constants.mjs`, `models.mjs`, `validation.mjs` | L001 replaces 14-day/credit/cap/image/private-viewer assumptions with seven-day anonymous lofi rules. |
+| Persistence | `src/persistence/*`, `supabase/migrations/*` | Reuse repository/store/PostgREST patterns; L002 creates isolated `cohort15_lofi_*` tables and does not touch existing tables. |
+| Create flow | `src/services/create-cohort.mjs`, `src/ui/create-cohort.mjs` | Reuse form fields and validation patterns; remove auth, credits, max participants, images, and social; add private creator email and abuse controls. |
+| Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs` | Adapt supplied marketing page, place full listing on `/`, sort active first, add status filters and public quorum progress. |
+| Interest flow | `src/services/show-interest.mjs`, cohort detail route/UI | Replace signed-in user/credit logic with normalized email-only interest and public link unlock. |
+| Email | No lofi adapter yet | L006 adds a small Resend HTTP adapter with fake-provider tests. |
+| Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration and stale route removal. |
 
-For any task involving deployment, Supabase, Google/GitHub OAuth, Stripe, LinkedIn, X, Email, DNS, webhooks, callback URLs, hosting dashboards, production secrets, or other provider/account setup, the manager or worker must first produce a Human Setup Checklist in `docs/human-tasks/` before depending on external setup.
+## Reusable Decisions
 
-The checklist must include current official docs or dashboard links, exact dashboard navigation paths, exact callback/webhook/redirect/app URL/DNS values, exact local file paths to edit, exact env var names, secret-handling warnings, verification steps, and a clear checkpoint for the user to report completion. Do not ask the user to paste secrets into chat. Continue local implementation that is not blocked by external setup.
+- Stack remains dependency-free Node.js ES modules with server-rendered HTML.
+- Approved meeting hosts already exist in `ALLOWED_MEETING_LINK_HOSTS`: Google Meet, Zoom, Microsoft Teams, Discord, and Slack.
+- Existing browser-local time enhancement can be reused, but creation must submit the browser timezone/absolute timestamp explicitly.
+- Existing Supabase adapter uses server-side REST with a service-role key; the lofi deployment must use a new project and lofi-only table names.
+- The supplied marketing source is `/Users/gzero/Desktop/cohort15/Marketing/early-interest-landing-page/index.html`; reuse its visual language and Google Analytics ID `G-LF22TLDSBV` without editing that external file.
 
-| Task Type | Read First | Then Read | Avoid Unless Needed |
-|---|---|---|---|
-| Setup/bootstrap | `start.txt`, `agent-starters/startSetupManager.txt`, `docs/cohort15-mvp-spec-v3.md` | `plan.md`, `tasks.json`, `atomic-task-graph.md`, progress files | product source until T001 creates it |
-| Main implementation task | `tasks.json`, `agent/progress/task-status.md`, this index | Files listed in the task `inputs` and `write_scope`; `docs/cohort15-mvp-spec-v3.md` for product behavior | unrelated future tasks and feedback issue folders |
-| Stack/scaffold task | T001 in `tasks.json`, `plan.md`, `README.md`, `USAGE.md` | Current repo tree; selected framework docs if needed | implementing domain flows beyond scaffold |
-| Domain model/validation | T002 in `tasks.json`, `docs/cohort15-mvp-spec-v3.md` sections for Event, validation, related objects | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs`, `tests/domain-validation.test.mjs` | UI routes and dashboards |
-| Persistence/credit ledger | T003 in `tasks.json`, spec sections for EventInterest and CreditTransaction | `src/persistence/schema.mjs`, `src/persistence/repositories.mjs`, `src/persistence/credit-ledger.mjs`, `src/persistence/seeds.mjs`, `tests/persistence-ledger.test.mjs` | social posting UI unless tied to schema |
-| Create cohort flow | T004 in `tasks.json`, creator flow in spec | `src/persistence/repositories.mjs`, `src/persistence/credit-ledger.mjs`, `src/persistence/seeds.mjs`, event validation modules | participant interest, expiry, dashboards |
-| Feed/detail/link visibility | T005 in `tasks.json`, online-only and locked link sections in spec | `src/services/create-cohort.mjs`, `src/server/app.mjs`, `src/ui/create-cohort.mjs`, and visibility/data-loader modules | social posting and expiry services |
-| Interest/quorum flow | T006 in `tasks.json`, participant and quorum flows in spec | `src/services/show-interest.mjs`, `src/services/event-browsing.mjs`, `src/ui/cohorts.mjs`, credit ledger, event detail route, interest tests | dashboards except where needed for test setup |
-| Expiry/refund processing | T007 and T019 in `tasks.json`, expiry and quorum-not-met sections in spec | Credit ledger, interest modules, `src/auth/admin.mjs`, authenticated session, and `COHORT15_ADMIN_EMAILS` | social channel integration |
-| Social promotion outbox | T008 in `tasks.json`, automated social promotion section in spec, MVP boundary in `plan.md` | Event creation flow and social post outbox persistence | real external API clients during MVP |
-| Dashboards | T009 in `tasks.json`, creator and participant flow sections in spec | Event, interest, credit data loaders | analytics, profiles, chat |
-| Durable persistence hardening | T011 in `tasks.json`, `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/seeds.mjs`, `src/server/app.mjs` | JSON-file mode is enabled with `COHORT15_PERSISTENCE_FILE`; in-memory state remains default. Tests should use isolated temp files for durable coverage. | auth, payments, social APIs unless the task explicitly reaches them |
-| Auth boundary | T012 in `tasks.json`, `src/auth/session.mjs`, server route handlers, create/interest/dashboard services | Local session-cookie auth is explicit through `/auth/sign-in`; protected routes should resolve identity from the signed-in session user, not query parameters or posted user IDs. | OAuth provider specifics unless selected |
-| Production deployment/config | T013-T014 in `tasks.json`, `plan.md`, `README.md`, `docs/human-tasks/deployment-render.md`, `docs/human-tasks/production-config.md`, `render.yaml`, `src/config/runtime.mjs`, `src/server/app.mjs` | Render Web Service `cohort15-mvp` is the first production deployment target. Use `https://cohort15-mvp.onrender.com` unless Render assigns a different URL. The root `cohort15.com` domain currently hosts the pre-release landing page on Netlify, but production launch can keep the Render URL, move `cohort15.com` to Render, or use a subdomain such as `https://app.cohort15.com`. Production mode is triggered by `COHORT15_APP_ENV=production` or `NODE_ENV=production`; startup validation rejects missing required provider/admin/session values, local JSON persistence, and `COHORT15_UPLOAD_MODE=local`. | provider credentials committed to repo |
-| Supabase Auth and session hardening | T015 and T018 in `tasks.json`, `src/auth/session.mjs`, `src/auth/supabase.mjs`, `src/server/app.mjs`, `src/ui/auth.mjs` | T015 is implemented with dependency-free Supabase OAuth/PKCE start and callback exchange. Production `/auth/sign-in` renders Google/GitHub provider links, `/auth/supabase/:provider` starts OAuth, `/auth/callback` converts the Supabase user to an app session, and seeded local sign-in is disabled in production. T018 hardened the app session boundary: production cookies are Secure, HttpOnly, SameSite=Lax, path-scoped, and expire after 8 hours; signed-in production form mutations include per-session CSRF tokens and reject missing or mismatched tokens. Optional email magic links are gated by `SUPABASE_ENABLE_MAGIC_LINK`. | OAuth provider alternatives unless user changes decision |
-| Supabase Postgres persistence | T017 in `tasks.json`, `src/persistence/supabase-postgres.mjs`, `supabase/migrations/20260617000000_cohort15_core.sql`, `docs/human-tasks/supabase-postgres.md` | T017 is implemented. Production startup calls `createConfiguredState()`, hydrates repositories from Supabase Postgres through server-side PostgREST using `SUPABASE_SERVICE_ROLE_KEY`, and does not seed demo users or demo grants. Local in-memory and JSON modes remain development/test only. The SQL migration creates users, events, interests, credit transactions, social posts, purchases, auth identity indexes, and credit RPC helpers with advisory locks for concurrent transaction safety. | local JSON as production store |
-| Stripe credit purchases | T020-T021 in `tasks.json`, `src/payments/stripe.mjs`, `src/services/purchase-credits.mjs`, `docs/human-tasks/stripe-checkout.md` | T020 is implemented: authenticated users can start hosted Checkout for `$6`/6-credit or `$12`/14-credit packages, and the browser return grants auditable credits only after the server retrieves and verifies a matching paid Session. T021 must add signed webhook fulfillment and durable event reconciliation. | mock-only payment or treating browser return as final reliable fulfillment |
-| LinkedIn/X/Email social publishing | T022-T024 in `tasks.json`, `src/services/social-promotion.mjs`, social post persistence | MVP live social publishing targets LinkedIn, X, and Email only, with dry-run available and admin controls for live processing. | additional social channels before MVP launch |
-| Lifecycle controls | T015 in `tasks.json`, domain statuses, expiry/refund service, dashboards | Server route guards and private-link visibility rules | broad moderation tooling |
-| Time-sensitive route tests | T016 in `tasks.json`, `src/server/app.mjs`, create-flow and MVP verification tests | `createRequestHandler(state, { now })` can inject a fixed clock into the create cohort service so tests do not depend on the real calendar date. | weakening first-meeting validation to satisfy stale tests |
-| Feedback intake | `agent/feedback/issue-index.md`, this index | Relevant existing issue folders | main task ledger unless mapping feedback to implementation |
-| Feedback resolution | Issue folder `tasks.json`, issue `task-status.md`, this index | Code in issue `files_expected` | unrelated issue folders |
-| Public cohort search | ISSUE-008 in `agent/feedback/issue-index.md`, `src/services/event-browsing.mjs`, `src/server/app.mjs` | Search is server-side through `/cohorts?q=` and should stay limited to public-safe fields. | private meeting links and non-public statuses |
-| Create-form guidance and image upload feedback | ISSUE-010 in `agent/feedback/issue-index.md`, `src/ui/create-cohort.mjs`, `src/server/app.mjs` | Resolved: `/cohorts/new` uses realistic placeholders and a multipart `eventImage` file picker. Valid PNG/JPG/GIF/WebP uploads up to 2 MB are saved locally and passed as app-relative `imageUrl`; blank uploads keep `/assets/default-cohort.png`. | full media library or cloud uploads |
-| Fuzzy cohort search feedback | ISSUE-011 in `agent/feedback/issue-index.md`, `src/services/event-browsing.mjs`, `tests/event-browsing.test.mjs` | Resolved: `/cohorts?q=` scores public-safe field matches with exact tokens first, substring matches next, and small edit-distance matches below so typos like `tost` can surface `test` cohorts. Every query word must still match a public-safe field. | hosted search service, private links |
-| Buy Credits flow | ISSUE-012 and T020, `src/ui/home.mjs`, `src/server/app.mjs`, `src/services/purchase-credits.mjs` | The earlier placeholder introduced by ISSUE-012 is now a real authenticated Stripe package page. Checkout uses configured Price IDs; no credits are granted for cancellation, unpaid status, or mismatched Session data. | bypassing Stripe verification or exposing secret keys |
-| Create-form placeholder contrast feedback | ISSUE-013 in `agent/feedback/issue-index.md`, `src/ui/create-cohort.mjs`, `src/ui/styles.css` | Resolved: create-form input and textarea placeholder examples render in very light `#b8b0a4` when unfocused, then become transparent with opacity `0` on focus. Preserve meaningful placeholder examples for unfocused empty fields. | changing validation, image upload, or broader create-form flow |
-| Buy Credits nav alignment feedback | ISSUE-014 in `agent/feedback/issue-index.md`, `src/ui/home.mjs`, `src/ui/styles.css` | Resolved: topbar nav links share inline-flex vertical centering and common min-height; `Buy Credits` keeps only CTA pill styling, and mobile wrapped nav rows left-align without changing `/credits/buy` placeholder behavior. | payment implementation, credit grants, full nav redesign |
+## Privacy And Isolation Traps
 
-## Prior Learnings
+- Never render creator or participant emails.
+- Never log raw emails, IP addresses, API keys, meeting links before quorum, session tokens, or provider responses containing secrets.
+- Never point lofi configuration at an existing production-MVP Supabase project or Render service.
+- Do not reuse old T-task backlog or prior feedback issues; Git history is the archive.
+- Public meeting links remain visible from quorum until the final meeting ends, even if the seven-day collection listing has expired.
+- Expiry is computed from time on reads; no scheduler or expiry email is required.
 
-- The repo began as an agent architecture starter kit, not a product implementation.
-- The Cohort15 spec is comprehensive enough to initialize implementation tasks without blocking clarification.
-- T001 chose a dependency-free Node.js HTTP + ES modules foundation with scripts: `npm run dev`, `npm run check`, `npm test`, and `npm run lint`.
-- T002 represents typed domain concepts with JSDoc typedefs because the scaffold has no TypeScript compile step.
-- T002 added domain validators in `src/domain/validation.mjs`; persistence and services should reuse these instead of duplicating spec enum or recurrence/link rules.
-- T003 added dependency-free in-memory persistence via `createRepositories`, explicit schema metadata in `src/persistence/schema.mjs`, demo grants in `src/persistence/seeds.mjs`, and credit ledger helpers in `src/persistence/credit-ledger.mjs`.
-- Credit ledger transaction amounts are positive. Available, held, consumed, and refunded balances are derived by transaction type rather than by mutating user balances.
-- Locked event links are serialized as hidden for open events; once active, the current conservative policy reveals links only to creators or interested viewers supplied to the serializer.
-- Social promotion should start as a local/mock outbox unless official channels and credentials are provided.
-- Stripe-backed credit purchase is production-MVP scope; local seed/admin grant transactions remain useful for development or explicit launch grants.
-- Production MVP credit packages are `$6` for 6 credits and `$12` for 14 credits.
-- Real automated social publishing is production-MVP scope for LinkedIn, X, and Email; the existing local public-safe outbox is the source record.
-- Create cohort uses the signed-in session user as creator and `GET/POST /cohorts/new` as the creation surface.
-- The create success view intentionally reports that the private link is locked and does not render `lockedEventLink`.
-- Public discovery is implemented through `src/services/event-browsing.mjs`, `GET /cohorts`, and `GET /cohorts/:id`; it lists open/active events and keeps locked links hidden unless an active event is viewed by an authorized signed-in creator or committed participant.
-- Show interest is implemented through `src/services/show-interest.mjs` and `POST /cohorts/:id/interest`; the route uses the signed-in session user, records a 1-credit participant hold, rejects duplicate active/consumed interest and cap overflow, and activates the event at quorum.
-- Quorum activation consumes the creator's 2-credit hold and each active participant's 1-credit hold, then marks active interests `consumed`; consumed participants remain authorized to view active private links.
-- Expiry processing lives in `src/services/expire-cohorts.mjs` and is exposed at `POST /admin/expire-cohorts`; it requires an authenticated account whose persisted email appears in server-side `COHORT15_ADMIN_EMAILS`, plus production CSRF validation. It only processes open events past `expiresAt`, refunds held creator/participant credits, and marks active interests `refunded`.
-- Social promotion is local/mock in `src/services/social-promotion.mjs`; create cohort enqueues a pending `x` outbox post with public event fields and a public cohort URL, never the private link.
-- Creator and participant dashboards live at `/dashboard/creator` and `/dashboard/participant`; `/dashboard` is the combined signed-in user view. Dashboard routes require a session and ignore user-controlled identity query parameters.
-- MVP handoff verification lives in `tests/mvp-verification.test.mjs`; it covers create/promote/privacy/quorum/dashboard success behavior and create/interest/expiry/refund behavior across the HTTP handler and in-memory repositories.
-- README documents local demo users, seed credit grants, MVP flow, manual expiry trigger, local social outbox behavior, credit package assumptions, known MVP assumptions, the T013 Render deployment target, and the T014 production config runbook; production docs still need T015-T030 updates.
-- Feedback resolution on 2026-05-30 added `imageUrl` to events, defaulting blank images to `/assets/default-cohort.png` and allowing custom http(s) or app-relative image values.
-- Visible MVP UI copy should use plain credit wording: creators use 2 credits to start a cohort, participants use 1 credit to show interest, and credits are returned if quorum is not met.
-- The create flow now enforces firstMeetingAt after the 14-day quorum window in backend validation and renders a `datetime-local` min value in the form.
-- The cohort detail interest form should prefer a non-creator demo participant. Creator self-interest remains rejected in the service.
-- Primary navigation now consistently exposes cohorts, create, creator dashboard, and participant dashboard.
-- Feedback resolution on 2026-05-30 completed ISSUE-004: dashboard UI now avoids repeated row-level credit summaries, renders only Available/In use/Used credit states, and uses content-based dashboard sections: Account Credits, Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts. Legacy dashboard routes remain supported.
-- Feedback resolution on 2026-05-31 completed ISSUE-005: the combined dashboard Account Credits section now renders one Available/In use/Used credit summary from a de-duplicated account balance, not separate Demo Creator and Demo Participant credit panels.
-- Feedback resolution on 2026-06-13 completed ISSUE-006: cohort creation supports `daily` recurrence, accepts private meeting links only from approved https Google Meet, Zoom, Microsoft Teams, Discord, and Slack hosts, removes the visible Creator selector, and assigns the temporary `user-creator` demo creator route-side until T012 auth replaces the demo identity path.
-- Feedback resolution on 2026-06-12 completed ISSUE-007: public cohort cards now use service-backed capacity summaries and stable decision fields for Starts, Open spots, and Quorum; feed images are compact thumbnails on desktop and stacked on mobile; cohort times render with UTC fallback and browser-local enhancement.
-- Feedback resolution on 2026-06-13 completed ISSUE-008: `/cohorts?q=` now filters public open/active cohorts by case-insensitive words across public-safe fields including title, description, category, topic, audience, skill, and additional details; private meeting links are not searched or exposed.
-- Feedback resolution on 2026-06-13 completed ISSUE-009: the repository now uses credit terminology across app copy, code identifiers, tests, docs, planning, and feedback artifacts; `src/persistence/store.mjs` normalizes earlier local JSON snapshot keys and seed grant source values into the current credit-shaped store.
-- T011 durable persistence uses `createJsonFileStore` in `src/persistence/store.mjs`, keeps repository methods synchronous, persists on successful writes, revives `*At` date fields on load, and stores credit balances as auditable transaction records rather than mutable balance fields.
-- Durable local mode is opt-in with `COHORT15_PERSISTENCE_FILE=.local/cohort15-state.json npm run dev`. The app seeds demo users and seed grant transactions only when missing, so reloading an existing state file does not duplicate grants.
-- Route-level tests that create cohorts should inject a fixed clock with `createRequestHandler(state, { now })` when asserting first-meeting behavior. Production validation still requires `firstMeetingAt` after the 14-day quorum window.
-- T012 added dependency-free local session auth in `src/auth/session.mjs` with explicit seeded-user sign-in/out. T013 selected Render for deployment. T014 added production runtime configuration in `src/config/runtime.mjs`; T015 added Supabase Auth with Google/GitHub provider routing and callback session creation. T017 added Supabase Postgres production persistence. T018 added production session cookie hardening, 8-hour session expiry, sign-out invalidation, and CSRF checks for signed-in production form mutations. T019 added server-configured admin email authorization and protected the expiry operation. T020 added Stripe-hosted credit packages and verified browser-return fulfillment. The next critical payment step is T021 webhook idempotency and reconciliation.
-- Feedback intake on 2026-06-16 added ISSUE-010 for meaningful create-form placeholders and local image file selection, ISSUE-011 for exact-first fuzzy cohort search, and ISSUE-012 for a Buy Credits navigation placeholder that must not create or grant credits.
-- Feedback resolution on 2026-06-16 completed ISSUE-010: the create form now renders realistic Cohort15 placeholders and posts as multipart form data with a standard local image file picker; uploads are MIME/size validated, saved under `/assets/uploads`, served as static assets, and default image behavior remains unchanged when no image is selected.
-- Feedback resolution on 2026-06-16 completed ISSUE-011: public cohort search now uses deterministic scoring in `src/services/event-browsing.mjs`; exact token matches rank before substring matches, typo-tolerant edit-distance matches rank lower, and matching remains limited to public-safe fields.
-- Feedback resolution on 2026-06-16 completed ISSUE-012: primary navigation now includes `Buy Credits` through a shared topbar renderer, and `/credits/buy` is a non-payment placeholder that does not grant credits.
-- Feedback intake on 2026-06-16 added ISSUE-013 for very light create-form placeholder text that disappears on field focus/click, and ISSUE-014 for aligning the `Buy Credits` nav item with the other navbar options.
-- Feedback resolution on 2026-06-16 completed ISSUE-013: create-form input and textarea placeholders now render very light while unfocused and disappear on focus without changing placeholder copy, validation, or image upload behavior.
-- Feedback resolution on 2026-06-16 completed ISSUE-014: shared topbar links now use consistent flex centering and mobile wrap alignment so `Buy Credits` aligns with the other nav options while remaining a non-payment placeholder.
-- T012/T015 auth boundary uses an in-memory session map plus `HttpOnly; SameSite=Lax` session cookie. In local development, seeded demo users remain selectable only at `/auth/sign-in`; in production, `/auth/sign-in` uses Supabase Auth provider redirects and protected mutation/dashboard routes call `requireCurrentUser` in `src/server/app.mjs`.
-- T014 production config lives in `src/config/runtime.mjs`. `loadRuntimeConfig()` intentionally returns only sanitized operational values, not secret values, and the server entry point calls it before listening. Keep real secrets in Render or provider dashboards, not source, `.env.example`, tests, docs examples, or chat.
-- T017 production persistence lives in `src/persistence/supabase-postgres.mjs`. It uses the server-only `SUPABASE_SERVICE_ROLE_KEY` from startup env and must not expose that key through `loadRuntimeConfig()`, UI, logs, docs examples with real values, or browser code. Apply `supabase/migrations/20260617000000_cohort15_core.sql` before production deploy.
-- T018 production session hardening lives in `src/auth/session.mjs`, `src/server/app.mjs`, and the form-rendering UI modules. CSRF enforcement is production-mode-only and covers signed-in create cohort, show-interest, sign-out, and admin expiry form posts; keep new authenticated browser mutations on the same token path. T019 admin authorization lives in `src/auth/admin.mjs` and derives role only from the persisted signed-in email matched case-insensitively against `COHORT15_ADMIN_EMAILS`.
+## Current State
 
-## Assumptions And Uncertainty
-
-- Supabase Auth is the selected and implemented production auth provider for Google and GitHub login. App sessions remain server-side opaque sessions after Supabase callback exchange; production cookies are Secure/HttpOnly/SameSite=Lax and protected form posts require CSRF tokens.
-- Deployment target is Render Web Service `cohort15-mvp`; keep additional deployment-specific choices out of core domain logic unless they are runtime configuration boundaries.
-- Secret management and required production env vars are formalized in `docs/human-tasks/production-config.md`, `.env.example`, `render.yaml`, and `src/config/runtime.mjs`. Later provider-backed tasks should extend this boundary instead of reading `process.env` ad hoc.
-- `cohort15.com` currently hosts the pre-release landing page on Netlify. Do not assume the final app URL until provider setup confirms it; valid options include the Render service URL, moving the root domain to Render, or using an app subdomain.
-- Authorization for viewing active private links should be implemented conservatively. At minimum, creators and interested participants should be eligible; broader public visibility after activation should be clarified if product behavior depends on it.
-- Official MVP social channels are LinkedIn, X, and Email. Do not broaden to more channels before production MVP unless the user changes scope.
-- Initial credit balances should use grant transactions for seed/demo/admin balances.
-- Stripe-backed USD credit sales are production-MVP scope, with `$6` for 6 credits and `$12` for 14 credits as the starting package assumptions.
-- Durable local persistence is a JSON-file adapter for development. Production persistence now uses Supabase Postgres via T017; production deploy still requires applying the SQL migration and setting Supabase env vars in Render.
-- Payment provider is Stripe; T020-T021 should implement verified payment and webhook/idempotency behavior rather than mock-only purchases.
-- Official social channels are LinkedIn, X, and Email; T022-T024 should preserve dry-run mode but implement configured live adapters without hard-coded secrets.
-
-## Staleness Checks
-
-Before trusting this index, check:
-
-- Has the dependency-free Node scaffold been replaced by a framework or moved from `src/*`?
-- Do task write scopes reference files that no longer exist?
-- Do progress notes mention architecture changes not reflected here?
-- Did a recent task add or move canonical modules?
-- Has the user clarified auth, stack, deployment, social channels, credit seeding, or payment provider?
-
-## Last Updated
-
-- 2026-05-30 00:02 EDT: Clarified MVP boundary: build all core cohort behavior now, keep credit sales and real social posting post-MVP, and record `$6`/6-credit and `$12`/14-credit package assumptions.
-- 2026-05-30 00:13 EDT: T001 created the dependency-free Node.js app foundation, README commands, lint/test scripts, and initial `src/*` layout.
-- 2026-05-30 00:18 EDT: T002 added JSDoc domain models, spec enums, event/related-object validators, expiry defaulting, and locked-link visibility serialization.
-- 2026-05-30 00:28 EDT: T003 added in-memory persistence schema/repositories, demo seed grants, credit ledger helpers, and persistence/ledger tests.
-- 2026-05-30 00:33 EDT: T004 added `src/services/create-cohort.mjs`, demo-backed `GET/POST /cohorts/new`, create form UI, hidden-link success rendering, and create-flow tests.
-- 2026-05-30 00:41 EDT: T005 added `src/services/event-browsing.mjs`, public `GET /cohorts` and `GET /cohorts/:id` routes, feed/detail UI, and visibility tests for locked/authorized private links.
-- 2026-05-30 00:48 EDT: T006 added `src/services/show-interest.mjs`, `POST /cohorts/:id/interest`, detail interest UI, quorum activation with credit consumption, consumed-participant link authorization, and interest/quorum tests.
-- 2026-05-30 00:59 EDT: T007-T009 added `src/services/expire-cohorts.mjs`, `src/services/social-promotion.mjs`, `src/services/dashboards.mjs`, local expiry trigger, social outbox integration, dashboard UI/routes, and focused tests.
-- 2026-05-30 07:42 EDT: T010 added `tests/mvp-verification.test.mjs`, expanded README handoff docs, and completed the current MVP task ledger after `npm run check` passed with 36 tests.
-- 2026-05-30 07:50 EDT: Setup manager added the next atomic task wave T011-T015 for post-MVP durable persistence, auth, credit purchases, social publishing, and lifecycle controls; updated plan, task graph, task status, and progress notes.
-- 2026-05-30 08:51 EDT: Feedback resolution completed ISSUE-001 and ISSUE-002: repaired participant interest defaults, credit copy, date validation, navigation, event image model/default asset/input/rendering, and verified with `npm run check` plus browser smoke.
-- 2026-05-30: Feedback resolution completed ISSUE-003: combined creator and participant dashboards at `/dashboard`, kept legacy dashboard URLs, separated navigation links from the app name in the topbar, and verified with dashboard tests.
-- 2026-05-30 09:51 EDT: Feedback intake created ISSUE-004 for dashboard information architecture and language: duplicate credit information, Available/In use/Used summary states, content-based labels like Active Cohorts & Schedule, Created Cohorts, and Interested Cohorts, and dashboard user-flow review.
-- 2026-05-30 10:06 EDT: Feedback resolution completed ISSUE-004: removed repeated dashboard credit row copy, removed Returned from dashboard credit presentation, changed dashboard labels to My Cohorts/My Events and content-based combined sections, and verified with tests, lint, and browser smoke.
-- 2026-05-30 10:13 EDT: Feedback intake created ISSUE-005 for unifying the combined dashboard Account Credits presentation so it no longer implies separate creator and participant credit buckets.
-- 2026-05-31 08:19 EDT: Feedback resolution completed ISSUE-005: added a de-duplicated account balance for the combined dashboard, rendered one Account Credits summary, and updated dashboard/MVP tests to reject split Demo Creator/Demo Participant credit panels.
-- 2026-06-13: Feedback resolution completed ISSUE-006: added daily recurrence, approved-provider https meeting-link validation, hidden demo creator assignment for `/cohorts/new`, and focused create/domain tests.
-- 2026-06-12 22:08 EDT: Feedback resolution completed ISSUE-007: redesigned public cohort cards around participant decision support, added capacity summaries, compact feed imagery, local-time enhancement with UTC fallback, focused tests, and browser smoke at desktop/mobile widths.
-- 2026-06-13: Feedback resolution completed ISSUE-008: added server-side word search on `/cohorts?q=`, search/clear/no-results feed UI, and focused visibility-safe search tests.
-- 2026-06-13: Feedback resolution completed ISSUE-009: adopted credit terminology repo-wide, renamed ledger-facing identifiers/modules, added local JSON compatibility normalization, and verified with focused tests, workflow checks, and full project checks.
-- 2026-05-31 08:55 EDT: T011 added dependency-free durable JSON-file persistence behind the repository boundary, wired `COHORT15_PERSISTENCE_FILE`, documented reset behavior, and verified reload semantics with 44 passing tests.
-- 2026-06-12 21:02 EDT: T016 repaired stale date-sensitive route tests by adding request-handler option injection and wiring create-flow/MVP verification tests to a fixed clock; `npm run check` passed with 44 tests.
-- 2026-06-16: Feedback intake created ISSUE-010, ISSUE-011, and ISSUE-012 for create-form guidance/local image selection, fuzzy search relevance, and Buy Credits nav placeholder work.
-- 2026-06-16: Feedback resolution completed ISSUE-010: added realistic create-form placeholders, dependency-free multipart upload handling, validated local image storage, static upload serving, and focused create-flow tests.
-- 2026-06-16: Feedback resolution completed ISSUE-011: added dependency-free exact-first fuzzy search scoring for public cohort search and focused event browsing tests.
-- 2026-06-16: Feedback resolution completed ISSUE-012: added shared Buy Credits navigation and a safe `/credits/buy` placeholder page for future T013 payment work.
-- 2026-06-16: Feedback intake created ISSUE-013 and ISSUE-014 for create-form placeholder contrast/focus behavior and Buy Credits navbar alignment.
-- 2026-06-16: Feedback resolution completed ISSUE-013: create-form placeholders are now light by default and hidden on field focus.
-- 2026-06-16: Feedback resolution completed ISSUE-014: aligned the Buy Credits nav item with shared topbar links on desktop and mobile while preserving the safe placeholder route.
-- 2026-06-16 12:48 EDT: T012 added a local session-cookie auth boundary, explicit sign-in/out UI, protected create/interest/dashboard routes, signed-in private-link authorization, and README auth notes.
-- 2026-06-17 EDT: Manager planning update converted the remaining graph into production-ready MVP scope with Stripe payments, Supabase Auth, Supabase Postgres, LinkedIn/X/Email social publishing, production config, admin controls, upload hardening, logging/audit, security review, and smoke testing as T013-T030.
-- 2026-06-17 EDT: T013 chose Render Web Service `cohort15-mvp` as the first production deployment target, added `render.yaml` and `docs/human-tasks/deployment-render.md`, documented Node 24 runtime/start/health/rollback/app URL assumptions, and adjusted `src/server/app.mjs` to bind to `HOST` or `0.0.0.0`.
-- 2026-06-17 EDT: T014 added production runtime configuration validation, `.env.example`, `docs/human-tasks/production-config.md`, Render secret placeholders, and tests for required production env values and rejected local fallbacks.
-- 2026-06-17 EDT: T015 added dependency-free Supabase Auth OAuth/PKCE support for Google and GitHub, production provider sign-in UI/routes, callback-to-app-session handling, production local-auth lockout, optional magic-link configuration, and focused auth tests.
-- 2026-06-17 EDT: T017 added dependency-free Supabase Postgres production persistence, SQL migration/runbook docs, production startup state selection without demo seeding, purchase/auth-linked persistence fields, and focused Supabase persistence tests.
-- 2026-06-17 EDT: T018 added production session cookie hardening, 8-hour opaque session expiry, sign-out invalidation, production CSRF tokens for signed-in form mutations, production admin expiry fail-closed behavior pending T019, documentation, and focused session security tests.
-- 2026-06-17 EDT: T019 added authenticated email-based admin authorization from `COHORT15_ADMIN_EMAILS`, protected cohort expiry from unauthenticated/non-admin callers, required production CSRF validation, and documented exact Render/Supabase setup and verification checkpoints.
-- 2026-05-29 23:50 EDT: Setup manager initialized Cohort15 planning artifacts from `docs/cohort15-mvp-spec-v3.md`; no product code exists yet.
+- Planning reset completed on 2026-06-18.
+- Product implementation has not started.
+- Next ready task: L001.
