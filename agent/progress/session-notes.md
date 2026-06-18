@@ -23,7 +23,7 @@ Read:
 - `src/ui/cohorts.mjs`
 - `src/ui/dashboards.mjs`
 - `src/config/runtime.mjs`
-- `docs/production-config.md`
+- `docs/human-tasks/production-config.md`
 - current MDN Set-Cookie and secure cookie docs, plus the OWASP CSRF prevention cheat sheet
 
 Decided:
@@ -97,7 +97,7 @@ Read:
 - `src/server/app.mjs`
 - `src/ui/auth.mjs`
 - `src/config/runtime.mjs`
-- `docs/production-config.md`
+- `docs/human-tasks/production-config.md`
 - current official Supabase docs for redirect URLs, Google login, GitHub login, OAuth sign-in/callback exchange, and passwordless email
 
 Decided:

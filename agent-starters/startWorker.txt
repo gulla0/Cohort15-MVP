@@ -26,6 +26,7 @@ WORKER RULES
 10. If `npm run check` fails because of the workflow guardrail, report the stale feedback/index mismatch to the manager; do not expand tracker edits unless authorized.
 11. Do not create git commits unless the manager explicitly includes commit responsibility in the task contract.
 12. Return concrete evidence, not broad claims.
+13. If the task reveals required human action outside the repository, report it to the manager. If the task contract authorizes you to document that work, create or update the checklist only in `docs/human-tasks/`, include a `## Human Setup Checklist` section, and register the file in `docs/human-tasks/README.md`. Do not expand your write scope to do this without manager authorization.
 
 ==================================================
 REQUIRED TASK CONTRACT

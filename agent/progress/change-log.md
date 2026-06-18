@@ -9,7 +9,7 @@ Task:
 
 Files Changed:
 - `README.md`
-- `docs/production-config.md`
+- `docs/human-tasks/production-config.md`
 - `src/auth/session.mjs`
 - `src/server/app.mjs`
 - `src/ui/auth.mjs`
@@ -42,8 +42,8 @@ Task:
 
 Files Changed:
 - `README.md`
-- `docs/production-config.md`
-- `docs/supabase-postgres.md`
+- `docs/human-tasks/production-config.md`
+- `docs/human-tasks/supabase-postgres.md`
 - `supabase/migrations/20260617000000_cohort15_core.sql`
 - `src/auth/supabase.mjs`
 - `src/persistence/repositories.mjs`
@@ -77,7 +77,7 @@ Task:
 Files Changed:
 - `.env.example`
 - `README.md`
-- `docs/production-config.md`
+- `docs/human-tasks/production-config.md`
 - `render.yaml`
 - `src/auth/session.mjs`
 - `src/auth/supabase.mjs`
@@ -109,7 +109,7 @@ Task:
 Files Changed:
 - `.env.example`
 - `.gitignore`
-- `docs/production-config.md`
+- `docs/human-tasks/production-config.md`
 - `render.yaml`
 - `src/config/runtime.mjs`
 - `src/server/app.mjs`
@@ -138,7 +138,7 @@ Task:
 - T013 Choose and document production deployment target
 
 Files Changed:
-- `docs/deployment-render.md`
+- `docs/human-tasks/deployment-render.md`
 - `render.yaml`
 - `src/server/app.mjs`
 - `README.md`
@@ -610,7 +610,7 @@ Files Changed:
 - `tests/expire-cohorts.test.mjs`
 - `tests/mvp-verification.test.mjs`
 - `README.md`
-- `docs/production-config.md`
+- `docs/human-tasks/production-config.md`
 - `.env.example`
 - canonical task, knowledge, and progress trackers
 

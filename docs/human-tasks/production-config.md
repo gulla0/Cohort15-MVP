@@ -136,7 +136,7 @@ No secrets should be pasted into chat or committed to this repository. Enter sec
    - Go to `Developers` -> `Webhooks` -> `Add endpoint`.
    - Endpoint URL: `COHORT15_APP_URL` + `STRIPE_WEBHOOK_PATH`, default `https://cohort15-mvp.onrender.com/stripe/webhook`.
    - Store the webhook signing secret in `STRIPE_WEBHOOK_SECRET`.
-   - Follow the complete test-mode product, Checkout, redirect, and verification checklist in `docs/stripe-checkout.md`. T020 uses the exact return URL `COHORT15_APP_URL/credits/checkout/complete?session_id={CHECKOUT_SESSION_ID}` and cancellation URL `COHORT15_APP_URL/credits/buy?cancelled=1`.
+   - Follow the complete test-mode product, Checkout, redirect, and verification checklist in `docs/human-tasks/stripe-checkout.md`. T020 uses the exact return URL `COHORT15_APP_URL/credits/checkout/complete?session_id={CHECKOUT_SESSION_ID}` and cancellation URL `COHORT15_APP_URL/credits/buy?cancelled=1`.
 10. LinkedIn:
    - Open https://www.linkedin.com/developers/apps.
    - Create or select the Cohort15 app.

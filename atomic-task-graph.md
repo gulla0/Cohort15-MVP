@@ -14,7 +14,7 @@ Each executable task should define or tightly imply:
 
 ## Human Setup Checklist Rule
 
-Any task that requires human action outside the repository must start by identifying the human setup path before depending on that external setup.
+Any task that requires human action outside the repository must start by identifying the human setup path before depending on that external setup. Its checklist or runbook must live in `docs/human-tasks/` and be linked from `docs/human-tasks/README.md`.
 
 This applies to deployment, Supabase, Google/GitHub OAuth, Stripe, LinkedIn, X, Email, DNS, webhooks, callback URLs, hosting dashboards, production secrets, or any other provider/account setup.
 

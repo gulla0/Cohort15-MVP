@@ -46,9 +46,11 @@ This executes the repository lint check, the agent workflow guardrail, and the N
 
 ## Production Deployment Target
 
-The first production deployment target is a Render Web Service named `cohort15-mvp`. The initial runbook is in [docs/deployment-render.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/deployment-render.md), and the starter service configuration is captured in [render.yaml](/Users/gzero/Desktop/cohort15/cohort15-mvp/render.yaml).
-The production configuration and secrets boundary is documented in [docs/production-config.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/production-config.md).
-Supabase Postgres production persistence setup is documented in [docs/supabase-postgres.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/supabase-postgres.md), with the SQL migration in [supabase/migrations/20260617000000_cohort15_core.sql](/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260617000000_cohort15_core.sql).
+All external setup and production operator work is indexed in [docs/human-tasks](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/human-tasks/README.md). New human-action checklists and runbooks belong in that directory.
+
+The first production deployment target is a Render Web Service named `cohort15-mvp`. The initial runbook is in [docs/human-tasks/deployment-render.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/human-tasks/deployment-render.md), and the starter service configuration is captured in [render.yaml](/Users/gzero/Desktop/cohort15/cohort15-mvp/render.yaml).
+The production configuration and secrets boundary is documented in [docs/human-tasks/production-config.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/human-tasks/production-config.md).
+Supabase Postgres production persistence setup is documented in [docs/human-tasks/supabase-postgres.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/human-tasks/supabase-postgres.md), with the SQL migration in [supabase/migrations/20260617000000_cohort15_core.sql](/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260617000000_cohort15_core.sql).
 
 Initial production assumptions:
 
@@ -65,7 +67,7 @@ Initial production assumptions:
 Do not commit provider credentials or paste secrets into chat. Production secrets and required environment variables are documented in the production configuration runbook.
 
 Production auth for T015 uses Supabase Auth with Google and GitHub providers. The app keeps local seeded-account sign-in available only outside production mode; in production `/auth/sign-in` starts Supabase provider flows and `/auth/callback` exchanges the Supabase identity into the app session. Production persistence for T017 hydrates users, cohorts, interests, credit transactions, social posts, and purchase records from Supabase Postgres; local demo seed grants are not created in production mode.
-Stripe Checkout for T020 provides one-time `$6` / 6-credit and `$12` / 14-credit packages. The server verifies completed, paid Checkout Sessions before recording purchase credits; setup and test-mode verification are documented in [docs/stripe-checkout.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/stripe-checkout.md). T021 remains required for signed webhook fulfillment and durable reconciliation when a paid customer does not return to the app.
+Stripe Checkout for T020 provides one-time `$6` / 6-credit and `$12` / 14-credit packages. The server verifies completed, paid Checkout Sessions before recording purchase credits; setup and test-mode verification are documented in [docs/human-tasks/stripe-checkout.md](/Users/gzero/Desktop/cohort15/cohort15-mvp/docs/human-tasks/stripe-checkout.md). T021 remains required for signed webhook fulfillment and durable reconciliation when a paid customer does not return to the app.
 Production session hardening for T018 uses opaque server-side app sessions with `HttpOnly`, `SameSite=Lax`, `Secure`, expiring cookies in production. Signed-in browser mutations include server-issued CSRF tokens and reject missing or invalid tokens before mutating cohort, interest, or sign-out state.
 Administrative mutations are authorized from the signed-in account email matched against server-side `COHORT15_ADMIN_EMAILS`. `POST /admin/expire-cohorts` rejects unauthenticated and non-admin callers and requires the signed-in admin's CSRF token; role status is never accepted from request input.
 

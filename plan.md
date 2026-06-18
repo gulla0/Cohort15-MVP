@@ -46,7 +46,7 @@ Ship the smallest usable version that proves:
 
 ## Human Setup Standard
 
-Provider-dependent production tasks must identify human setup requirements before relying on external setup.
+Provider-dependent production tasks must identify human setup requirements before relying on external setup. Every human-action checklist or runbook must live in `docs/human-tasks/`, include a `## Human Setup Checklist` section, and be registered in `docs/human-tasks/README.md`.
 
 For deployment, Supabase, Google/GitHub OAuth, Stripe, LinkedIn, X, Email, DNS, webhooks, callback URLs, hosting dashboards, production secrets, or similar external provider work, the executor must first provide a Human Setup Checklist with:
 
@@ -209,7 +209,7 @@ Do not cut:
 
 ## Open Implementation Questions
 
-1. The first production deployment target is Render Web Service `cohort15-mvp`. The initial app base URL assumption is `https://cohort15-mvp.onrender.com`. The root `cohort15.com` domain currently hosts the pre-release landing page on Netlify, but production launch can keep the Render URL, move `cohort15.com` to Render, or use a subdomain such as `https://app.cohort15.com`. See `docs/deployment-render.md`.
+1. The first production deployment target is Render Web Service `cohort15-mvp`. The initial app base URL assumption is `https://cohort15-mvp.onrender.com`. The root `cohort15.com` domain currently hosts the pre-release landing page on Netlify, but production launch can keep the Render URL, move `cohort15.com` to Render, or use a subdomain such as `https://app.cohort15.com`. See `docs/human-tasks/deployment-render.md`.
 2. Secret management and environment variable requirements are not formalized. T014 should add that boundary before provider-backed integrations.
 3. Production credit bootstrap policy is still unspecified: new users may need to buy credits first, or receive explicit ledger-backed launch/admin grants.
 4. Production upload storage is still unspecified: T026 should either harden storage for uploaded event images or constrain uploads in production.
