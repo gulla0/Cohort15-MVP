@@ -249,7 +249,7 @@
     {
       "id": "L005",
       "title": "Build anonymous interest and quorum unlock",
-      "status": "not_started",
+      "status": "done",
       "phase": "Public Product Flow",
       "dependencies": [
         "L004"
@@ -295,8 +295,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when the anonymous quorum flow works without notification delivery.",
-      "evidence": "Pending.",
-      "notes": "Ten accepted interests per IP per hour."
+      "evidence": "2026-06-18: normalized email-only interest service, lifecycle-aware form, guarded POST route, atomic quorum transition, immediate link unlock, privacy boundaries, and ten-success IP limit verified.",
+      "notes": "Complete. Ten accepted interests per IP per hour; L006 is next."
     },
     {
       "id": "L006",

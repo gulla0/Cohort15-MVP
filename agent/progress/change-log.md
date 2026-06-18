@@ -86,3 +86,13 @@ Verification: focused creation/rate-limit/shell tests passed; full `npm run chec
 - Added the `/cohorts` compatibility redirect and focused browsing, route, ordering, privacy, and link-visibility tests.
 
 Verification: `node --test tests/event-browsing.test.mjs` passed with 3 tests; full `npm run check` passed with 34 tests.
+
+## 2026-06-18 — L005 anonymous interest and quorum unlock
+
+- Added normalized, email-only interest submission with no authentication.
+- Added the active/gathering detail form, private-email consent, and honeypot.
+- Added media type, body-size, Origin, validation, conflict, missing-cohort, and privacy-safe HTTP handling.
+- Integrated atomic interest acceptance and immediate public meeting-link unlock at quorum.
+- Added a separate ten-success-per-IP rolling limiter and focused concurrency, lifecycle, privacy, route, and limit tests.
+
+Verification: `node --test tests/show-interest.test.mjs tests/rate-limit.test.mjs` passed with 7 tests; full `npm run check` passed with 39 tests.

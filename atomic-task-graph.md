@@ -10,7 +10,7 @@ L000 Clean lofi application shell (done)
        └─ L002 Isolated persistence and Supabase migration (done)
             └─ L003 Anonymous cohort creation (done)
                  └─ L004 Landing, listing, and lifecycle views (done)
-                      └─ L005 Anonymous interest and quorum unlock (not_started)
+                      └─ L005 Anonymous interest and quorum unlock (done)
                            └─ L006 Resend notifications (not_started)
                                 └─ L007 Isolated production config/deployment (not_started)
                                      └─ L008 Privacy, abuse, and end-to-end verification (not_started)
@@ -62,6 +62,7 @@ L000 Clean lofi application shell (done)
 ### L005 — Build anonymous interest and quorum unlock
 
 - Depends on: L004
+- Status: done
 - Owns: interest service/route/form, duplicate and creator exclusion, honeypot, ten-per-hour IP limit, tests
 - Delivers: email-only interest, atomic conflict handling, hashed-IP ten-success rolling limit, and immediate public link unlock at quorum
 - Stops before: notification delivery

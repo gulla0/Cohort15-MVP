@@ -183,6 +183,12 @@ article p:last-child {
 .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; margin-top: 46px; padding-top: 40px; border-top: 1px solid var(--line); }
 .detail-grid h2 { color: var(--ink-strong); }
 .local-note { color: var(--muted); font-size: .9rem; }
+.interest-panel { margin-top: 30px; padding: 24px; border: 1px solid #9fc9b7; border-radius: 8px; background: var(--green-soft); }
+.interest-panel h2 { margin: 8px 0; color: var(--ink-strong); }
+.interest-panel > p { max-width: 680px; }
+.interest-form { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 8px 12px; align-items: end; max-width: 680px; margin-top: 18px; }
+.interest-form label { grid-column: 1 / -1; color: var(--ink-strong); font-weight: 750; }
+.interest-form input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font: inherit; }
 
 .grid {
   display: grid;
@@ -283,4 +289,5 @@ footer {
 
   .cohort-form { grid-template-columns: 1fr; padding: 18px; }
   .cohort-form .full, .field-note.full { grid-column: auto; }
+  .interest-form { grid-template-columns: 1fr; }
 }

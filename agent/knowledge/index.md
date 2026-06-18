@@ -34,7 +34,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L002 provides local repositories, a server-only PostgREST adapter, and isolated `cohort15_lofi_*` tables/RPC. |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L003 provides anonymous creation, private normalized email, timezone capture, request guards, honeypot, and five-success IP limiting. |
 | Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | L004 provides landing-page listings, filters, detail lifecycle views, browser-local times, public quorum progress, and safely gated meeting links. |
-| Interest flow | not yet created | L005 adds normalized email-only interest and public link unlock. |
+| Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L005 provides normalized email-only interest, guarded mutations, ten-success IP limiting, and atomic public link unlock. |
 | Email | No lofi adapter yet | L006 adds a small Resend HTTP adapter with fake-provider tests. |
 | Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration, privacy, abuse, concurrency, and launch verification. |
 
@@ -73,4 +73,5 @@ Git history contains the later production MVP. It must not override the lofi spe
 - L002 isolated local/Supabase persistence completed on 2026-06-18 with atomic interest/quorum, RLS, privacy, concurrency, and idempotency coverage.
 - L003 anonymous creation completed on 2026-06-18 with form/route policy, timezone capture, honeypot, and hashed-IP rate-limit coverage.
 - L004 public browsing completed on 2026-06-18 with active-first filtering, detail views, local-time rendering, HTML escaping, and link privacy coverage.
-- Next ready task: L005.
+- L005 anonymous interest completed on 2026-06-18 with request guards, conflict/privacy handling, atomic quorum unlock, and ten-success IP limiting.
+- Next ready task: L006.

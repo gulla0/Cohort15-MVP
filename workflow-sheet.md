@@ -8,13 +8,13 @@ Public Product Flow
 
 L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
 
-Next ready task: L005.
+Next ready task: L006.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L005 | L004 is complete and every current input exists | Build anonymous interest and quorum unlock. |
+| L006 | L005 is complete and every current input exists | Add Resend confirmation and quorum notifications. |
 
 ## Known Parallelism
 

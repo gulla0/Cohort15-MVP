@@ -111,6 +111,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L005.
+Next ready task: L006.
 
-L000–L004 are complete. L005 adds anonymous interest submission and quorum-driven link unlock.
+L000–L005 are complete. L006 adds transactional confirmation and quorum notifications through Resend.

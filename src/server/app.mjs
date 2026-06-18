@@ -10,6 +10,7 @@ import {
 } from '../persistence/repositories.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../services/create-cohort.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
+import { createShowInterestService, InterestHoneypotSubmissionError } from '../services/show-interest.mjs';
 import {
   clientIpFromRequest, createRollingWindowLimiter, RateLimitExceededError,
 } from '../services/rate-limit.mjs';
@@ -63,6 +64,11 @@ export function createRequestHandler(options = {}) {
   });
   const cohortCreator = options.cohortCreator ?? createCohortService({ repositories, limiter: creationLimiter });
   const eventBrowsing = options.eventBrowsing ?? createEventBrowsingService({ repositories });
+  const interestLimiter = options.interestLimiter ?? createRollingWindowLimiter({
+    limit: 10,
+    windowMs: 60 * 60 * 1000,
+  });
+  const showInterest = options.showInterest ?? createShowInterestService({ repositories, limiter: interestLimiter });
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -150,6 +156,56 @@ export function createRequestHandler(options = {}) {
           send(res, 409, 'text/plain; charset=utf-8', 'Conflict');
         } else if (error instanceof DomainValidationError || error instanceof HoneypotSubmissionError) {
           send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({ error: true }));
+        } else {
+          throw error;
+        }
+      }
+      return;
+    }
+
+    const interestMatch = method === 'POST' ? /^\/cohorts\/([^/]+)\/interests$/u.exec(url.pathname) : null;
+    if (interestMatch) {
+      const cohortId = decodeURIComponent(interestMatch[1]);
+      const mediaType = String(req.headers?.['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      if (mediaType !== 'application/x-www-form-urlencoded') {
+        send(res, 415, 'text/plain; charset=utf-8', 'Unsupported media type');
+        return;
+      }
+      if (req.headers?.origin) {
+        let expectedOrigin;
+        try { expectedOrigin = new URL(config.appUrl).origin; } catch { expectedOrigin = ''; }
+        if (req.headers.origin !== expectedOrigin) {
+          send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+          return;
+        }
+      }
+
+      try {
+        const input = await readFormBody(req);
+        await showInterest.show(cohortId, input, { clientIp: clientIpFromRequest(req, config) });
+        redirect(res, 303, `/cohorts/${encodeURIComponent(cohortId)}`);
+      } catch (error) {
+        if (error?.code === 'body_too_large') {
+          send(res, 413, 'text/plain; charset=utf-8', 'Request body too large');
+        } else if (error instanceof RateLimitExceededError) {
+          res.writeHead(429, {
+            'content-type': 'text/plain; charset=utf-8',
+            'retry-after': String(error.retryAfterSeconds),
+            'x-content-type-options': 'nosniff',
+          });
+          res.end('Too many requests');
+        } else if (error instanceof RepositoryNotFoundError) {
+          send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+        } else if (error instanceof RepositoryConflictError) {
+          send(res, 409, 'text/plain; charset=utf-8', 'Conflict');
+        } else if (error instanceof DomainValidationError || error instanceof InterestHoneypotSubmissionError) {
+          try {
+            const cohort = await eventBrowsing.getById(cohortId);
+            send(res, 400, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, { error: true }));
+          } catch (readError) {
+            if (readError instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+            else throw readError;
+          }
         } else {
           throw error;
         }

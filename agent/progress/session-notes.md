@@ -88,3 +88,14 @@ Focused event browsing/UI tests and the full 34-test repository check passed. L0
 - Standardized one machine-checkable `Next ready task: <task IDs>.` line across status-facing workflow artifacts.
 - Extended the workflow checker to derive ready tasks from `tasks.json` and verify every task's graph status.
 - Expanded manager closeout requirements so task completion cannot omit status-facing documents.
+
+## 2026-06-18 — L005 anonymous interest and quorum unlock
+
+- Added normalized email-only interest submission without authentication.
+- Added lifecycle-aware detail forms with private-email consent and a hidden honeypot.
+- Added guarded POST handling for media type, body size, Origin, validation, conflict, missing-cohort, and rate-limit outcomes.
+- Reused the atomic repository operation so exactly one accepted concurrent write reaches quorum and exposes the meeting link immediately.
+- Added a separate ten-success rolling IP limiter; rejected and honeypot submissions consume no allowance.
+- Kept notification delivery outside this task for L006.
+
+Focused interest/rate-limit tests and the full 39-test repository suite passed. L006 is next.
