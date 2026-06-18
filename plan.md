@@ -43,7 +43,7 @@ Deploy the smallest real product that validates:
 
 ### Phase 1 — Domain And Data Isolation
 
-- L000: establish the clean lofi application shell. (complete)
+- L000: establish the clean lofi application shell.
 - L001: simplify the lofi domain and validation policy.
 - L002: add isolated lofi persistence and Supabase migration.
 
@@ -109,6 +109,8 @@ Explicitly defer:
 
 None. Reversible internal code organization remains at the implementing manager's discretion, but observable behavior, persisted data, security/privacy boundaries, and acceptance rules are locked in the specification and task contracts.
 
-## First Ready Task
+## Next Ready Task
 
-L000 is complete. Start with L001; it establishes the field and lifecycle contract required by every later implementation task.
+Next ready task: L003.
+
+L000–L002 are complete. L003 starts the anonymous public product flow on top of the verified domain and persistence boundaries.

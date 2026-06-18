@@ -8,6 +8,12 @@ const humanTasksIndexUrl = new URL('README.md', humanTasksUrl);
 const tasksUrl = new URL('../tasks.json', import.meta.url);
 const taskGraphUrl = new URL('../atomic-task-graph.md', import.meta.url);
 const taskStatusUrl = new URL('../agent/progress/task-status.md', import.meta.url);
+const workflowStatusUrls = new Map([
+  ['README.md', new URL('../README.md', import.meta.url)],
+  ['plan.md', new URL('../plan.md', import.meta.url)],
+  ['workflow-sheet.md', new URL('../workflow-sheet.md', import.meta.url)],
+  ['agent/progress/task-status.md', taskStatusUrl]
+]);
 
 const ignoredDirectories = new Set(['.git', 'coverage', 'dist', 'node_modules']);
 
@@ -196,6 +202,26 @@ function parseTaskStatus(text) {
   return statuses;
 }
 
+function parseTaskGraphStatuses(text) {
+  const statuses = new Map();
+  const executionGraph = text.match(/## Execution Graph\s+```text\s+([\s\S]*?)```/)?.[1] ?? '';
+
+  for (const line of executionGraph.split('\n')) {
+    const match = line.match(/\b(L\d{3})\b.*\((not_started|in_progress|blocked|done)\)\s*$/);
+    if (match) {
+      statuses.set(match[1], match[2]);
+    }
+  }
+
+  return statuses;
+}
+
+function findReadyTasks(tasks) {
+  const taskById = new Map(tasks.map((task) => [task.id, task]));
+  return tasks.filter((task) => task.status === 'not_started'
+    && task.dependencies.every((dependency) => taskById.get(dependency)?.status === 'done'));
+}
+
 function looksLikeRepositoryInput(value) {
   return typeof value === 'string'
     && !/^https?:\/\//.test(value)
@@ -237,7 +263,8 @@ const [
   humanTaskEntries,
   tasksText,
   taskGraphText,
-  taskStatusText
+  taskStatusText,
+  workflowStatusTexts
 ] =
   await Promise.all([
   readFile(issueIndexUrl, 'utf8'),
@@ -247,13 +274,18 @@ const [
   readdir(humanTasksUrl, { withFileTypes: true }),
   readFile(tasksUrl, 'utf8'),
   readFile(taskGraphUrl, 'utf8'),
-  readFile(taskStatusUrl, 'utf8')
+  readFile(taskStatusUrl, 'utf8'),
+  Promise.all(
+    [...workflowStatusUrls.entries()].map(async ([name, url]) => [name, await readFile(url, 'utf8')])
+  )
   ]);
 
 const taskLedger = parseTaskLedger(tasksText);
 const taskLedgerFailures = validateTaskLedger(taskLedger);
 const taskStatuses = parseTaskStatus(taskStatusText);
+const taskGraphStatuses = parseTaskGraphStatuses(taskGraphText);
 const taskTrackerFailures = [];
+const taskById = new Map((taskLedger.tasks ?? []).map((task) => [task.id, task]));
 
 for (const task of taskLedger.tasks ?? []) {
   const readableStatus = taskStatuses.get(task.id);
@@ -262,7 +294,6 @@ for (const task of taskLedger.tasks ?? []) {
       `${task.id} status mismatch: tasks.json=${task.status}, task-status.md=${readableStatus?.status ?? 'missing'}.`
     );
   }
-  const taskById = new Map(taskLedger.tasks.map((item) => [item.id, item]));
   const expectedDependenciesReady = task.dependencies.every(
     (dependency) => taskById.get(dependency)?.status === 'done'
   ) ? 'yes' : 'no';
@@ -271,14 +302,29 @@ for (const task of taskLedger.tasks ?? []) {
       `${task.id} dependency readiness mismatch: expected ${expectedDependenciesReady}, task-status.md=${readableStatus?.dependenciesReady ?? 'missing'}.`
     );
   }
-  if (!taskGraphText.includes(task.id)) {
-    taskTrackerFailures.push(`${task.id} is missing from atomic-task-graph.md.`);
+  const graphStatus = taskGraphStatuses.get(task.id);
+  if (graphStatus !== task.status) {
+    taskTrackerFailures.push(
+      `${task.id} status mismatch: tasks.json=${task.status}, atomic-task-graph.md=${graphStatus ?? 'missing'}.`
+    );
   }
 }
 
 for (const taskId of taskStatuses.keys()) {
   if (!(taskLedger.tasks ?? []).some((task) => task.id === taskId)) {
     taskTrackerFailures.push(`${taskId} exists in task-status.md but not tasks.json.`);
+  }
+}
+
+const readyTaskIds = findReadyTasks(taskLedger.tasks ?? []).map((task) => task.id);
+const expectedNextTaskLine = `Next ready task: ${readyTaskIds.length > 0 ? readyTaskIds.join(', ') : 'none'}.`;
+
+for (const [name, text] of workflowStatusTexts) {
+  const nextTaskLines = text.match(/^Next ready task:.*$/gm) ?? [];
+  if (nextTaskLines.length !== 1 || nextTaskLines[0] !== expectedNextTaskLine) {
+    taskTrackerFailures.push(
+      `${name} must contain exactly "${expectedNextTaskLine}"; found ${nextTaskLines.length === 0 ? 'none' : nextTaskLines.join(' | ')}.`
+    );
   }
 }
 

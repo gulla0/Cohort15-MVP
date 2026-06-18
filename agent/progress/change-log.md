@@ -60,3 +60,10 @@ Verification: `node --test tests/domain-validation.test.mjs` passed with 12 test
 - Added focused privacy, conflict, concurrency, adapter, notification-outcome, and migration-isolation tests.
 
 Verification: `node --test tests/persistence.test.mjs tests/supabase-postgres.test.mjs` passed with 8 tests; `npm run check` passed.
+
+## 2026-06-18 — Workflow status-alignment hardening
+
+- Reconciled stale L001 guidance with the completed L002 ledger state.
+- Added automated next-ready-task checks for the README, plan, workflow sheet, and readable task status.
+- Added exact task-status validation for the atomic task graph.
+- Expanded manager closeout instructions to keep all status-facing workflow artifacts aligned.

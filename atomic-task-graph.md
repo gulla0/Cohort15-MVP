@@ -7,15 +7,15 @@
 ```text
 L000 Clean lofi application shell (done)
   └─ L001 Lofi domain and validation (done)
-       └─ L002 Isolated persistence and Supabase migration
-            └─ L003 Anonymous cohort creation
-                 └─ L004 Landing, listing, and lifecycle views
-                      └─ L005 Anonymous interest and quorum unlock
-                           └─ L006 Resend notifications
-                                └─ L007 Isolated production config/deployment
-                                     └─ L008 Privacy, abuse, and end-to-end verification
-                                          └─ L009 Human provider setup and deployment
-                                               └─ L010 Production smoke test
+       └─ L002 Isolated persistence and Supabase migration (done)
+            └─ L003 Anonymous cohort creation (not_started)
+                 └─ L004 Landing, listing, and lifecycle views (not_started)
+                      └─ L005 Anonymous interest and quorum unlock (not_started)
+                           └─ L006 Resend notifications (not_started)
+                                └─ L007 Isolated production config/deployment (not_started)
+                                     └─ L008 Privacy, abuse, and end-to-end verification (not_started)
+                                          └─ L009 Human provider setup and deployment (not_started)
+                                               └─ L010 Production smoke test (not_started)
 ```
 
 ## Atomic Task Contracts
@@ -104,6 +104,6 @@ L000 Clean lofi application shell (done)
 - Execute exactly one task per implementation chat; do not create parallel task waves.
 - Each implementation chat starts through `start.txt` or directly with `agent-starters/startNewManager.txt`.
 - The manager selects the next unblocked task from `tasks.json`; workers do not select tasks.
-- Update `tasks.json`, `agent/progress/task-status.md`, session notes, and change log only after implementation and verification.
+- After implementation and verification, update `tasks.json`, `atomic-task-graph.md`, `README.md`, `plan.md`, `workflow-sheet.md`, `agent/progress/task-status.md`, session notes, and change log.
 - Commit each successful task wave separately.
 - External provider work must follow `docs/human-tasks/lofi-mvp-launch.md`; never place credentials in repository artifacts or chat.

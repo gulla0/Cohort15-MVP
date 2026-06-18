@@ -6,7 +6,7 @@ Visitors will be able to create cohort requests or show interest with a mandator
 
 ## Setup Status
 
-Planning and the clean lofi shell are complete. Product behavior begins with L001; no production-MVP runtime code remains in this branch.
+The clean lofi shell, domain policy, and isolated persistence layer are complete. Anonymous public product flows begin with L003; no production-MVP runtime code remains in this branch.
 
 - Product rules: `docs/cohort15-lofi-mvp-spec.md`
 - Plan: `plan.md`
@@ -15,7 +15,7 @@ Planning and the clean lofi shell are complete. Product behavior begins with L00
 - Current status: `agent/progress/task-status.md`
 - Provider setup: `docs/human-tasks/lofi-mvp-launch.md`
 
-Next ready task: L001.
+Next ready task: L003.
 
 The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
 
@@ -44,6 +44,6 @@ The local server defaults to `http://localhost:3000`.
 
 ## Agent Workflow
 
-Use `start.txt` for user-facing routing or `agent-starters/startNewManager.txt` when directly starting an implementation task. Managers select the next unblocked task from `tasks.json`, verify it, align trackers, and commit the completed task wave.
+Use `start.txt` for user-facing routing or `agent-starters/startNewManager.txt` when directly starting an implementation task. Managers select the next unblocked task from `tasks.json`, verify it, align every status-facing workflow artifact, and commit the completed task wave. `npm run check` rejects stale next-task summaries and task-graph statuses.
 
 Old production tasks and resolved feedback issues were removed from the active workflow. Git history remains their archive.

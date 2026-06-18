@@ -44,12 +44,13 @@ Wave closeout:
 1. Review merged code.
 2. Run narrow verification.
 3. Update `tasks.json`.
-4. Align `agent/progress/task-status.md`.
-5. Append `agent/progress/session-notes.md`.
-6. Append `agent/progress/change-log.md`.
-7. Update `agent/progress/blockers.md` if needed.
-8. Update `agent/knowledge/index.md` if reusable context changed.
-9. Run `npm run check` when practical before handoff. This validates task contracts/dependencies, tracker alignment, ready inputs, human-task rules, and feedback context.
-10. If the workflow guardrail fails, reconcile the exact mismatch or report why it is outside the task scope.
-11. If the task wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for this task wave and exclude unrelated user changes.
-12. Report completed tasks, verification, commit hash, next task, and blockers.
+4. Align task statuses in `atomic-task-graph.md`.
+5. Update the exact `Next ready task: <task IDs>.` line in `README.md`, `plan.md`, `workflow-sheet.md`, and `agent/progress/task-status.md`.
+6. Append `agent/progress/session-notes.md`.
+7. Append `agent/progress/change-log.md`.
+8. Update `agent/progress/blockers.md` if needed.
+9. Update `agent/knowledge/index.md` if reusable context changed.
+10. Run `npm run check` when practical before handoff. This validates task contracts/dependencies, graph and next-task alignment, ready inputs, human-task rules, and feedback context.
+11. If the workflow guardrail fails, reconcile the exact mismatch or report why it is outside the task scope.
+12. If the task wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for this task wave and exclude unrelated user changes.
+13. Report completed tasks, verification, commit hash, next task, and blockers.

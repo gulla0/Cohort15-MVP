@@ -60,3 +60,10 @@ Verification completed with 12 focused domain tests and the full repository chec
 - Manager review tightened security-definer permissions, search-path isolation, persisted timestamp hydration, database normalization, and local lock cleanup.
 
 Verification completed with 8 focused persistence/Supabase tests and the full repository check. L003 is next.
+
+## 2026-06-18 — Workflow status-alignment hardening
+
+- Corrected stale next-task guidance in the README, plan, workflow sheet, and atomic task graph.
+- Standardized one machine-checkable `Next ready task: <task IDs>.` line across status-facing workflow artifacts.
+- Extended the workflow checker to derive ready tasks from `tasks.json` and verify every task's graph status.
+- Expanded manager closeout requirements so task completion cannot omit status-facing documents.

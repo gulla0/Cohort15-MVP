@@ -2,17 +2,19 @@
 
 ## Current Phase
 
-Domain and Data Isolation
+Public Product Flow
 
 ## Current Critical Path
 
-L000 (done) → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
+L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
+
+Next ready task: L003.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L001 | L000 is complete and every current input exists | Implement the fully specified domain and boundary tests. |
+| L003 | L002 is complete and every current input exists | Build anonymous cohort creation and its abuse controls. |
 
 ## Known Parallelism
 
