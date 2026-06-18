@@ -6,14 +6,16 @@ import { loadRuntimeConfig } from '../config/runtime.mjs';
 import { DomainValidationError } from '../domain/validation.mjs';
 import { createLofiStore } from '../persistence/store.mjs';
 import {
-  createLocalRepositories, RepositoryConflictError,
+  createLocalRepositories, RepositoryConflictError, RepositoryNotFoundError,
 } from '../persistence/repositories.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../services/create-cohort.mjs';
+import { createEventBrowsingService } from '../services/event-browsing.mjs';
 import {
   clientIpFromRequest, createRollingWindowLimiter, RateLimitExceededError,
 } from '../services/rate-limit.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
+import { renderCohortDetailPage } from '../ui/cohorts.mjs';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -60,6 +62,7 @@ export function createRequestHandler(options = {}) {
     windowMs: 60 * 60 * 1000,
   });
   const cohortCreator = options.cohortCreator ?? createCohortService({ repositories, limiter: creationLimiter });
+  const eventBrowsing = options.eventBrowsing ?? createEventBrowsingService({ repositories });
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -81,14 +84,34 @@ export function createRequestHandler(options = {}) {
     }
 
     if (method === 'GET' && url.pathname === '/') {
+      const listing = await eventBrowsing.list({ status: url.searchParams.get('status') ?? 'all' });
       send(res, 200, 'text/html; charset=utf-8', renderHomePage({
-        googleAnalyticsId: config.googleAnalyticsId
+        googleAnalyticsId: config.googleAnalyticsId,
+        cohorts: listing.cohorts,
+        status: listing.status,
       }));
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/cohorts') {
+      redirect(res, 302, '/');
       return;
     }
 
     if (method === 'GET' && url.pathname === '/cohorts/new') {
       send(res, 200, 'text/html; charset=utf-8', renderCreateCohortPage());
+      return;
+    }
+
+    const detailMatch = method === 'GET' ? /^\/cohorts\/([^/]+)$/u.exec(url.pathname) : null;
+    if (detailMatch) {
+      try {
+        const cohort = await eventBrowsing.getById(decodeURIComponent(detailMatch[1]));
+        send(res, 200, 'text/html; charset=utf-8', renderCohortDetailPage(cohort));
+      } catch (error) {
+        if (error instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+        else throw error;
+      }
       return;
     }
 

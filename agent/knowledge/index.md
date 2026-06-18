@@ -33,7 +33,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L001 implements the seven-day anonymous lofi domain, validation, recurrence, lifecycle, and public serialization. |
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L002 provides local repositories, a server-only PostgREST adapter, and isolated `cohort15_lofi_*` tables/RPC. |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L003 provides anonymous creation, private normalized email, timezone capture, request guards, honeypot, and five-success IP limiting. |
-| Browse flow | `src/ui/home.mjs`, `src/ui/styles.css` shell only | L004 adds listings, filters, detail views, local times, and public quorum progress. |
+| Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | L004 provides landing-page listings, filters, detail lifecycle views, browser-local times, public quorum progress, and safely gated meeting links. |
 | Interest flow | not yet created | L005 adds normalized email-only interest and public link unlock. |
 | Email | No lofi adapter yet | L006 adds a small Resend HTTP adapter with fake-provider tests. |
 | Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration, privacy, abuse, concurrency, and launch verification. |
@@ -72,4 +72,5 @@ Git history contains the later production MVP. It must not override the lofi spe
 - L001 domain and validation policy completed on 2026-06-18 with focused boundary, DST, lifecycle, and privacy coverage.
 - L002 isolated local/Supabase persistence completed on 2026-06-18 with atomic interest/quorum, RLS, privacy, concurrency, and idempotency coverage.
 - L003 anonymous creation completed on 2026-06-18 with form/route policy, timezone capture, honeypot, and hashed-IP rate-limit coverage.
-- Next ready task: L004.
+- L004 public browsing completed on 2026-06-18 with active-first filtering, detail views, local-time rendering, HTML escaping, and link privacy coverage.
+- Next ready task: L005.

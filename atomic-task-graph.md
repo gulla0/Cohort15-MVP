@@ -9,7 +9,7 @@ L000 Clean lofi application shell (done)
   └─ L001 Lofi domain and validation (done)
        └─ L002 Isolated persistence and Supabase migration (done)
             └─ L003 Anonymous cohort creation (done)
-                 └─ L004 Landing, listing, and lifecycle views (not_started)
+                 └─ L004 Landing, listing, and lifecycle views (done)
                       └─ L005 Anonymous interest and quorum unlock (not_started)
                            └─ L006 Resend notifications (not_started)
                                 └─ L007 Isolated production config/deployment (not_started)
@@ -54,6 +54,7 @@ L000 Clean lofi application shell (done)
 ### L004 — Build the landing page, listing, and lifecycle views
 
 - Depends on: L003
+- Status: done
 - Owns: supplied landing-page adaptation, public browsing, filters, sorting, local-time rendering, safe link display, tests
 - Delivers: full listing on `/`, All/Active/Expired filters, active-first default, persistent expired posts, and meeting schedules visible throughout
 - Stops before: form mutations

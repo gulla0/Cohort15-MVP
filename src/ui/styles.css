@@ -110,6 +110,9 @@ h1 {
   color: var(--green);
 }
 
+.button-link.compact { min-height: 40px; padding: 0 14px; }
+.text-link { color: var(--green); font-weight: 800; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
 .foundation-card,
 article {
   padding: 24px;
@@ -139,6 +142,47 @@ article p:last-child {
   padding: 72px 0;
   border-top: 1px solid var(--line);
 }
+
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.section-heading h2 { margin: 14px 0 0; color: var(--ink-strong); font-size: clamp(2.3rem, 5vw, 4rem); line-height: 1; letter-spacing: -.035em; }
+.section-heading p:last-child { max-width: 640px; margin: 14px 0 0; color: var(--muted); }
+.listing-section { background: #f1eee6; }
+.filters { display: flex; gap: 8px; margin-bottom: 24px; }
+.filter-link { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); font-weight: 800; text-decoration: none; }
+.filter-link.selected { border-color: var(--green); background: var(--green); color: #fff; }
+.cohort-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.cohort-card { display: flex; flex-direction: column; min-height: 100%; }
+.card-heading, .progress-copy { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.card-heading .status-pill { min-height: 26px; padding: 0 9px; }
+.status-pill.expired { border-color: var(--line); background: #eeeae1; color: var(--muted); }
+.category { color: var(--muted); font-size: .8rem; font-weight: 800; text-transform: uppercase; }
+.cohort-card h3 { margin: 18px 0 8px; font-size: 1.45rem; }
+.cohort-card h3 a { color: var(--ink-strong); text-decoration: none; }
+.cohort-card > p { margin: 0 0 18px; color: var(--muted); }
+.cohort-card > .text-link { margin-top: auto; padding-top: 20px; }
+.cohort-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 4px 0 20px; }
+.cohort-facts div { min-width: 0; }
+.cohort-facts dt { color: var(--muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.cohort-facts dd { margin: 2px 0 0; color: var(--ink-strong); font-weight: 700; }
+.local-time { font-variant-numeric: tabular-nums; }
+.quorum-progress { margin: 4px 0 0; }
+.progress-copy { font-size: .9rem; }
+.progress-copy span { color: var(--muted); }
+.progress-track { height: 8px; margin-top: 8px; overflow: hidden; border-radius: 99px; background: #dfe4df; }
+.progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--green); }
+.empty-state { grid-column: 1 / -1; padding: 48px; border: 1px dashed var(--line); border-radius: 8px; text-align: center; }
+.empty-state h3, .empty-state p { margin: 0; }
+.empty-state p { margin-top: 8px; color: var(--muted); }
+.detail-shell { padding: 40px 0 80px; }
+.detail-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .48fr); gap: 40px; align-items: start; margin: 34px 0; }
+.detail-heading h1 { font-size: clamp(2.8rem, 7vw, 5.5rem); }
+.meeting-access { padding: 24px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.meeting-access.unlocked { border-color: #9fc9b7; background: var(--green-soft); }
+.meeting-access h2 { margin: 16px 0 10px; }
+.meeting-access .button-link { margin-top: 8px; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; margin-top: 46px; padding-top: 40px; border-top: 1px solid var(--line); }
+.detail-grid h2 { color: var(--ink-strong); }
+.local-note { color: var(--muted); font-size: .9rem; }
 
 .grid {
   display: grid;
@@ -207,7 +251,10 @@ footer {
 
 @media (max-width: 820px) {
   .hero,
-  .grid {
+  .grid,
+  .cohort-grid,
+  .detail-heading,
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 
@@ -229,6 +276,10 @@ footer {
   .button-link {
     width: 100%;
   }
+
+  .topbar .button-link.compact, .section-heading .button-link.compact { width: auto; }
+  .section-heading { align-items: start; flex-direction: column; }
+  .cohort-facts { grid-template-columns: 1fr; }
 
   .cohort-form { grid-template-columns: 1fr; padding: 18px; }
   .cohort-form .full, .field-note.full { grid-column: auto; }

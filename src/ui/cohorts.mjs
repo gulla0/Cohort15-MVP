@@ -1,0 +1,75 @@
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function label(value) {
+  return String(value).replaceAll('-', ' ').replace(/\b\w/gu, (character) => character.toUpperCase());
+}
+
+function localTime(instant, { includeEnd = false, durationMinutes = 0 } = {}) {
+  const end = new Date(Date.parse(instant) + durationMinutes * 60_000).toISOString();
+  return `<time class="local-time" datetime="${escapeHtml(instant)}" data-local-time${includeEnd ? ` data-end="${end}"` : ''}>${escapeHtml(instant)}</time>`;
+}
+
+function schedule(cohort) {
+  const recurrence = cohort.recurrence === 'none' ? 'One time' : label(cohort.recurrence);
+  return `<dl class="cohort-facts">
+    <div><dt>First meeting</dt><dd>${localTime(cohort.firstMeetingAt, { includeEnd: true, durationMinutes: cohort.meetingDurationMinutes })}</dd></div>
+    <div><dt>Duration</dt><dd>${cohort.meetingDurationMinutes} minutes</dd></div>
+    <div><dt>Recurrence</dt><dd>${recurrence}</dd></div>
+    <div><dt>Meetings</dt><dd>${cohort.meetingCount}</dd></div>
+  </dl>`;
+}
+
+function progress(cohort) {
+  const percentage = Math.min(100, Math.round((cohort.interestCount / cohort.minQuorum) * 100));
+  return `<div class="quorum-progress">
+    <div class="progress-copy"><strong>${cohort.interestCount} of ${cohort.minQuorum} interested</strong><span>${cohort.quorumStatus === 'met' ? 'Quorum met' : `${Math.max(0, cohort.minQuorum - cohort.interestCount)} more needed`}</span></div>
+    <div class="progress-track" role="progressbar" aria-label="Quorum progress" aria-valuemin="0" aria-valuemax="${cohort.minQuorum}" aria-valuenow="${Math.min(cohort.interestCount, cohort.minQuorum)}"><span style="width:${percentage}%"></span></div>
+  </div>`;
+}
+
+export function renderCohortCard(cohort) {
+  return `<article class="cohort-card">
+    <div class="card-heading"><span class="status-pill ${cohort.collectionStatus}">${label(cohort.collectionStatus)}</span><span class="category">${escapeHtml(label(cohort.category))}</span></div>
+    <h3><a href="/cohorts/${encodeURIComponent(cohort.id)}">${escapeHtml(cohort.title)}</a></h3>
+    <p>${escapeHtml(cohort.description)}</p>
+    ${schedule(cohort)}
+    ${progress(cohort)}
+    <a class="text-link" href="/cohorts/${encodeURIComponent(cohort.id)}">View cohort details →</a>
+  </article>`;
+}
+
+export function localTimeScript() {
+  return `<script>
+    (() => {
+      const formatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZoneName: 'short' });
+      document.querySelectorAll('[data-local-time]').forEach((element) => {
+        const start = new Date(element.dateTime);
+        const endValue = element.dataset.end;
+        element.textContent = endValue ? formatter.format(start) + ' – ' + formatter.format(new Date(endValue)) : formatter.format(start);
+      });
+    })();
+  </script>`;
+}
+
+function pageStart(title) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="shell topbar"><a class="brand" href="/">Cohort15</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a></header>`;
+}
+
+export function renderCohortDetailPage(cohort) {
+  const meetingAccess = cohort.meetingLink
+    ? `<div class="meeting-access unlocked"><p class="eyebrow">Quorum met</p><h2>The meeting is unlocked.</h2><a class="button-link" href="${escapeHtml(cohort.meetingLink)}" rel="noopener noreferrer">Open meeting link</a></div>`
+    : `<div class="meeting-access"><p class="eyebrow">${cohort.quorumStatus === 'met' ? 'Meeting ended' : 'Link locked'}</p><h2>${cohort.quorumStatus === 'met' ? 'This meeting link is no longer public.' : 'The meeting link unlocks at quorum.'}</h2><p>Schedule details stay public throughout the cohort lifecycle.</p></div>`;
+  return `${pageStart(cohort.title)}<main class="shell detail-shell">
+    <a class="text-link" href="/#cohorts">← Browse all cohorts</a>
+    <div class="detail-heading"><div><p class="eyebrow">${escapeHtml(label(cohort.category))} · ${escapeHtml(cohort.collectionStatus)}</p><h1>${escapeHtml(cohort.title)}</h1><p class="lede">${escapeHtml(cohort.description)}</p></div>${meetingAccess}</div>
+    ${progress(cohort)}
+    <section class="detail-grid"><div><h2>Meeting schedule</h2>${schedule(cohort)}<p class="local-note">Times are shown in your local timezone.</p></div><div><h2>Who it’s for</h2><dl class="cohort-facts"><div><dt>Topic</dt><dd>${escapeHtml(cohort.topic)}</dd></div><div><dt>Audience</dt><dd>${escapeHtml(cohort.targetAudience)}</dd></div><div><dt>Skill level</dt><dd>${escapeHtml(label(cohort.targetSkillLevel))}</dd></div></dl>${cohort.additionalDetails ? `<h2>Additional details</h2><p>${escapeHtml(cohort.additionalDetails)}</p>` : ''}</div></section>
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${localTimeScript()}</body></html>`;
+}

@@ -196,7 +196,7 @@
     {
       "id": "L004",
       "title": "Build the landing page, listing, and lifecycle views",
-      "status": "not_started",
+      "status": "done",
       "phase": "Public Product Flow",
       "dependencies": [
         "L003"
@@ -243,8 +243,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when read-only public pages match the lofi contract.",
-      "evidence": "Pending.",
-      "notes": "GET /cohorts is a compatibility redirect to the landing-page listing; do not build a second listing UI."
+      "evidence": "2026-06-18: landing-page listing, lifecycle filters and sorting, public detail pages, local-time enhancement, quorum progress, privacy escaping, and meeting-link visibility verified with focused tests and npm run check.",
+      "notes": "Complete. GET /cohorts redirects to the landing-page listing; L005 is next."
     },
     {
       "id": "L005",

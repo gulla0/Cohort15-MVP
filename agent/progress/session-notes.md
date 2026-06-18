@@ -71,6 +71,17 @@ Verification completed with 8 focused persistence/Supabase tests and the full re
 
 Focused creation, route, rate-limit, and shell tests passed. L004 is next.
 
+## 2026-06-18 — L004 landing, listing, and lifecycle views
+
+- Reworked the supplied early-interest visual language into the product landing page with creation and browsing actions.
+- Added read-only event browsing with normalized All/Active/Expired filters and canonical repository ordering.
+- Added landing-page listing cards and public detail pages with exact quorum progress and always-public schedule metadata.
+- Added browser-local date/time enhancement with explicit local-time labeling.
+- Kept creator and participant emails private, escaped all user content, and rendered meeting links only when public serialization permits them.
+- Added the `/cohorts` compatibility redirect and privacy-safe 404 detail behavior.
+
+Focused event browsing/UI tests and the full 34-test repository check passed. L005 is next.
+
 ## 2026-06-18 — Workflow status-alignment hardening
 
 - Corrected stale next-task guidance in the README, plan, workflow sheet, and atomic task graph.

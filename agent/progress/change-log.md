@@ -76,3 +76,13 @@ Verification: `node --test tests/persistence.test.mjs tests/supabase-postgres.te
 - Added focused creation service, HTTP route, timezone, honeypot, privacy, and limiter tests.
 
 Verification: focused creation/rate-limit/shell tests passed; full `npm run check` passed with 31 tests.
+
+## 2026-06-18 — L004 landing, listing, and lifecycle views
+
+- Added the full landing-page cohort directory with All, Active, and Expired filters.
+- Added public cohort detail pages, exact quorum progress, lifecycle states, and persistent expired listings.
+- Added browser-local meeting-time rendering while keeping schedule metadata server-rendered and public.
+- Enforced HTML escaping and public-serialization meeting-link boundaries throughout the UI.
+- Added the `/cohorts` compatibility redirect and focused browsing, route, ordering, privacy, and link-visibility tests.
+
+Verification: `node --test tests/event-browsing.test.mjs` passed with 3 tests; full `npm run check` passed with 34 tests.

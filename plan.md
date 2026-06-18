@@ -111,6 +111,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L004.
+Next ready task: L005.
 
-L000–L003 are complete. L004 adds public browsing and lifecycle views on top of anonymous creation.
+L000–L004 are complete. L005 adds anonymous interest submission and quorum-driven link unlock.
