@@ -70,6 +70,14 @@ test('creation page contains the exact anonymous form surface and timezone captu
   assert.match(html, /email stays private/i);
   assert.match(html, /For safety/);
   assert.match(html, /resolvedOptions\(\)\.timeZone/);
+  assert.match(html, /placeholder="A short, specific name for the cohort"/);
+  assert.match(html, /placeholder="Explain what the group will work on and what participants can expect"/);
+  assert.match(html, /placeholder="People needed to unlock the meeting link \(1–15\)"/);
+  assert.match(html, /querySelectorAll\('\[placeholder\]'\)/);
+  assert.match(html, /addEventListener\('focus'/);
+  assert.match(html, /field\.placeholder = ''/);
+  assert.match(html, /Date\.now\(\) \+ \(7 \* 24 \* 60 \* 60 \* 1000\)/);
+  assert.match(html, /firstMeetingInput\.min =/);
   assert.doesNotMatch(html, /creatorName|maximumParticipants|type="file"/);
 });
 
