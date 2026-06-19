@@ -188,7 +188,7 @@ export function createRequestHandler(options = {}) {
             minQuorum: 'Minimum quorum', meetingLink: 'Approved meeting link',
             creatorTimeZone: 'Time zone', firstMeetingLocal: 'First meeting date and time',
             meetingDurationMinutes: 'Duration in minutes', recurrence: 'Recurrence',
-            meetingCount: 'Meeting count',
+            meetingCount: 'Total number of meetings',
           };
           const message = error.field === 'firstMeetingAt'
             ? 'First meeting date and time must be more than seven days after submission.'

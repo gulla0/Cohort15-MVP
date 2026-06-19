@@ -79,6 +79,12 @@ test('creation page contains the exact anonymous form surface and timezone captu
   assert.match(html, /Date\.now\(\) \+ \(7 \* 24 \* 60 \* 60 \* 1000\)/);
   assert.match(html, /firstMeetingInput\.min =/);
   assert.match(html, /setInterval\(updateMeetingMinimum, 30 \* 1000\)/);
+  assert.match(html, /Total number of meetings/);
+  assert.match(html, /name="meetingCount" min="1" max="1" value="1" required readonly/);
+  assert.match(html, /One-time cohorts always have 1 total meeting\./);
+  assert.match(html, /recurrenceInput\.addEventListener\('change', syncMeetingCount\)/);
+  assert.match(html, /meetingCountInput\.min = recurring \? '2' : '1'/);
+  assert.match(html, /meetingCountInput\.max = recurring \? '52' : '1'/);
   assert.doesNotMatch(html, /creatorName|maximumParticipants|type="file"/);
 });
 
@@ -109,7 +115,8 @@ test('creation page explains validation errors and safely restores submitted val
   assert.match(html, /value="intermediate" selected/);
   assert.match(html, /name="firstMeetingLocal"[^>]+value="2026-06-20T18:30"[^>]+aria-invalid="true"/);
   assert.match(html, /value="weekly" selected/);
-  assert.match(html, /name="meetingCount"[^>]+value="4"/);
+  assert.match(html, /name="meetingCount" min="2" max="52" value="4"/);
+  assert.match(html, /One meeting every week; choose 2–52 total meetings\./);
   assert.doesNotMatch(html, /do-not-reflect/);
 });
 
