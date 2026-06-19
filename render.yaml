@@ -17,3 +17,13 @@ services:
         value: https://cohort15.com
       - key: COHORT15_LOFI_GA_MEASUREMENT_ID
         value: G-LF22TLDSBV
+      - key: COHORT15_LOFI_SUPABASE_URL
+        sync: false
+      - key: COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: COHORT15_LOFI_RESEND_API_KEY
+        sync: false
+      - key: COHORT15_LOFI_EMAIL_FROM
+        value: Cohort15 <updates@cohort15.com>
+      - key: COHORT15_LOFI_EMAIL_REPLY_TO
+        value: cohort15dotcom@gmail.com

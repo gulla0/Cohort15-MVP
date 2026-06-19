@@ -9,6 +9,7 @@ import { createLofiStore } from '../persistence/store.mjs';
 import {
   createLocalRepositories, RepositoryConflictError, RepositoryNotFoundError,
 } from '../persistence/repositories.mjs';
+import { createSupabasePostgresRepositories } from '../persistence/supabase-postgres.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../services/create-cohort.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
 import { createShowInterestService, InterestHoneypotSubmissionError } from '../services/show-interest.mjs';
@@ -21,6 +22,17 @@ import { renderHomePage } from '../ui/home.mjs';
 import { renderCohortDetailPage } from '../ui/cohorts.mjs';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+export function createRuntimeRepositories(config, options = {}) {
+  if (config.isProduction) {
+    return createSupabasePostgresRepositories({
+      url: config.supabaseUrl,
+      serviceRoleKey: config.supabaseServiceRoleKey,
+      fetchImpl: options.fetchImpl,
+    });
+  }
+  return createLocalRepositories({ store: createLofiStore() });
+}
 
 function send(res, status, contentType, body) {
   res.writeHead(status, {
@@ -59,7 +71,9 @@ async function readFormBody(req, maximumBytes = 64 * 1024) {
 
 export function createRequestHandler(options = {}) {
   const config = options.config ?? loadRuntimeConfig(options.env ?? process.env);
-  const repositories = options.repositories ?? createLocalRepositories({ store: createLofiStore() });
+  const repositories = options.repositories ?? createRuntimeRepositories(config, {
+    fetchImpl: options.fetchImpl,
+  });
   const creationLimiter = options.creationLimiter ?? createRollingWindowLimiter({
     limit: 5,
     windowMs: 60 * 60 * 1000,

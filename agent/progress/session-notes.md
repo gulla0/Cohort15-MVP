@@ -109,3 +109,13 @@ Focused interest/rate-limit tests and the full 39-test repository suite passed. 
 - Added fake-provider coverage for message composition, duplicate suppression, quorum fanout, private recipients, and failure isolation.
 
 Focused notification/create/interest tests and the full 44-test repository suite passed. L007 is next.
+
+## 2026-06-18 — L007 isolated production configuration
+
+- Completed the eight-variable lofi application contract plus Render host/port settings.
+- Made production fail fast when app, analytics, Supabase, Resend, sender, or reply-to configuration is absent or invalid.
+- Made production startup construct the isolated Supabase repositories and removed the possibility of silently using in-memory persistence.
+- Kept development and tests dependency-free with local persistence and safe non-secret defaults.
+- Aligned `.env.example`, Render Blueprint configuration, README guidance, and the indexed human launch runbook without adding credentials.
+
+Focused runtime configuration tests and the full 47-test repository suite passed. L008 is next.

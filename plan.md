@@ -111,6 +111,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L007.
+Next ready task: L008.
 
-L000–L006 are complete. L007 isolates production configuration and deployment behavior.
+L000–L007 are complete. L008 is the local privacy, abuse, and end-to-end launch gate.

@@ -12,7 +12,7 @@ L000 Clean lofi application shell (done)
                  └─ L004 Landing, listing, and lifecycle views (done)
                       └─ L005 Anonymous interest and quorum unlock (done)
                            └─ L006 Resend notifications (done)
-                                └─ L007 Isolated production config/deployment (not_started)
+                                └─ L007 Isolated production config/deployment (done)
                                      └─ L008 Privacy, abuse, and end-to-end verification (not_started)
                                           └─ L009 Human provider setup and deployment (not_started)
                                                └─ L010 Production smoke test (not_started)
@@ -78,6 +78,7 @@ L000 Clean lofi application shell (done)
 ### L007 — Isolate lofi production configuration and deployment
 
 - Depends on: L006
+- Status: done
 - Owns: runtime config, startup, `.env.example`, `render.yaml`, deployment docs/tests
 - Delivers: finalized lofi-only Supabase/Resend environment contract
 - Stops before: provider or DNS changes

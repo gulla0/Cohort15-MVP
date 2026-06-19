@@ -29,7 +29,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 
 | Area | Current files | Lofi direction |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Lofi Node server with home, creation, styles, health, and 404 behavior. |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | Lofi Node server; production fails fast on missing lofi settings and uses only the isolated Supabase repositories. |
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L001 implements the seven-day anonymous lofi domain, validation, recurrence, lifecycle, and public serialization. |
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L002 provides local repositories, a server-only PostgREST adapter, and isolated `cohort15_lofi_*` tables/RPC. |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L003 provides anonymous creation, private normalized email, timezone capture, request guards, honeypot, and five-success IP limiting. |
@@ -75,4 +75,5 @@ Git history contains the later production MVP. It must not override the lofi spe
 - L004 public browsing completed on 2026-06-18 with active-first filtering, detail views, local-time rendering, HTML escaping, and link privacy coverage.
 - L005 anonymous interest completed on 2026-06-18 with request guards, conflict/privacy handling, atomic quorum unlock, and ten-success IP limiting.
 - L006 transactional notifications completed on 2026-06-18 with fake-provider, idempotency, failure-isolation, and quorum-recipient coverage.
-- Next ready task: L007.
+- L007 isolated production configuration completed on 2026-06-18 with required lofi-only environment values, Supabase production selection, Render/env documentation, and no local production fallback.
+- Next ready task: L008.

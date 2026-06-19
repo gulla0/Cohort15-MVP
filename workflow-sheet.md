@@ -8,13 +8,13 @@ Notifications and Production Runtime
 
 L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
 
-Next ready task: L007.
+Next ready task: L008.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L007 | L006 is complete and every current input exists | Isolate lofi production configuration and deployment. |
+| L008 | L007 is complete and every current input exists | Run the local privacy, abuse, and end-to-end launch gate. |
 
 ## Known Parallelism
 

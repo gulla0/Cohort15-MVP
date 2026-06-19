@@ -6,7 +6,7 @@ Visitors will be able to create cohort requests or show interest with a mandator
 
 ## Setup Status
 
-The clean lofi shell, domain policy, isolated persistence layer, and anonymous cohort creation flow are complete. Public browsing and lifecycle views are next; no production-MVP runtime code remains in this branch.
+The complete local lofi product flow and isolated production configuration are implemented. Privacy, abuse, and end-to-end launch verification are next; no production-MVP runtime code remains in this branch.
 
 - Product rules: `docs/cohort15-lofi-mvp-spec.md`
 - Plan: `plan.md`
@@ -15,7 +15,7 @@ The clean lofi shell, domain policy, isolated persistence layer, and anonymous c
 - Current status: `agent/progress/task-status.md`
 - Provider setup: `docs/human-tasks/lofi-mvp-launch.md`
 
-Next ready task: L007.
+Next ready task: L008.
 
 The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
 
@@ -41,6 +41,11 @@ npm start
 ```
 
 The local server defaults to `http://localhost:3000`.
+
+Production starts only when all `COHORT15_LOFI_*` values in `.env.example` are
+set. It uses the separate lofi Supabase project and never falls back to local
+in-memory persistence. Do not reuse credentials from another Cohort15 service;
+provider setup belongs in `docs/human-tasks/lofi-mvp-launch.md`.
 
 ## Agent Workflow
 

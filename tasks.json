@@ -353,7 +353,7 @@
     {
       "id": "L007",
       "title": "Isolate lofi production configuration and deployment",
-      "status": "not_started",
+      "status": "done",
       "phase": "Notifications and Production Runtime",
       "dependencies": [
         "L006"
@@ -395,8 +395,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when local code/config is deployment-ready; provider dashboards remain a human task.",
-      "evidence": "Pending.",
-      "notes": "External setup is documented in docs/human-tasks/lofi-mvp-launch.md."
+      "evidence": "2026-06-18: production now requires the complete lofi-only environment contract, selects the isolated Supabase repositories without local fallback, and has aligned Render/env/runbook configuration; focused tests and npm run check passed.",
+      "notes": "Complete. External setup remains documented in docs/human-tasks/lofi-mvp-launch.md; L008 is next."
     },
     {
       "id": "L008",

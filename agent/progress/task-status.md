@@ -11,9 +11,9 @@
 | L004 | Build the landing page, listing, and lifecycle views | done | yes | Landing listing, filters, detail lifecycle views, local times, privacy, and safe link visibility verified. |
 | L005 | Build anonymous interest and quorum unlock | done | yes | Email-only interest, request guards, conflicts, atomic quorum unlock, privacy, and ten-success IP limit verified. |
 | L006 | Add Resend confirmation and quorum notifications | done | yes | Resend adapter, idempotent delivery records, confirmations, quorum fanout, sanitized failures, and fake-provider tests verified. |
-| L007 | Isolate lofi production configuration and deployment | not_started | yes | Pending |
-| L008 | Complete lofi privacy, abuse, and end-to-end verification | not_started | no | Pending |
+| L007 | Isolate lofi production configuration and deployment | done | yes | Production requires the complete lofi-only environment contract and isolated Supabase persistence; Render/env/runbook configuration and tests are aligned. |
+| L008 | Complete lofi privacy, abuse, and end-to-end verification | not_started | yes | Pending |
 | L009 | Create isolated provider resources and deploy | not_started | no | Pending |
 | L010 | Run production lofi smoke test | not_started | no | Pending |
 
-Next ready task: L007.
+Next ready task: L008.

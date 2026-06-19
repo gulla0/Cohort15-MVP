@@ -63,6 +63,9 @@ Do not select an existing Cohort15 Supabase project or Render service. The lofi 
    - `COHORT15_LOFI_EMAIL_REPLY_TO=cohort15dotcom@gmail.com`
    - `COHORT15_LOFI_GA_MEASUREMENT_ID=G-LF22TLDSBV`
 5. Do not add existing auth, Stripe, admin, social, upload, session, or production-MVP Supabase variables.
+6. Treat a startup failure naming a missing `COHORT15_LOFI_*` variable as a
+   configuration error. Production intentionally has no local/demo persistence
+   fallback.
 
 ### 3. Configure Resend
 

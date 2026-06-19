@@ -106,3 +106,13 @@ Verification: `node --test tests/show-interest.test.mjs tests/rate-limit.test.mj
 - Added fake-provider adapter, idempotency, fanout, privacy, and failure-isolation tests.
 
 Verification: focused notification/create/interest tests passed with 14 tests; full `npm run check` passed with 44 tests.
+
+## 2026-06-18 — L007 isolated production configuration and deployment
+
+- Added fail-fast production validation for the complete lofi-only app, analytics, Supabase, Resend, sender, and reply-to environment contract.
+- Wired production startup to the isolated Supabase PostgREST repositories with no in-memory fallback.
+- Preserved dependency-free local development and Render host/port binding with `/health` readiness.
+- Finalized `.env.example`, `render.yaml`, README guidance, and the human launch runbook while explicitly forbidding production-MVP credential reuse.
+- Added focused coverage for missing production values, fixed email policy, legacy-variable absence, and production Supabase selection.
+
+Verification: `node --test tests/runtime-config.test.mjs` passed with 6 tests; full `npm run check` passed with 47 tests.
