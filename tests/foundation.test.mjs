@@ -52,6 +52,9 @@ test('shell exposes only home, styles, health, and 404 routes', async () => {
   assert.match(styles.body, /\.cohort-form input::placeholder/);
   assert.match(styles.body, /font-size: 0\.72rem/);
   assert.match(styles.body, /color: #8b948f/);
+  assert.match(styles.body, /align-content: start/);
+  assert.match(styles.body, /\.cohort-form input\[readonly\]/);
+  assert.match(styles.body, /\.recurrence-summary/);
 
   const health = await invoke(handler, { url: '/health' });
   assert.equal(health.status, 200);

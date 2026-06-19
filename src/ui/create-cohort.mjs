@@ -19,13 +19,23 @@ function fieldState(error, field) {
   return error?.field === field ? ' aria-invalid="true" aria-describedby="form-error"' : '';
 }
 
-function meetingCountNote(recurrence) {
+function sessionCountNote(recurrence) {
+  return recurrence === 'none'
+    ? 'Fixed at 1 session for a one-time group.'
+    : 'Choose between 2 and 52 sessions.';
+}
+
+function recurrenceSummary(recurrence, countValue) {
+  if (recurrence === 'none') return 'This group will meet once.';
+  const count = Math.max(2, Number(countValue) || 2);
   const cadence = {
-    daily: 'day', weekly: 'week', biweekly: 'two weeks', monthly: 'month',
+    daily: { phrase: 'once per day', span: count, unit: 'day' },
+    weekly: { phrase: 'once per week', span: count, unit: 'week' },
+    biweekly: { phrase: 'once every two weeks', span: count * 2, unit: 'week' },
+    monthly: { phrase: 'once per month', span: count, unit: 'month' },
   }[recurrence];
-  return cadence
-    ? `One meeting every ${cadence}; choose 2–52 total meetings.`
-    : 'One-time cohorts always have 1 total meeting.';
+  const unit = cadence.span === 1 ? cadence.unit : `${cadence.unit}s`;
+  return `This group will meet ${cadence.phrase} for ${cadence.span} ${unit}.`;
 }
 
 export function renderCreateCohortPage({ error, values = {} } = {}) {
@@ -64,7 +74,8 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
         <label>First meeting date and time <input type="datetime-local" name="firstMeetingLocal" value="${value('firstMeetingLocal')}" required${fieldState(error, 'firstMeetingLocal')}></label>
         <label>Duration in minutes <input type="number" name="meetingDurationMinutes" value="${value('meetingDurationMinutes')}" min="15" max="480" required placeholder="For example, 60"${fieldState(error, 'meetingDurationMinutes')}></label>
         <label>Recurrence <select name="recurrence" required${fieldState(error, 'recurrence')}>${selectedOptions(RECURRENCES, recurrence)}</select></label>
-        <label>Total number of meetings <input type="number" name="meetingCount" min="${isRecurring ? '2' : '1'}" max="${isRecurring ? '52' : '1'}" value="${value('meetingCount', isRecurring ? '2' : '1')}" required${isRecurring ? '' : ' readonly'}${fieldState(error, 'meetingCount')}><span class="control-note" data-meeting-count-note>${meetingCountNote(recurrence)}</span></label>
+        <label>Total number of sessions <input type="number" name="meetingCount" min="${isRecurring ? '2' : '1'}" max="${isRecurring ? '52' : '1'}" value="${value('meetingCount', isRecurring ? '2' : '1')}" required${isRecurring ? '' : ' readonly'}${fieldState(error, 'meetingCount')}><span class="control-note" data-session-count-note>${sessionCountNote(recurrence)}</span></label>
+        <p class="recurrence-summary full" data-recurrence-summary aria-live="polite">${recurrenceSummary(recurrence, values.meetingCount)}</p>
         <button class="button-link full" type="submit">Create cohort</button>
       </form>
     </main>
@@ -101,9 +112,25 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
 
       const recurrenceInput = document.querySelector('[name="recurrence"]');
       const meetingCountInput = document.querySelector('[name="meetingCount"]');
-      const meetingCountNote = document.querySelector('[data-meeting-count-note]');
-      const cadenceLabels = {
-        daily: 'day', weekly: 'week', biweekly: 'two weeks', monthly: 'month'
+      const sessionCountNote = document.querySelector('[data-session-count-note]');
+      const recurrenceSummary = document.querySelector('[data-recurrence-summary]');
+      const cadenceDetails = {
+        daily: { phrase: 'once per day', multiplier: 1, unit: 'day' },
+        weekly: { phrase: 'once per week', multiplier: 1, unit: 'week' },
+        biweekly: { phrase: 'once every two weeks', multiplier: 2, unit: 'week' },
+        monthly: { phrase: 'once per month', multiplier: 1, unit: 'month' }
+      };
+      const updateRecurrenceSummary = () => {
+        if (recurrenceInput.value === 'none') {
+          recurrenceSummary.textContent = 'This group will meet once.';
+          return;
+        }
+        const count = Math.max(2, Number(meetingCountInput.value) || 2);
+        const cadence = cadenceDetails[recurrenceInput.value];
+        const span = count * cadence.multiplier;
+        const unit = span === 1 ? cadence.unit : cadence.unit + 's';
+        recurrenceSummary.textContent = 'This group will meet ' + cadence.phrase
+          + ' for ' + span + ' ' + unit + '.';
       };
       const syncMeetingCount = () => {
         const recurring = recurrenceInput.value !== 'none';
@@ -112,11 +139,13 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
         meetingCountInput.max = recurring ? '52' : '1';
         if (!recurring) meetingCountInput.value = '1';
         if (recurring && Number(meetingCountInput.value) < 2) meetingCountInput.value = '2';
-        meetingCountNote.textContent = recurring
-          ? 'One meeting every ' + cadenceLabels[recurrenceInput.value] + '; choose 2–52 total meetings.'
-          : 'One-time cohorts always have 1 total meeting.';
+        sessionCountNote.textContent = recurring
+          ? 'Choose between 2 and 52 sessions.'
+          : 'Fixed at 1 session for a one-time group.';
+        updateRecurrenceSummary();
       };
       recurrenceInput.addEventListener('change', syncMeetingCount);
+      meetingCountInput.addEventListener('input', updateRecurrenceSummary);
       syncMeetingCount();
     </script>
   </body>
