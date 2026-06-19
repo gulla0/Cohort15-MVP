@@ -56,7 +56,7 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
       <p class="eyebrow">Anonymous cohort request</p>
       <h1>Create a focused cohort.</h1>
       <p class="lede">Collect interest for seven days. Your email stays private and is used only for updates about this cohort.</p>
-      ${error ? `<div class="form-error" id="form-error" role="alert"><strong>${escapeHtml(error.message)}</strong><br>Your entries have been kept so you can correct this field and resubmit.</div>` : ''}
+      ${error ? `<div class="form-error" id="form-error" role="alert"><strong>${escapeHtml(error.message)}</strong>${error.preserveValues === false ? '' : '<br>Your entries have been kept so you can correct the submission and resubmit.'}</div>` : ''}
       <form class="cohort-form" method="post" action="/cohorts">
         <div class="honeypot" aria-hidden="true"><label>Website <input name="website" autocomplete="off" tabindex="-1"></label></div>
         <label>Creator email <input type="email" name="creatorEmail" value="${value('creatorEmail')}" maxlength="254" required autocomplete="email" placeholder="you@example.com — kept private and used for cohort updates"${fieldState(error, 'creatorEmail')}></label>

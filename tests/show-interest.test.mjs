@@ -119,21 +119,39 @@ test('POST interest enforces policy, conflicts safely, and redirects without pri
   assert.equal((await post({ email: 'person@example.com' }, {
     'content-type': 'application/x-www-form-urlencoded', origin: 'https://evil.example',
   })).status, 403);
-  assert.equal((await post({ email: 'person@example.com' }, {
+  const oversized = await post({ email: 'person@example.com' }, {
     'content-type': 'application/x-www-form-urlencoded', 'content-length': '65537',
-  })).status, 413);
+  });
+  assert.equal(oversized.status, 413);
+  assert.match(oversized.body, /submission is too large/i);
+  assert.doesNotMatch(oversized.body, /person@example\.com/i);
+  const honeypot = await post({ email: 'person@example.com', website: 'bot' });
+  assert.equal(honeypot.status, 400);
+  assert.match(honeypot.body, /check your submission/i);
+  assert.doesNotMatch(honeypot.body, /person@example\.com|website.*bot/i);
   const invalid = await post({ email: 'not-an-email' });
   assert.equal(invalid.status, 400);
+  assert.match(invalid.body, /Email must be a valid email address\./);
+  assert.match(invalid.body, /name="email"[^>]+aria-invalid="true"/);
   assert.doesNotMatch(invalid.body, /not-an-email/);
-  assert.equal((await post({ email: 'creator@example.com' })).status, 409);
+  const creator = await post({ email: 'creator@example.com' });
+  assert.equal(creator.status, 409);
+  assert.match(creator.body, /creator email cannot count/i);
+  assert.doesNotMatch(creator.body, /creator@example\.com/i);
 
   const accepted = await post({ email: ' Person@Example.COM ' });
   assert.equal(accepted.status, 303);
   assert.equal(accepted.headers.location, '/cohorts/cohort-1');
   assert.doesNotMatch(accepted.headers.location, /person|example/i);
-  assert.equal((await post({ email: 'person@example.com' })).status, 409);
+  const duplicate = await post({ email: 'person@example.com' });
+  assert.equal(duplicate.status, 409);
+  assert.match(duplicate.body, /already been counted/i);
+  assert.doesNotMatch(duplicate.body, /person@example\.com/i);
   assert.equal((await post({ email: 'second@example.com' })).status, 303);
-  assert.equal((await post({ email: 'third@example.com' })).status, 409);
+  const alreadyMet = await post({ email: 'third@example.com' });
+  assert.equal(alreadyMet.status, 409);
+  assert.match(alreadyMet.body, /already reached quorum/i);
+  assert.doesNotMatch(alreadyMet.body, /name="email"|third@example\.com/i);
   assert.equal(store.listInterestsByCohortId('cohort-1').length, 2);
 
   const detail = await invoke(handler, { url: '/cohorts/cohort-1' });
@@ -148,6 +166,34 @@ test('POST interest enforces policy, conflicts safely, and redirects without pri
   })).status, 404);
 });
 
+test('expired and unexpected interest failures render safe cohort errors', async () => {
+  const expiredFixture = await fixture({ createdAt: new Date('2026-06-01T12:00:00.000Z') });
+  const expiredHandler = createRequestHandler({ config, repositories: expiredFixture.repositories });
+  const expired = await invoke(expiredHandler, {
+    url: '/cohorts/cohort-1/interests', method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ email: 'late@example.com' }).toString(),
+  });
+  assert.equal(expired.status, 409);
+  assert.match(expired.body, /interest window has closed/i);
+  assert.doesNotMatch(expired.body, /name="email"|late@example\.com/i);
+
+  const { repositories } = await fixture();
+  const failedHandler = createRequestHandler({
+    config,
+    repositories,
+    showInterest: { async show() { throw new Error('sensitive database detail'); } },
+  });
+  const failure = await invoke(failedHandler, {
+    url: '/cohorts/cohort-1/interests', method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ email: 'person@example.com' }).toString(),
+  });
+  assert.equal(failure.status, 500);
+  assert.match(failure.body, /could not record your interest right now/i);
+  assert.doesNotMatch(failure.body, /person@example\.com|sensitive database detail/i);
+});
+
 test('eleventh successful interest from one IP returns 429 with Retry-After', async () => {
   const { store, repositories } = await fixture({ minQuorum: 15 });
   const handler = createRequestHandler({ config, repositories });
@@ -160,5 +206,7 @@ test('eleventh successful interest from one IP returns 429 with Retry-After', as
   const rejected = await request(10);
   assert.equal(rejected.status, 429);
   assert.ok(Number(rejected.headers['retry-after']) >= 1);
+  assert.match(rejected.body, /too many interests/i);
+  assert.doesNotMatch(rejected.body, /person-10@example\.com/i);
   assert.equal(store.listInterestsByCohortId('cohort-1').length, 10);
 });

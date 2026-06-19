@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createLofiStore } from '../src/persistence/store.mjs';
-import { createLocalRepositories } from '../src/persistence/repositories.mjs';
+import {
+  createLocalRepositories, RepositoryConflictError,
+} from '../src/persistence/repositories.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../src/services/create-cohort.mjs';
 import { createRollingWindowLimiter } from '../src/services/rate-limit.mjs';
@@ -158,9 +160,11 @@ test('POST /cohorts enforces request policy and redirects without private data',
   assert.equal((await invoke(handler, {
     url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: 'https://evil.example' }, body: encoded,
   })).status, 403);
-  assert.equal((await invoke(handler, {
+  const oversized = await invoke(handler, {
     url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', 'content-length': '65537' }, body: encoded,
-  })).status, 413);
+  });
+  assert.equal(oversized.status, 413);
+  assert.match(oversized.body, /submission is too large/i);
 
   const response = await invoke(handler, {
     url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded; charset=utf-8', origin: config.appUrl }, body: encoded,
@@ -186,6 +190,32 @@ test('POST /cohorts enforces request policy and redirects without private data',
   assert.equal(store.listCohorts().length, 1);
 });
 
+test('creation conflicts and unexpected failures render safe form errors instead of escaping', async () => {
+  const repositories = createLocalRepositories({ store: createLofiStore() });
+  const encoded = new URLSearchParams(validSubmission({ title: 'Keep this safe title' })).toString();
+  const request = (cohortCreator) => invoke(createRequestHandler({
+    config, repositories, cohortCreator,
+  }), {
+    url: '/cohorts', method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: encoded,
+  });
+
+  const conflict = await request({
+    async create() { throw new RepositoryConflictError('duplicate_cohort'); },
+  });
+  assert.equal(conflict.status, 409);
+  assert.match(conflict.body, /temporary conflict/i);
+  assert.match(conflict.body, /value="Keep this safe title"/);
+
+  const failure = await request({
+    async create() { throw new Error('sensitive backend detail'); },
+  });
+  assert.equal(failure.status, 500);
+  assert.match(failure.body, /could not create the cohort right now/i);
+  assert.match(failure.body, /value="Keep this safe title"/);
+  assert.doesNotMatch(failure.body, /sensitive backend detail/i);
+});
+
 test('sixth successful creation returns 429 with Retry-After', async () => {
   const store = createLofiStore();
   let id = 0;
@@ -199,5 +229,7 @@ test('sixth successful creation returns 429 with Retry-After', async () => {
   const rejected = await request();
   assert.equal(rejected.status, 429);
   assert.ok(Number(rejected.headers['retry-after']) >= 1);
+  assert.match(rejected.body, /too many cohorts/i);
+  assert.match(rejected.body, /value="Build a tiny compiler"/);
   assert.equal(store.listCohorts().length, 5);
 });

@@ -34,10 +34,11 @@ export function createRuntimeRepositories(config, options = {}) {
   return createLocalRepositories({ store: createLofiStore() });
 }
 
-function send(res, status, contentType, body) {
+function send(res, status, contentType, body, headers = {}) {
   res.writeHead(status, {
     'content-type': contentType,
-    'x-content-type-options': 'nosniff'
+    'x-content-type-options': 'nosniff',
+    ...headers,
   });
   res.end(body);
 }
@@ -69,6 +70,32 @@ async function readFormBody(req, maximumBytes = 64 * 1024) {
   return Object.fromEntries(new URLSearchParams(Buffer.concat(chunks).toString('utf8')));
 }
 
+function createValidationMessage(error) {
+  const field = error.field === 'firstMeetingAt' ? 'firstMeetingLocal' : error.field;
+  const fieldLabels = {
+    creatorEmail: 'Creator email', title: 'Title', description: 'Description',
+    category: 'Category', topic: 'Topic', targetAudience: 'Target audience',
+    targetSkillLevel: 'Target skill level', additionalDetails: 'Additional details',
+    minQuorum: 'Minimum quorum', meetingLink: 'Approved meeting link',
+    creatorTimeZone: 'Time zone', firstMeetingLocal: 'First meeting date and time',
+    meetingDurationMinutes: 'Duration in minutes', recurrence: 'Recurrence',
+    meetingCount: 'Total number of sessions',
+  };
+  const message = error.field === 'firstMeetingAt'
+    ? 'First meeting date and time must be more than seven days after submission.'
+    : `${fieldLabels[field] ?? 'Submission'} ${error.rule}.`;
+  return { field, message };
+}
+
+function interestConflictMessage(code) {
+  return {
+    creator_email: 'The creator email cannot count toward this cohort’s quorum.',
+    duplicate_email: 'This email has already been counted toward this cohort’s quorum.',
+    expired: 'This cohort’s interest window has closed.',
+    already_met: 'This cohort has already reached quorum and is no longer accepting interest.',
+  }[code] ?? 'Your interest could not be recorded because the cohort’s state changed. Please review the cohort and try again.';
+}
+
 export function createRequestHandler(options = {}) {
   const config = options.config ?? loadRuntimeConfig(options.env ?? process.env);
   const repositories = options.repositories ?? createRuntimeRepositories(config, {
@@ -93,6 +120,19 @@ export function createRequestHandler(options = {}) {
   const showInterest = options.showInterest ?? createShowInterestService({
     repositories, limiter: interestLimiter, notifications,
   });
+
+  async function sendInterestError(res, cohortId, status, error, headers = {}) {
+    try {
+      const cohort = await eventBrowsing.getById(cohortId);
+      send(res, status, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, { error }), headers);
+    } catch (readError) {
+      if (readError instanceof RepositoryNotFoundError) {
+        send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+      } else {
+        send(res, 500, 'text/plain; charset=utf-8', 'We could not load this cohort. Please try again.');
+      }
+    }
+  }
 
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -169,40 +209,50 @@ export function createRequestHandler(options = {}) {
         redirect(res, 303, `/cohorts/${encodeURIComponent(cohort.id)}`);
       } catch (error) {
         if (error?.code === 'body_too_large') {
-          send(res, 413, 'text/plain; charset=utf-8', 'Request body too large');
+          send(res, 413, 'text/html; charset=utf-8', renderCreateCohortPage({
+            error: {
+              field: '',
+              message: 'This submission is too large. Shorten the entered text and try again.',
+              preserveValues: false,
+            },
+          }));
         } else if (error instanceof RateLimitExceededError) {
-          res.writeHead(429, {
-            'content-type': 'text/plain; charset=utf-8',
+          send(res, 429, 'text/html; charset=utf-8', renderCreateCohortPage({
+            error: {
+              field: '',
+              message: 'Too many cohorts have been created from this connection. Please wait and try again.',
+            },
+            values: input,
+          }), {
             'retry-after': String(error.retryAfterSeconds),
-            'x-content-type-options': 'nosniff',
           });
-          res.end('Too many requests');
         } else if (error instanceof RepositoryConflictError) {
-          send(res, 409, 'text/plain; charset=utf-8', 'Conflict');
+          send(res, 409, 'text/html; charset=utf-8', renderCreateCohortPage({
+            error: {
+              field: '',
+              message: 'The cohort could not be created because of a temporary conflict. Please resubmit.',
+            },
+            values: input,
+          }));
         } else if (error instanceof DomainValidationError) {
-          const field = error.field === 'firstMeetingAt' ? 'firstMeetingLocal' : error.field;
-          const fieldLabels = {
-            creatorEmail: 'Creator email', title: 'Title', description: 'Description',
-            category: 'Category', topic: 'Topic', targetAudience: 'Target audience',
-            targetSkillLevel: 'Target skill level', additionalDetails: 'Additional details',
-            minQuorum: 'Minimum quorum', meetingLink: 'Approved meeting link',
-            creatorTimeZone: 'Time zone', firstMeetingLocal: 'First meeting date and time',
-            meetingDurationMinutes: 'Duration in minutes', recurrence: 'Recurrence',
-            meetingCount: 'Total number of sessions',
-          };
-          const message = error.field === 'firstMeetingAt'
-            ? 'First meeting date and time must be more than seven days after submission.'
-            : `${fieldLabels[field] ?? 'Submission'} ${error.rule}.`;
           send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({
-            error: { field, message },
+            error: createValidationMessage(error),
             values: input,
           }));
         } else if (error instanceof HoneypotSubmissionError) {
           send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({
-            error: { field: '', message: 'Please check your submission and try again.' },
+            error: {
+              field: '', message: 'Please check your submission and try again.', preserveValues: false,
+            },
           }));
         } else {
-          throw error;
+          send(res, 500, 'text/html; charset=utf-8', renderCreateCohortPage({
+            error: {
+              field: '',
+              message: 'We could not create the cohort right now. Your entries are safe to resubmit.',
+            },
+            values: input,
+          }));
         }
       }
       return;
@@ -231,28 +281,36 @@ export function createRequestHandler(options = {}) {
         redirect(res, 303, `/cohorts/${encodeURIComponent(cohortId)}`);
       } catch (error) {
         if (error?.code === 'body_too_large') {
-          send(res, 413, 'text/plain; charset=utf-8', 'Request body too large');
-        } else if (error instanceof RateLimitExceededError) {
-          res.writeHead(429, {
-            'content-type': 'text/plain; charset=utf-8',
-            'retry-after': String(error.retryAfterSeconds),
-            'x-content-type-options': 'nosniff',
+          await sendInterestError(res, cohortId, 413, {
+            field: '', message: 'This submission is too large. Enter only your email and try again.',
           });
-          res.end('Too many requests');
+        } else if (error instanceof RateLimitExceededError) {
+          await sendInterestError(res, cohortId, 429, {
+            field: '',
+            message: 'Too many interests have been submitted from this connection. Please wait and try again.',
+          }, {
+            'retry-after': String(error.retryAfterSeconds),
+          });
         } else if (error instanceof RepositoryNotFoundError) {
           send(res, 404, 'text/plain; charset=utf-8', 'Not found');
         } else if (error instanceof RepositoryConflictError) {
-          send(res, 409, 'text/plain; charset=utf-8', 'Conflict');
+          await sendInterestError(res, cohortId, 409, {
+            field: 'email', message: interestConflictMessage(error.code),
+          });
         } else if (error instanceof DomainValidationError || error instanceof InterestHoneypotSubmissionError) {
-          try {
-            const cohort = await eventBrowsing.getById(cohortId);
-            send(res, 400, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, { error: true }));
-          } catch (readError) {
-            if (readError instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
-            else throw readError;
-          }
+          const validationError = error instanceof DomainValidationError
+            ? {
+              field: error.field === 'email' ? 'email' : '',
+              message: error.field === 'email'
+                ? `Email ${error.rule}.`
+                : 'Please check your submission and try again.',
+            }
+            : { field: '', message: 'Please check your submission and try again.' };
+          await sendInterestError(res, cohortId, 400, validationError);
         } else {
-          throw error;
+          await sendInterestError(res, cohortId, 500, {
+            field: '', message: 'We could not record your interest right now. Please try again.',
+          });
         }
       }
       return;
