@@ -226,7 +226,7 @@ export function createSupabasePostgresRepositories({
   serviceRoleKey,
   fetchImpl = globalThis.fetch,
   now = () => new Date(),
-  randomUUID = crypto.randomUUID,
+  randomUUID = () => globalThis.crypto.randomUUID(),
 } = {}) {
   const client = createPostgrestClient({ url, serviceRoleKey, fetchImpl });
 

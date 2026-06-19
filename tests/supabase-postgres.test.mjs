@@ -100,6 +100,30 @@ test('Supabase cohort inserts use only service-role headers and isolated lofi ta
   assert.equal(calls[0].body.id, '66203c07-eaa9-4e7e-8ce0-7963f569fbd3');
 });
 
+test('Supabase repositories call the default Web Crypto UUID generator with its receiver', async () => {
+  let insertedRow;
+  const fetchImpl = async (_url, init = {}) => {
+    insertedRow = JSON.parse(init.body);
+    return {
+      ok: true,
+      status: 200,
+      async text() {
+        return JSON.stringify([insertedRow]);
+      },
+    };
+  };
+  const repositories = createSupabasePostgresRepositories({
+    url: SUPABASE_URL,
+    serviceRoleKey: SERVICE_ROLE_KEY,
+    fetchImpl,
+  });
+
+  const cohort = await repositories.createCohort(validCohortInput(), { now: CREATED_AT });
+
+  assert.match(cohort.id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u);
+  assert.equal(insertedRow.id, cohort.id);
+});
+
 test('Supabase interest acceptance uses the isolated RPC and maps repository conflicts', async () => {
   const { fetchImpl, calls } = createFetchStub(
     {
