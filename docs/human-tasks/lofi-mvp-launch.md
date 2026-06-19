@@ -36,7 +36,10 @@ Do not select an existing Cohort15 Supabase project or Render service. The lofi 
 1. Open https://supabase.com/dashboard.
 2. Select the intended organization, then choose `New project`.
 3. Name it `cohort15-lofi-mvp`, choose the appropriate region, and generate a new database password. Store that password in your password manager; do not paste it into chat.
-4. After L002 creates `/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260618000000_cohort15_lofi.sql`, open `SQL Editor` -> `New query`, paste that file's SQL, and run it.
+4. Open `SQL Editor` -> `New query`, then run these migration files in filename order:
+   - `/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260618000000_cohort15_lofi.sql`
+   - `/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260618000001_fix_cohort15_lofi_accept_interest.sql`
+   If the first migration was already applied, run only the second migration; it safely replaces the interest function.
 5. In `Table Editor`, verify that every app table begins with `cohort15_lofi_`. Stop if any setup instruction asks you to modify existing `cohort15_users`, `cohort15_events`, credit, purchase, or social tables.
 6. Open `Project Settings` -> `API` and copy the new project's URL and server secret directly into the new Render service variables listed below.
 

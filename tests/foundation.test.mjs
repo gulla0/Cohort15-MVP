@@ -49,6 +49,9 @@ test('shell exposes only home, styles, health, and 404 routes', async () => {
   const styles = await invoke(handler, { url: '/assets/styles.css' });
   assert.equal(styles.status, 200);
   assert.match(styles.headers['content-type'], /text\/css/);
+  assert.match(styles.body, /\.cohort-form input::placeholder/);
+  assert.match(styles.body, /font-size: 0\.72rem/);
+  assert.match(styles.body, /color: #8b948f/);
 
   const health = await invoke(handler, { url: '/health' });
   assert.equal(health.status, 200);

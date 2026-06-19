@@ -249,6 +249,14 @@ footer {
   font: inherit;
 }
 
+.cohort-form input::placeholder,
+.cohort-form textarea::placeholder {
+  color: #8b948f;
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 1;
+}
+
 .cohort-form textarea { min-height: 110px; resize: vertical; }
 .cohort-form .full, .field-note.full { grid-column: 1 / -1; }
 .field-note { margin: -8px 0 0; color: var(--muted); font-size: 0.9rem; }

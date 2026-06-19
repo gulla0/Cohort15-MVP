@@ -323,3 +323,16 @@ test('migration is isolated to cohort15_lofi objects with RLS and no browser pol
     false,
   );
 });
+
+test('interest RPC correction qualifies table columns that conflict with output names', async () => {
+  const migration = await readFile(
+    new URL('../supabase/migrations/20260618000001_fix_cohort15_lofi_accept_interest.sql', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(migration, /update public\.cohort15_lofi_cohorts as cohorts/u);
+  assert.match(migration, /and cohorts\.quorum_met_at is null/u);
+  assert.match(migration, /v_interest_count >= cohorts\.min_quorum/u);
+  assert.match(migration, /returning cohorts\.quorum_met_at into v_quorum_met_at/u);
+  assert.match(migration, /select cohorts\.quorum_met_at/u);
+});
