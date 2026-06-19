@@ -54,6 +54,8 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.match(home.body, /G-LF22TLDSBV/);
   assert.match(home.body, /aria-current="page">Active/);
   assert.match(home.body, /data-local-time/);
+  assert.match(home.body, /timeZoneName: 'short'/);
+  assert.doesNotMatch(home.body, /dateStyle|timeStyle/);
   assert.match(home.body, /3 more needed/);
   assert.doesNotMatch(home.body, /private@example\.com|meet\.google\.com/);
   assert.ok(home.body.indexOf('Newer active') < home.body.indexOf('Older active'));

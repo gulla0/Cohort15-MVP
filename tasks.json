@@ -401,7 +401,7 @@
     {
       "id": "L008",
       "title": "Complete lofi privacy, abuse, and end-to-end verification",
-      "status": "not_started",
+      "status": "done",
       "phase": "Launch Verification",
       "dependencies": [
         "L007"
@@ -436,8 +436,8 @@
         "Run a local browser smoke test for primary mobile and desktop flows"
       ],
       "stop_condition": "Stop when local launch verification passes and only external setup remains.",
-      "evidence": "Pending.",
-      "notes": "This is the local launch gate; legacy product surfaces were removed in L000 and must remain absent."
+      "evidence": "2026-06-18: integrated create/browse/interest/quorum/lifecycle verification, privacy and abuse launch gates, absent deferred-route checks, and mobile/desktop browser smoke verification passed; browser-local time formatter launch defect fixed.",
+      "notes": "Complete. Local launch gate passed; only external provider setup remains."
     },
     {
       "id": "L009",

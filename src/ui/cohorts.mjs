@@ -48,7 +48,10 @@ export function renderCohortCard(cohort) {
 export function localTimeScript() {
   return `<script>
     (() => {
-      const formatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZoneName: 'short' });
+      const formatter = new Intl.DateTimeFormat(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+      });
       document.querySelectorAll('[data-local-time]').forEach((element) => {
         const start = new Date(element.dateTime);
         const endValue = element.dataset.end;

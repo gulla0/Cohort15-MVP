@@ -13,7 +13,7 @@ L000 Clean lofi application shell (done)
                       └─ L005 Anonymous interest and quorum unlock (done)
                            └─ L006 Resend notifications (done)
                                 └─ L007 Isolated production config/deployment (done)
-                                     └─ L008 Privacy, abuse, and end-to-end verification (not_started)
+                                     └─ L008 Privacy, abuse, and end-to-end verification (done)
                                           └─ L009 Human provider setup and deployment (not_started)
                                                └─ L010 Production smoke test (not_started)
 ```
@@ -86,6 +86,7 @@ L000 Clean lofi application shell (done)
 ### L008 — Complete lofi privacy, abuse, and end-to-end verification
 
 - Depends on: L007
+- Status: done
 - Owns: integration tests, privacy/abuse/concurrency coverage, launch-blocking fixes, local smoke verification
 - Delivers: local launch gate with `npm run check` passing
 - Stops before: external deployment

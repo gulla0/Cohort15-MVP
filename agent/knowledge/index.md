@@ -36,7 +36,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 | Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | L004 provides landing-page listings, filters, detail lifecycle views, browser-local times, public quorum progress, and safely gated meeting links. |
 | Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L005 provides normalized email-only interest, guarded mutations, ten-success IP limiting, and atomic public link unlock. |
 | Email | `src/email/resend.mjs`, `src/services/notifications.mjs` | Resend adapter and idempotent creator, participant, and per-recipient quorum notification orchestration. |
-| Tests | `tests/*.test.mjs`, Node test runner | Rewrite incrementally per task; L008 owns full lofi integration, privacy, abuse, concurrency, and launch verification. |
+| Tests | `tests/*.test.mjs`, Node test runner | Full lofi integration, privacy, abuse, concurrency, notification-idempotency, and launch verification are covered. |
 
 ## Locked Implementation Policy
 
@@ -76,4 +76,5 @@ Git history contains the later production MVP. It must not override the lofi spe
 - L005 anonymous interest completed on 2026-06-18 with request guards, conflict/privacy handling, atomic quorum unlock, and ten-success IP limiting.
 - L006 transactional notifications completed on 2026-06-18 with fake-provider, idempotency, failure-isolation, and quorum-recipient coverage.
 - L007 isolated production configuration completed on 2026-06-18 with required lofi-only environment values, Supabase production selection, Render/env documentation, and no local production fallback.
-- Next ready task: L008.
+- L008 local launch verification completed on 2026-06-18 with integrated lifecycle, privacy, abuse, absent-route, responsive-browser, and console-error coverage; the browser-local formatter uses explicit date/time fields because `dateStyle`/`timeStyle` cannot be combined with `timeZoneName`.
+- Next ready task: L009.

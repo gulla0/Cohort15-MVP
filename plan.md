@@ -111,6 +111,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L008.
+Next ready task: L009.
 
-L000–L007 are complete. L008 is the local privacy, abuse, and end-to-end launch gate.
+L000–L008 are complete. L009 is the human-operated isolated provider setup and deployment task.

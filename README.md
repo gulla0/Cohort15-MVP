@@ -6,7 +6,7 @@ Visitors will be able to create cohort requests or show interest with a mandator
 
 ## Setup Status
 
-The complete local lofi product flow and isolated production configuration are implemented. Privacy, abuse, and end-to-end launch verification are next; no production-MVP runtime code remains in this branch.
+The complete local lofi product flow, isolated production configuration, and privacy/abuse/end-to-end launch gate are implemented and verified. External provider setup and deployment are next; no production-MVP runtime code remains in this branch.
 
 - Product rules: `docs/cohort15-lofi-mvp-spec.md`
 - Plan: `plan.md`
@@ -15,7 +15,7 @@ The complete local lofi product flow and isolated production configuration are i
 - Current status: `agent/progress/task-status.md`
 - Provider setup: `docs/human-tasks/lofi-mvp-launch.md`
 
-Next ready task: L008.
+Next ready task: L009.
 
 The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
 

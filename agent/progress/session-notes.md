@@ -119,3 +119,13 @@ Focused notification/create/interest tests and the full 44-test repository suite
 - Aligned `.env.example`, Render Blueprint configuration, README guidance, and the indexed human launch runbook without adding credentials.
 
 Focused runtime configuration tests and the full 47-test repository suite passed. L008 is next.
+
+## 2026-06-18 — L008 privacy, abuse, and end-to-end launch gate
+
+- Added an integrated anonymous flow covering creation, listing filters, private interest, duplicate and creator rejection, quorum unlock, seven-day expiry, and final-meeting link hiding.
+- Added consolidated privacy and abuse checks for both honeypots, request guards, public responses, logs, secrets, pre-quorum links, and deferred product routes.
+- Verified existing focused coverage for both IP limits, concurrency, body/media/origin boundaries, and notification idempotency.
+- Ran responsive browser smoke checks at 1280x720 and 390x844 with no horizontal overflow.
+- Found and fixed a browser-local time formatter exception by replacing the invalid `dateStyle`/`timeStyle` plus `timeZoneName` combination with explicit date/time fields.
+
+Focused launch tests and browser verification passed. L009 is next and requires the indexed human provider setup runbook.

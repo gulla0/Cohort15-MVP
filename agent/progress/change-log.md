@@ -116,3 +116,12 @@ Verification: focused notification/create/interest tests passed with 14 tests; f
 - Added focused coverage for missing production values, fixed email policy, legacy-variable absence, and production Supabase selection.
 
 Verification: `node --test tests/runtime-config.test.mjs` passed with 6 tests; full `npm run check` passed with 47 tests.
+
+## 2026-06-18 — L008 privacy, abuse, and end-to-end verification
+
+- Added full local-flow verification from cohort creation through quorum, expiry, and final meeting completion.
+- Added public-response/log privacy assertions, honeypot and request-policy integration checks, and comprehensive absent legacy-route checks.
+- Fixed browser-local time enhancement to use a valid `Intl.DateTimeFormat` option combination.
+- Verified desktop and mobile layouts in the local browser with no console errors or horizontal overflow.
+
+Verification: focused launch suites and local browser smoke passed; full `npm run check` passed with 50 tests.
