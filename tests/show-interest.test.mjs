@@ -102,6 +102,7 @@ test('detail form appears only while collection is active and gathering', async 
   assert.match(html, /name="email"/);
   assert.match(html, /name="website"/);
   assert.match(html, /email stays private/i);
+  assert.match(html, /type="submit" onclick="gtag\('event', 'join_cohort_interest'\);"/);
 
   const expired = await repositories.getPublicCohortById('cohort-1', { now: new Date('2026-06-26T12:00:00.000Z') });
   assert.doesNotMatch(renderCohortDetailPage(expired), /name="email"/);

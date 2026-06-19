@@ -73,7 +73,7 @@ function interestForm(cohort, { error } = {}) {
     <form class="interest-form" method="post" action="/cohorts/${encodeURIComponent(cohort.id)}/interests">
       <div class="honeypot" aria-hidden="true"><label>Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
       <label for="interest-email">Email</label><input id="interest-email" name="email" type="email" autocomplete="email" required maxlength="254"${error?.field === 'email' ? ' aria-invalid="true" aria-describedby="interest-error"' : ''}>
-      <button class="button-link" type="submit">I’m interested</button>
+      <button class="button-link" type="submit" onclick="gtag('event', 'join_cohort_interest');">I’m interested</button>
     </form>
   </section>`;
 }
