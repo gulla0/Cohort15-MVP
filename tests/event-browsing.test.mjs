@@ -63,6 +63,7 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
 
   const detail = await invoke(handler, '/cohorts/b-active');
   assert.equal(detail.status, 200);
+  assert.match(detail.body, /googletagmanager\.com\/gtag\/js\?id=G-LF22TLDSBV/);
   assert.match(detail.body, /Older active &lt;test&gt;/);
   assert.match(detail.body, /Times are shown in your local timezone/);
   assert.match(detail.body, /Duration<\/dt><dd>60 minutes/);

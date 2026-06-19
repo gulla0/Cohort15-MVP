@@ -124,7 +124,9 @@ export function createRequestHandler(options = {}) {
   async function sendInterestError(res, cohortId, status, error, headers = {}) {
     try {
       const cohort = await eventBrowsing.getById(cohortId);
-      send(res, status, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, { error }), headers);
+      send(res, status, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, {
+        error, googleAnalyticsId: config.googleAnalyticsId,
+      }), headers);
     } catch (readError) {
       if (readError instanceof RepositoryNotFoundError) {
         send(res, 404, 'text/plain; charset=utf-8', 'Not found');
@@ -177,7 +179,9 @@ export function createRequestHandler(options = {}) {
     if (detailMatch) {
       try {
         const cohort = await eventBrowsing.getById(decodeURIComponent(detailMatch[1]));
-        send(res, 200, 'text/html; charset=utf-8', renderCohortDetailPage(cohort));
+        send(res, 200, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, {
+          googleAnalyticsId: config.googleAnalyticsId,
+        }));
       } catch (error) {
         if (error instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
         else throw error;

@@ -102,7 +102,15 @@ test('detail form appears only while collection is active and gathering', async 
   assert.match(html, /name="email"/);
   assert.match(html, /name="website"/);
   assert.match(html, /email stays private/i);
-  assert.match(html, /type="submit" onclick="gtag\('event', 'join_cohort_interest'\);"/);
+  assert.match(html, /action="\/cohorts\/cohort-1\/interests" novalidate/);
+  assert.match(html, /type="submit" onclick="if \(typeof gtag === 'function'\) gtag\('event', 'join_cohort_interest'\);"/);
+  assert.match(html, /id="interest-error" role="alert" hidden/);
+  assert.match(html, /email\.validity\.valueMissing/);
+  assert.match(html, /Enter your email to show interest\./);
+  assert.match(html, /Enter a valid email address\./);
+  assert.match(html, /event\.preventDefault\(\)/);
+  assert.match(html, /email\.focus\(\)/);
+  assert.match(html, /googletagmanager\.com\/gtag\/js\?id=G-LF22TLDSBV/);
 
   const expired = await repositories.getPublicCohortById('cohort-1', { now: new Date('2026-06-26T12:00:00.000Z') });
   assert.doesNotMatch(renderCohortDetailPage(expired), /name="email"/);
@@ -135,6 +143,10 @@ test('POST interest enforces policy, conflicts safely, and redirects without pri
   assert.match(invalid.body, /Email must be a valid email address\./);
   assert.match(invalid.body, /name="email"[^>]+aria-invalid="true"/);
   assert.doesNotMatch(invalid.body, /not-an-email/);
+  const missing = await post({});
+  assert.equal(missing.status, 400);
+  assert.match(missing.body, /Email is required\./);
+  assert.match(missing.body, /name="email"[^>]+aria-invalid="true"/);
   const creator = await post({ email: 'creator@example.com' });
   assert.equal(creator.status, 409);
   assert.match(creator.body, /creator email cannot count/i);
