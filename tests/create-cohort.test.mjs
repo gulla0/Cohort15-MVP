@@ -78,7 +78,39 @@ test('creation page contains the exact anonymous form surface and timezone captu
   assert.match(html, /field\.placeholder = ''/);
   assert.match(html, /Date\.now\(\) \+ \(7 \* 24 \* 60 \* 60 \* 1000\)/);
   assert.match(html, /firstMeetingInput\.min =/);
+  assert.match(html, /setInterval\(updateMeetingMinimum, 30 \* 1000\)/);
   assert.doesNotMatch(html, /creatorName|maximumParticipants|type="file"/);
+});
+
+test('creation page explains validation errors and safely restores submitted values', () => {
+  const html = renderCreateCohortPage({
+    error: {
+      field: 'firstMeetingLocal',
+      message: 'First meeting date and time must be more than seven days after submission.',
+    },
+    values: {
+      creatorEmail: 'creator@example.com',
+      title: '<Launch test>',
+      description: 'A description worth preserving after an error.',
+      category: 'build',
+      targetSkillLevel: 'intermediate',
+      firstMeetingLocal: '2026-06-20T18:30',
+      recurrence: 'weekly',
+      meetingCount: '4',
+      website: 'do-not-reflect',
+    },
+  });
+
+  assert.match(html, /First meeting date and time must be more than seven days after submission\./);
+  assert.match(html, /value="creator@example\.com"/);
+  assert.match(html, /value="&lt;Launch test&gt;"/);
+  assert.match(html, /A description worth preserving after an error\./);
+  assert.match(html, /value="build" selected/);
+  assert.match(html, /value="intermediate" selected/);
+  assert.match(html, /name="firstMeetingLocal"[^>]+value="2026-06-20T18:30"[^>]+aria-invalid="true"/);
+  assert.match(html, /value="weekly" selected/);
+  assert.match(html, /name="meetingCount"[^>]+value="4"/);
+  assert.doesNotMatch(html, /do-not-reflect/);
 });
 
 test('create service normalizes private email and honeypot consumes no allowance', async () => {
@@ -127,6 +159,21 @@ test('POST /cohorts enforces request policy and redirects without private data',
   assert.equal(response.status, 303);
   assert.equal(response.headers.location, '/cohorts/cohort-1');
   assert.doesNotMatch(response.headers.location, /creator|example/i);
+  assert.equal(store.listCohorts().length, 1);
+
+  const invalid = await invoke(handler, {
+    url: '/cohorts',
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded; charset=utf-8', origin: config.appUrl },
+    body: new URLSearchParams(validSubmission({
+      title: 'Keep this title',
+      firstMeetingLocal: '2026-06-20T18:30',
+    })).toString(),
+  });
+  assert.equal(invalid.status, 400);
+  assert.match(invalid.body, /First meeting date and time must be more than seven days after submission\./);
+  assert.match(invalid.body, /value="Keep this title"/);
+  assert.match(invalid.body, /value=" Creator@Example\.COM "/);
   assert.equal(store.listCohorts().length, 1);
 });
 

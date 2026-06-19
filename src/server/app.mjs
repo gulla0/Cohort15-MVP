@@ -160,8 +160,9 @@ export function createRequestHandler(options = {}) {
         }
       }
 
+      let input = {};
       try {
-        const input = await readFormBody(req);
+        input = await readFormBody(req);
         const cohort = await cohortCreator.create(input, {
           clientIp: clientIpFromRequest(req, config),
         });
@@ -178,8 +179,28 @@ export function createRequestHandler(options = {}) {
           res.end('Too many requests');
         } else if (error instanceof RepositoryConflictError) {
           send(res, 409, 'text/plain; charset=utf-8', 'Conflict');
-        } else if (error instanceof DomainValidationError || error instanceof HoneypotSubmissionError) {
-          send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({ error: true }));
+        } else if (error instanceof DomainValidationError) {
+          const field = error.field === 'firstMeetingAt' ? 'firstMeetingLocal' : error.field;
+          const fieldLabels = {
+            creatorEmail: 'Creator email', title: 'Title', description: 'Description',
+            category: 'Category', topic: 'Topic', targetAudience: 'Target audience',
+            targetSkillLevel: 'Target skill level', additionalDetails: 'Additional details',
+            minQuorum: 'Minimum quorum', meetingLink: 'Approved meeting link',
+            creatorTimeZone: 'Time zone', firstMeetingLocal: 'First meeting date and time',
+            meetingDurationMinutes: 'Duration in minutes', recurrence: 'Recurrence',
+            meetingCount: 'Meeting count',
+          };
+          const message = error.field === 'firstMeetingAt'
+            ? 'First meeting date and time must be more than seven days after submission.'
+            : `${fieldLabels[field] ?? 'Submission'} ${error.rule}.`;
+          send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({
+            error: { field, message },
+            values: input,
+          }));
+        } else if (error instanceof HoneypotSubmissionError) {
+          send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({
+            error: { field: '', message: 'Please check your submission and try again.' },
+          }));
         } else {
           throw error;
         }

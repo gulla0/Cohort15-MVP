@@ -258,6 +258,7 @@ footer {
 }
 
 .cohort-form textarea { min-height: 110px; resize: vertical; }
+.cohort-form [aria-invalid="true"] { border-color: #b55; outline-color: #b55; }
 .cohort-form .full, .field-note.full { grid-column: 1 / -1; }
 .field-note { margin: -8px 0 0; color: var(--muted); font-size: 0.9rem; }
 .form-error { margin-top: 24px; padding: 14px; border: 1px solid #b55; border-radius: 6px; background: #fff1ef; }
