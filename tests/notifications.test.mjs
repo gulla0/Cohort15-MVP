@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createResendEmailProvider, EmailProviderError } from '../src/email/resend.mjs';
 import { createLofiStore } from '../src/persistence/store.mjs';
 import { createLocalRepositories } from '../src/persistence/repositories.mjs';
+import { createSupabasePostgresRepositories, TABLES } from '../src/persistence/supabase-postgres.mjs';
 import { createCohortService } from '../src/services/create-cohort.mjs';
 import { createNotificationService } from '../src/services/notifications.mjs';
 import { createRollingWindowLimiter } from '../src/services/rate-limit.mjs';
@@ -95,7 +96,8 @@ test('creation and interest confirmations are persisted once and provider failur
   await notifications.interestAccepted(accepted);
   deliveries = store.listNotificationDeliveriesByCohortId(cohort.id);
   assert.equal(deliveries.length, 2);
-  assert.equal(calls.length, 2);
+  assert.equal(deliveries[1].attemptCount, 2);
+  assert.equal(calls.length, 3);
 });
 
 test('quorum sends separate participant confirmation and one private delivery per accepted recipient', async () => {
@@ -118,6 +120,162 @@ test('quorum sends separate participant confirmation and one private delivery pe
   }
 });
 
+test('Supabase and Resend adapters recover quorum after accepted email outcome writes fail', async () => {
+  const cohortId = '89a31d99-22ef-453f-ab9d-c53be1df8cd0';
+  const interestId = 'b10a8e44-c1b6-49d1-a6fa-e6ccf4f2f8ea';
+  const timestamp = '2026-06-18T12:00:00.000Z';
+  const cohortRow = {
+    id: cohortId,
+    creator_email: 'creator@example.com',
+    title: 'Build a tiny compiler',
+    description: 'Work through a tiny compiler implementation together.',
+    category: 'build',
+    topic: 'Compilers',
+    target_audience: 'Developers learning language implementation',
+    target_skill_level: 'intermediate',
+    additional_details: null,
+    min_quorum: 1,
+    meeting_link: 'https://meet.google.com/abc-defg-hij',
+    creator_time_zone: 'America/Detroit',
+    first_meeting_at: '2026-07-10T22:00:00.000Z',
+    first_meeting_local: '2026-07-10T18:00',
+    meeting_duration_minutes: 60,
+    recurrence: 'weekly',
+    meeting_count: 2,
+    created_at: timestamp,
+    updated_at: timestamp,
+    expires_at: '2026-06-25T12:00:00.000Z',
+    quorum_met_at: timestamp,
+  };
+  const interestRow = {
+    id: interestId, cohort_id: cohortId, email: 'participant@example.com', created_at: timestamp,
+  };
+  const rows = new Map();
+  const failedAcceptancePatches = new Set();
+  let deliveryId = 0;
+
+  const supabaseFetch = async (rawUrl, init = {}) => {
+    const url = new URL(rawUrl);
+    const body = init.body == null ? null : JSON.parse(init.body);
+    let status = 200;
+    let payload;
+    if (url.pathname.endsWith('/rpc/cohort15_lofi_accept_interest')) {
+      payload = [{
+        interest_id: interestId,
+        interest_created_at: timestamp,
+        interest_count: 1,
+        reached_quorum: true,
+        conflict_code: null,
+        quorum_met_at: timestamp,
+      }];
+    } else if (url.pathname.endsWith(`/${TABLES.cohorts}`)) {
+      payload = cohortRow;
+    } else if (url.pathname.endsWith(`/${TABLES.interests}`)) {
+      payload = [interestRow];
+    } else if (url.pathname.endsWith(`/${TABLES.notificationDeliveries}`) && init.method === 'POST') {
+      if (rows.has(body.idempotency_key)) {
+        status = 409;
+        payload = { message: 'duplicate delivery' };
+      } else {
+        const row = {
+          ...body,
+          id: `delivery-${++deliveryId}`,
+        };
+        rows.set(row.idempotency_key, row);
+        payload = [row];
+      }
+    } else if (url.pathname.endsWith(`/${TABLES.notificationDeliveries}`) && init.method === 'PATCH') {
+      const key = url.searchParams.get('idempotency_key').replace(/^eq\./u, '');
+      const row = rows.get(key);
+      const shouldFailOnce = body.status === 'sent'
+        && (row.type === 'participant_confirmation'
+          || (row.type === 'quorum_met' && row.recipient_email === 'creator@example.com'));
+      if (shouldFailOnce && !failedAcceptancePatches.has(key)) {
+        failedAcceptancePatches.add(key);
+        status = 503;
+        payload = { message: 'temporary persistence failure' };
+      } else {
+        Object.assign(row, body);
+        payload = [row];
+      }
+    } else if (url.pathname.endsWith(`/${TABLES.notificationDeliveries}`)) {
+      const key = url.searchParams.get('idempotency_key').replace(/^eq\./u, '');
+      payload = rows.get(key) ?? null;
+      if (!payload) status = 406;
+    } else {
+      throw new Error(`unexpected Supabase request: ${url.pathname}`);
+    }
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      async text() { return JSON.stringify(payload); },
+    };
+  };
+
+  const resendRequests = [];
+  let participantQuorumRejected = false;
+  const repositories = createSupabasePostgresRepositories({
+    url: 'https://example.supabase.co',
+    serviceRoleKey: 'test-service-role-key',
+    fetchImpl: supabaseFetch,
+    now: () => new Date(timestamp),
+    randomUUID: () => `delivery-${deliveryId + 1}`,
+  });
+  const emailProvider = createResendEmailProvider({
+    apiKey: 'test-resend-key',
+    fetchImpl: async (_url, init) => {
+      resendRequests.push(init.headers['idempotency-key']);
+      const message = JSON.parse(init.body);
+      if (!participantQuorumRejected
+        && message.subject.startsWith('Quorum reached')
+        && message.to[0] === 'participant@example.com') {
+        participantQuorumRejected = true;
+        return { ok: false, status: 503 };
+      }
+      return { ok: true, status: 200 };
+    },
+  });
+  const logs = [];
+  const notifications = createNotificationService({
+    repositories,
+    emailProvider,
+    appUrl: 'https://cohort15.com',
+    logger: { error(event, details) { logs.push({ event, details }); } },
+  });
+  const accepted = await repositories.acceptInterest({ cohortId, email: interestRow.email }, {
+    id: interestId, now: timestamp,
+  });
+
+  assert.equal(accepted.reachedQuorum, true);
+  await notifications.interestAccepted(accepted);
+
+  let deliveries = [...rows.values()];
+  assert.equal(deliveries.find(({ type }) => type === 'participant_confirmation').status, 'pending');
+  assert.equal(deliveries.filter(({ type }) => type === 'quorum_met').length, 2);
+  assert.ok(deliveries.filter(({ type }) => type === 'quorum_met').every(({ status }) => status === 'sent'));
+
+  const requestsBeforeRecovery = resendRequests.length;
+  await notifications.recoverQuorumNotifications(accepted.cohort);
+
+  deliveries = [...rows.values()];
+  assert.ok(deliveries.filter(({ type }) => type === 'quorum_met').every(({ status }) => status === 'sent'));
+  assert.equal(resendRequests.length, requestsBeforeRecovery);
+  const creatorQuorumKey = deliveries.find(({ type, recipient_email: recipient }) => (
+    type === 'quorum_met' && recipient === 'creator@example.com'
+  )).idempotency_key;
+  const participantQuorumKey = deliveries.find(({ type, recipient_email: recipient }) => (
+    type === 'quorum_met' && recipient === 'participant@example.com'
+  )).idempotency_key;
+  assert.deepEqual(resendRequests.filter((key) => key === creatorQuorumKey), [creatorQuorumKey, creatorQuorumKey]);
+  assert.deepEqual(
+    resendRequests.filter((key) => key === participantQuorumKey),
+    [participantQuorumKey, participantQuorumKey],
+  );
+  assert.equal(new Set(deliveries.map(({ idempotency_key: key }) => key)).size, deliveries.length);
+  assert.ok(logs.some(({ details }) => details.phase === 'record_provider_acceptance'));
+  assert.doesNotMatch(JSON.stringify(logs), /@|meet\.google|test-service|test-resend/u);
+});
+
 test('notification infrastructure exceptions never turn an accepted submission into failure', async () => {
   const store = createLofiStore();
   const repositories = createLocalRepositories({ store, now: () => NOW, randomUUID: () => 'cohort-1' });
@@ -129,4 +287,35 @@ test('notification infrastructure exceptions never turn an accepted submission i
   const cohort = await creator.create({ ...submission(), website: '' }, { clientIp: '192.0.2.1' });
   assert.equal(cohort.id, 'cohort-1');
   assert.equal(store.listCohorts().length, 1);
+});
+
+test('interest notification exceptions are logged without request or recipient data', async () => {
+  const store = createLofiStore();
+  let id = 0;
+  const repositories = createLocalRepositories({
+    store, now: () => NOW, randomUUID: () => `record-${++id}`,
+  });
+  const cohort = await repositories.createCohort(submission({ minQuorum: 1 }));
+  const logs = [];
+  const service = createShowInterestService({
+    repositories,
+    limiter: createRollingWindowLimiter({ limit: 1, windowMs: 3_600_000 }),
+    notifications: {
+      async interestAccepted() {
+        throw new Error('recipient@example.com https://private.example secret-value');
+      },
+    },
+    logger: { error(event, details) { logs.push({ event, details }); } },
+  });
+
+  const accepted = await service.show(cohort.id, { email: 'recipient@example.com' }, {
+    clientIp: '192.0.2.10',
+  });
+
+  assert.equal(accepted.reachedQuorum, true);
+  assert.deepEqual(logs, [{
+    event: 'notification_processing_failed',
+    details: { operation: 'interest_accepted', cohortId: cohort.id },
+  }]);
+  assert.doesNotMatch(JSON.stringify(logs), /@|192\.0\.2\.10|private\.example|secret-value/u);
 });

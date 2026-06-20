@@ -34,7 +34,7 @@ function quorumMessage(cohort, url) {
   };
 }
 
-export function createNotificationService({ repositories, emailProvider, appUrl } = {}) {
+export function createNotificationService({ repositories, emailProvider, appUrl, logger = console } = {}) {
   if (!repositories?.ensureNotificationDelivery || !repositories?.recordNotificationOutcome) {
     throw new TypeError('notification repositories are required');
   }
@@ -45,25 +45,75 @@ export function createNotificationService({ repositories, emailProvider, appUrl 
     const idempotencyKey = notificationIdempotencyKey({
       type, cohortId: cohort.id, interestId, recipientEmail,
     });
-    const ensured = await repositories.ensureNotificationDelivery({
-      idempotencyKey,
-      cohortId: cohort.id,
-      interestId,
-      recipientEmail,
-      type,
-    });
-    if (!ensured.created) return ensured.delivery;
+    let ensured;
+    try {
+      ensured = await repositories.ensureNotificationDelivery({
+        idempotencyKey,
+        cohortId: cohort.id,
+        interestId,
+        recipientEmail,
+        type,
+      });
+    } catch {
+      logger.error('notification_delivery_failed', {
+        phase: 'ensure_delivery', type, cohortId: cohort.id,
+      });
+      throw new Error('notification delivery could not be persisted');
+    }
+    if (!ensured.created && ensured.delivery.status === 'sent') return ensured.delivery;
+
+    const attemptCount = ensured.delivery.attemptCount + 1;
 
     try {
       await emailProvider.send({ recipientEmail, to: recipientEmail, ...message, idempotencyKey });
-      return repositories.recordNotificationOutcome(idempotencyKey, { status: 'sent', attemptCount: 1 });
     } catch (error) {
-      return repositories.recordNotificationOutcome(idempotencyKey, {
-        status: 'failed',
-        attemptCount: 1,
-        providerErrorCode: sanitizedEmailProviderErrorCode(error),
-      });
+      const providerErrorCode = sanitizedEmailProviderErrorCode(error);
+      try {
+        return await repositories.recordNotificationOutcome(idempotencyKey, {
+          status: 'failed', attemptCount, providerErrorCode,
+        });
+      } catch {
+        logger.error('notification_delivery_failed', {
+          phase: 'record_provider_failure', type, cohortId: cohort.id, providerErrorCode,
+        });
+        return ensured.delivery;
+      }
     }
+
+    try {
+      return await repositories.recordNotificationOutcome(idempotencyKey, {
+        status: 'sent', attemptCount,
+      });
+    } catch {
+      logger.error('notification_delivery_failed', {
+        phase: 'record_provider_acceptance', type, cohortId: cohort.id,
+      });
+      return ensured.delivery;
+    }
+  }
+
+  async function deliverQuorum(cohort, url) {
+    const interests = await repositories.listInterestsByCohortId(cohort.id);
+    const recipients = [cohort.creatorEmail, ...interests.map(({ email }) => email)];
+    const deliveryFor = (recipientEmail) => deliver({
+      cohort,
+      recipientEmail,
+      type: 'quorum_met',
+      message: quorumMessage(cohort, url),
+    });
+    const firstResults = await Promise.allSettled(recipients.map(deliveryFor));
+    const recoverableRecipients = recipients.filter((_recipientEmail, index) => {
+      const result = firstResults[index];
+      return result.status === 'rejected' || result.value.status !== 'sent';
+    });
+    const recoveryResults = await Promise.allSettled(recoverableRecipients.map(deliveryFor));
+    const recovered = new Map(recoverableRecipients.map((recipientEmail, index) => (
+      [recipientEmail, recoveryResults[index]]
+    )));
+    return firstResults
+      .map((result, index) => recovered.get(recipients[index]) ?? result)
+      .filter(({ status }) => status === 'fulfilled')
+      .map(({ value }) => value);
   }
 
   return Object.freeze({
@@ -86,18 +136,16 @@ export function createNotificationService({ repositories, emailProvider, appUrl 
         recipientEmail: interest.email,
         type: 'participant_confirmation',
         message: confirmationMessage(cohort, url, 'participant'),
-      });
+      }).catch(() => null);
       if (!reachedQuorum) return [participant];
 
-      const interests = await repositories.listInterestsByCohortId(cohort.id);
-      const recipients = [cohort.creatorEmail, ...interests.map(({ email }) => email)];
-      const quorum = await Promise.all(recipients.map((recipientEmail) => deliver({
-        cohort,
-        recipientEmail,
-        type: 'quorum_met',
-        message: quorumMessage(cohort, url),
-      })));
+      const quorum = await deliverQuorum(cohort, url);
       return [participant, ...quorum];
+    },
+
+    async recoverQuorumNotifications(cohort) {
+      if (!cohort.quorumMetAt) return [];
+      return deliverQuorum(cohort, publicUrl(appUrl, cohort.id));
     },
   });
 }

@@ -107,7 +107,7 @@ export function createRequestHandler(options = {}) {
   });
   const emailProvider = options.emailProvider ?? createResendEmailProvider({ apiKey: config.resendApiKey });
   const notifications = options.notifications ?? createNotificationService({
-    repositories, emailProvider, appUrl: config.appUrl,
+    repositories, emailProvider, appUrl: config.appUrl, logger: options.logger,
   });
   const cohortCreator = options.cohortCreator ?? createCohortService({
     repositories, limiter: creationLimiter, notifications,
@@ -118,7 +118,7 @@ export function createRequestHandler(options = {}) {
     windowMs: 60 * 60 * 1000,
   });
   const showInterest = options.showInterest ?? createShowInterestService({
-    repositories, limiter: interestLimiter, notifications,
+    repositories, limiter: interestLimiter, notifications, logger: options.logger,
   });
 
   async function sendInterestError(res, cohortId, status, error, headers = {}) {

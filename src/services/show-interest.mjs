@@ -7,7 +7,12 @@ export class InterestHoneypotSubmissionError extends Error {
   }
 }
 
-export function createShowInterestService({ repositories, limiter, notifications = null } = {}) {
+export function createShowInterestService({
+  repositories,
+  limiter,
+  notifications = null,
+  logger = console,
+} = {}) {
   if (!repositories?.acceptInterest) throw new TypeError('repositories are required');
   if (!limiter?.run) throw new TypeError('limiter is required');
 
@@ -25,7 +30,14 @@ export function createShowInterestService({ repositories, limiter, notifications
       const email = normalizeEmail(input.email);
       const result = await limiter.run(clientIp, () => repositories.acceptInterest({ cohortId, email }));
       if (notifications) {
-        try { await notifications.interestAccepted(result); } catch { /* submission already succeeded */ }
+        try {
+          await notifications.interestAccepted(result);
+        } catch {
+          logger.error('notification_processing_failed', {
+            operation: 'interest_accepted',
+            cohortId: result.cohort.id,
+          });
+        }
       }
       return result;
     },
