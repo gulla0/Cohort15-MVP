@@ -75,6 +75,28 @@ test('Resend adapter sanitizes provider failures without reading response bodies
   );
 });
 
+test('Resend adapter sends up to one hundred emails in one idempotent batch request', async () => {
+  let request;
+  const provider = createResendEmailProvider({
+    apiKey: 'test-key',
+    fetchImpl: async (url, options) => { request = { url, options }; return { ok: true, status: 200 }; },
+  });
+  await provider.sendBatch({
+    messages: [
+      { to: 'first@example.com', subject: 'First', html: '<p>First</p>' },
+      { to: 'second@example.com', subject: 'Second', html: '<p>Second</p>' },
+    ],
+    idempotencyKey: 'batch-key-1',
+  });
+
+  assert.equal(request.url, 'https://api.resend.com/emails/batch');
+  assert.equal(request.options.headers['idempotency-key'], 'batch-key-1');
+  assert.equal(JSON.parse(request.options.body).length, 2);
+  assert.deepEqual(JSON.parse(request.options.body).map(({ to }) => to), [
+    ['first@example.com'], ['second@example.com'],
+  ]);
+});
+
 test('creation and interest confirmations are persisted once and provider failure does not undo writes', async () => {
   const calls = [];
   const emailProvider = { async send(message) {
@@ -213,7 +235,6 @@ test('Supabase and Resend adapters recover quorum after accepted email outcome w
   };
 
   const resendRequests = [];
-  let participantQuorumRejected = false;
   const repositories = createSupabasePostgresRepositories({
     url: 'https://example.supabase.co',
     serviceRoleKey: 'test-service-role-key',
@@ -223,15 +244,8 @@ test('Supabase and Resend adapters recover quorum after accepted email outcome w
   });
   const emailProvider = createResendEmailProvider({
     apiKey: 'test-resend-key',
-    fetchImpl: async (_url, init) => {
-      resendRequests.push(init.headers['idempotency-key']);
-      const message = JSON.parse(init.body);
-      if (!participantQuorumRejected
-        && message.subject.startsWith('Quorum reached')
-        && message.to[0] === 'participant@example.com') {
-        participantQuorumRejected = true;
-        return { ok: false, status: 503 };
-      }
+    fetchImpl: async (url, init) => {
+      resendRequests.push({ url, key: init.headers['idempotency-key'] });
       return { ok: true, status: 200 };
     },
   });
@@ -263,14 +277,12 @@ test('Supabase and Resend adapters recover quorum after accepted email outcome w
   const creatorQuorumKey = deliveries.find(({ type, recipient_email: recipient }) => (
     type === 'quorum_met' && recipient === 'creator@example.com'
   )).idempotency_key;
-  const participantQuorumKey = deliveries.find(({ type, recipient_email: recipient }) => (
-    type === 'quorum_met' && recipient === 'participant@example.com'
-  )).idempotency_key;
-  assert.deepEqual(resendRequests.filter((key) => key === creatorQuorumKey), [creatorQuorumKey, creatorQuorumKey]);
-  assert.deepEqual(
-    resendRequests.filter((key) => key === participantQuorumKey),
-    [participantQuorumKey, participantQuorumKey],
-  );
+  const batchRequests = resendRequests.filter(({ url }) => url.endsWith('/emails/batch'));
+  assert.equal(batchRequests.length, 2);
+  assert.deepEqual(batchRequests.map(({ key }) => key), [
+    `quorum_met_batch:${cohortId}`, `quorum_met_batch:${cohortId}`,
+  ]);
+  assert.ok(!batchRequests.some(({ key }) => key === creatorQuorumKey));
   assert.equal(new Set(deliveries.map(({ idempotency_key: key }) => key)).size, deliveries.length);
   assert.ok(logs.some(({ details }) => details.phase === 'record_provider_acceptance'));
   assert.doesNotMatch(JSON.stringify(logs), /@|meet\.google|test-service|test-resend/u);

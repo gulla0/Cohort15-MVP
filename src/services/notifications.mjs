@@ -92,14 +92,12 @@ export function createNotificationService({ repositories, emailProvider, appUrl,
     }
   }
 
-  async function deliverQuorum(cohort, url) {
-    const interests = await repositories.listInterestsByCohortId(cohort.id);
-    const recipients = [cohort.creatorEmail, ...interests.map(({ email }) => email)];
+  async function deliverQuorumIndividually(cohort, recipients, message) {
     const deliveryFor = (recipientEmail) => deliver({
       cohort,
       recipientEmail,
       type: 'quorum_met',
-      message: quorumMessage(cohort, url),
+      message,
     });
     const firstResults = await Promise.allSettled(recipients.map(deliveryFor));
     const recoverableRecipients = recipients.filter((_recipientEmail, index) => {
@@ -114,6 +112,93 @@ export function createNotificationService({ repositories, emailProvider, appUrl,
       .map((result, index) => recovered.get(recipients[index]) ?? result)
       .filter(({ status }) => status === 'fulfilled')
       .map(({ value }) => value);
+  }
+
+  async function ensureQuorumDelivery(cohort, recipientEmail) {
+    const idempotencyKey = notificationIdempotencyKey({
+      type: 'quorum_met', cohortId: cohort.id, recipientEmail,
+    });
+    try {
+      const ensured = await repositories.ensureNotificationDelivery({
+        idempotencyKey,
+        cohortId: cohort.id,
+        interestId: null,
+        recipientEmail,
+        type: 'quorum_met',
+      });
+      return { ...ensured, idempotencyKey, recipientEmail };
+    } catch {
+      logger.error('notification_delivery_failed', {
+        phase: 'ensure_delivery', type: 'quorum_met', cohortId: cohort.id,
+      });
+      throw new Error('notification delivery could not be persisted');
+    }
+  }
+
+  async function recordQuorumBatchOutcome(cohort, ensured, outcome) {
+    if (ensured.delivery.status === 'sent') return ensured.delivery;
+    try {
+      return await repositories.recordNotificationOutcome(ensured.idempotencyKey, {
+        ...outcome,
+        attemptCount: ensured.delivery.attemptCount + 1,
+      });
+    } catch {
+      logger.error('notification_delivery_failed', {
+        phase: outcome.status === 'sent' ? 'record_provider_acceptance' : 'record_provider_failure',
+        type: 'quorum_met',
+        cohortId: cohort.id,
+        ...(outcome.providerErrorCode ? { providerErrorCode: outcome.providerErrorCode } : {}),
+      });
+      return ensured.delivery;
+    }
+  }
+
+  async function attemptQuorumBatch(cohort, recipients, message) {
+    const ensureResults = await Promise.allSettled(
+      recipients.map((recipientEmail) => ensureQuorumDelivery(cohort, recipientEmail)),
+    );
+    const ensured = ensureResults
+      .filter(({ status }) => status === 'fulfilled')
+      .map(({ value }) => value);
+    if (ensured.length !== recipients.length) {
+      return { deliveries: ensured.map(({ delivery }) => delivery), needsRecovery: true };
+    }
+    if (ensured.every(({ delivery }) => delivery.status === 'sent')) {
+      return { deliveries: ensured.map(({ delivery }) => delivery), needsRecovery: false };
+    }
+
+    let outcome = { status: 'sent' };
+    try {
+      await emailProvider.sendBatch({
+        messages: recipients.map((to) => ({ to, ...message })),
+        idempotencyKey: `quorum_met_batch:${cohort.id}`,
+      });
+    } catch (error) {
+      outcome = {
+        status: 'failed',
+        providerErrorCode: sanitizedEmailProviderErrorCode(error),
+      };
+    }
+    const deliveries = await Promise.all(
+      ensured.map((entry) => recordQuorumBatchOutcome(cohort, entry, outcome)),
+    );
+    return {
+      deliveries,
+      needsRecovery: deliveries.some(({ status }) => status !== 'sent'),
+    };
+  }
+
+  async function deliverQuorum(cohort, url) {
+    const interests = await repositories.listInterestsByCohortId(cohort.id);
+    const recipients = [cohort.creatorEmail, ...interests.map(({ email }) => email)];
+    const message = quorumMessage(cohort, url);
+    if (!emailProvider.sendBatch) {
+      return deliverQuorumIndividually(cohort, recipients, message);
+    }
+
+    const firstAttempt = await attemptQuorumBatch(cohort, recipients, message);
+    if (!firstAttempt.needsRecovery) return firstAttempt.deliveries;
+    return (await attemptQuorumBatch(cohort, recipients, message)).deliveries;
   }
 
   return Object.freeze({
