@@ -4,7 +4,7 @@ This branch prepares a lightweight public validation product before the authenti
 
 Visitors will be able to create cohort requests or show interest with a mandatory private email. A cohort's approved meeting link becomes public at quorum. Listings collect interest for seven days and remain browsable afterward.
 
-The public `/research` collection hosts Cohort15 research, essays, field notes, and written product updates. Its first article is an edited synthesis of public demand signals for small, committed groups.
+The public `/research` collection hosts Cohort15 research, essays, field notes, and written product updates. It includes an edited demand-research synthesis and a video-backed account of the original product thesis and its evolution into the validation MVP.
 
 ## Setup Status
 

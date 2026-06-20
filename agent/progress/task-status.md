@@ -16,5 +16,6 @@
 | L009 | Create isolated provider resources and deploy | not_started | yes | Pending human provider and DNS work. |
 | L010 | Run production lofi smoke test | not_started | no | Pending |
 | L011 | Add public Research & Field Notes editorial pages | done | yes | Index, stable research article, navigation, safe extensible entry rendering, and focused tests verified. |
+| L012 | Publish the original Cohort15 product thesis video update | done | yes | Supplied video, transcript-derived article, original-vs-current framing, embed safety, and focused tests verified. |
 
 Next ready task: L009.

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 
 import { createRequestHandler } from '../src/server/app.mjs';
 import {
-  ARTICLE_PATH, renderDemandResearchArticle, renderResearchCard, renderResearchIndexPage,
+  ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
+  renderOriginalProductThesisPage, renderResearchCard, renderResearchIndexPage,
 } from '../src/ui/research.mjs';
 
 const config = Object.freeze({
@@ -25,7 +26,7 @@ function invoke(handler, url) {
   });
 }
 
-test('research index presents the editorial model without invented media links', () => {
+test('research index presents the editorial model and supplied product video', () => {
   const html = renderResearchIndexPage({ googleAnalyticsId: 'G-TEST' });
 
   assert.match(html, /<main>/);
@@ -33,8 +34,25 @@ test('research index presents the editorial model without invented media links',
   assert.match(html, /Research &amp; Field Notes/);
   assert.match(html, /Research[\s\S]+Essays[\s\S]+Field notes[\s\S]+Product updates[\s\S]+External publications/);
   assert.match(html, new RegExp(`href="${ARTICLE_PATH}"`));
+  assert.match(html, new RegExp(`href="${VIDEO_ARTICLE_PATH}"`));
+  assert.match(html, /Introducing Cohort15: The original product thesis/);
   assert.match(html, /G-TEST/);
-  assert.doesNotMatch(html, /youtube\.com|youtu\.be|medium\.com/i);
+  assert.doesNotMatch(html, /medium\.com/i);
+});
+
+test('product update embeds the supplied video and distinguishes original and current mechanics', () => {
+  const html = renderOriginalProductThesisPage({ googleAnalyticsId: 'G-TEST' });
+
+  assert.match(html, /youtube-nocookie\.com\/embed\/E5f-qqNILlg\?start=4/);
+  assert.match(html, /youtube\.com\/watch\?v=E5f-qqNILlg&amp;t=4s/);
+  assert.match(html, /This video captures the original vision/);
+  assert.match(html, /What stayed true/);
+  assert.match(html, /What changed in the validation MVP/);
+  assert.match(html, /No credits, authentication, or payments/);
+  assert.match(html, /No automated social publishing yet/);
+  assert.match(html, /referrerpolicy="strict-origin-when-cross-origin"/);
+  assert.match(html, /title="Introducing Cohort15: The original product thesis"/);
+  assert.doesNotMatch(html, /Public handle|Suggested outreach|turn\d+view|cite/i);
 });
 
 test('public research article is a sanitized synthesis with method, limits, implications, and CTA', () => {
@@ -71,11 +89,14 @@ test('GET research routes render through the server and preserve unknown-route 4
   const handler = createRequestHandler({ config });
   const index = await invoke(handler, '/research');
   const article = await invoke(handler, ARTICLE_PATH);
+  const videoArticle = await invoke(handler, VIDEO_ARTICLE_PATH);
   const missing = await invoke(handler, '/research/not-published');
 
   assert.equal(index.status, 200);
   assert.match(index.headers['content-type'], /text\/html/);
   assert.equal(article.status, 200);
   assert.match(article.body, /commitment density/i);
+  assert.equal(videoArticle.status, 200);
+  assert.match(videoArticle.body, /original product thesis/i);
   assert.equal(missing.status, 404);
 });

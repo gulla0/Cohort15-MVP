@@ -16,7 +16,7 @@ Next ready task: L009.
 |---|---|---|
 | L009 | L008 is complete and every current input exists | Follow the indexed human setup runbook for isolated provider resources and deployment. |
 
-L011, the user-approved Research & Field Notes change wave, is complete and does not alter the L009 → L010 deployment critical path.
+L011–L012, the user-approved Research & Field Notes and product-video waves, are complete and do not alter the L009 → L010 deployment critical path.
 
 ## Known Parallelism
 

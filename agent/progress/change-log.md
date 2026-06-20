@@ -135,3 +135,12 @@ Verification: focused launch suites and local browser smoke passed; full `npm ru
 - Added focused server-route, rendering, privacy, accessibility, unknown-route, and unsafe-link tests.
 
 Verification: focused research and affected-route suites passed; full `npm run check` passed with 62 tests and 12 aligned tasks.
+
+## 2026-06-20 — L012 original Cohort15 product thesis video update
+
+- Added the supplied YouTube video to `/research` as a first-party product update.
+- Added a transcript-derived founder story and explanation of the original product mechanics.
+- Clearly separated the durable product thesis from retired credit, maximum-membership, link timing, and automated social-publishing assumptions.
+- Added a privacy-enhanced video embed, safe direct YouTube link, responsive styling, current-product CTAs, and focused route/rendering tests.
+
+Verification: focused research tests passed; full `npm run check` passed with 63 tests and 13 aligned tasks.

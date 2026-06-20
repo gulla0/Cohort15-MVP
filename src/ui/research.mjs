@@ -1,8 +1,17 @@
 import { analyticsMarkup } from './analytics.mjs';
 
 const ARTICLE_PATH = '/research/why-small-committed-groups';
+const VIDEO_ARTICLE_PATH = '/research/introducing-cohort15-original-product-thesis';
+const YOUTUBE_URL = 'https://www.youtube.com/watch?v=E5f-qqNILlg&t=4s';
 
 export const RESEARCH_ENTRIES = Object.freeze([
+  Object.freeze({
+    type: 'Product update',
+    title: 'Introducing Cohort15: The original product thesis',
+    summary: 'The founder story, original mechanics, and early assumptions behind Cohort15—plus what changed in the validation MVP.',
+    publishedAt: '2026-06-20',
+    href: VIDEO_ARTICLE_PATH,
+  }),
   Object.freeze({
     type: 'Research',
     title: 'Why small, committed groups are worth building',
@@ -139,4 +148,66 @@ export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV'
   </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
 }
 
-export { ARTICLE_PATH };
+export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
+  return `${pageStart({
+    title: 'Introducing Cohort15: The original product thesis',
+    description: 'The founder story and original product thesis behind Cohort15, with an update on what changed in the validation MVP.',
+    googleAnalyticsId,
+  })}<main class="shell article-shell">
+    <a class="text-link" href="/research">← All research &amp; field notes</a>
+    <header class="article-header"><p class="eyebrow">Product update</p><h1>Introducing Cohort15: The original product thesis</h1><p class="lede">The founder story, initial product mechanics, and early assumptions behind a place for small groups of high-intent people.</p><div class="article-byline"><span>By Cohort15</span><time datetime="2026-06-20">June 20, 2026</time><span>13 min watch</span></div></header>
+    <article class="article-body">
+      <section class="video-embed" aria-labelledby="video-title"><h2 class="visually-hidden" id="video-title">Introducing Cohort15 video</h2><iframe src="https://www.youtube-nocookie.com/embed/E5f-qqNILlg?start=4" title="Introducing Cohort15: The original product thesis" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></section>
+      <p class="video-link"><a class="text-link" href="${escapeHtml(YOUTUBE_URL)}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a></p>
+
+      <aside class="editorial-note" aria-labelledby="editorial-note-title"><p class="eyebrow">Editorial note</p><h2 id="editorial-note-title">This video captures the original vision.</h2><p>The central thesis remains intact, but several mechanics described in the video—credits, refunds, maximum membership, and automated social publishing—are not part of the current validation MVP. The update below documents that evolution.</p></aside>
+
+      <p class="article-intro">Cohort15 began with a personal experience: learning something difficult became possible after finding a small group of people willing to take the same journey seriously.</p>
+
+      <h2>The problem Cohort15 set out to solve</h2>
+      <p>The original idea was an application where people could form cohorts of 15 members or fewer around a specific intention. Learning TypeScript was one example, but the format could also support building, gaming, accountability, or any other journey that benefits from committed peers.</p>
+      <p>The important quality was not the subject. It was signal: people who genuinely cared about the same outcome and were willing to contribute time, effort, and consistency.</p>
+
+      <h2>The founder story</h2>
+      <p>Without a formal computer-science background, programming initially felt too difficult to begin. Seeing other developers build useful things was inspiring, but also intimidating. The turning point was finding a small group of people attempting the same journey.</p>
+      <p>That group did not remove the difficulty. It made taking the first step—and continuing through a long learning process—possible. Cohort15 grew from the belief that more people should have an easier way to find that kind of small, committed group.</p>
+
+      <blockquote><p>Cohort15 should help people publish an intent, gather the right people, and then get out of their way.</p></blockquote>
+
+      <h2>An assembly point, not another community platform</h2>
+      <p>One of the earliest product boundaries remains important: Cohort15 is for assembling the group, not keeping it captive. Once enough people come together, they can move to Discord, Google Meet, Slack, or whatever tool suits them.</p>
+      <p>The product’s job is to make an intention visible, let interested people commit, and create a clear moment when the group is ready to begin.</p>
+
+      <h2>The original mechanics</h2>
+      <p>The first concept used a small credit payment as a filter. Creating a cohort would cost two credits, showing interest would cost one, and credits would be returned if the group failed to reach its target. A successful cohort would unlock a creator-provided meeting link.</p>
+      <p>The video also proposed publishing cohort requests across social networks so people could discover relevant groups where they already spent time instead of repeatedly checking another application.</p>
+
+      <h2>What stayed true</h2>
+      <ul>
+        <li>Groups should form around a concrete goal rather than generic networking.</li>
+        <li>Participants should understand the commitment before joining.</li>
+        <li>A quorum should turn scattered interest into a group that can begin.</li>
+        <li>Cohort15 should assemble people, then let them use their preferred tools.</li>
+        <li>The product should be treated as an experiment and public good, not as a claim that every assumption is already correct.</li>
+      </ul>
+
+      <h2>What changed in the validation MVP</h2>
+      <p>The current version tests the underlying demand before testing monetization or heavier filtering:</p>
+      <ul>
+        <li><strong>No credits, authentication, or payments.</strong> Creating a cohort and showing interest require only a private email address.</li>
+        <li><strong>Quorum instead of maximum membership.</strong> A creator chooses how many interested people are needed, from 1 through 15; interest closes when that threshold is reached.</li>
+        <li><strong>The meeting link is supplied at creation.</strong> It remains private until quorum is reached.</li>
+        <li><strong>No automated social publishing yet.</strong> Distribution is a separate assumption to test after the core formation flow.</li>
+        <li><strong>A seven-day interest window.</strong> Each request has a defined period in which to become viable.</li>
+      </ul>
+      <p>This smaller product asks a narrower question: will people publish focused group intentions, and will others commit when the goal, schedule, and quorum are visible?</p>
+
+      <h2>Why document the earlier version?</h2>
+      <p>Product ideas become more useful when their assumptions remain visible. The video records where Cohort15 started; the validation MVP records what was removed to obtain a clearer test. Future results may support bringing some mechanics back, changing them again, or discarding them permanently.</p>
+
+      <section class="article-cta" aria-labelledby="video-cta-title"><p class="eyebrow">The current experiment</p><h2 id="video-cta-title">See what Cohort15 is testing now.</h2><p>Explore the demand research behind the validation MVP, or publish a focused cohort request of your own.</p><div class="button-row"><a class="button-link" href="/cohorts/new">Create a cohort</a><a class="button-link secondary" href="${ARTICLE_PATH}">Read the research</a></div></section>
+    </article>
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
+}
+
+export { ARTICLE_PATH, VIDEO_ARTICLE_PATH };

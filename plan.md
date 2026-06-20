@@ -77,7 +77,7 @@ Exit: `cohort15.com` serves the verified lofi MVP and no production-MVP database
 Build now:
 
 - branded landing page with full listing and All/Active/Expired filters;
-- public Research & Field Notes index with first-party articles and clearly labeled external media;
+- public Research & Field Notes index with first-party articles, embedded video updates, and clearly labeled external media;
 - anonymous cohort creation with mandatory creator email;
 - anonymous email-only interest submission;
 - normalized duplicate prevention and creator exclusion;
