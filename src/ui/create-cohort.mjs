@@ -51,7 +51,7 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
     <link rel="stylesheet" href="/assets/styles.css">
   </head>
   <body>
-    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><span class="status-pill">Create</span></header>
+    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><span class="status-pill">Create</span></nav></header>
     <main class="shell form-shell">
       <p class="eyebrow">Anonymous cohort request</p>
       <h1>Create a focused cohort.</h1>

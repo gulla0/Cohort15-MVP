@@ -15,5 +15,6 @@
 | L008 | Complete lofi privacy, abuse, and end-to-end verification | done | yes | Integrated lifecycle/privacy/abuse gates passed; browser smoke found and verified the local-time formatter fix. |
 | L009 | Create isolated provider resources and deploy | not_started | yes | Pending human provider and DNS work. |
 | L010 | Run production lofi smoke test | not_started | no | Pending |
+| L011 | Add public Research & Field Notes editorial pages | done | yes | Index, stable research article, navigation, safe extensible entry rendering, and focused tests verified. |
 
 Next ready task: L009.

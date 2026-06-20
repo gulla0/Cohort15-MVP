@@ -129,3 +129,13 @@ Focused runtime configuration tests and the full 47-test repository suite passed
 - Found and fixed a browser-local time formatter exception by replacing the invalid `dateStyle`/`timeStyle` plus `timeZoneName` combination with explicit date/time fields.
 
 Focused launch tests and browser verification passed. L009 is next and requires the indexed human provider setup runbook.
+
+## 2026-06-20 — L011 Research & Field Notes
+
+- Added a public `/research` editorial index and integrated it into the landing, creation, and cohort-detail navigation.
+- Published an edited demand-research synthesis at `/research/why-small-committed-groups` with methodology, patterns, product implications, limitations, and cohort CTAs.
+- Excluded handles, outreach notes, internal scoring, source-detail links, and research-tool citation markers from the raw report.
+- Added a structured, escaped entry renderer with HTTP(S)-only external links and `/research/`-only internal routes for future articles, field notes, YouTube updates, and external publications.
+- Added responsive editorial styles, visible keyboard focus, semantic landmarks, labeled navigation, and focused route/rendering/privacy tests.
+
+Focused research and affected-route tests passed. The in-app browser connection was unavailable during visual verification; full repository verification is recorded in the change log. L009 remains next.

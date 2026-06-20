@@ -125,3 +125,13 @@ Verification: `node --test tests/runtime-config.test.mjs` passed with 6 tests; f
 - Verified desktop and mobile layouts in the local browser with no console errors or horizontal overflow.
 
 Verification: focused launch suites and local browser smoke passed; full `npm run check` passed with 50 tests.
+
+## 2026-06-20 — L011 public Research & Field Notes
+
+- Added `/research` as a first-party editorial index with explicit support for research, essays, field notes, product updates, and external publications.
+- Added `/research/why-small-committed-groups` as an edited public synthesis of the supplied demand-validation report.
+- Added site-wide research navigation and responsive editorial/article styling consistent with the existing visual system.
+- Added safe content escaping, constrained internal routes, HTTP(S)-only external links, semantic page structure, and visible keyboard focus.
+- Added focused server-route, rendering, privacy, accessibility, unknown-route, and unsafe-link tests.
+
+Verification: focused research and affected-route suites passed; full `npm run check` passed with 62 tests and 12 aligned tasks.

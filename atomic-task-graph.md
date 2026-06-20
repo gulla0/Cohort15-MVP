@@ -14,8 +14,9 @@ L000 Clean lofi application shell (done)
                            └─ L006 Resend notifications (done)
                                 └─ L007 Isolated production config/deployment (done)
                                      └─ L008 Privacy, abuse, and end-to-end verification (done)
-                                          └─ L009 Human provider setup and deployment (not_started)
-                                               └─ L010 Production smoke test (not_started)
+                                          ├─ L009 Human provider setup and deployment (not_started)
+                                          │    └─ L010 Production smoke test (not_started)
+                                          └─ L011 Research & Field Notes pages (done)
 ```
 
 ## Atomic Task Contracts
@@ -104,6 +105,14 @@ L000 Clean lofi application shell (done)
 - Owns: deployed-flow verification and closeout evidence
 - Delivers: verified production flow, emails, database isolation, analytics, HTTPS/domain behavior
 - Stops on: passing launch gate or documented launch blocker
+
+### L011 — Add public Research & Field Notes editorial pages
+
+- Depends on: L008
+- Status: done
+- Owns: research index/article rendering, public routes/navigation/styles, focused tests
+- Delivers: `/research`, a stable public demand-research synthesis, and a safe content model for later field notes, video updates, and external publications
+- Stops before: publishing any YouTube entry without the user-supplied transcript and URL
 
 ## Execution Rules
 

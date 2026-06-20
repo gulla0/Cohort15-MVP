@@ -16,6 +16,8 @@ Next ready task: L009.
 |---|---|---|
 | L009 | L008 is complete and every current input exists | Follow the indexed human setup runbook for isolated provider resources and deployment. |
 
+L011, the user-approved Research & Field Notes change wave, is complete and does not alter the L009 → L010 deployment critical path.
+
 ## Known Parallelism
 
 None. The lofi critical path is intentionally linear so each implementation chat has one unambiguous next task and shared server/UI files never receive concurrent edits.

@@ -514,6 +514,50 @@
       "stop_condition": "Stop when the production smoke passes or launch blockers are documented precisely.",
       "evidence": "Pending.",
       "notes": "Final lofi launch gate."
+    },
+    {
+      "id": "L011",
+      "title": "Add public Research & Field Notes editorial pages",
+      "status": "done",
+      "phase": "Public Product Flow",
+      "dependencies": [
+        "L008"
+      ],
+      "objective": "Add a first-party editorial index and publish a privacy-safe synthesis of the Cohort15 demand-validation research.",
+      "inputs": [
+        "/Users/gzero/Desktop/cohort15/Marketing/idea-validation-research /deep-research-report.md",
+        "src/server/app.mjs",
+        "src/ui/home.mjs",
+        "src/ui/styles.css"
+      ],
+      "write_scope": [
+        "src/ui/research.mjs",
+        "src/server/app.mjs",
+        "public page navigation and styles",
+        "tests/research.test.mjs",
+        "workflow tracker alignment"
+      ],
+      "authority": [
+        "Publish an edited synthesis, not the raw report.",
+        "Exclude public handles, outreach notes, internal scores, and research-tool citation markers.",
+        "Support future article, field note, YouTube update, and external publication entries without inventing unavailable URLs or transcripts.",
+        "Preserve the dependency-free Node/ESM and server-rendered architecture."
+      ],
+      "acceptance_criteria": [
+        "GET /research renders an editorial index integrated into public navigation.",
+        "A stable /research/... route hosts methodology, patterns, limitations, product implications, and a cohort CTA.",
+        "The index communicates supported content types without placeholder external links.",
+        "Entry rendering escapes public content and rejects unsafe internal or external links.",
+        "Focused route, rendering, accessibility, privacy, and escaping tests pass.",
+        "npm run check passes."
+      ],
+      "verification": [
+        "Run node --test tests/research.test.mjs",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop when the public editorial surface and first research synthesis are verified without requiring YouTube content input.",
+      "evidence": "2026-06-20: /research index, stable demand-research article, site navigation, responsive styles, safe extensible entry renderer, and focused route/privacy/accessibility tests implemented.",
+      "notes": "Complete. Future YouTube entries still require the user-supplied transcript and URL. L009 remains the next ready deployment task."
     }
   ]
 }

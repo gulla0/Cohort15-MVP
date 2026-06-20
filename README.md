@@ -4,6 +4,8 @@ This branch prepares a lightweight public validation product before the authenti
 
 Visitors will be able to create cohort requests or show interest with a mandatory private email. A cohort's approved meeting link becomes public at quorum. Listings collect interest for seven days and remain browsable afterward.
 
+The public `/research` collection hosts Cohort15 research, essays, field notes, and written product updates. Its first article is an edited synthesis of public demand signals for small, committed groups.
+
 ## Setup Status
 
 The complete local lofi product flow, isolated production configuration, and privacy/abuse/end-to-end launch gate are implemented and verified. External provider setup and deployment are next; no production-MVP runtime code remains in this branch.
@@ -17,7 +19,7 @@ The complete local lofi product flow, isolated production configuration, and pri
 
 Next ready task: L009.
 
-The lofi specification and L001–L010 task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
+The lofi specification and task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, editorial, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
 
 ## Intended Stack
 
