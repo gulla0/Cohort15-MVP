@@ -21,8 +21,8 @@ import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 import { renderCohortDetailPage } from '../ui/cohorts.mjs';
 import {
-  ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
-  renderOriginalProductThesisPage, renderResearchIndexPage,
+  ARTICLE_PATH, FORMATION_ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
+  renderFormationFieldNotePage, renderOriginalProductThesisPage, renderResearchIndexPage,
 } from '../ui/research.mjs';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -185,6 +185,13 @@ export function createRequestHandler(options = {}) {
 
     if (method === 'GET' && url.pathname === VIDEO_ARTICLE_PATH) {
       send(res, 200, 'text/html; charset=utf-8', renderOriginalProductThesisPage({
+        googleAnalyticsId: config.googleAnalyticsId,
+      }));
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === FORMATION_ARTICLE_PATH) {
+      send(res, 200, 'text/html; charset=utf-8', renderFormationFieldNotePage({
         googleAnalyticsId: config.googleAnalyticsId,
       }));
       return;

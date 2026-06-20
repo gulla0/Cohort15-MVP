@@ -2,9 +2,17 @@ import { analyticsMarkup } from './analytics.mjs';
 
 const ARTICLE_PATH = '/research/why-small-committed-groups';
 const VIDEO_ARTICLE_PATH = '/research/introducing-cohort15-original-product-thesis';
+const FORMATION_ARTICLE_PATH = '/research/testing-how-small-groups-form';
 const YOUTUBE_URL = 'https://www.youtube.com/watch?v=E5f-qqNILlg&t=4s';
 
 export const RESEARCH_ENTRIES = Object.freeze([
+  Object.freeze({
+    type: 'Field note',
+    title: 'How Cohort15 is testing small-group formation',
+    summary: 'The formation loop, manual experiments, and modest success criteria guiding the next phase of Cohort15.',
+    publishedAt: '2026-06-20',
+    href: FORMATION_ARTICLE_PATH,
+  }),
   Object.freeze({
     type: 'Product update',
     title: 'Introducing Cohort15: The original product thesis',
@@ -210,4 +218,61 @@ export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLD
   </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
 }
 
-export { ARTICLE_PATH, VIDEO_ARTICLE_PATH };
+export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
+  return `${pageStart({
+    title: 'How Cohort15 is testing small-group formation',
+    description: 'The formation loop and manual experiments guiding the next phase of Cohort15.',
+    googleAnalyticsId,
+  })}<main class="shell article-shell">
+    <a class="text-link" href="/research">← All research &amp; field notes</a>
+    <header class="article-header"><p class="eyebrow">Field note</p><h1>How Cohort15 is testing small-group formation</h1><p class="lede">The next phase is not about building a large community. It is about learning whether scattered intent can become a small group that actually starts.</p><div class="article-byline"><span>By Cohort15</span><time datetime="2026-06-20">June 20, 2026</time><span>6 min read</span></div></header>
+    <article class="article-body">
+      <p class="article-intro">The internet has plenty of places to talk. The harder problem is finding a few people pursuing a similar goal, on a compatible schedule, with enough commitment to keep the group from disappearing after two days.</p>
+
+      <h2>The problem is formation, not community</h2>
+      <p>Early research found repeated requests for coding peers, interview-practice partners, job-search check-ins, founder accountability, writing circles, study groups, and reliable gaming squads. Across those use cases, people were rarely asking for another broad community. They wanted a few serious peers who would show up.</p>
+      <p>Large communities remain useful for discovery and advice, but membership alone does not create cadence or commitment. Cohort15 is testing the gap between expressing an intention and assembling a group that can begin.</p>
+
+      <blockquote><p>The working question is simple: can scattered intent become a real group?</p></blockquote>
+
+      <h2>What the current product tests</h2>
+      <p>The live validation MVP lets anyone publish a focused cohort request with a public goal, schedule, recurrence, and quorum. Interested people respond with a private email address. The meeting link stays private until enough people commit, and each request has seven days to reach that threshold.</p>
+      <p>This is deliberately smaller than the original product vision. There is no authentication, payment, credit system, or automated social distribution. The immediate signal is whether someone will propose a group or join one when its commitment is visible—not whether they will like a post or enter a generic waitlist.</p>
+
+      <h2>The formation loop</h2>
+      <p>The next experiments follow a short loop:</p>
+      <ol>
+        <li>Someone expresses a concrete intent.</li>
+        <li>That intent becomes a public group request.</li>
+        <li>The request reaches people likely to care.</li>
+        <li>A few people commit with the schedule and goal in view.</li>
+        <li>The group starts, narrows, changes, or expires.</li>
+      </ol>
+      <p>Failure is useful here. An intent that attracts polite attention but no commitment may be too broad, poorly timed, or simply weak. The product should reveal that rather than manufacture activity.</p>
+
+      <h2>Why the next learning will be manual</h2>
+      <p>Public creation is already available, but early distribution and follow-up can remain hands-on. If someone is looking for coding accountability, job-search peers, or an AI learning group, we can carefully test whether that request belongs with an existing cohort or should become a new one.</p>
+      <p>Manual work exposes distinctions software can hide: one partner versus a small group, live calls versus asynchronous check-ins, a strict curriculum versus shared momentum, or a broad theme versus a tightly defined outcome. Those answers matter more than automating an unproven routing system.</p>
+
+      <h2>Admin-hosted intents as probes</h2>
+      <p>One proposed experiment is for Cohort15 to publish a few simple requests—such as coding accountability, a learning group, or job-search accountability—rather than waiting for every request to originate with a visitor. These would be research probes, not polished cohort products.</p>
+      <p>A broad request may attract enough people to reveal the specific group they need. “Coding accountability” might separate into DSA practice, shipping one project, or learning TypeScript. It may also prove that broad intents do not work. Either result would improve the next test. This capability is not part of the current automated product flow; it is a prospective manual experiment.</p>
+
+      <h2>Distribution needs permission</h2>
+      <p>Group requests only work when relevant people see them. Early distribution may use direct outreach, email, Cohort15’s own site, or appropriate posts on existing networks. The standard is permission and relevance: people should opt in to hear about topics they care about, not receive indiscriminate promotion.</p>
+      <p>Over time, that could become a subscription layer for coding, learning, job-search, or founder requests. For now, the goal is to learn which signals are worth routing before building feeds or notification infrastructure.</p>
+
+      <h2>What success looks like now</h2>
+      <p>Success is not thousands of users or a busy content feed. A meaningful early result is helping one small group—often four to eight people—gather around the same intent and begin. Attendance and continuation matter more than raw interest.</p>
+      <p>The questions are practical: Do people join? Do they show up? Are broad intents useful, or must requests be specific from the start? Do people want Cohort15 to define the group, or do they prefer to propose their own?</p>
+
+      <h2>What remains open</h2>
+      <p>Cohort15 is not assuming the final product is a marketplace, social network, paid commitment system, or highly structured cohort platform. It is not assuming the first niche is already obvious. Those are downstream choices.</p>
+      <p>The current job is to find the smallest formation loop that works: one person wants a group, a few matching people find it, enough people commit, and the group starts. We will share what attracts real commitment, what remains too vague, and what changes as those experiments run.</p>
+
+      <section class="article-cta" aria-labelledby="formation-cta-title"><p class="eyebrow">Join the experiment</p><h2 id="formation-cta-title">Put a real intent into the loop.</h2><p>Publish the group you want to form, or browse current requests and decide whether one is worth showing up for.</p><div class="button-row"><a class="button-link" href="/cohorts/new">Create a cohort</a><a class="button-link secondary" href="/#cohorts">Browse cohorts</a></div></section>
+    </article>
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
+}
+
+export { ARTICLE_PATH, FORMATION_ARTICLE_PATH, VIDEO_ARTICLE_PATH };

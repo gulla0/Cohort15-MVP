@@ -148,3 +148,13 @@ Focused research and affected-route tests passed. The in-app browser connection 
 - Published the supplied video with a privacy-enhanced embed, direct YouTube link, written summary, explicit “what stayed true” and “what changed” sections, and current-product CTAs.
 
 Focused research and full repository verification passed. L009 remains next.
+
+## 2026-06-20 — L013 small-group formation field note
+
+- Reviewed the supplied draft against the current research collection and implemented MVP behavior.
+- Condensed the draft into a six-minute field note while preserving its formation-loop thesis, manual-learning plan, admin-hosted-intent experiment, permissioned-distribution idea, and modest success criteria.
+- Corrected the draft's earlier-state framing so public creation, visible schedule/quorum, private interest, meeting-link gating, and the seven-day window are described accurately.
+- Explicitly labeled admin-hosted intents, subscriptions, and automated routing as proposed experiments rather than existing features.
+- Added the index entry, stable route, CTA, and focused content-boundary and route coverage without changing product behavior or human-operation documentation.
+
+Focused research verification passed. L009 remains next.

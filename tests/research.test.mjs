@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 
 import { createRequestHandler } from '../src/server/app.mjs';
 import {
-  ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
-  renderOriginalProductThesisPage, renderResearchCard, renderResearchIndexPage,
+  ARTICLE_PATH, FORMATION_ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
+  renderFormationFieldNotePage, renderOriginalProductThesisPage, renderResearchCard,
+  renderResearchIndexPage,
 } from '../src/ui/research.mjs';
 
 const config = Object.freeze({
@@ -35,9 +36,28 @@ test('research index presents the editorial model and supplied product video', (
   assert.match(html, /Research[\s\S]+Essays[\s\S]+Field notes[\s\S]+Product updates[\s\S]+External publications/);
   assert.match(html, new RegExp(`href="${ARTICLE_PATH}"`));
   assert.match(html, new RegExp(`href="${VIDEO_ARTICLE_PATH}"`));
+  assert.match(html, new RegExp(`href="${FORMATION_ARTICLE_PATH}"`));
   assert.match(html, /Introducing Cohort15: The original product thesis/);
+  assert.match(html, /How Cohort15 is testing small-group formation/);
   assert.match(html, /G-TEST/);
   assert.doesNotMatch(html, /medium\.com/i);
+});
+
+test('formation field note preserves the draft thesis and separates current behavior from proposed experiments', () => {
+  const html = renderFormationFieldNotePage({ googleAnalyticsId: 'G-TEST' });
+
+  for (const expected of [
+    'The problem is formation, not community', 'What the current product tests',
+    'The formation loop', 'Why the next learning will be manual',
+    'Admin-hosted intents as probes', 'Distribution needs permission',
+    'What success looks like now', 'What remains open',
+  ]) assert.match(html, new RegExp(expected));
+  assert.match(html, /This capability is not part of the current automated product flow/);
+  assert.match(html, /seven days to reach that threshold/);
+  assert.match(html, /There is no authentication, payment, credit system, or automated social distribution/);
+  assert.match(html, /Create a cohort/);
+  assert.match(html, /Browse cohorts/);
+  assert.doesNotMatch(html, /already proven|guaranteed to work/i);
 });
 
 test('product update embeds the supplied video and distinguishes original and current mechanics', () => {
@@ -90,6 +110,7 @@ test('GET research routes render through the server and preserve unknown-route 4
   const index = await invoke(handler, '/research');
   const article = await invoke(handler, ARTICLE_PATH);
   const videoArticle = await invoke(handler, VIDEO_ARTICLE_PATH);
+  const formationArticle = await invoke(handler, FORMATION_ARTICLE_PATH);
   const missing = await invoke(handler, '/research/not-published');
 
   assert.equal(index.status, 200);
@@ -98,5 +119,7 @@ test('GET research routes render through the server and preserve unknown-route 4
   assert.match(article.body, /commitment density/i);
   assert.equal(videoArticle.status, 200);
   assert.match(videoArticle.body, /original product thesis/i);
+  assert.equal(formationArticle.status, 200);
+  assert.match(formationArticle.body, /scattered intent[^.]+real group/i);
   assert.equal(missing.status, 404);
 });

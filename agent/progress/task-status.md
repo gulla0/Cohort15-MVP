@@ -17,5 +17,6 @@
 | L010 | Run production lofi smoke test | not_started | no | Pending |
 | L011 | Add public Research & Field Notes editorial pages | done | yes | Index, stable research article, navigation, safe extensible entry rendering, and focused tests verified. |
 | L012 | Publish the original Cohort15 product thesis video update | done | yes | Supplied video, transcript-derived article, original-vs-current framing, embed safety, and focused tests verified. |
+| L013 | Publish the small-group formation field note | done | yes | Draft condensed into a current-state field note with proposed experiments clearly separated from implemented behavior; focused tests passed. |
 
 Next ready task: L009.

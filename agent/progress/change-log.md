@@ -144,3 +144,13 @@ Verification: focused research and affected-route suites passed; full `npm run c
 - Added a privacy-enhanced video embed, safe direct YouTube link, responsive styling, current-product CTAs, and focused route/rendering tests.
 
 Verification: focused research tests passed; full `npm run check` passed with 63 tests and 13 aligned tasks.
+
+## 2026-06-20 — L013 small-group formation field note
+
+- Added “How Cohort15 is testing small-group formation” to the Research & Field Notes index.
+- Reworked the supplied long-form draft into a concise first-party field note consistent with the collection's editorial structure and tone.
+- Preserved the formation loop, manual-learning approach, admin-hosted-intent probes, permissioned distribution, success criteria, and open assumptions.
+- Updated earlier-state language to match the implemented MVP and clearly separated current behavior from prospective experiments.
+- Added a stable public route and focused index, rendering, content-boundary, and server-route tests.
+
+Verification: `node --test tests/research.test.mjs` passed with 6 tests; full `npm run check` passed with 64 tests and 14 aligned tasks.

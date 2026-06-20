@@ -18,6 +18,7 @@ L000 Clean lofi application shell (done)
                                           │    └─ L010 Production smoke test (not_started)
                                           └─ L011 Research & Field Notes pages (done)
                                                └─ L012 Original product thesis video update (done)
+                                                    └─ L013 Small-group formation field note (done)
 ```
 
 ## Atomic Task Contracts
@@ -122,6 +123,14 @@ L000 Clean lofi application shell (done)
 - Owns: product-update article, supplied YouTube embed/link, transcript-derived summary, explicit current-vs-original framing, focused tests
 - Delivers: a stable first-party video update that preserves the founder story and original thesis without presenting retired mechanics as current behavior
 - Stops before: reintroducing credits, payments, maximum membership, or automated social publishing into the validation MVP
+
+### L013 — Publish the small-group formation field note
+
+- Depends on: L012
+- Status: done
+- Owns: edited field-note article, research index entry, public route, focused tests, workflow alignment
+- Delivers: a concise account of the current formation thesis, implemented MVP, proposed manual experiments, success criteria, and open assumptions
+- Stops before: adding admin-created cohorts, subscription infrastructure, automated distribution, or claiming unobserved results
 
 ## Execution Rules
 

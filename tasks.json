@@ -603,6 +603,48 @@
       "stop_condition": "Stop when the supplied video update is published and verified without introducing legacy product behavior into the runtime.",
       "evidence": "2026-06-20: supplied video embedded through YouTube's privacy-enhanced domain; transcript-derived founder story, original mechanics, explicit MVP changes, and focused route/rendering tests added.",
       "notes": "Complete. L009 remains the next ready deployment task."
+    },
+    {
+      "id": "L013",
+      "title": "Publish the small-group formation field note",
+      "status": "done",
+      "phase": "Public Product Flow",
+      "dependencies": [
+        "L012"
+      ],
+      "objective": "Edit the supplied draft into a concise first-party article about how Cohort15 is testing small-group formation and publish it in the existing Research & Field Notes collection.",
+      "inputs": [
+        "/Users/gzero/.codex/attachments/bebd309c-3639-448a-b2d0-bade32e29799/pasted-text.txt",
+        "src/ui/research.mjs",
+        "src/server/app.mjs",
+        "tests/research.test.mjs"
+      ],
+      "write_scope": [
+        "src/ui/research.mjs",
+        "src/server/app.mjs",
+        "tests/research.test.mjs",
+        "workflow tracker alignment"
+      ],
+      "authority": [
+        "Preserve the draft's core argument about testing the smallest viable group-formation loop.",
+        "Tighten the draft to match the tone, structure, and length of existing first-party articles.",
+        "Describe the current implemented MVP accurately and distinguish current behavior from future manual-routing, admin-hosted-intent, and permissioned-distribution experiments.",
+        "Do not add product behavior, external provider work, credentials, or invented results."
+      ],
+      "acceptance_criteria": [
+        "The research index lists the new article without replacing existing entries.",
+        "A stable /research/... route publishes a concise edited article with the draft's group-formation thesis, next experiments, success criteria, and explicit non-assumptions.",
+        "Current product behavior and proposed experiments cannot reasonably be confused.",
+        "Focused index, route, rendering, content-boundary, and unknown-route tests pass.",
+        "npm run check passes."
+      ],
+      "verification": [
+        "Run node --test tests/research.test.mjs",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop when the edited article is published, verified, and represented in the canonical workflow trackers.",
+      "evidence": "2026-06-20: supplied draft condensed into a first-party field note, current product behavior separated from proposed manual experiments, stable route and index entry added, and focused tests passed.",
+      "notes": "Complete. L009 remains the next ready deployment task."
     }
   ]
 }

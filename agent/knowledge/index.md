@@ -34,7 +34,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L002 provides local repositories, a server-only PostgREST adapter, and isolated `cohort15_lofi_*` tables/RPC. |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L003 provides anonymous creation, private normalized email, timezone capture, request guards, honeypot, and five-success IP limiting. |
 | Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | L004 provides landing-page listings, filters, detail lifecycle views, browser-local times, public quorum progress, and safely gated meeting links. |
-| Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | L011–L012 provide `/research`, a stable demand-research article, and a supplied-video product update that explicitly separates original mechanics from the current MVP. |
+| Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | L011–L013 provide `/research`, a stable demand-research article, a supplied-video product update, and a current field note that separates implemented behavior from proposed formation experiments. |
 | Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L005 provides normalized email-only interest, guarded mutations, ten-success IP limiting, and atomic public link unlock. |
 | Email | `src/email/resend.mjs`, `src/services/notifications.mjs` | Resend adapter and idempotent creator, participant, and per-recipient quorum notification orchestration. |
 | Tests | `tests/*.test.mjs`, Node test runner | Full lofi integration, privacy, abuse, concurrency, notification-idempotency, and launch verification are covered. |
@@ -79,4 +79,4 @@ Git history contains the later production MVP. It must not override the lofi spe
 - L007 isolated production configuration completed on 2026-06-18 with required lofi-only environment values, Supabase production selection, Render/env documentation, and no local production fallback.
 - L008 local launch verification completed on 2026-06-18 with integrated lifecycle, privacy, abuse, absent-route, responsive-browser, and console-error coverage; the browser-local formatter uses explicit date/time fields because `dateStyle`/`timeStyle` cannot be combined with `timeZoneName`.
 - Next ready task: L009.
-- L011 public Research & Field Notes pages and L012 original-product-thesis video update completed on 2026-06-20.
+- L011 public Research & Field Notes pages, L012 original-product-thesis video update, and L013 small-group formation field note completed on 2026-06-20.
