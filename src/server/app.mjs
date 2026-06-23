@@ -228,7 +228,7 @@ export function createRequestHandler(options = {}) {
     if (socialImageMatch) {
       try {
         const cohort = await eventBrowsing.getById(decodeURIComponent(socialImageMatch[1]));
-        send(res, 200, 'image/png', renderCohortSocialPng(cohort), {
+        send(res, 200, 'image/png', await renderCohortSocialPng(cohort), {
           'cache-control': 'public, max-age=300',
         });
       } catch (error) {
