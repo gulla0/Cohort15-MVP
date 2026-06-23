@@ -24,7 +24,18 @@ function cohort(overrides = {}) {
 function invoke(handler, url = '/') {
   return new Promise((resolve, reject) => {
     const req = { url, method: 'GET', headers: {} };
-    const response = { status: 0, headers: {}, body: '', writeHead(status, headers) { this.status = status; this.headers = headers; }, end(body = '') { this.body = String(body); resolve(this); } };
+    const response = {
+      status: 0,
+      headers: {},
+      body: '',
+      rawBody: Buffer.alloc(0),
+      writeHead(status, headers) { this.status = status; this.headers = headers; },
+      end(body = '') {
+        this.rawBody = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+        this.body = this.rawBody.toString('utf8');
+        resolve(this);
+      },
+    };
     Promise.resolve(handler(req, response)).catch(reject);
   });
 }
@@ -69,20 +80,19 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.match(detail.body, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(detail.body, /<meta property="og:title" content="Older active &lt;test&gt; \| Cohort15">/);
   assert.match(detail.body, /<meta property="og:url" content="http:\/\/localhost:3000\/cohorts\/b-active">/);
-  assert.match(detail.body, /<meta property="og:image" content="http:\/\/localhost:3000\/cohorts\/b-active\/social-image\.svg">/);
+  assert.match(detail.body, /<meta property="og:image" content="http:\/\/localhost:3000\/cohorts\/b-active\/social-image\.png">/);
+  assert.match(detail.body, /<meta property="og:image:type" content="image\/png">/);
   assert.match(detail.body, /Older active &lt;test&gt;/);
   assert.match(detail.body, /Times are converted by your browser and shown in your local timezone/);
   assert.match(detail.body, /Duration<\/dt><dd>60 minutes/);
   assert.doesNotMatch(detail.body, /private@example\.com|meet\.google\.com/);
 
-  const socialImage = await invoke(handler, '/cohorts/b-active/social-image.svg');
+  const socialImage = await invoke(handler, '/cohorts/b-active/social-image.png');
   assert.equal(socialImage.status, 200);
-  assert.match(socialImage.headers['content-type'], /image\/svg\+xml/);
+  assert.match(socialImage.headers['content-type'], /image\/png/);
   assert.match(socialImage.headers['cache-control'], /max-age=300/);
-  assert.match(socialImage.body, /width="1200" height="630"/);
-  assert.match(socialImage.body, /Older active &lt;test&gt;/);
-  assert.match(socialImage.body, /Build cohort/);
-  assert.match(socialImage.body, /0 of 3 interested/);
+  assert.deepEqual([...socialImage.rawBody.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.ok(socialImage.rawBody.length > 1000);
   assert.doesNotMatch(socialImage.body, /private@example\.com|meet\.google\.com/);
 
   assert.equal((await invoke(handler, '/cohorts')).status, 302);

@@ -1,3 +1,5 @@
+import { deflateSync } from 'node:zlib';
+
 function escapeXml(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -6,6 +8,52 @@ function escapeXml(value) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;');
 }
+
+const PNG_WIDTH = 1200;
+const PNG_HEIGHT = 630;
+const GLYPHS = Object.freeze({
+  A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+  C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+  E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  G: ['01111', '10000', '10000', '10111', '10001', '10001', '01111'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+  I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+  J: ['00111', '00010', '00010', '00010', '00010', '10010', '01100'],
+  K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+  M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
+  N: ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
+  O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
+  R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+  S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+  V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+  W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
+  X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+  Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
+  0: ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+  1: ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  2: ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  3: ['11110', '00001', '00001', '01110', '00001', '00001', '11110'],
+  4: ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+  5: ['11111', '10000', '10000', '11110', '00001', '00001', '11110'],
+  6: ['01111', '10000', '10000', '11110', '10001', '10001', '01110'],
+  7: ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+  8: ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
+  9: ['01110', '10001', '10001', '01111', '00001', '00001', '11110'],
+  ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
+  '-': ['00000', '00000', '00000', '11111', '00000', '00000', '00000'],
+  '/': ['00001', '00001', '00010', '00100', '01000', '10000', '10000'],
+  '&': ['01100', '10010', '10100', '01000', '10101', '10010', '01101'],
+  '.': ['00000', '00000', '00000', '00000', '00000', '01100', '01100'],
+});
 
 function label(value) {
   return String(value ?? '').replaceAll('-', ' ').replace(/\b\w/gu, (character) => character.toUpperCase());
@@ -59,6 +107,110 @@ function scheduleLabel(cohort) {
 export function cohortSocialDescription(cohort) {
   const summary = plainText(cohort.description).slice(0, 180).replace(/\s+\S*$/u, '');
   return summary || `A ${label(cohort.category).toLowerCase()} cohort for ${plainText(cohort.topic)}.`;
+}
+
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let index = 0; index < 8; index += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type, data) {
+  const typeBuffer = Buffer.from(type, 'ascii');
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length);
+  const checksum = Buffer.alloc(4);
+  checksum.writeUInt32BE(crc32(Buffer.concat([typeBuffer, data])));
+  return Buffer.concat([length, typeBuffer, data, checksum]);
+}
+
+function setPixel(pixels, x, y, [red, green, blue]) {
+  if (x < 0 || x >= PNG_WIDTH || y < 0 || y >= PNG_HEIGHT) return;
+  const offset = (y * PNG_WIDTH + x) * 3;
+  pixels[offset] = red;
+  pixels[offset + 1] = green;
+  pixels[offset + 2] = blue;
+}
+
+function fillRect(pixels, x, y, width, height, color) {
+  for (let row = Math.max(0, y); row < Math.min(PNG_HEIGHT, y + height); row += 1) {
+    for (let column = Math.max(0, x); column < Math.min(PNG_WIDTH, x + width); column += 1) {
+      setPixel(pixels, column, row, color);
+    }
+  }
+}
+
+function drawText(pixels, text, x, y, scale, color) {
+  const normalized = plainText(text).toUpperCase().replace(/[^A-Z0-9:./& -]/gu, '');
+  let cursor = x;
+  for (const character of normalized) {
+    if (character === ' ') {
+      cursor += scale * 4;
+      continue;
+    }
+    const glyph = GLYPHS[character] ?? GLYPHS['-'];
+    for (let row = 0; row < glyph.length; row += 1) {
+      for (let column = 0; column < glyph[row].length; column += 1) {
+        if (glyph[row][column] === '1') {
+          fillRect(pixels, cursor + column * scale, y + row * scale, scale, scale, color);
+        }
+      }
+    }
+    cursor += scale * 6;
+  }
+}
+
+function encodePng(pixels) {
+  const scanlineLength = PNG_WIDTH * 3 + 1;
+  const raw = Buffer.alloc(scanlineLength * PNG_HEIGHT);
+  for (let y = 0; y < PNG_HEIGHT; y += 1) {
+    const rawOffset = y * scanlineLength;
+    raw[rawOffset] = 0;
+    pixels.copy(raw, rawOffset + 1, y * PNG_WIDTH * 3, (y + 1) * PNG_WIDTH * 3);
+  }
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(PNG_WIDTH, 0);
+  header.writeUInt32BE(PNG_HEIGHT, 4);
+  header[8] = 8;
+  header[9] = 2;
+  header[10] = 0;
+  header[11] = 0;
+  header[12] = 0;
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk('IHDR', header),
+    pngChunk('IDAT', deflateSync(raw)),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+export function renderCohortSocialPng(cohort) {
+  const pixels = Buffer.alloc(PNG_WIDTH * PNG_HEIGHT * 3, 247);
+  fillRect(pixels, 0, 0, PNG_WIDTH, PNG_HEIGHT, [238, 246, 240]);
+  fillRect(pixels, 54, 52, 1092, 526, [255, 255, 255]);
+  fillRect(pixels, 54, 52, 1092, 16, [71, 146, 117]);
+  fillRect(pixels, 78, 76, 1044, 478, [250, 253, 250]);
+  fillRect(pixels, 720, 346, 350, 154, [18, 53, 43]);
+
+  const titleLines = wrapText(cohort.title, { maxCharacters: 27, maxLines: 3 });
+  const topicLines = wrapText(cohort.topic, { maxCharacters: 41, maxLines: 2 });
+  drawText(pixels, 'Cohort15', 88, 104, 7, [18, 53, 43]);
+  drawText(pixels, `${label(cohort.category)} cohort`, 88, 154, 5, [29, 111, 88]);
+  titleLines.forEach((line, index) => drawText(pixels, line, 88, 210 + index * 58, 9, [16, 36, 31]));
+  drawText(pixels, 'Topic', 90, 402, 4, [90, 113, 105]);
+  topicLines.forEach((line, index) => drawText(pixels, line, 90, 438 + index * 36, 5, [56, 85, 76]));
+  drawText(pixels, 'Quorum progress', 754, 386, 4, [185, 218, 205]);
+  drawText(pixels, `${cohort.interestCount} of ${cohort.minQuorum}`, 754, 430, 6, [255, 255, 255]);
+  fillRect(pixels, 754, 466, 244, 12, [54, 88, 76]);
+  fillRect(pixels, 754, 466, Math.max(12, Math.round((cohort.interestCount / cohort.minQuorum) * 244)), 12, [90, 208, 160]);
+  drawText(pixels, scheduleLabel(cohort), 88, 532, 4, [37, 69, 59]);
+  drawText(pixels, 'cohort15.com', 862, 532, 4, [90, 113, 105]);
+  return encodePng(pixels);
 }
 
 export function renderCohortSocialImage(cohort) {

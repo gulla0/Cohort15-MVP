@@ -20,7 +20,7 @@ import {
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 import { renderCohortDetailPage } from '../ui/cohorts.mjs';
-import { renderCohortSocialImage } from '../ui/social-image.mjs';
+import { renderCohortSocialImage, renderCohortSocialPng } from '../ui/social-image.mjs';
 import {
   ARTICLE_PATH, FORMATION_ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
   renderFormationFieldNotePage, renderOriginalProductThesisPage, renderResearchIndexPage,
@@ -224,10 +224,24 @@ export function createRequestHandler(options = {}) {
       return;
     }
 
-    const socialImageMatch = method === 'GET' ? /^\/cohorts\/([^/]+)\/social-image\.svg$/u.exec(url.pathname) : null;
+    const socialImageMatch = method === 'GET' ? /^\/cohorts\/([^/]+)\/social-image\.png$/u.exec(url.pathname) : null;
     if (socialImageMatch) {
       try {
         const cohort = await eventBrowsing.getById(decodeURIComponent(socialImageMatch[1]));
+        send(res, 200, 'image/png', renderCohortSocialPng(cohort), {
+          'cache-control': 'public, max-age=300',
+        });
+      } catch (error) {
+        if (error instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+        else throw error;
+      }
+      return;
+    }
+
+    const socialSvgMatch = method === 'GET' ? /^\/cohorts\/([^/]+)\/social-image\.svg$/u.exec(url.pathname) : null;
+    if (socialSvgMatch) {
+      try {
+        const cohort = await eventBrowsing.getById(decodeURIComponent(socialSvgMatch[1]));
         send(res, 200, 'image/svg+xml; charset=utf-8', renderCohortSocialImage(cohort), {
           'cache-control': 'public, max-age=300',
         });

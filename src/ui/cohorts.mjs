@@ -98,7 +98,7 @@ function metaTag(name, content, { property = false } = {}) {
 function cohortSocialMeta(cohort, { appUrl = 'http://localhost:3000' } = {}) {
   const path = `/cohorts/${encodeURIComponent(cohort.id)}`;
   const url = absoluteUrl(appUrl, path);
-  const image = absoluteUrl(appUrl, `${path}/social-image.svg`);
+  const image = absoluteUrl(appUrl, `${path}/social-image.png`);
   const title = `${cohort.title} | Cohort15`;
   const description = cohortSocialDescription(cohort);
   return [
@@ -109,7 +109,7 @@ function cohortSocialMeta(cohort, { appUrl = 'http://localhost:3000' } = {}) {
     metaTag('og:description', description, { property: true }),
     metaTag('og:url', url, { property: true }),
     metaTag('og:image', image, { property: true }),
-    metaTag('og:image:type', 'image/svg+xml', { property: true }),
+    metaTag('og:image:type', 'image/png', { property: true }),
     metaTag('og:image:width', '1200', { property: true }),
     metaTag('og:image:height', '630', { property: true }),
     metaTag('twitter:card', 'summary_large_image'),
