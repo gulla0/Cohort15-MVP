@@ -95,17 +95,34 @@ function metaTag(name, content, { property = false } = {}) {
   return `<meta ${attribute}="${escapeHtml(name)}" content="${escapeHtml(content)}">`;
 }
 
+function truncateText(value, maximumLength) {
+  const text = String(value ?? '').replace(/\s+/gu, ' ').trim();
+  if (text.length <= maximumLength) return text;
+  const clipped = text.slice(0, Math.max(0, maximumLength - 1)).replace(/\s+\S*$/u, '').trim();
+  return `${clipped || text.slice(0, maximumLength - 1).trim()}…`;
+}
+
+function metadataTitle(cohort, maximumLength) {
+  const title = String(cohort.title ?? '').trim();
+  const branded = `${title} | Cohort15`;
+  if (branded.length <= maximumLength) return branded;
+
+  const suffix = ' | Cohort15';
+  return `${truncateText(title, maximumLength - suffix.length)}${suffix}`;
+}
+
 function cohortSocialMeta(cohort, { appUrl = 'http://localhost:3000' } = {}) {
   const path = `/cohorts/${encodeURIComponent(cohort.id)}`;
   const url = absoluteUrl(appUrl, path);
   const image = absoluteUrl(appUrl, `${path}/social-image.png`);
-  const title = `${cohort.title} | Cohort15`;
-  const description = cohortSocialDescription(cohort);
+  const searchTitle = metadataTitle(cohort, 60);
+  const socialTitle = metadataTitle(cohort, 70);
+  const description = truncateText(cohortSocialDescription(cohort), 125);
   return [
     metaTag('description', description),
     metaTag('og:type', 'article', { property: true }),
     metaTag('og:site_name', 'Cohort15', { property: true }),
-    metaTag('og:title', title, { property: true }),
+    metaTag('og:title', searchTitle, { property: true }),
     metaTag('og:description', description, { property: true }),
     metaTag('og:url', url, { property: true }),
     metaTag('og:image', image, { property: true }),
@@ -113,7 +130,7 @@ function cohortSocialMeta(cohort, { appUrl = 'http://localhost:3000' } = {}) {
     metaTag('og:image:width', '1200', { property: true }),
     metaTag('og:image:height', '630', { property: true }),
     metaTag('twitter:card', 'summary_large_image'),
-    metaTag('twitter:title', title),
+    metaTag('twitter:title', socialTitle),
     metaTag('twitter:description', description),
     metaTag('twitter:image', image),
     metaTag('twitter:image:alt', `Cohort15 preview for ${cohort.title}`),

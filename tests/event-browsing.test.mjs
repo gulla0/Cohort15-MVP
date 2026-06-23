@@ -40,6 +40,13 @@ function invoke(handler, url = '/') {
   });
 }
 
+function metaContent(html, selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+  const propertyPattern = new RegExp(`<meta property="${escaped}" content="([^"]*)">`, 'u');
+  const namePattern = new RegExp(`<meta name="${escaped}" content="([^"]*)">`, 'u');
+  return propertyPattern.exec(html)?.[1] ?? namePattern.exec(html)?.[1] ?? '';
+}
+
 async function fixture() {
   const repositories = createLocalRepositories({ store: createLofiStore(), now: () => NOW, randomUUID: () => 'unused' });
   await repositories.createCohort(cohort({ title: 'Older active <test>' }), { id: 'b-active', now: new Date('2026-06-17T12:00:00.000Z') });
@@ -98,6 +105,35 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.equal((await invoke(handler, '/cohorts')).status, 302);
   assert.equal((await invoke(handler, '/cohorts/missing')).status, 404);
   assert.equal((await invoke(handler, '/cohorts/missing/social-image.svg')).status, 404);
+});
+
+test('cohort detail metadata uses concise titles and descriptions for social previews', () => {
+  const html = renderCohortDetailPage({
+    ...cohort({
+      id: 'long-meta',
+      title: 'Co-founder search for Cohort15: technical, growth, and accelerator-experienced collaborators',
+      description: 'This is the first serious Cohort15 request, and it tests the system itself: can one clear intent attract a small number of serious, aligned people? Cohort15 is an early-stage product for forming small, committed online groups.',
+    }),
+    firstMeetingAt: '2026-07-10T22:00:00.000Z',
+    createdAt: NOW.toISOString(),
+    updatedAt: NOW.toISOString(),
+    expiresAt: '2026-06-25T12:00:00.000Z',
+    interestCount: 0,
+    collectionStatus: 'active',
+    quorumStatus: 'gathering',
+    quorumMetAt: null,
+    finalMeetingEndsAt: '2026-07-17T23:00:00.000Z',
+  }, { appUrl: 'https://cohort15.com' });
+
+  assert.match(html, /<h1>Co-founder search for Cohort15: technical, growth, and accelerator-experienced collaborators<\/h1>/);
+  assert.ok(metaContent(html, 'og:title').length <= 60);
+  assert.ok(metaContent(html, 'twitter:title').length <= 70);
+  assert.ok(metaContent(html, 'description').length <= 125);
+  assert.ok(metaContent(html, 'og:description').length <= 125);
+  assert.ok(metaContent(html, 'twitter:description').length <= 125);
+  assert.match(metaContent(html, 'og:title'), /… \| Cohort15$/u);
+  assert.match(metaContent(html, 'twitter:title'), /… \| Cohort15$/u);
+  assert.match(metaContent(html, 'description'), /…$/u);
 });
 
 test('detail exposes the meeting link only after quorum and before the final meeting ends', () => {
