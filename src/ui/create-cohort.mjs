@@ -78,25 +78,27 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
         <p class="recurrence-summary full" data-recurrence-summary aria-live="polite">${recurrenceSummary(recurrence, values.meetingCount)}</p>
         <button class="button-link full" type="submit" data-preview-button>Preview cohort</button>
       </form>
-      <section class="cohort-preview" data-cohort-preview hidden tabindex="-1" aria-labelledby="cohort-preview-title">
-        <p class="eyebrow">Preview</p>
-        <h2 id="cohort-preview-title">Review this cohort request.</h2>
-        <dl class="preview-grid">
-          <div class="full"><dt>Title</dt><dd data-preview-value="title"></dd></div>
-          <div class="full"><dt>Description</dt><dd class="preview-text" data-preview-value="description"></dd></div>
-          <div><dt>Category</dt><dd data-preview-value="category"></dd></div>
-          <div><dt>Topic</dt><dd data-preview-value="topic"></dd></div>
-          <div class="full"><dt>Target audience</dt><dd class="preview-text" data-preview-value="targetAudience"></dd></div>
-          <div><dt>Target skill level</dt><dd data-preview-value="targetSkillLevel"></dd></div>
-          <div><dt>Minimum quorum</dt><dd data-preview-value="minQuorum"></dd></div>
-          <div class="full"><dt>Schedule</dt><dd data-preview-value="schedule"></dd></div>
-          <div class="full"><dt>Additional details</dt><dd class="preview-text" data-preview-value="additionalDetails"></dd></div>
-          <div class="full"><dt>Private creator email</dt><dd data-preview-value="creatorEmail"></dd></div>
-          <div class="full"><dt>Approved meeting link</dt><dd data-preview-value="meetingLink"></dd></div>
-        </dl>
-        <div class="button-row">
-          <button class="button-link secondary" type="button" data-edit-button>Edit</button>
-          <button class="button-link" type="button" data-confirm-button>Confirm and create cohort</button>
+      <section class="cohort-preview" data-cohort-preview hidden tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="cohort-preview-title">
+        <div class="preview-panel">
+          <p class="eyebrow">Preview</p>
+          <h2 id="cohort-preview-title">Review this cohort request.</h2>
+          <dl class="preview-grid">
+            <div class="full"><dt>Title</dt><dd data-preview-value="title"></dd></div>
+            <div class="full"><dt>Description</dt><dd class="preview-text" data-preview-value="description"></dd></div>
+            <div><dt>Category</dt><dd data-preview-value="category"></dd></div>
+            <div><dt>Topic</dt><dd data-preview-value="topic"></dd></div>
+            <div class="full"><dt>Target audience</dt><dd class="preview-text" data-preview-value="targetAudience"></dd></div>
+            <div><dt>Target skill level</dt><dd data-preview-value="targetSkillLevel"></dd></div>
+            <div><dt>Minimum quorum</dt><dd data-preview-value="minQuorum"></dd></div>
+            <div class="full"><dt>Schedule</dt><dd data-preview-value="schedule"></dd></div>
+            <div class="full"><dt>Additional details</dt><dd class="preview-text" data-preview-value="additionalDetails"></dd></div>
+            <div class="full"><dt>Private creator email</dt><dd data-preview-value="creatorEmail"></dd></div>
+            <div class="full"><dt>Approved meeting link</dt><dd data-preview-value="meetingLink"></dd></div>
+          </dl>
+          <div class="button-row">
+            <button class="button-link secondary" type="button" data-edit-button>Edit</button>
+            <button class="button-link" type="button" data-confirm-button>Confirm and create cohort</button>
+          </div>
         </div>
       </section>
     </main>
@@ -214,15 +216,15 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
         updateMeetingMinimum();
         if (!form.reportValidity()) return;
         updatePreview();
-        form.hidden = true;
+        document.body.classList.add('preview-open');
         previewPanel.hidden = false;
+        previewPanel.scrollTop = 0;
         previewPanel.focus();
-        previewPanel.scrollIntoView({ block: 'start' });
       });
       editButton.addEventListener('click', () => {
         delete form.dataset.confirmed;
         previewPanel.hidden = true;
-        form.hidden = false;
+        document.body.classList.remove('preview-open');
         form.querySelector('[name="title"]').focus();
       });
       confirmButton.addEventListener('click', () => {

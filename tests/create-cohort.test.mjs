@@ -82,8 +82,10 @@ test('creation page contains the exact anonymous form surface and timezone captu
   assert.match(html, /form\.addEventListener\('submit'/);
   assert.match(html, /event\.preventDefault\(\)/);
   assert.match(html, /form\.reportValidity\(\)/);
-  assert.match(html, /form\.hidden = true/);
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /document\.body\.classList\.add\('preview-open'\)/);
   assert.match(html, /previewPanel\.hidden = false/);
+  assert.match(html, /document\.body\.classList\.remove\('preview-open'\)/);
   assert.match(html, /form\.dataset\.confirmed = 'true'/);
   assert.match(html, /form\.requestSubmit\(\)/);
   assert.match(html, /querySelectorAll\('\[placeholder\]'\)/);
