@@ -5,7 +5,7 @@ import { createLofiStore } from '../src/persistence/store.mjs';
 import { createLocalRepositories } from '../src/persistence/repositories.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
 import { createEventBrowsingService } from '../src/services/event-browsing.mjs';
-import { renderCohortDetailPage } from '../src/ui/cohorts.mjs';
+import { renderCohortCard, renderCohortDetailPage } from '../src/ui/cohorts.mjs';
 
 const NOW = new Date('2026-06-18T12:00:00.000Z');
 const config = Object.freeze({ appEnv: 'test', appUrl: 'http://localhost:3000', googleAnalyticsId: 'G-LF22TLDSBV' });
@@ -79,6 +79,45 @@ test('detail exposes the meeting link only after quorum and before the final mee
   const base = { ...publicFields, firstMeetingAt: '2026-07-10T22:00:00.000Z', createdAt: NOW.toISOString(), expiresAt: '2026-06-25T12:00:00.000Z', id: 'met', updatedAt: NOW.toISOString(), interestCount: 3, collectionStatus: 'expired', quorumStatus: 'met', quorumMetAt: NOW.toISOString(), finalMeetingEndsAt: '2026-07-17T23:00:00.000Z' };
   assert.match(renderCohortDetailPage({ ...base, meetingLink }), /meet\.google\.com/);
   assert.doesNotMatch(renderCohortDetailPage(base), /meet\.google\.com/);
+});
+
+test('cards summarize long formatted descriptions for scanning', () => {
+  const html = renderCohortCard({
+    ...cohort({
+      id: 'summary',
+      createdAt: NOW.toISOString(),
+      updatedAt: NOW.toISOString(),
+      expiresAt: '2026-06-25T12:00:00.000Z',
+      firstMeetingAt: '2026-07-10T22:00:00.000Z',
+      interestCount: 0,
+      collectionStatus: 'active',
+      quorumStatus: 'gathering',
+      quorumMetAt: null,
+      finalMeetingEndsAt: '2026-07-17T23:00:00.000Z',
+      description: `This is a serious request for aligned people.
+
+1. Technical co-founder candidate
+   Someone who can handle product-quality implementation.
+
+2. Marketing / growth co-founder candidate
+   Someone strong at early-stage positioning.
+
+Before joining, self-qualify honestly:
+
+* Do I care about the mission?
+* Can I commit meaningful time?
+
+Working chemistry matters and the full request continues with more context.`,
+    }),
+  });
+
+  assert.match(html, /class="cohort-card-summary"/);
+  assert.match(html, /<p>This is a serious request for aligned people\.<\/p>/);
+  assert.match(html, /<ol><li>Technical co-founder candidate<br>Someone who can handle product-quality implementation\.<\/li><\/ol>/);
+  assert.match(html, /<ol start="2"><li>Marketing \/ growth co-founder candidate<br>Someone strong at early-stage positioning\.<\/li><\/ol>/);
+  assert.match(html, /<ul><li>Do I care about the mission\?<\/li><li>Can I commit meaningful time\?<\/li><\/ul>/);
+  assert.match(html, /Full request continues on the detail page\./);
+  assert.doesNotMatch(html, /Working chemistry matters/);
 });
 
 test('detail page organizes long text into escaped paragraphs and lists', () => {

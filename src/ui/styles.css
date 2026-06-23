@@ -174,6 +174,19 @@ article p:last-child {
 .cohort-card h3 { margin: 18px 0 8px; font-size: 1.45rem; }
 .cohort-card h3 a { color: var(--ink-strong); text-decoration: none; }
 .cohort-card > p { margin: 0 0 18px; color: var(--muted); }
+.cohort-card-summary { margin: 0 0 18px; }
+.cohort-card-summary .formatted-text { color: var(--muted); font-size: 1rem; line-height: 1.5; }
+.cohort-card-summary .formatted-text p + p,
+.cohort-card-summary .formatted-text p + ul,
+.cohort-card-summary .formatted-text p + ol,
+.cohort-card-summary .formatted-text ul + p,
+.cohort-card-summary .formatted-text ol + p,
+.cohort-card-summary .formatted-text ul + ul,
+.cohort-card-summary .formatted-text ol + ol { margin-top: 10px; }
+.cohort-card-summary .formatted-text ul,
+.cohort-card-summary .formatted-text ol { padding-left: 1.2rem; }
+.cohort-card-summary .formatted-text li + li { margin-top: 6px; }
+.summary-note { margin: 12px 0 0; color: var(--green); font-size: .9rem; font-weight: 800; }
 .cohort-card > .text-link { margin-top: auto; padding-top: 20px; }
 .cohort-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 4px 0 20px; }
 .cohort-facts div { min-width: 0; }

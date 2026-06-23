@@ -13,10 +13,38 @@ function label(value) {
   return String(value).replaceAll('-', ' ').replace(/\b\w/gu, (character) => character.toUpperCase());
 }
 
-function renderFormattedText(value) {
+function formattedTextBlocks(value) {
   const text = String(value ?? '').replace(/\r\n?/gu, '\n').trim();
-  if (!text) return '';
-  const blocks = text.split(/\n\s*\n/gu).map((block) => block.split('\n'));
+  return text ? text.split(/\n\s*\n/gu).map((block) => block.split('\n')) : [];
+}
+
+function blockLength(lines) {
+  return lines.map((line) => line.trim()).filter(Boolean).join(' ').length;
+}
+
+function summarizeBlocks(blocks, { maxBlocks = 5, maxCharacters = 900 } = {}) {
+  const selected = [];
+  let characterCount = 0;
+  for (const block of blocks) {
+    const length = blockLength(block);
+    if (!length) continue;
+    if (selected.length >= maxBlocks || (selected.length && characterCount + length > maxCharacters)) break;
+    if (!selected.length && length > maxCharacters) {
+      const snippet = block.join(' ').replace(/\s+/gu, ' ').trim().slice(0, maxCharacters).replace(/\s+\S*$/u, '');
+      selected.push([`${snippet}...`]);
+      break;
+    }
+    selected.push(block);
+    characterCount += length;
+  }
+  return {
+    blocks: selected,
+    truncated: selected.length < blocks.filter((block) => blockLength(block)).length,
+  };
+}
+
+function renderFormattedBlocks(blocks) {
+  if (!blocks.length) return '';
   const renderParts = (parts) => parts.map((part) => escapeHtml(part.trim())).join('<br>');
   return `<div class="formatted-text">${blocks.map((lines) => {
     const firstLine = lines[0]?.trim() ?? '';
@@ -47,6 +75,15 @@ function renderFormattedText(value) {
   }).join('')}</div>`;
 }
 
+function renderFormattedText(value) {
+  return renderFormattedBlocks(formattedTextBlocks(value));
+}
+
+function renderFormattedSummary(value) {
+  const summary = summarizeBlocks(formattedTextBlocks(value));
+  return `${renderFormattedBlocks(summary.blocks)}${summary.truncated ? '<p class="summary-note">Full request continues on the detail page.</p>' : ''}`;
+}
+
 function localTime(instant, { includeEnd = false, durationMinutes = 0 } = {}) {
   const end = new Date(Date.parse(instant) + durationMinutes * 60_000).toISOString();
   return `<time class="local-time" datetime="${escapeHtml(instant)}" data-local-time${includeEnd ? ` data-end="${end}"` : ''}>${escapeHtml(instant)}</time>`;
@@ -74,7 +111,7 @@ export function renderCohortCard(cohort) {
   return `<article class="cohort-card">
     <div class="card-heading"><span class="status-pill ${cohort.collectionStatus}">${label(cohort.collectionStatus)}</span><span class="category">${escapeHtml(label(cohort.category))}</span></div>
     <h3><a href="/cohorts/${encodeURIComponent(cohort.id)}">${escapeHtml(cohort.title)}</a></h3>
-    <p>${escapeHtml(cohort.description)}</p>
+    <div class="cohort-card-summary">${renderFormattedSummary(cohort.description)}</div>
     ${schedule(cohort)}
     ${progress(cohort)}
     <a class="text-link" href="/cohorts/${encodeURIComponent(cohort.id)}">View cohort details →</a>
