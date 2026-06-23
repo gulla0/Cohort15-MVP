@@ -84,14 +84,26 @@ export function renderCohortCard(cohort) {
 export function localTimeScript() {
   return `<script>
     (() => {
-      const formatter = new Intl.DateTimeFormat(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+      const dateFormatter = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
       });
+      const timeFormatter = new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric', minute: '2-digit'
+      });
+      const zoneFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZoneName: 'long'
+      });
+      const zoneName = (date) => zoneFormatter.formatToParts(date).find((part) => part.type === 'timeZoneName')?.value;
+      const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       document.querySelectorAll('[data-local-time]').forEach((element) => {
         const start = new Date(element.dateTime);
         const endValue = element.dataset.end;
-        element.textContent = endValue ? formatter.format(start) + ' – ' + formatter.format(new Date(endValue)) : formatter.format(start);
+        const end = endValue ? new Date(endValue) : null;
+        const timeLabel = end
+          ? timeFormatter.format(start) + ' – ' + timeFormatter.format(end)
+          : timeFormatter.format(start);
+        const zone = zoneName(start) || localZone || 'your timezone';
+        element.textContent = 'Your local time:\\n' + dateFormatter.format(start) + '\\n' + timeLabel + '\\n' + zone;
       });
     })();
   </script>`;
@@ -163,7 +175,7 @@ export function renderCohortDetailPage(cohort, options = {}) {
     ${interestForm(cohort, options)}
     <section class="detail-content" aria-label="Cohort details">
       <div class="detail-section detail-section-main"><h2>About this cohort</h2>${renderFormattedText(cohort.description)}</div>
-      <div class="detail-section"><h2>Meeting schedule</h2>${schedule(cohort)}<p class="local-note">Times are shown in your local timezone.</p></div>
+      <div class="detail-section"><h2>Meeting schedule</h2>${schedule(cohort)}<p class="local-note">Times are converted by your browser and shown in your local timezone.</p></div>
       <div class="detail-section"><h2>Who it’s for</h2><dl class="cohort-facts"><div><dt>Topic</dt><dd>${escapeHtml(cohort.topic)}</dd></div><div><dt>Skill level</dt><dd>${escapeHtml(label(cohort.targetSkillLevel))}</dd></div></dl>${renderFormattedText(cohort.targetAudience)}</div>
       ${cohort.additionalDetails ? `<div class="detail-section detail-section-main"><h2>Additional details</h2>${renderFormattedText(cohort.additionalDetails)}</div>` : ''}
     </section>

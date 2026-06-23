@@ -179,7 +179,7 @@ article p:last-child {
 .cohort-facts div { min-width: 0; }
 .cohort-facts dt { color: var(--muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
 .cohort-facts dd { margin: 2px 0 0; color: var(--ink-strong); font-weight: 700; }
-.local-time { font-variant-numeric: tabular-nums; }
+.local-time { display: inline-block; white-space: pre-line; font-variant-numeric: tabular-nums; line-height: 1.45; }
 .quorum-progress { margin: 4px 0 0; }
 .progress-copy { font-size: .9rem; }
 .progress-copy span { color: var(--muted); }

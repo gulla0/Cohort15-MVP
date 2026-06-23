@@ -54,7 +54,9 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.match(home.body, /G-LF22TLDSBV/);
   assert.match(home.body, /aria-current="page">Active/);
   assert.match(home.body, /data-local-time/);
-  assert.match(home.body, /timeZoneName: 'short'/);
+  assert.match(home.body, /Your local time:/);
+  assert.match(home.body, /weekday: 'short'/);
+  assert.match(home.body, /timeZoneName: 'long'/);
   assert.doesNotMatch(home.body, /dateStyle|timeStyle/);
   assert.match(home.body, /3 more needed/);
   assert.doesNotMatch(home.body, /private@example\.com|meet\.google\.com/);
@@ -65,7 +67,7 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.equal(detail.status, 200);
   assert.match(detail.body, /googletagmanager\.com\/gtag\/js\?id=G-LF22TLDSBV/);
   assert.match(detail.body, /Older active &lt;test&gt;/);
-  assert.match(detail.body, /Times are shown in your local timezone/);
+  assert.match(detail.body, /Times are converted by your browser and shown in your local timezone/);
   assert.match(detail.body, /Duration<\/dt><dd>60 minutes/);
   assert.doesNotMatch(detail.body, /private@example\.com|meet\.google\.com/);
   assert.equal((await invoke(handler, '/cohorts')).status, 302);
