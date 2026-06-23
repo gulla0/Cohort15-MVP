@@ -57,7 +57,7 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
       <h1>Create a focused cohort.</h1>
       <p class="lede">Collect interest for seven days. Your email stays private and is used only for updates about this cohort.</p>
       ${error ? `<div class="form-error" id="form-error" role="alert"><strong>${escapeHtml(error.message)}</strong>${error.preserveValues === false ? '' : '<br>Your entries have been kept so you can correct the submission and resubmit.'}</div>` : ''}
-      <form class="cohort-form" method="post" action="/cohorts">
+      <form class="cohort-form" method="post" action="/cohorts" data-cohort-form>
         <div class="honeypot" aria-hidden="true"><label>Website <input name="website" autocomplete="off" tabindex="-1"></label></div>
         <label>Creator email <input type="email" name="creatorEmail" value="${value('creatorEmail')}" maxlength="254" required autocomplete="email" placeholder="you@example.com — kept private and used for cohort updates"${fieldState(error, 'creatorEmail')}></label>
         <label>Title <input name="title" value="${value('title')}" minlength="3" maxlength="120" required placeholder="A short, specific name for the cohort"${fieldState(error, 'title')}></label>
@@ -76,10 +76,35 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
         <label>Recurrence <select name="recurrence" required${fieldState(error, 'recurrence')}>${selectedOptions(RECURRENCES, recurrence)}</select></label>
         <label>Total number of sessions <input type="number" name="meetingCount" min="${isRecurring ? '2' : '1'}" max="${isRecurring ? '52' : '1'}" value="${value('meetingCount', isRecurring ? '2' : '1')}" required${isRecurring ? '' : ' readonly'}${fieldState(error, 'meetingCount')}><span class="control-note" data-session-count-note>${sessionCountNote(recurrence)}</span></label>
         <p class="recurrence-summary full" data-recurrence-summary aria-live="polite">${recurrenceSummary(recurrence, values.meetingCount)}</p>
-        <button class="button-link full" type="submit">Create cohort</button>
+        <button class="button-link full" type="submit" data-preview-button>Preview cohort</button>
       </form>
+      <section class="cohort-preview" data-cohort-preview hidden tabindex="-1" aria-labelledby="cohort-preview-title">
+        <p class="eyebrow">Preview</p>
+        <h2 id="cohort-preview-title">Review this cohort request.</h2>
+        <dl class="preview-grid">
+          <div class="full"><dt>Title</dt><dd data-preview-value="title"></dd></div>
+          <div class="full"><dt>Description</dt><dd class="preview-text" data-preview-value="description"></dd></div>
+          <div><dt>Category</dt><dd data-preview-value="category"></dd></div>
+          <div><dt>Topic</dt><dd data-preview-value="topic"></dd></div>
+          <div class="full"><dt>Target audience</dt><dd class="preview-text" data-preview-value="targetAudience"></dd></div>
+          <div><dt>Target skill level</dt><dd data-preview-value="targetSkillLevel"></dd></div>
+          <div><dt>Minimum quorum</dt><dd data-preview-value="minQuorum"></dd></div>
+          <div class="full"><dt>Schedule</dt><dd data-preview-value="schedule"></dd></div>
+          <div class="full"><dt>Additional details</dt><dd class="preview-text" data-preview-value="additionalDetails"></dd></div>
+          <div class="full"><dt>Private creator email</dt><dd data-preview-value="creatorEmail"></dd></div>
+          <div class="full"><dt>Approved meeting link</dt><dd data-preview-value="meetingLink"></dd></div>
+        </dl>
+        <div class="button-row">
+          <button class="button-link secondary" type="button" data-edit-button>Edit</button>
+          <button class="button-link" type="button" data-confirm-button>Confirm and create cohort</button>
+        </div>
+      </section>
     </main>
     <script>
+      const form = document.querySelector('[data-cohort-form]');
+      const previewPanel = document.querySelector('[data-cohort-preview]');
+      const editButton = document.querySelector('[data-edit-button]');
+      const confirmButton = document.querySelector('[data-confirm-button]');
       const timeZoneInput = document.querySelector('[name="creatorTimeZone"]');
       timeZoneInput.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
@@ -147,6 +172,63 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
       recurrenceInput.addEventListener('change', syncMeetingCount);
       meetingCountInput.addEventListener('input', updateRecurrenceSummary);
       syncMeetingCount();
+
+      const fieldValue = (name) => form.elements[name]?.value?.trim() || '';
+      const selectedText = (name) => {
+        const field = form.elements[name];
+        return field?.selectedOptions?.[0]?.textContent?.trim() || fieldValue(name);
+      };
+      const previewValue = (name, value, fallback = 'Not provided') => {
+        document.querySelector('[data-preview-value="' + name + '"]').textContent = value || fallback;
+      };
+      const formatMeetingDate = () => {
+        const value = fieldValue('firstMeetingLocal');
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.valueOf())) return value;
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(date);
+      };
+      const updatePreview = () => {
+        const schedule = formatMeetingDate()
+          + ' for ' + fieldValue('meetingDurationMinutes') + ' minutes. '
+          + recurrenceSummary.textContent
+          + ' Timezone: ' + fieldValue('creatorTimeZone') + '.';
+        previewValue('title', fieldValue('title'));
+        previewValue('description', fieldValue('description'));
+        previewValue('category', selectedText('category'));
+        previewValue('topic', fieldValue('topic'));
+        previewValue('targetAudience', fieldValue('targetAudience'));
+        previewValue('targetSkillLevel', selectedText('targetSkillLevel'));
+        previewValue('minQuorum', fieldValue('minQuorum') + ' people');
+        previewValue('schedule', schedule);
+        previewValue('additionalDetails', fieldValue('additionalDetails'));
+        previewValue('creatorEmail', fieldValue('creatorEmail'));
+        previewValue('meetingLink', fieldValue('meetingLink'));
+      };
+      form.addEventListener('submit', (event) => {
+        if (form.dataset.confirmed === 'true') return;
+        event.preventDefault();
+        updateMeetingMinimum();
+        if (!form.reportValidity()) return;
+        updatePreview();
+        form.hidden = true;
+        previewPanel.hidden = false;
+        previewPanel.focus();
+        previewPanel.scrollIntoView({ block: 'start' });
+      });
+      editButton.addEventListener('click', () => {
+        delete form.dataset.confirmed;
+        previewPanel.hidden = true;
+        form.hidden = false;
+        form.querySelector('[name="title"]').focus();
+      });
+      confirmButton.addEventListener('click', () => {
+        form.dataset.confirmed = 'true';
+        form.requestSubmit();
+      });
     </script>
   </body>
 </html>`;

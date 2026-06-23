@@ -75,6 +75,17 @@ test('creation page contains the exact anonymous form surface and timezone captu
   assert.match(html, /placeholder="A short, specific name for the cohort"/);
   assert.match(html, /placeholder="Explain what the group will work on and what participants can expect"/);
   assert.match(html, /placeholder="People needed to unlock the meeting link \(1–15\)"/);
+  assert.match(html, /data-cohort-form/);
+  assert.match(html, /data-cohort-preview/);
+  assert.match(html, /Preview cohort/);
+  assert.match(html, /Confirm and create cohort/);
+  assert.match(html, /form\.addEventListener\('submit'/);
+  assert.match(html, /event\.preventDefault\(\)/);
+  assert.match(html, /form\.reportValidity\(\)/);
+  assert.match(html, /form\.hidden = true/);
+  assert.match(html, /previewPanel\.hidden = false/);
+  assert.match(html, /form\.dataset\.confirmed = 'true'/);
+  assert.match(html, /form\.requestSubmit\(\)/);
   assert.match(html, /querySelectorAll\('\[placeholder\]'\)/);
   assert.match(html, /addEventListener\('focus'/);
   assert.match(html, /field\.placeholder = ''/);
