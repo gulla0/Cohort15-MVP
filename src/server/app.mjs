@@ -26,6 +26,7 @@ import {
 } from '../ui/research.mjs';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const CREATE_COHORT_BODY_LIMIT_BYTES = 128 * 1024;
 
 export function createRuntimeRepositories(config, options = {}) {
   if (config.isProduction) {
@@ -238,7 +239,7 @@ export function createRequestHandler(options = {}) {
 
       let input = {};
       try {
-        input = await readFormBody(req);
+        input = await readFormBody(req, CREATE_COHORT_BODY_LIMIT_BYTES);
         const cohort = await cohortCreator.create(input, {
           clientIp: clientIpFromRequest(req, config),
         });

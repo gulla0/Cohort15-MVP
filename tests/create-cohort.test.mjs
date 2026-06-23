@@ -161,7 +161,7 @@ test('POST /cohorts enforces request policy and redirects without private data',
     url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: 'https://evil.example' }, body: encoded,
   })).status, 403);
   const oversized = await invoke(handler, {
-    url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', 'content-length': '65537' }, body: encoded,
+    url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', 'content-length': '131073' }, body: encoded,
   });
   assert.equal(oversized.status, 413);
   assert.match(oversized.body, /submission is too large/i);

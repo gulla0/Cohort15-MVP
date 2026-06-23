@@ -77,7 +77,7 @@ test('honeypots, request guards, public responses, and logs preserve private val
       url: '/cohorts', method: 'POST', headers: { 'content-type': 'text/plain' }, body: 'private-creator@example.com',
     })).status, 415);
     assert.equal((await form(handler, '/cohorts', createInput(), { origin: 'https://evil.example' })).status, 403);
-    assert.equal((await form(handler, '/cohorts', createInput(), { 'content-length': '65537' })).status, 413);
+    assert.equal((await form(handler, '/cohorts', createInput(), { 'content-length': '131073' })).status, 413);
 
     const created = await form(handler, '/cohorts', createInput());
     assert.equal(created.status, 303);

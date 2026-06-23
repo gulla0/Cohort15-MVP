@@ -46,10 +46,10 @@ export const COLLECTION_WINDOW_MS = COLLECTION_WINDOW_HOURS * 60 * 60 * 1000;
 
 export const TEXT_LIMITS = Object.freeze({
   title: Object.freeze({ min: 3, max: 120 }),
-  description: Object.freeze({ min: 20, max: 2_000 }),
+  description: Object.freeze({ min: 20, max: 4_000 }),
   topic: Object.freeze({ min: 2, max: 100 }),
-  targetAudience: Object.freeze({ min: 2, max: 500 }),
-  additionalDetails: Object.freeze({ min: 0, max: 2_000 }),
+  targetAudience: Object.freeze({ min: 2, max: 4_000 }),
+  additionalDetails: Object.freeze({ min: 0, max: 4_000 }),
   email: Object.freeze({ min: 1, max: 254 }),
   creatorTimeZone: Object.freeze({ min: 1, max: 100 }),
   meetingLink: Object.freeze({ min: 1, max: 2_048 }),
