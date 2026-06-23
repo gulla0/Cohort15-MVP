@@ -50,7 +50,7 @@ export function sortPublicCohorts(cohorts) {
 export function createLocalRepositories({
   store,
   now = () => new Date(),
-  randomUUID = crypto.randomUUID,
+  randomUUID = () => globalThis.crypto.randomUUID(),
 } = {}) {
   if (!store) throw new TypeError('store is required');
 

@@ -56,6 +56,15 @@ test('local repositories persist only required cohort fields and public views hi
   assert.doesNotMatch(JSON.stringify(publicCohort), /creator@example.com/u);
 });
 
+test('local repositories generate ids with the default Web Crypto receiver intact', async () => {
+  const repositories = createLocalRepositories({
+    store: createLofiStore(),
+    now: () => new Date(CREATED_AT),
+  });
+  const cohort = await repositories.createCohort(validCohortInput());
+  assert.match(cohort.id, /^[0-9a-f-]{36}$/u);
+});
+
 test('interest acceptance is atomic and rejects creator, duplicate, expired, and already-met attempts', async () => {
   const repositories = await createRepository();
   const cohort = await repositories.createCohort(validCohortInput(), {
