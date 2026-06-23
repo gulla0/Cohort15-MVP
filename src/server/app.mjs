@@ -20,6 +20,7 @@ import {
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 import { renderCohortDetailPage } from '../ui/cohorts.mjs';
+import { renderCohortSocialImage } from '../ui/social-image.mjs';
 import {
   ARTICLE_PATH, FORMATION_ARTICLE_PATH, VIDEO_ARTICLE_PATH, renderDemandResearchArticle,
   renderFormationFieldNotePage, renderOriginalProductThesisPage, renderResearchIndexPage,
@@ -130,7 +131,7 @@ export function createRequestHandler(options = {}) {
     try {
       const cohort = await eventBrowsing.getById(cohortId);
       send(res, status, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, {
-        error, googleAnalyticsId: config.googleAnalyticsId,
+        appUrl: config.appUrl, error, googleAnalyticsId: config.googleAnalyticsId,
       }), headers);
     } catch (readError) {
       if (readError instanceof RepositoryNotFoundError) {
@@ -213,8 +214,23 @@ export function createRequestHandler(options = {}) {
       try {
         const cohort = await eventBrowsing.getById(decodeURIComponent(detailMatch[1]));
         send(res, 200, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, {
+          appUrl: config.appUrl,
           googleAnalyticsId: config.googleAnalyticsId,
         }));
+      } catch (error) {
+        if (error instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+        else throw error;
+      }
+      return;
+    }
+
+    const socialImageMatch = method === 'GET' ? /^\/cohorts\/([^/]+)\/social-image\.svg$/u.exec(url.pathname) : null;
+    if (socialImageMatch) {
+      try {
+        const cohort = await eventBrowsing.getById(decodeURIComponent(socialImageMatch[1]));
+        send(res, 200, 'image/svg+xml; charset=utf-8', renderCohortSocialImage(cohort), {
+          'cache-control': 'public, max-age=300',
+        });
       } catch (error) {
         if (error instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');
         else throw error;

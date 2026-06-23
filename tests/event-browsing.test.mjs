@@ -66,12 +66,28 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   const detail = await invoke(handler, '/cohorts/b-active');
   assert.equal(detail.status, 200);
   assert.match(detail.body, /googletagmanager\.com\/gtag\/js\?id=G-LF22TLDSBV/);
+  assert.match(detail.body, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(detail.body, /<meta property="og:title" content="Older active &lt;test&gt; \| Cohort15">/);
+  assert.match(detail.body, /<meta property="og:url" content="http:\/\/localhost:3000\/cohorts\/b-active">/);
+  assert.match(detail.body, /<meta property="og:image" content="http:\/\/localhost:3000\/cohorts\/b-active\/social-image\.svg">/);
   assert.match(detail.body, /Older active &lt;test&gt;/);
   assert.match(detail.body, /Times are converted by your browser and shown in your local timezone/);
   assert.match(detail.body, /Duration<\/dt><dd>60 minutes/);
   assert.doesNotMatch(detail.body, /private@example\.com|meet\.google\.com/);
+
+  const socialImage = await invoke(handler, '/cohorts/b-active/social-image.svg');
+  assert.equal(socialImage.status, 200);
+  assert.match(socialImage.headers['content-type'], /image\/svg\+xml/);
+  assert.match(socialImage.headers['cache-control'], /max-age=300/);
+  assert.match(socialImage.body, /width="1200" height="630"/);
+  assert.match(socialImage.body, /Older active &lt;test&gt;/);
+  assert.match(socialImage.body, /Build cohort/);
+  assert.match(socialImage.body, /0 of 3 interested/);
+  assert.doesNotMatch(socialImage.body, /private@example\.com|meet\.google\.com/);
+
   assert.equal((await invoke(handler, '/cohorts')).status, 302);
   assert.equal((await invoke(handler, '/cohorts/missing')).status, 404);
+  assert.equal((await invoke(handler, '/cohorts/missing/social-image.svg')).status, 404);
 });
 
 test('detail exposes the meeting link only after quorum and before the final meeting ends', () => {

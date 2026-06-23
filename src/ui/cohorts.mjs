@@ -1,4 +1,5 @@
 import { analyticsMarkup } from './analytics.mjs';
+import { cohortSocialDescription } from './social-image.mjs';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -84,6 +85,41 @@ function renderFormattedSummary(value) {
   return `${renderFormattedBlocks(summary.blocks)}${summary.truncated ? '<p class="summary-note">Full request continues on the detail page.</p>' : ''}`;
 }
 
+function absoluteUrl(appUrl, path) {
+  const base = String(appUrl ?? 'http://localhost:3000').replace(/\/$/u, '');
+  return `${base}${path}`;
+}
+
+function metaTag(name, content, { property = false } = {}) {
+  const attribute = property ? 'property' : 'name';
+  return `<meta ${attribute}="${escapeHtml(name)}" content="${escapeHtml(content)}">`;
+}
+
+function cohortSocialMeta(cohort, { appUrl = 'http://localhost:3000' } = {}) {
+  const path = `/cohorts/${encodeURIComponent(cohort.id)}`;
+  const url = absoluteUrl(appUrl, path);
+  const image = absoluteUrl(appUrl, `${path}/social-image.svg`);
+  const title = `${cohort.title} | Cohort15`;
+  const description = cohortSocialDescription(cohort);
+  return [
+    metaTag('description', description),
+    metaTag('og:type', 'article', { property: true }),
+    metaTag('og:site_name', 'Cohort15', { property: true }),
+    metaTag('og:title', title, { property: true }),
+    metaTag('og:description', description, { property: true }),
+    metaTag('og:url', url, { property: true }),
+    metaTag('og:image', image, { property: true }),
+    metaTag('og:image:type', 'image/svg+xml', { property: true }),
+    metaTag('og:image:width', '1200', { property: true }),
+    metaTag('og:image:height', '630', { property: true }),
+    metaTag('twitter:card', 'summary_large_image'),
+    metaTag('twitter:title', title),
+    metaTag('twitter:description', description),
+    metaTag('twitter:image', image),
+    metaTag('twitter:image:alt', `Cohort15 preview for ${cohort.title}`),
+  ].join('');
+}
+
 function localTime(instant, { includeEnd = false, durationMinutes = 0 } = {}) {
   const end = new Date(Date.parse(instant) + durationMinutes * 60_000).toISOString();
   return `<time class="local-time" datetime="${escapeHtml(instant)}" data-local-time${includeEnd ? ` data-end="${end}"` : ''}>${escapeHtml(instant)}</time>`;
@@ -146,8 +182,8 @@ export function localTimeScript() {
   </script>`;
 }
 
-function pageStart(title, googleAnalyticsId) {
-  return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a></nav></header>`;
+function pageStart(title, googleAnalyticsId, socialMeta = '') {
+  return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${socialMeta}<title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a></nav></header>`;
 }
 
 function interestForm(cohort, { error } = {}) {
@@ -204,7 +240,7 @@ export function renderCohortDetailPage(cohort, options = {}) {
     ? `<div class="meeting-access unlocked"><p class="eyebrow">Quorum met</p><h2>The meeting is unlocked.</h2><a class="button-link" href="${escapeHtml(cohort.meetingLink)}" rel="noopener noreferrer">Open meeting link</a></div>`
     : `<div class="meeting-access"><p class="eyebrow">${cohort.quorumStatus === 'met' ? 'Meeting ended' : 'Link locked'}</p><h2>${cohort.quorumStatus === 'met' ? 'This meeting link is no longer public.' : 'The meeting link unlocks at quorum.'}</h2><p>Schedule details stay public throughout the cohort lifecycle.</p></div>`;
   const sessionLabel = cohort.meetingCount === 1 ? '1 meeting' : `${cohort.meetingCount} meetings`;
-  return `${pageStart(cohort.title, options.googleAnalyticsId ?? 'G-LF22TLDSBV')}<main class="shell detail-shell">
+  return `${pageStart(cohort.title, options.googleAnalyticsId ?? 'G-LF22TLDSBV', cohortSocialMeta(cohort, { appUrl: options.appUrl }))}<main class="shell detail-shell">
     <a class="text-link" href="/#cohorts">← Browse all cohorts</a>
     <div class="detail-heading"><div><p class="eyebrow">${escapeHtml(label(cohort.category))} · ${escapeHtml(cohort.collectionStatus)}</p><h1>${escapeHtml(cohort.title)}</h1><p class="lede">${escapeHtml(cohort.topic)} · ${escapeHtml(label(cohort.targetSkillLevel))} · ${sessionLabel}</p></div>${meetingAccess}</div>
     ${progress(cohort)}
