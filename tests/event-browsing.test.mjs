@@ -78,3 +78,47 @@ test('detail exposes the meeting link only after quorum and before the final mee
   assert.match(renderCohortDetailPage({ ...base, meetingLink }), /meet\.google\.com/);
   assert.doesNotMatch(renderCohortDetailPage(base), /meet\.google\.com/);
 });
+
+test('detail page organizes long text into escaped paragraphs and lists', () => {
+  const html = renderCohortDetailPage({
+    ...cohort({
+      description: `This is a serious request for aligned people.
+
+1. Technical co-founder candidate
+   Someone who can handle product-quality implementation.
+
+2. Marketing / growth co-founder candidate
+   Someone strong at early-stage positioning.
+
+Before joining, self-qualify honestly:
+
+* Do I care about the mission?
+* Can I commit meaningful time?`,
+      targetAudience: `People who may want to build Cohort15.
+
+- Technical builders
+- Growth operators`,
+      additionalDetails: 'Bring a thoughtful point of view. <script>alert("x")</script>',
+    }),
+    id: 'formatted',
+    firstMeetingAt: '2026-07-10T22:00:00.000Z',
+    createdAt: NOW.toISOString(),
+    updatedAt: NOW.toISOString(),
+    expiresAt: '2026-06-25T12:00:00.000Z',
+    interestCount: 0,
+    collectionStatus: 'active',
+    quorumStatus: 'gathering',
+    quorumMetAt: null,
+    finalMeetingEndsAt: '2026-07-17T23:00:00.000Z',
+  });
+
+  assert.match(html, /<section class="detail-content" aria-label="Cohort details">/);
+  assert.match(html, /<h2>About this cohort<\/h2><div class="formatted-text"><p>This is a serious request for aligned people\.<\/p>/);
+  assert.match(html, /<ol><li>Technical co-founder candidate<br>Someone who can handle product-quality implementation\.<\/li><\/ol>/);
+  assert.match(html, /<ol start="2"><li>Marketing \/ growth co-founder candidate<br>Someone strong at early-stage positioning\.<\/li><\/ol>/);
+  assert.match(html, /<ul><li>Do I care about the mission\?<\/li><li>Can I commit meaningful time\?<\/li><\/ul>/);
+  assert.match(html, /<h2>Who it’s for<\/h2>/);
+  assert.match(html, /<ul><li>Technical builders<\/li><li>Growth operators<\/li><\/ul>/);
+  assert.match(html, /&lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt;/);
+  assert.doesNotMatch(html, /<script>alert/);
+});

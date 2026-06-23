@@ -13,6 +13,40 @@ function label(value) {
   return String(value).replaceAll('-', ' ').replace(/\b\w/gu, (character) => character.toUpperCase());
 }
 
+function renderFormattedText(value) {
+  const text = String(value ?? '').replace(/\r\n?/gu, '\n').trim();
+  if (!text) return '';
+  const blocks = text.split(/\n\s*\n/gu).map((block) => block.split('\n'));
+  const renderParts = (parts) => parts.map((part) => escapeHtml(part.trim())).join('<br>');
+  return `<div class="formatted-text">${blocks.map((lines) => {
+    const firstLine = lines[0]?.trim() ?? '';
+    const orderedMatch = /^(\d+)[.)]\s+(.+)$/u.exec(firstLine);
+    const unorderedMatch = /^[-*]\s+(.+)$/u.exec(firstLine);
+    if (orderedMatch || unorderedMatch) {
+      const ordered = Boolean(orderedMatch);
+      const items = [];
+      let start = orderedMatch ? Number(orderedMatch[1]) : null;
+      for (const line of lines) {
+        const normalized = line.trim();
+        const nextOrdered = /^(\d+)[.)]\s+(.+)$/u.exec(normalized);
+        const nextUnordered = /^[-*]\s+(.+)$/u.exec(normalized);
+        if (ordered && nextOrdered) {
+          if (start == null) start = Number(nextOrdered[1]);
+          items.push([nextOrdered[2]]);
+        } else if (!ordered && nextUnordered) {
+          items.push([nextUnordered[1]]);
+        } else if (items.length && normalized) {
+          items.at(-1).push(normalized);
+        }
+      }
+      const tag = ordered ? 'ol' : 'ul';
+      const startAttribute = ordered && start !== 1 ? ` start="${start}"` : '';
+      return `<${tag}${startAttribute}>${items.map((parts) => `<li>${renderParts(parts)}</li>`).join('')}</${tag}>`;
+    }
+    return `<p>${lines.map((line) => escapeHtml(line.trim())).filter(Boolean).join('<br>')}</p>`;
+  }).join('')}</div>`;
+}
+
 function localTime(instant, { includeEnd = false, durationMinutes = 0 } = {}) {
   const end = new Date(Date.parse(instant) + durationMinutes * 60_000).toISOString();
   return `<time class="local-time" datetime="${escapeHtml(instant)}" data-local-time${includeEnd ? ` data-end="${end}"` : ''}>${escapeHtml(instant)}</time>`;
@@ -120,12 +154,18 @@ export function renderCohortDetailPage(cohort, options = {}) {
   const meetingAccess = cohort.meetingLink
     ? `<div class="meeting-access unlocked"><p class="eyebrow">Quorum met</p><h2>The meeting is unlocked.</h2><a class="button-link" href="${escapeHtml(cohort.meetingLink)}" rel="noopener noreferrer">Open meeting link</a></div>`
     : `<div class="meeting-access"><p class="eyebrow">${cohort.quorumStatus === 'met' ? 'Meeting ended' : 'Link locked'}</p><h2>${cohort.quorumStatus === 'met' ? 'This meeting link is no longer public.' : 'The meeting link unlocks at quorum.'}</h2><p>Schedule details stay public throughout the cohort lifecycle.</p></div>`;
+  const sessionLabel = cohort.meetingCount === 1 ? '1 meeting' : `${cohort.meetingCount} meetings`;
   return `${pageStart(cohort.title, options.googleAnalyticsId ?? 'G-LF22TLDSBV')}<main class="shell detail-shell">
     <a class="text-link" href="/#cohorts">← Browse all cohorts</a>
-    <div class="detail-heading"><div><p class="eyebrow">${escapeHtml(label(cohort.category))} · ${escapeHtml(cohort.collectionStatus)}</p><h1>${escapeHtml(cohort.title)}</h1><p class="lede">${escapeHtml(cohort.description)}</p></div>${meetingAccess}</div>
+    <div class="detail-heading"><div><p class="eyebrow">${escapeHtml(label(cohort.category))} · ${escapeHtml(cohort.collectionStatus)}</p><h1>${escapeHtml(cohort.title)}</h1><p class="lede">${escapeHtml(cohort.topic)} · ${escapeHtml(label(cohort.targetSkillLevel))} · ${sessionLabel}</p></div>${meetingAccess}</div>
     ${progress(cohort)}
     ${errorNotice}
     ${interestForm(cohort, options)}
-    <section class="detail-grid"><div><h2>Meeting schedule</h2>${schedule(cohort)}<p class="local-note">Times are shown in your local timezone.</p></div><div><h2>Who it’s for</h2><dl class="cohort-facts"><div><dt>Topic</dt><dd>${escapeHtml(cohort.topic)}</dd></div><div><dt>Audience</dt><dd>${escapeHtml(cohort.targetAudience)}</dd></div><div><dt>Skill level</dt><dd>${escapeHtml(label(cohort.targetSkillLevel))}</dd></div></dl>${cohort.additionalDetails ? `<h2>Additional details</h2><p>${escapeHtml(cohort.additionalDetails)}</p>` : ''}</div></section>
+    <section class="detail-content" aria-label="Cohort details">
+      <div class="detail-section detail-section-main"><h2>About this cohort</h2>${renderFormattedText(cohort.description)}</div>
+      <div class="detail-section"><h2>Meeting schedule</h2>${schedule(cohort)}<p class="local-note">Times are shown in your local timezone.</p></div>
+      <div class="detail-section"><h2>Who it’s for</h2><dl class="cohort-facts"><div><dt>Topic</dt><dd>${escapeHtml(cohort.topic)}</dd></div><div><dt>Skill level</dt><dd>${escapeHtml(label(cohort.targetSkillLevel))}</dd></div></dl>${renderFormattedText(cohort.targetAudience)}</div>
+      ${cohort.additionalDetails ? `<div class="detail-section detail-section-main"><h2>Additional details</h2>${renderFormattedText(cohort.additionalDetails)}</div>` : ''}
+    </section>
   </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${localTimeScript()}${acceptsInterest ? interestFormScript() : ''}</body></html>`;
 }
