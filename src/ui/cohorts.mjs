@@ -1,4 +1,5 @@
 import { analyticsMarkup } from './analytics.mjs';
+import { renderFeedbackWidget } from './feedback-widget.mjs';
 import { cohortSocialDescription } from './social-image.mjs';
 
 function escapeHtml(value) {
@@ -269,5 +270,5 @@ export function renderCohortDetailPage(cohort, options = {}) {
       <div class="detail-section"><h2>Who it’s for</h2><dl class="cohort-facts"><div><dt>Topic</dt><dd>${escapeHtml(cohort.topic)}</dd></div><div><dt>Skill level</dt><dd>${escapeHtml(label(cohort.targetSkillLevel))}</dd></div></dl>${renderFormattedText(cohort.targetAudience)}</div>
       ${cohort.additionalDetails ? `<div class="detail-section detail-section-main"><h2>Additional details</h2>${renderFormattedText(cohort.additionalDetails)}</div>` : ''}
     </section>
-  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${localTimeScript()}${acceptsInterest ? interestFormScript() : ''}</body></html>`;
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}${localTimeScript()}${acceptsInterest ? interestFormScript() : ''}</body></html>`;
 }

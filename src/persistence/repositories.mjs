@@ -1,7 +1,9 @@
 import {
   createCohort,
+  createFeedback,
   createInterest,
   createNotificationDelivery,
+  hydrateFeedback,
   hydrateNotificationDelivery,
 } from '../domain/models.mjs';
 import {
@@ -149,6 +151,33 @@ export function createLocalRepositories({
     async countInterestsByCohortId(cohortId) {
       await requireCohort(cohortId);
       return store.countInterestsByCohortId(cohortId);
+    },
+
+    async upsertFeedback(input, options = {}) {
+      const prior = store.getFeedbackBySessionId(input.sessionId);
+      const feedback = createFeedback(input, {
+        id: prior?.id ?? options.id ?? randomUUID(),
+        now: prior?.createdAt ?? options.now ?? now(),
+      });
+      const currentNow = new Date(options.updatedAt ?? options.now ?? now()).toISOString();
+      return hydrateFeedback(store.upsertFeedback({
+        ...feedback,
+        createdAt: prior?.createdAt ?? feedback.createdAt,
+        updatedAt: currentNow,
+        completedAt: feedback.completionState === 'completed'
+          ? feedback.completedAt ?? currentNow
+          : null,
+      }));
+    },
+
+    async getFeedbackBySessionId(sessionId) {
+      const feedback = store.getFeedbackBySessionId(sessionId);
+      if (!feedback) throw new RepositoryNotFoundError('feedback', sessionId);
+      return hydrateFeedback(feedback);
+    },
+
+    async listFeedback() {
+      return store.listFeedback().map(hydrateFeedback);
     },
 
     async ensureNotificationDelivery(input, options = {}) {

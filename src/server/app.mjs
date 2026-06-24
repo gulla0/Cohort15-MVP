@@ -12,6 +12,7 @@ import {
 import { createSupabasePostgresRepositories } from '../persistence/supabase-postgres.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../services/create-cohort.mjs';
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
+import { createFeedbackService } from '../services/feedback.mjs';
 import { createShowInterestService, InterestHoneypotSubmissionError } from '../services/show-interest.mjs';
 import { createNotificationService } from '../services/notifications.mjs';
 import {
@@ -28,6 +29,7 @@ import {
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const CREATE_COHORT_BODY_LIMIT_BYTES = 128 * 1024;
+const FEEDBACK_BODY_LIMIT_BYTES = 32 * 1024;
 
 export function createRuntimeRepositories(config, options = {}) {
   if (config.isProduction) {
@@ -74,6 +76,41 @@ async function readFormBody(req, maximumBytes = 64 * 1024) {
     chunks.push(buffer);
   }
   return Object.fromEntries(new URLSearchParams(Buffer.concat(chunks).toString('utf8')));
+}
+
+async function readJsonBody(req, maximumBytes = 32 * 1024) {
+  const contentLength = Number(req.headers?.['content-length']);
+  if (Number.isFinite(contentLength) && contentLength > maximumBytes) {
+    const error = new Error('Request body too large');
+    error.code = 'body_too_large';
+    throw error;
+  }
+  let size = 0;
+  const chunks = [];
+  for await (const chunk of req) {
+    const buffer = Buffer.from(chunk);
+    size += buffer.length;
+    if (size > maximumBytes) {
+      const error = new Error('Request body too large');
+      error.code = 'body_too_large';
+      throw error;
+    }
+    chunks.push(buffer);
+  }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+  } catch {
+    const error = new Error('Malformed JSON');
+    error.code = 'malformed_json';
+    throw error;
+  }
+}
+
+function sameOrigin(req, config) {
+  if (!req.headers?.origin) return true;
+  let expectedOrigin;
+  try { expectedOrigin = new URL(config.appUrl).origin; } catch { expectedOrigin = ''; }
+  return req.headers.origin === expectedOrigin;
 }
 
 function createValidationMessage(error) {
@@ -123,8 +160,15 @@ export function createRequestHandler(options = {}) {
     limit: 10,
     windowMs: 60 * 60 * 1000,
   });
+  const feedbackLimiter = options.feedbackLimiter ?? createRollingWindowLimiter({
+    limit: 40,
+    windowMs: 60 * 60 * 1000,
+  });
   const showInterest = options.showInterest ?? createShowInterestService({
     repositories, limiter: interestLimiter, notifications, logger: options.logger,
+  });
+  const feedback = options.feedback ?? createFeedbackService({
+    repositories, limiter: feedbackLimiter,
   });
 
   async function sendInterestError(res, cohortId, status, error, headers = {}) {
@@ -258,13 +302,9 @@ export function createRequestHandler(options = {}) {
         send(res, 415, 'text/plain; charset=utf-8', 'Unsupported media type');
         return;
       }
-      if (req.headers?.origin) {
-        let expectedOrigin;
-        try { expectedOrigin = new URL(config.appUrl).origin; } catch { expectedOrigin = ''; }
-        if (req.headers.origin !== expectedOrigin) {
-          send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
-          return;
-        }
+      if (!sameOrigin(req, config)) {
+        send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+        return;
       }
 
       let input = {};
@@ -333,13 +373,9 @@ export function createRequestHandler(options = {}) {
         send(res, 415, 'text/plain; charset=utf-8', 'Unsupported media type');
         return;
       }
-      if (req.headers?.origin) {
-        let expectedOrigin;
-        try { expectedOrigin = new URL(config.appUrl).origin; } catch { expectedOrigin = ''; }
-        if (req.headers.origin !== expectedOrigin) {
-          send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
-          return;
-        }
+      if (!sameOrigin(req, config)) {
+        send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+        return;
       }
 
       try {
@@ -378,6 +414,46 @@ export function createRequestHandler(options = {}) {
           await sendInterestError(res, cohortId, 500, {
             field: '', message: 'We could not record your interest right now. Please try again.',
           });
+        }
+      }
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/feedback') {
+      const mediaType = String(req.headers?.['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      if (mediaType !== 'application/json') {
+        send(res, 415, 'application/json; charset=utf-8', JSON.stringify({ ok: false, error: 'unsupported_media_type' }));
+        return;
+      }
+      if (!sameOrigin(req, config)) {
+        send(res, 403, 'application/json; charset=utf-8', JSON.stringify({ ok: false, error: 'forbidden' }));
+        return;
+      }
+      try {
+        const input = await readJsonBody(req, FEEDBACK_BODY_LIMIT_BYTES);
+        const saved = await feedback.submit(input, { clientIp: clientIpFromRequest(req, config) });
+        send(res, 200, 'application/json; charset=utf-8', JSON.stringify({
+          ok: true,
+          id: saved.id,
+          completionState: saved.completionState,
+        }));
+      } catch (error) {
+        if (error?.code === 'body_too_large') {
+          send(res, 413, 'application/json; charset=utf-8', JSON.stringify({ ok: false, error: 'body_too_large' }));
+        } else if (error?.code === 'malformed_json') {
+          send(res, 400, 'application/json; charset=utf-8', JSON.stringify({ ok: false, error: 'malformed_json' }));
+        } else if (error instanceof RateLimitExceededError) {
+          send(res, 429, 'application/json; charset=utf-8', JSON.stringify({ ok: false, error: 'rate_limited' }), {
+            'retry-after': String(error.retryAfterSeconds),
+          });
+        } else if (error instanceof DomainValidationError) {
+          send(res, 400, 'application/json; charset=utf-8', JSON.stringify({
+            ok: false,
+            error: 'validation_error',
+            field: error.field,
+          }));
+        } else {
+          send(res, 500, 'application/json; charset=utf-8', JSON.stringify({ ok: false, error: 'server_error' }));
         }
       }
       return;

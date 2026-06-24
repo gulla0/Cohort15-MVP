@@ -442,7 +442,7 @@
     {
       "id": "L009",
       "title": "Create isolated provider resources and deploy",
-      "status": "not_started",
+      "status": "done",
       "phase": "Launch Verification",
       "dependencies": [
         "L008"
@@ -473,8 +473,8 @@
         "Record only provider resource names, URLs, and pass/fail status"
       ],
       "stop_condition": "Stop when the domain cutover is verified or report the exact human/provider blocker.",
-      "evidence": "Pending.",
-      "notes": "This task necessarily requires the user to operate provider dashboards."
+      "evidence": "2026-06-24: user reported all human setup tasks complete and cohort15.com live.",
+      "notes": "This task necessarily required the user to operate provider dashboards; no credentials or secret values recorded."
     },
     {
       "id": "L010",
@@ -557,7 +557,7 @@
       ],
       "stop_condition": "Stop when the public editorial surface and first research synthesis are verified without requiring YouTube content input.",
       "evidence": "2026-06-20: /research index, stable demand-research article, site navigation, responsive styles, safe extensible entry renderer, and focused route/privacy/accessibility tests implemented.",
-      "notes": "Complete. L012 publishes the subsequently supplied YouTube update. L009 remains the next ready deployment task."
+      "notes": "Complete. L012 publishes the subsequently supplied YouTube update. L010 remains the next ready deployment verification task."
     },
     {
       "id": "L012",
@@ -602,7 +602,7 @@
       ],
       "stop_condition": "Stop when the supplied video update is published and verified without introducing legacy product behavior into the runtime.",
       "evidence": "2026-06-20: supplied video embedded through YouTube's privacy-enhanced domain; transcript-derived founder story, original mechanics, explicit MVP changes, and focused route/rendering tests added.",
-      "notes": "Complete. L009 remains the next ready deployment task."
+      "notes": "Complete. L010 remains the next ready deployment verification task."
     },
     {
       "id": "L013",
@@ -644,7 +644,60 @@
       ],
       "stop_condition": "Stop when the edited article is published, verified, and represented in the canonical workflow trackers.",
       "evidence": "2026-06-20: supplied draft condensed into a first-party field note, current product behavior separated from proposed manual experiments, stable route and index entry added, and focused tests passed.",
-      "notes": "Complete. L009 remains the next ready deployment task."
+      "notes": "Complete. L010 remains the next ready deployment verification task."
+    },
+    {
+      "id": "L014",
+      "title": "Add first-party feedback capture",
+      "status": "done",
+      "phase": "Product Learning",
+      "dependencies": [
+        "L013"
+      ],
+      "objective": "Add a first-party feedback widget that captures partial and completed qualitative feedback from visitors after key Cohort15 actions.",
+      "inputs": [
+        "src/server/app.mjs",
+        "src/persistence/store.mjs",
+        "src/persistence/repositories.mjs",
+        "src/persistence/supabase-postgres.mjs",
+        "src/ui/home.mjs",
+        "src/ui/create-cohort.mjs",
+        "src/ui/cohorts.mjs",
+        "src/ui/research.mjs",
+        "src/ui/styles.css"
+      ],
+      "write_scope": [
+        "feedback service and validation",
+        "local and Supabase feedback persistence",
+        "POST /feedback route",
+        "global feedback widget UI and client context capture",
+        "focused tests",
+        "workflow tracker alignment"
+      ],
+      "authority": [
+        "Use a first-party Supabase table prefixed cohort15_lofi_; do not add an external form provider.",
+        "Capture partial feedback as visitors progress or close the widget after starting.",
+        "Show founder social links as clickable icons, not raw URLs.",
+        "Make the widget a bottom-right panel on desktop and a full-screen modal on mobile.",
+        "Do not store raw IP addresses; use only existing hashed-IP rate limiting patterns for abuse control."
+      ],
+      "acceptance_criteria": [
+        "The feedback widget appears on public pages and opens from the bottom-right affordance.",
+        "Visitors can answer the conditional small-group formation questions and optionally provide one best contact method.",
+        "Partial feedback is saved after answered steps and when closing after progress; completed feedback records completion metadata.",
+        "Client-submitted action context captures only non-sensitive page/action signals.",
+        "Feedback/contact details are persisted privately and never rendered on public pages.",
+        "Focused service, persistence, route, privacy, and UI rendering tests pass.",
+        "npm run check passes."
+      ],
+      "verification": [
+        "Run node --test tests/feedback.test.mjs",
+        "Run npm run check",
+        "Smoke test the widget on desktop and mobile viewports"
+      ],
+      "stop_condition": "Stop when first-party feedback capture works locally and is ready for user approval before commit/push.",
+      "evidence": "2026-06-24: first-party feedback widget, autosave/close-save behavior, conditional prompts, founder contact icons, local/Supabase persistence, migration, route, and focused tests implemented; npm run check passed.",
+      "notes": "Complete. Production requires applying the indexed feedback migration human task before deployed feedback capture works."
     }
   ]
 }

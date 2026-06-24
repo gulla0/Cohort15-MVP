@@ -5,6 +5,7 @@ This directory is the only location for external dashboard, credential, DNS, ope
 ## Current Lofi MVP Task
 
 - `lofi-mvp-launch.md` — create isolated Supabase, Render, and Resend resources; verify the generated deployment; replace the Netlify site at `cohort15.com`; run non-secret launch checks.
+- `feedback-production-migration.md` — apply the first-party feedback table migration in the isolated Supabase project and verify production feedback capture after deployment.
 
 ## Repository Rule
 

@@ -36,6 +36,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 | Browse flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | L004 provides landing-page listings, filters, detail lifecycle views, browser-local times, public quorum progress, and safely gated meeting links. |
 | Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | L011–L013 provide `/research`, a stable demand-research article, a supplied-video product update, and a current field note that separates implemented behavior from proposed formation experiments. |
 | Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L005 provides normalized email-only interest, guarded mutations, ten-success IP limiting, and atomic public link unlock. |
+| Feedback flow | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs`, `src/server/app.mjs` | L014 adds first-party partial/completed feedback capture, founder contact icons, client action context, and private `cohort15_lofi_feedback` persistence. |
 | Email | `src/email/resend.mjs`, `src/services/notifications.mjs` | Resend adapter and idempotent creator, participant, and per-recipient quorum notification orchestration. |
 | Tests | `tests/*.test.mjs`, Node test runner | Full lofi integration, privacy, abuse, concurrency, notification-idempotency, and launch verification are covered. |
 
@@ -78,5 +79,7 @@ Git history contains the later production MVP. It must not override the lofi spe
 - L006 transactional notifications completed on 2026-06-18 with fake-provider, idempotency, failure-isolation, and quorum-recipient coverage.
 - L007 isolated production configuration completed on 2026-06-18 with required lofi-only environment values, Supabase production selection, Render/env documentation, and no local production fallback.
 - L008 local launch verification completed on 2026-06-18 with integrated lifecycle, privacy, abuse, absent-route, responsive-browser, and console-error coverage; the browser-local formatter uses explicit date/time fields because `dateStyle`/`timeStyle` cannot be combined with `timeZoneName`.
-- Next ready task: L009.
+- L009 human provider setup completed by user report on 2026-06-24; cohort15.com is live.
+- Next ready task: L010.
 - L011 public Research & Field Notes pages, L012 original-product-thesis video update, and L013 small-group formation field note completed on 2026-06-20.
+- L014 first-party feedback capture completed on 2026-06-24; production feedback capture requires the indexed feedback migration human task.

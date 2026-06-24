@@ -1,4 +1,5 @@
 import { analyticsMarkup } from './analytics.mjs';
+import { renderFeedbackWidget } from './feedback-widget.mjs';
 
 const ARTICLE_PATH = '/research/why-small-committed-groups';
 const VIDEO_ARTICLE_PATH = '/research/introducing-cohort15-original-product-thesis';
@@ -91,7 +92,7 @@ export function renderResearchIndexPage({
     <section class="shell research-hero" aria-labelledby="research-title"><p class="eyebrow">Research &amp; Field Notes</p><h1 id="research-title">The thinking behind Cohort15.</h1><p class="lede">Research, product observations, and working ideas about helping a few serious people reliably show up around a concrete goal.</p></section>
     <section class="section research-lanes" aria-labelledby="collection-title"><div class="shell"><div class="section-heading"><div><p class="eyebrow">The collection</p><h2 id="collection-title">Evidence, ideas, and progress.</h2><p>Written work lives here. Product videos will include a useful written summary and a link to YouTube; selected external publications will be labeled clearly.</p></div></div><div class="editorial-lanes" aria-label="Content types"><span>Research</span><span>Essays</span><span>Field notes</span><span>Product updates</span><span>External publications</span></div></div></section>
     <section class="section listing-section" aria-labelledby="latest-title"><div class="shell"><div class="section-heading"><div><p class="eyebrow">Latest</p><h2 id="latest-title">Start with the evidence.</h2></div></div><div class="research-grid">${entries.map(renderResearchCard).join('')}</div></div></section>
-  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
 export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
@@ -153,7 +154,7 @@ export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV'
 
       <section class="article-cta" aria-labelledby="article-cta-title"><p class="eyebrow">Put the idea to work</p><h2 id="article-cta-title">Make the group you wish existed.</h2><p>Choose a concrete goal, set the schedule and quorum, and let interested people decide with the full commitment in view.</p><div class="button-row"><a class="button-link" href="/cohorts/new">Create a cohort</a><a class="button-link secondary" href="/#cohorts">Browse cohorts</a></div></section>
     </article>
-  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
 export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
@@ -215,7 +216,7 @@ export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLD
 
       <section class="article-cta" aria-labelledby="video-cta-title"><p class="eyebrow">The current experiment</p><h2 id="video-cta-title">See what Cohort15 is testing now.</h2><p>Explore the demand research behind the validation MVP, or publish a focused cohort request of your own.</p><div class="button-row"><a class="button-link" href="/cohorts/new">Create a cohort</a><a class="button-link secondary" href="${ARTICLE_PATH}">Read the research</a></div></section>
     </article>
-  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
 export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
@@ -272,7 +273,7 @@ export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV
 
       <section class="article-cta" aria-labelledby="formation-cta-title"><p class="eyebrow">Join the experiment</p><h2 id="formation-cta-title">Put a real intent into the loop.</h2><p>Publish the group you want to form, or browse current requests and decide whether one is worth showing up for.</p><div class="button-row"><a class="button-link" href="/cohorts/new">Create a cohort</a><a class="button-link secondary" href="/#cohorts">Browse cohorts</a></div></section>
     </article>
-  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer></body></html>`;
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
 export { ARTICLE_PATH, FORMATION_ARTICLE_PATH, VIDEO_ARTICLE_PATH };

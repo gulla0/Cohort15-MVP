@@ -158,3 +158,22 @@ Focused research and full repository verification passed. L009 remains next.
 - Added the index entry, stable route, CTA, and focused content-boundary and route coverage without changing product behavior or human-operation documentation.
 
 Focused research verification passed. L009 remains next.
+
+## 2026-06-24 — L009 human setup reported complete and L014 feedback capture started
+
+- Recorded the user's report that all human setup tasks are complete and `cohort15.com` is live.
+- Started L014 for a first-party feedback system instead of an external form provider.
+- Added private feedback capture scope: partial autosaves, close-to-save behavior, founder social icon links, optional best-contact fields, desktop panel, and mobile full-screen modal.
+- Added a production migration human-task checklist for applying the new feedback table after user approval, commit, push, and deployment.
+
+Focused feedback and Supabase adapter tests passed. L010 remains the next ready launch-verification task; L014 was then refined through user review and completed.
+
+## 2026-06-24 — L014 first-party feedback capture completed
+
+- Added debounced autosave for answered fields, immediate save on step transitions, and close-to-save behavior after progress.
+- Refined the feedback flow to show Q1 Yes/No only, branch the No path to an optional "What are you looking for instead?" prompt, and branch the Yes path through create/join intent, experience/friction copy, and the founder contact step.
+- Added once-per-session auto-open triggers after meaningful actions while respecting user dismissal for the rest of the session.
+- Updated the founder step to use personal "I'm Harsha" copy, "Founder's socials", and icon-only contact links.
+- Verified the private Supabase migration, local repository behavior, route policy, UI rendering, and workflow alignment.
+
+Full `npm run check` passed with 75 tests. Commit and push are approved by the user; production feedback capture remains blocked until the indexed Supabase feedback migration human task is completed.

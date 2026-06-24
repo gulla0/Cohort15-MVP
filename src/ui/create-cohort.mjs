@@ -1,4 +1,5 @@
 import { CATEGORIES, RECURRENCES, TARGET_SKILL_LEVELS } from '../domain/constants.mjs';
+import { renderFeedbackWidget } from './feedback-widget.mjs';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -102,6 +103,7 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
         </div>
       </section>
     </main>
+    ${renderFeedbackWidget()}
     <script>
       const form = document.querySelector('[data-cohort-form]');
       const previewPanel = document.querySelector('[data-cohort-preview]');

@@ -13,10 +13,11 @@
 | L006 | Add Resend confirmation and quorum notifications | done | yes | Resend adapter, idempotent delivery records, confirmations, quorum fanout, sanitized failures, and fake-provider tests verified. |
 | L007 | Isolate lofi production configuration and deployment | done | yes | Production requires the complete lofi-only environment contract and isolated Supabase persistence; Render/env/runbook configuration and tests are aligned. |
 | L008 | Complete lofi privacy, abuse, and end-to-end verification | done | yes | Integrated lifecycle/privacy/abuse gates passed; browser smoke found and verified the local-time formatter fix. |
-| L009 | Create isolated provider resources and deploy | not_started | yes | Pending human provider and DNS work. |
-| L010 | Run production lofi smoke test | not_started | no | Pending |
+| L009 | Create isolated provider resources and deploy | done | yes | User reported all human setup tasks complete and cohort15.com live on 2026-06-24. |
+| L010 | Run production lofi smoke test | not_started | yes | Pending production smoke verification. |
 | L011 | Add public Research & Field Notes editorial pages | done | yes | Index, stable research article, navigation, safe extensible entry rendering, and focused tests verified. |
 | L012 | Publish the original Cohort15 product thesis video update | done | yes | Supplied video, transcript-derived article, original-vs-current framing, embed safety, and focused tests verified. |
 | L013 | Publish the small-group formation field note | done | yes | Draft condensed into a current-state field note with proposed experiments clearly separated from implemented behavior; focused tests passed. |
+| L014 | Add first-party feedback capture | done | yes | Feedback service, persistence, route, widget, migration, autosave/auto-open behavior, founder contact step, and focused tests verified. |
 
-Next ready task: L009.
+Next ready task: L010.

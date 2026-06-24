@@ -300,6 +300,67 @@ test('Supabase notification deliveries use unique idempotency keys and outcome p
   assert.equal(calls[3].method, 'PATCH');
 });
 
+test('Supabase feedback upserts use the isolated feedback table and session conflict key', async () => {
+  const { fetchImpl, calls } = createFetchStub(
+    { status: 406, ok: false, body: { message: 'JSON object requested, multiple or no rows returned' } },
+    {
+      body: [{
+        id: '3c6d7f06-24fa-41d5-a942-35b93b0ce1dc',
+        session_id: 'feedback-session-1',
+        path: '/research',
+        action_context: { readResearch: true },
+        looking_for_group: 'yes',
+        looking_for_instead: null,
+        group_intent: 'both',
+        did_create_or_join: 'not_yet',
+        why_or_why_not: 'I want a serious group.',
+        contact_email: 'person@example.com',
+        contact_x: '@cohort15dotcom',
+        contact_linkedin: null,
+        contact_other: null,
+        completion_state: 'completed',
+        last_step: 6,
+        submitted_on_close: false,
+        created_at: CREATED_AT,
+        updated_at: CREATED_AT,
+        completed_at: CREATED_AT,
+      }],
+    },
+  );
+  const repositories = createSupabasePostgresRepositories({
+    url: SUPABASE_URL,
+    serviceRoleKey: SERVICE_ROLE_KEY,
+    fetchImpl,
+  });
+
+  const saved = await repositories.upsertFeedback({
+    sessionId: 'feedback-session-1',
+    path: '/research',
+    actionContext: { readResearch: true },
+    lookingForGroup: 'yes',
+    groupIntent: 'both',
+    didCreateOrJoin: 'not_yet',
+    whyOrWhyNot: 'I want a serious group.',
+    contactEmail: 'Person@Example.com',
+    contactX: '@cohort15dotcom',
+    completionState: 'completed',
+    lastStep: 6,
+  }, {
+    id: '3c6d7f06-24fa-41d5-a942-35b93b0ce1dc',
+    now: CREATED_AT,
+  });
+
+  assert.equal(saved.contactEmail, 'person@example.com');
+  assert.equal(saved.completionState, 'completed');
+  assert.match(calls[0].url, new RegExp(`/rest/v1/${TABLES.feedback}\\?`, 'u'));
+  assert.match(calls[1].url, new RegExp(`/rest/v1/${TABLES.feedback}\\?on_conflict=session_id$`, 'u'));
+  assert.equal(calls[1].method, 'POST');
+  assert.equal(calls[1].headers.Prefer, 'resolution=merge-duplicates,return=representation');
+  assert.equal(calls[1].body.session_id, 'feedback-session-1');
+  assert.equal(calls[1].body.contact_email, 'person@example.com');
+  assert.equal(calls[1].body.action_context.readResearch, true);
+});
+
 test('migration is isolated to cohort15_lofi objects with RLS and no browser policies', async () => {
   const migration = await readFile(
     new URL('../supabase/migrations/20260618000000_cohort15_lofi.sql', import.meta.url),
@@ -322,6 +383,22 @@ test('migration is isolated to cohort15_lofi objects with RLS and no browser pol
     /create\s+(?:table|function|type|view)\s+[^\n;]*(?:auth\.|users\b|credits\b|purchases\b|images\b|social\b|rate[_-]?limit\b)/iu.test(migration),
     false,
   );
+});
+
+test('feedback migration is isolated, private, and service-role only', async () => {
+  const migration = await readFile(
+    new URL('../supabase/migrations/20260624000000_cohort15_lofi_feedback.sql', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(migration, /create table if not exists public\.cohort15_lofi_feedback/u);
+  assert.match(migration, /session_id text not null unique/u);
+  assert.match(migration, /action_context jsonb not null default/u);
+  assert.match(migration, /alter table public\.cohort15_lofi_feedback enable row level security/u);
+  assert.match(migration, /revoke all on table public\.cohort15_lofi_feedback from anon/u);
+  assert.match(migration, /grant select, insert, update on table public\.cohort15_lofi_feedback to service_role/u);
+  assert.equal(/create policy/iu.test(migration), false);
+  assert.equal(/production[_-]?mvp|cohort15_users|credits|purchases/iu.test(migration), false);
 });
 
 test('interest RPC correction qualifies table columns that conflict with output names', async () => {

@@ -8,15 +8,15 @@ Launch Verification
 
 L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
 
-Next ready task: L009.
+Next ready task: L010.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L009 | L008 is complete and every current input exists | Follow the indexed human setup runbook for isolated provider resources and deployment. |
+| L010 | L009 is complete from user-reported human setup and every current input exists | Run production smoke verification against the live `cohort15.com` deployment before closing the launch gate. |
 
-L011–L013, the user-approved Research & Field Notes, product-video, and formation-field-note waves, are complete and do not alter the L009 → L010 deployment critical path.
+L011–L014, the user-approved Research & Field Notes, product-video, formation-field-note, and first-party feedback waves, are complete. L014 does not close L010.
 
 ## Known Parallelism
 

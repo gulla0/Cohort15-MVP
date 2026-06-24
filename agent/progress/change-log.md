@@ -154,3 +154,16 @@ Verification: focused research tests passed; full `npm run check` passed with 63
 - Added a stable public route and focused index, rendering, content-boundary, and server-route tests.
 
 Verification: `node --test tests/research.test.mjs` passed with 6 tests; full `npm run check` passed with 64 tests and 14 aligned tasks.
+
+## 2026-06-24 — L014 first-party feedback capture
+
+- Recorded user-reported completion of L009 human provider setup without adding credentials or secret values.
+- Added a first-party feedback service that validates conditional qualitative answers, optional contact fields, non-sensitive action context, partial completion state, close-submitted state, and completion metadata.
+- Added local and Supabase feedback persistence keyed by client feedback session, plus the isolated `cohort15_lofi_feedback` migration.
+- Added `POST /feedback` with JSON media-type, body-size, same-origin, validation, and hashed-IP rate-limit handling.
+- Added a global feedback widget with desktop bottom-right panel behavior, mobile full-screen modal behavior, debounced answer autosave, autosave on step transitions, close-to-save partial submission, once-per-session meaningful-action auto-open, and founder contact icon links.
+- Refined the user-approved flow to branch No responses to an optional alternate-need prompt and Yes responses to create/join intent, experience/friction copy, and a personal founder contact step.
+- Added `docs/human-tasks/feedback-production-migration.md` for the required production Supabase migration after approval/deploy.
+- Added focused feedback and Supabase adapter/migration tests.
+
+Verification: `npm run check` passed with 75 tests and 15 aligned tasks.

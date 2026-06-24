@@ -9,10 +9,23 @@ import {
 } from './validation.mjs';
 
 const INTEREST_FIELDS = ['id', 'cohortId', 'email', 'createdAt'];
+const FEEDBACK_FIELDS = [
+  'id', 'sessionId', 'path', 'actionContext', 'lookingForGroup', 'lookingForInstead',
+  'groupIntent', 'didCreateOrJoin', 'whyOrWhyNot', 'contactEmail', 'contactX',
+  'contactLinkedin', 'contactOther', 'completionState', 'lastStep', 'submittedOnClose',
+  'createdAt', 'updatedAt', 'completedAt',
+];
 const DELIVERY_FIELDS = [
   'id', 'idempotencyKey', 'cohortId', 'interestId', 'recipientEmail', 'type',
   'status', 'attemptCount', 'providerErrorCode', 'createdAt', 'updatedAt', 'sentAt',
 ];
+
+export const FEEDBACK_LOOKING_FOR_GROUP_VALUES = Object.freeze(['yes', 'no', 'not_sure']);
+export const FEEDBACK_GROUP_INTENT_VALUES = Object.freeze(['create', 'join', 'both']);
+export const FEEDBACK_DID_CREATE_OR_JOIN_VALUES = Object.freeze([
+  'created', 'joined', 'both', 'not_yet', 'tried_but_stopped',
+]);
+export const FEEDBACK_COMPLETION_STATES = Object.freeze(['partial', 'completed']);
 
 function instant(value, field, { nullable = false } = {}) {
   if (nullable && (value === null || value === undefined)) return null;
@@ -33,6 +46,59 @@ function allowedEnum(value, field, allowed) {
     throw new DomainValidationError(field, `must be one of: ${allowed.join(', ')}`);
   }
   return value;
+}
+
+function optionalEnum(value, field, allowed) {
+  if (value === null || value === undefined || value === '') return null;
+  return allowedEnum(value, field, allowed);
+}
+
+function optionalTrimmedString(value, field, { maximum = 500 } = {}) {
+  if (value === null || value === undefined) return null;
+  const normalized = String(value).trim();
+  if (!normalized) return null;
+  if (normalized.length > maximum) {
+    throw new DomainValidationError(field, `must be at most ${maximum} characters`);
+  }
+  return normalized;
+}
+
+function normalizedPath(value) {
+  const path = optionalTrimmedString(value, 'path', { maximum: 2048 }) ?? '/';
+  if (!path.startsWith('/') || path.includes('\\')) {
+    throw new DomainValidationError('path', 'must be a same-site path');
+  }
+  return path;
+}
+
+function normalizedFeedbackContext(value) {
+  if (value === null || value === undefined || value === '') return Object.freeze({});
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new DomainValidationError('actionContext', 'must be an object');
+  }
+  const allowed = new Set([
+    'openedCohortRequest', 'startedCohortForm', 'submittedCohortRequest',
+    'openedCohortDetail', 'submittedInterest', 'readResearch',
+  ]);
+  const context = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (!allowed.has(key)) continue;
+    context[key] = Boolean(entry);
+  }
+  return Object.freeze(context);
+}
+
+function nullableEmail(value, field) {
+  if (value === null || value === undefined || String(value).trim() === '') return null;
+  return normalizeEmail(value, field);
+}
+
+function normalizedStep(value) {
+  const step = Number(value ?? 0);
+  if (!Number.isInteger(step) || step < 0 || step > 6) {
+    throw new DomainValidationError('lastStep', 'must be between 0 and 6');
+  }
+  return step;
 }
 
 export function notificationIdempotencyKey({ type, cohortId, interestId, recipientEmail }) {
@@ -84,6 +150,67 @@ export function createInterest(input, { id = randomUUID(), now = new Date() } = 
     cohortId: requiredString(input.cohortId, 'cohortId'),
     email: normalizeEmail(input.email),
     createdAt: instant(now, 'createdAt'),
+  });
+}
+
+export function createFeedback(input, { id = randomUUID(), now = new Date() } = {}) {
+  assertKnownFields(input, [
+    'sessionId', 'path', 'actionContext', 'lookingForGroup', 'lookingForInstead',
+    'groupIntent', 'didCreateOrJoin', 'whyOrWhyNot', 'contactEmail', 'contactX',
+    'contactLinkedin', 'contactOther', 'completionState', 'lastStep', 'submittedOnClose',
+    'completedAt',
+  ], 'feedback');
+  const timestamp = instant(now, 'createdAt');
+  const completionState = allowedEnum(input.completionState ?? 'partial', 'completionState', FEEDBACK_COMPLETION_STATES);
+  const completedAt = completionState === 'completed'
+    ? instant(input.completedAt ?? timestamp, 'completedAt')
+    : null;
+  return Object.freeze({
+    id: requiredString(id, 'id'),
+    sessionId: requiredString(input.sessionId, 'sessionId'),
+    path: normalizedPath(input.path),
+    actionContext: normalizedFeedbackContext(input.actionContext),
+    lookingForGroup: optionalEnum(input.lookingForGroup, 'lookingForGroup', FEEDBACK_LOOKING_FOR_GROUP_VALUES),
+    lookingForInstead: optionalTrimmedString(input.lookingForInstead, 'lookingForInstead', { maximum: 1000 }),
+    groupIntent: optionalEnum(input.groupIntent, 'groupIntent', FEEDBACK_GROUP_INTENT_VALUES),
+    didCreateOrJoin: optionalEnum(input.didCreateOrJoin, 'didCreateOrJoin', FEEDBACK_DID_CREATE_OR_JOIN_VALUES),
+    whyOrWhyNot: optionalTrimmedString(input.whyOrWhyNot, 'whyOrWhyNot', { maximum: 2000 }),
+    contactEmail: nullableEmail(input.contactEmail, 'contactEmail'),
+    contactX: optionalTrimmedString(input.contactX, 'contactX', { maximum: 200 }),
+    contactLinkedin: optionalTrimmedString(input.contactLinkedin, 'contactLinkedin', { maximum: 500 }),
+    contactOther: optionalTrimmedString(input.contactOther, 'contactOther', { maximum: 500 }),
+    completionState,
+    lastStep: normalizedStep(input.lastStep),
+    submittedOnClose: Boolean(input.submittedOnClose),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    completedAt,
+  });
+}
+
+export function hydrateFeedback(record) {
+  assertKnownFields(record, FEEDBACK_FIELDS, 'feedback');
+  const base = createFeedback({
+    sessionId: record.sessionId,
+    path: record.path,
+    actionContext: record.actionContext,
+    lookingForGroup: record.lookingForGroup,
+    lookingForInstead: record.lookingForInstead,
+    groupIntent: record.groupIntent,
+    didCreateOrJoin: record.didCreateOrJoin,
+    whyOrWhyNot: record.whyOrWhyNot,
+    contactEmail: record.contactEmail,
+    contactX: record.contactX,
+    contactLinkedin: record.contactLinkedin,
+    contactOther: record.contactOther,
+    completionState: record.completionState,
+    lastStep: record.lastStep,
+    submittedOnClose: record.submittedOnClose,
+    completedAt: record.completedAt,
+  }, { id: record.id, now: record.createdAt });
+  return Object.freeze({
+    ...base,
+    updatedAt: instant(record.updatedAt, 'updatedAt'),
   });
 }
 

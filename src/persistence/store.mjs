@@ -3,6 +3,8 @@ export function createLofiStore() {
   const interestsById = new Map();
   const interestsByCohort = new Map();
   const interestKeys = new Map();
+  const feedbackById = new Map();
+  const feedbackBySession = new Map();
   const deliveriesById = new Map();
   const deliveriesByKey = new Map();
   const locks = new Map();
@@ -78,6 +80,29 @@ export function createLofiStore() {
 
     countInterestsByCohortId(cohortId) {
       return (interestsByCohort.get(cohortId) ?? []).length;
+    },
+
+    upsertFeedback(record) {
+      const existingId = feedbackBySession.get(record.sessionId);
+      const id = existingId ?? record.id;
+      const existing = existingId == null ? null : feedbackById.get(existingId);
+      const next = {
+        ...record,
+        id,
+        createdAt: existing?.createdAt ?? record.createdAt,
+      };
+      feedbackById.set(id, clone(next));
+      feedbackBySession.set(record.sessionId, id);
+      return clone(next);
+    },
+
+    getFeedbackBySessionId(sessionId) {
+      const id = feedbackBySession.get(sessionId);
+      return clone(id == null ? null : feedbackById.get(id));
+    },
+
+    listFeedback() {
+      return [...feedbackById.values()].map(clone);
     },
 
     insertNotificationDelivery(record) {

@@ -112,6 +112,6 @@ None. Reversible internal code organization remains at the implementing manager'
 
 ## Next Ready Task
 
-Next ready task: L009.
+Next ready task: L010.
 
-L000–L008 are complete. L009 is the human-operated isolated provider setup and deployment task.
+L000–L009 and L011–L014 are complete. L010 is the production smoke verification task.

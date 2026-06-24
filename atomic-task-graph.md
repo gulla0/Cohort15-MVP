@@ -14,11 +14,12 @@ L000 Clean lofi application shell (done)
                            └─ L006 Resend notifications (done)
                                 └─ L007 Isolated production config/deployment (done)
                                      └─ L008 Privacy, abuse, and end-to-end verification (done)
-                                          ├─ L009 Human provider setup and deployment (not_started)
+                                          ├─ L009 Human provider setup and deployment (done)
                                           │    └─ L010 Production smoke test (not_started)
                                           └─ L011 Research & Field Notes pages (done)
                                                └─ L012 Original product thesis video update (done)
                                                     └─ L013 Small-group formation field note (done)
+                                                         └─ L014 First-party feedback capture (done)
 ```
 
 ## Atomic Task Contracts
@@ -97,6 +98,7 @@ L000 Clean lofi application shell (done)
 ### L009 — Create isolated provider resources and deploy
 
 - Depends on: L008
+- Status: done
 - Owns: human dashboard and DNS actions documented in `docs/human-tasks/lofi-mvp-launch.md`
 - Delivers: separate Supabase project, Render service, Resend setup, and `cohort15.com` cutover
 - Stops on: exact provider blocker or verified deployment
@@ -131,6 +133,14 @@ L000 Clean lofi application shell (done)
 - Owns: edited field-note article, research index entry, public route, focused tests, workflow alignment
 - Delivers: a concise account of the current formation thesis, implemented MVP, proposed manual experiments, success criteria, and open assumptions
 - Stops before: adding admin-created cohorts, subscription infrastructure, automated distribution, or claiming unobserved results
+
+### L014 — Add first-party feedback capture
+
+- Depends on: L013
+- Status: done
+- Owns: feedback service, local/Supabase persistence, `POST /feedback`, global widget, client action context, focused tests, workflow alignment
+- Delivers: first-party partial/completed feedback capture with founder contact icons, optional best-contact fields, desktop panel, mobile full-screen modal, auto-open triggers, autosave, close-save, and private Supabase storage
+- Stops before: production migration until user completes the indexed human task
 
 ## Execution Rules
 

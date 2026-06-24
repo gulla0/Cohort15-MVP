@@ -1,7 +1,9 @@
 import {
   createCohort,
+  createFeedback,
   createInterest,
   createNotificationDelivery,
+  hydrateFeedback,
   hydrateInterest,
   hydrateNotificationDelivery,
 } from '../domain/models.mjs';
@@ -15,6 +17,7 @@ import {
 export const TABLES = Object.freeze({
   cohorts: 'cohort15_lofi_cohorts',
   interests: 'cohort15_lofi_interests',
+  feedback: 'cohort15_lofi_feedback',
   notificationDeliveries: 'cohort15_lofi_notification_deliveries',
 });
 
@@ -117,6 +120,54 @@ function mapDeliveryToRow(delivery) {
   };
 }
 
+function mapFeedbackToRow(feedback) {
+  return {
+    id: feedback.id,
+    session_id: feedback.sessionId,
+    path: feedback.path,
+    action_context: feedback.actionContext,
+    looking_for_group: feedback.lookingForGroup,
+    looking_for_instead: feedback.lookingForInstead,
+    group_intent: feedback.groupIntent,
+    did_create_or_join: feedback.didCreateOrJoin,
+    why_or_why_not: feedback.whyOrWhyNot,
+    contact_email: feedback.contactEmail,
+    contact_x: feedback.contactX,
+    contact_linkedin: feedback.contactLinkedin,
+    contact_other: feedback.contactOther,
+    completion_state: feedback.completionState,
+    last_step: feedback.lastStep,
+    submitted_on_close: feedback.submittedOnClose,
+    created_at: feedback.createdAt,
+    updated_at: feedback.updatedAt,
+    completed_at: feedback.completedAt,
+  };
+}
+
+function mapRowToFeedback(row) {
+  return hydrateFeedback({
+    id: row.id,
+    sessionId: row.session_id,
+    path: row.path,
+    actionContext: row.action_context ?? {},
+    lookingForGroup: row.looking_for_group,
+    lookingForInstead: row.looking_for_instead,
+    groupIntent: row.group_intent,
+    didCreateOrJoin: row.did_create_or_join,
+    whyOrWhyNot: row.why_or_why_not,
+    contactEmail: row.contact_email,
+    contactX: row.contact_x,
+    contactLinkedin: row.contact_linkedin,
+    contactOther: row.contact_other,
+    completionState: row.completion_state,
+    lastStep: row.last_step,
+    submittedOnClose: row.submitted_on_close,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    completedAt: row.completed_at,
+  });
+}
+
 function mapRowToDelivery(row) {
   return hydrateNotificationDelivery({
     id: row.id,
@@ -209,6 +260,17 @@ function createPostgrestClient({ url, serviceRoleKey, fetchImpl = globalThis.fet
         headers: { Prefer: 'return=representation' },
         query,
         body: patch,
+      });
+    },
+
+    upsert(table, row, { onConflict } = {}) {
+      return request(`/rest/v1/${table}`, {
+        method: 'POST',
+        headers: {
+          Prefer: 'resolution=merge-duplicates,return=representation',
+        },
+        query: onConflict ? { on_conflict: onConflict } : undefined,
+        body: row,
       });
     },
 
@@ -331,6 +393,37 @@ export function createSupabasePostgresRepositories({
       await requireCohort(cohortId);
       const rows = await client.list(TABLES.interests, { select: 'id', cohort_id: `eq.${cohortId}` });
       return rows.length;
+    },
+
+    async upsertFeedback(input, options = {}) {
+      const existing = await client.one(TABLES.feedback, {
+        session_id: `eq.${input.sessionId}`,
+      });
+      const feedback = createFeedback(input, {
+        id: existing?.id ?? options.id ?? randomUUID(),
+        now: existing?.created_at ?? options.now ?? now(),
+      });
+      const currentNow = new Date(options.updatedAt ?? options.now ?? now()).toISOString();
+      const [row] = await client.upsert(TABLES.feedback, mapFeedbackToRow({
+        ...feedback,
+        createdAt: existing?.created_at ?? feedback.createdAt,
+        updatedAt: currentNow,
+        completedAt: feedback.completionState === 'completed'
+          ? feedback.completedAt ?? currentNow
+          : null,
+      }), { onConflict: 'session_id' });
+      return mapRowToFeedback(row);
+    },
+
+    async getFeedbackBySessionId(sessionId) {
+      const row = await client.one(TABLES.feedback, { session_id: `eq.${sessionId}` });
+      if (!row) throw new RepositoryNotFoundError('feedback', sessionId);
+      return mapRowToFeedback(row);
+    },
+
+    async listFeedback() {
+      const rows = await client.list(TABLES.feedback);
+      return rows.map(mapRowToFeedback);
     },
 
     async ensureNotificationDelivery(input, options = {}) {
