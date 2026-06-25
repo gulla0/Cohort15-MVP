@@ -3,6 +3,7 @@ export const CATEGORIES = Object.freeze([
   'build',
   'practice',
   'accountability',
+  'gaming',
   'open_source',
   'explore',
 ]);

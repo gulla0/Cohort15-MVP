@@ -21,7 +21,7 @@ The creation form requires:
 - creator email — private, trimmed, and normalized to lowercase;
 - title;
 - description;
-- category — `learn`, `build`, `practice`, `accountability`, `open_source`, or `explore`;
+- category — `learn`, `build`, `practice`, `accountability`, `gaming`, `open_source`, or `explore`;
 - topic;
 - target audience;
 - target skill level — `beginner`, `intermediate`, `advanced`, or `any`;

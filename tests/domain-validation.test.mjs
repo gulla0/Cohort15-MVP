@@ -49,10 +49,11 @@ function cohort(overrides = {}) {
 
 test('normalizes submission strings, email, numbers, and exact expiry', () => {
   const normalized = normalizeCohortSubmission(
-    validInput({ firstMeetingLocal: '2026-01-10T10:00:59.999' }),
+    validInput({ category: 'gaming', firstMeetingLocal: '2026-01-10T10:00:59.999' }),
     { createdAt: CREATED_AT },
   );
   assert.equal(normalized.creatorEmail, 'creator@example.com');
+  assert.equal(normalized.category, 'gaming');
   assert.equal(normalized.title, 'Learn distributed systems');
   assert.equal(normalized.additionalDetails, 'Bring a notebook.');
   assert.equal(normalized.minQuorum, 5);
