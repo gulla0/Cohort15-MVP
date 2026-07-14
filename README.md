@@ -51,6 +51,6 @@ provider setup belongs in `docs/human-tasks/lofi-mvp-launch.md`.
 
 ## Agent Workflow
 
-Use `start.txt` for user-facing routing or `agent-starters/startNewManager.txt` when directly starting an implementation task. Managers select the next unblocked task from `tasks.json`, verify it, align every status-facing workflow artifact, and commit the completed task wave. `npm run check` rejects stale next-task summaries and task-graph statuses.
+Use `start.txt` for user-facing routing, including workflow/knowledge maintenance, or `agent-starters/startNewManager.txt` when directly starting an implementation task. Workflow audits route to `agent-starters/startWorkflowMaintenanceManager.txt`. Managers select the next unblocked task from `tasks.json`, reconcile approved behavior with canonical guidance, verify it, align status-facing artifacts, and commit the completed task wave. `npm run check` rejects stale next-task summaries, task-graph statuses, malformed issue contracts, and a missing maintenance route.
 
 Old production tasks and resolved feedback issues were removed from the active workflow. Git history remains their archive.

@@ -39,12 +39,13 @@ After each wave:
 
 1. Review code.
 2. Run narrow verification.
-3. Update issue `tasks.json`.
-4. Align issue `task-status.md` and `task-graph.md`.
-5. Append issue notes and change log.
-6. Update `agent/feedback/issue-index.md`.
-7. Update `agent/knowledge/index.md` if reusable context changed.
-8. Cross-check `agent/feedback/issue-index.md` against `agent/knowledge/index.md` so resolved issue IDs and reusable behavior summaries are not stale.
-9. Run `npm run check` when practical. This includes the automated workflow guardrail for the same feedback-to-knowledge consistency check.
-10. If the issue wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for the resolved issue wave and exclude unrelated user changes.
-11. Report completed issues/tasks, verification, commit hash, next issue, and blockers.
+3. Perform knowledge reconciliation: promote approved behavior changes into the canonical product or design source and remove superseded guidance.
+4. Update issue `tasks.json`.
+5. Align issue `task-status.md` and `task-graph.md`.
+6. Append issue notes and change log.
+7. Update `agent/feedback/issue-index.md`.
+8. Update `agent/knowledge/index.md` only with routes, reusable decisions, uncertainty, or safety traps; do not duplicate the issue ledger or resolution history.
+9. Confirm any required human operation is linked through `docs/human-tasks/README.md`.
+10. Run `npm run check` when practical. This includes issue-contract/index, knowledge-route, human-task, and maintenance-route guardrails.
+11. If the issue wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for the resolved issue wave and exclude unrelated user changes.
+12. Report completed issues/tasks, canonical guidance updated, verification, commit hash, next issue, and blockers.

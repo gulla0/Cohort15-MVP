@@ -62,10 +62,11 @@ SETUP RULES
 11. Keep `atomic-task-graph.md` aligned with `tasks.json`.
 12. Keep `agent/progress/task-status.md` aligned with `tasks.json`.
 13. Populate `agent/knowledge/index.md` with concrete context routes from the actual repo, not generic advice.
-14. If the repository has `npm run check`, use it after setup artifact changes when practical; it includes task-ledger, tracker, human-task, and feedback guardrails.
-15. After successful setup verification, create a git commit containing only the setup artifacts changed by this setup wave.
-16. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
-17. Stop after setup artifacts are ready. Report the next recommended starter prompt.
+14. Keep the knowledge index pointer-based. Put durable behavior in the canonical product/design source and historical evidence in progress logs rather than duplicating either in the index.
+15. If the repository has `npm run check`, use it after setup artifact changes when practical; it includes task-ledger, tracker, human-task, feedback-contract, and maintenance-route guardrails.
+16. After successful setup verification, create a git commit containing only the setup artifacts changed by this setup wave.
+17. Record open questions and assumptions in `plan.md` and/or `agent/progress/session-notes.md`.
+18. Stop after setup artifacts are ready. Report the next recommended starter prompt.
 
 ==================================================
 SETUP LOOP
@@ -127,6 +128,8 @@ Update `agent/knowledge/index.md` with:
 - context routes for likely task types
 - stale assumptions and uncertainty
 - last updated note
+
+Do not copy task history, issue history, or full specifications into the index. Point to their canonical files.
 
 STEP 6 - Initialize Progress
 Update:

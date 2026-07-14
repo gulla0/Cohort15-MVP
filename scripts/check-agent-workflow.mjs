@@ -2,7 +2,10 @@ import { access, readdir, readFile } from 'node:fs/promises';
 
 const repositoryUrl = new URL('../', import.meta.url);
 const issueIndexUrl = new URL('../agent/feedback/issue-index.md', import.meta.url);
+const feedbackIssuesUrl = new URL('../agent/feedback/issues/', import.meta.url);
 const knowledgeIndexUrl = new URL('../agent/knowledge/index.md', import.meta.url);
+const startUrl = new URL('../start.txt', import.meta.url);
+const maintenanceStarterUrl = new URL('../agent-starters/startWorkflowMaintenanceManager.txt', import.meta.url);
 const humanTasksUrl = new URL('../docs/human-tasks/', import.meta.url);
 const humanTasksIndexUrl = new URL('README.md', humanTasksUrl);
 const tasksUrl = new URL('../tasks.json', import.meta.url);
@@ -39,8 +42,8 @@ async function listMarkdownFiles(directoryUrl, relativeDirectory = '') {
   return files;
 }
 
-function parseDoneIssueIds(issueIndexText) {
-  const issueIds = [];
+function parseIssueRows(issueIndexText) {
+  const issues = [];
 
   for (const line of issueIndexText.split('\n')) {
     if (!line.startsWith('| ISSUE-')) {
@@ -51,14 +54,16 @@ function parseDoneIssueIds(issueIndexText) {
       .split('|')
       .slice(1, -1)
       .map((cell) => cell.trim());
-    const [issueId, , status] = cells;
-
-    if (status === 'done') {
-      issueIds.push(issueId);
-    }
+    const [issueId, title, status, folder] = cells;
+    issues.push({
+      issueId,
+      title,
+      status,
+      folder: folder?.replaceAll('`', '').replace(/\/$/, '')
+    });
   }
 
-  return issueIds;
+  return issues;
 }
 
 const requiredTaskFields = [
@@ -185,6 +190,80 @@ function validateTaskLedger(ledger) {
   return errors;
 }
 
+const requiredIssueFiles = [
+  'issue.md',
+  'tasks.json',
+  'task-graph.md',
+  'task-status.md',
+  'session-notes.md',
+  'change-log.md',
+  'blockers.md'
+];
+
+async function validateFeedbackIssues(issueRows) {
+  const errors = [];
+  const indexedFolders = new Set();
+  const allowedIssueStatuses = new Set(['not_started', 'in_progress', 'blocked', 'done']);
+
+  for (const issue of issueRows) {
+    if (!allowedIssueStatuses.has(issue.status)) {
+      errors.push(`${issue.issueId} has invalid issue status ${issue.status}.`);
+    }
+    if (!issue.folder?.startsWith('agent/feedback/issues/')) {
+      errors.push(`${issue.issueId} must point to a folder under agent/feedback/issues/.`);
+      continue;
+    }
+    if (indexedFolders.has(issue.folder)) {
+      errors.push(`Duplicate feedback folder in issue index: ${issue.folder}.`);
+      continue;
+    }
+    indexedFolders.add(issue.folder);
+
+    const folderUrl = new URL(`../${issue.folder}/`, import.meta.url);
+    for (const fileName of requiredIssueFiles) {
+      try {
+        await access(new URL(fileName, folderUrl));
+      } catch {
+        errors.push(`${issue.issueId} is missing ${issue.folder}/${fileName}.`);
+      }
+    }
+
+    try {
+      const ledger = parseTaskLedger(await readFile(new URL('tasks.json', folderUrl), 'utf8'));
+      errors.push(...validateTaskLedger(ledger).map((error) => `${issue.issueId}: ${error}`));
+      for (const task of ledger.tasks ?? []) {
+        if (typeof task.risk !== 'string' || task.risk.trim().length === 0) {
+          errors.push(`${issue.issueId}: ${task.id ?? 'unknown task'}.risk must be a non-empty string.`);
+        }
+      }
+      if (ledger.issue_id && ledger.issue_id !== issue.issueId) {
+        errors.push(`${issue.issueId} folder ledger declares issue_id ${ledger.issue_id}.`);
+      }
+      if (issue.status === 'done' && (ledger.tasks ?? []).some((task) => task.status !== 'done')) {
+        errors.push(`${issue.issueId} is done while one or more issue tasks are not done.`);
+      }
+    } catch (error) {
+      errors.push(`${issue.issueId} tasks.json could not be validated: ${error.message}`);
+    }
+  }
+
+  const issueEntries = await readdir(feedbackIssuesUrl, { withFileTypes: true });
+  for (const entry of issueEntries) {
+    if (!entry.isDirectory()) continue;
+    const folder = `agent/feedback/issues/${entry.name}`;
+    try {
+      await access(new URL('tasks.json', new URL(`${entry.name}/`, feedbackIssuesUrl)));
+      if (!indexedFolders.has(folder)) {
+        errors.push(`Feedback folder with tasks.json is missing from issue index: ${folder}.`);
+      }
+    } catch {
+      // Empty legacy directories do not participate in the active workflow.
+    }
+  }
+
+  return errors;
+}
+
 function parseTaskStatus(text) {
   const statuses = new Map();
   for (const line of text.split('\n')) {
@@ -258,6 +337,7 @@ async function findMissingReadyTaskInputs(tasks) {
 const [
   issueIndexText,
   knowledgeIndexText,
+  startText,
   humanTasksIndexText,
   markdownFiles,
   humanTaskEntries,
@@ -269,6 +349,7 @@ const [
   await Promise.all([
   readFile(issueIndexUrl, 'utf8'),
   readFile(knowledgeIndexUrl, 'utf8'),
+  readFile(startUrl, 'utf8'),
   readFile(humanTasksIndexUrl, 'utf8'),
   listMarkdownFiles(repositoryUrl),
   readdir(humanTasksUrl, { withFileTypes: true }),
@@ -330,8 +411,8 @@ for (const [name, text] of workflowStatusTexts) {
 
 const missingReadyTaskInputs = await findMissingReadyTaskInputs(taskLedger.tasks ?? []);
 
-const doneIssueIds = parseDoneIssueIds(issueIndexText);
-const missingIssueIds = doneIssueIds.filter((issueId) => !knowledgeIndexText.includes(issueId));
+const issueRows = parseIssueRows(issueIndexText);
+const feedbackIssueFailures = await validateFeedbackIssues(issueRows);
 const humanSetupHeading = /^## Human Setup Checklist\s*$/m;
 const misplacedHumanTaskFiles = [];
 
@@ -363,18 +444,30 @@ for (const entry of humanTaskEntries) {
   }
 }
 
+const humanTaskCount = humanTaskEntries.filter(
+  (entry) => entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'README.md'
+).length;
+
 const failures = [];
 
 failures.push(...taskLedgerFailures, ...taskTrackerFailures);
+failures.push(...feedbackIssueFailures);
+
+try {
+  await access(maintenanceStarterUrl);
+} catch {
+  failures.push('Missing agent-starters/startWorkflowMaintenanceManager.txt.');
+}
+if (!startText.includes('agent-starters/startWorkflowMaintenanceManager.txt')) {
+  failures.push('start.txt must route workflow maintenance to agent-starters/startWorkflowMaintenanceManager.txt.');
+}
 
 if (missingReadyTaskInputs.length > 0) {
   failures.push(`Ready tasks have missing inputs: ${missingReadyTaskInputs.join(', ')}`);
 }
 
-if (missingIssueIds.length > 0) {
-  failures.push(
-    `Resolved feedback issues missing from agent/knowledge/index.md: ${missingIssueIds.join(', ')}`
-  );
+if (!knowledgeIndexText.includes('agent/feedback/issue-index.md')) {
+  failures.push('agent/knowledge/index.md must point to agent/feedback/issue-index.md.');
 }
 
 if (misplacedHumanTaskFiles.length > 0) {
@@ -395,15 +488,15 @@ if (malformedHumanTaskFiles.length > 0) {
   );
 }
 
+if (humanTaskCount > 0 && !knowledgeIndexText.includes('docs/human-tasks/README.md')) {
+  failures.push('agent/knowledge/index.md must route human operations through docs/human-tasks/README.md.');
+}
+
 if (failures.length > 0) {
   console.error(['agent workflow check failed:', ...failures].join('\n'));
   process.exit(1);
 }
 
-const humanTaskCount = humanTaskEntries.filter(
-  (entry) => entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'README.md'
-).length;
-
 console.log(
-  `agent workflow ok (${taskLedger.tasks.length} aligned tasks; ${doneIssueIds.length} resolved feedback issues reflected in knowledge index; ${humanTaskCount} indexed human-task files)`
+  `agent workflow ok (${taskLedger.tasks.length} aligned tasks; ${issueRows.length} indexed feedback issues; ${humanTaskCount} indexed human-task files)`
 );

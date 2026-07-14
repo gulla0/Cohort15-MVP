@@ -177,3 +177,13 @@ Focused feedback and Supabase adapter tests passed. L010 remains the next ready 
 - Verified the private Supabase migration, local repository behavior, route policy, UI rendering, and workflow alignment.
 
 Full `npm run check` passed with 75 tests. Commit and push are approved by the user; production feedback capture remains blocked until the indexed Supabase feedback migration human task is completed.
+
+## 2026-07-14 — Workflow drift prevention
+
+- Added a workflow-maintenance manager reachable from `start.txt` for orchestration, knowledge, schema, and tracker audits.
+- Added mandatory knowledge reconciliation to setup, implementation, and feedback manager closeout.
+- Reduced the knowledge index to authority, context, application, safety, and current-state pointers instead of duplicated histories.
+- Extended the workflow guard to validate issue-local contracts/folders, canonical feedback and human-task index routes, and maintenance-route reachability.
+- Corrected stale blocker guidance and replaced machine-specific migration paths in human-task documents with repository-relative paths.
+
+Full `npm run check` passed with 75 tests. L010 remains the next ready product task.

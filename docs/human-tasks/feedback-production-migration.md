@@ -8,7 +8,7 @@ Do not paste credentials, API keys, feedback contact data, or secret values into
 
 1. Open the isolated `cohort15-lofi-mvp` Supabase project.
 2. Open `SQL Editor` -> `New query`.
-3. Run `/Users/gzero/Desktop/cohort15/cohort15-mvp/supabase/migrations/20260624000000_cohort15_lofi_feedback.sql`.
+3. Run `supabase/migrations/20260624000000_cohort15_lofi_feedback.sql` from the repository root.
 4. Verify the new table is named `cohort15_lofi_feedback`.
 5. Verify row level security is enabled and access remains service-role only.
 6. Deploy the approved branch to the existing isolated Render service.

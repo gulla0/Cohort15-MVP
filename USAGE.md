@@ -54,11 +54,21 @@ agent-starters/startFeedbackResolutionManager.txt
 
 This resolves issue-local task graphs and updates feedback trackers.
 
-Before handoff, feedback resolution should run `npm run check` and fix any agent workflow guardrail failure. The guardrail validates task contracts/dependencies, tracker alignment, ready inputs, human-task rules, and feedback-to-knowledge consistency.
+Before handoff, feedback resolution should run `npm run check` and fix any agent workflow guardrail failure. The guardrail validates task contracts/dependencies, tracker alignment, ready inputs, human-task rules, feedback issue contracts/indexing, and knowledge routes.
 
 After successful feedback intake or resolution, the manager should commit the completed issue wave and include the commit hash in the handoff report.
 
 In normal use, `start.txt` should route by role transition into these managers. Directly starting a manager is useful when the intent is already known.
+
+## Auditing Or Repairing Agent Workflow
+
+Use `start.txt` for requests about orchestration paths, knowledge-layer accessibility, stale trackers, schema drift, or workflow documentation. The router should transition to:
+
+```text
+agent-starters/startWorkflowMaintenanceManager.txt
+```
+
+This manager reconciles canonical authority first, then derived trackers and pointer indexes. It does not implement product features.
 
 ## Updating The Knowledge Index
 
@@ -70,9 +80,11 @@ Update `agent/knowledge/index.md` when an agent learns reusable context such as:
 - stale assumptions
 - files that should be avoided unless relevant
 
+Keep it pointer-based. Product behavior belongs in the canonical specification, task and issue history belongs in their ledgers/logs, and human operations belong under `docs/human-tasks/`.
+
 Do not treat the index as proof. Verify against code before marking work done.
 
-`npm run check` also verifies that every `done` feedback issue in `agent/feedback/issue-index.md` is mentioned in `agent/knowledge/index.md`.
+`npm run check` verifies that active feedback folders are indexed and structurally valid, and that the knowledge index points to the canonical feedback index. Issue histories remain issue-local.
 
 ## Adding A Main Task
 

@@ -38,6 +38,7 @@ Classify routed requests before role transition.
 | Change / fix | User asks for a bounded product/code change or bug fix in the main product flow | `agent-starters/startNewManager.txt`, after routing into an approved work request if needed |
 | Feedback intake | User gives product feedback, UX pain, missing behavior, or bug reports that should become tracked issue-local work | `agent-starters/startFeedbackCreationManager.txt` |
 | Feedback resolution | User asks to work through existing feedback issues or issue-local task graphs | `agent-starters/startFeedbackResolutionManager.txt` |
+| Workflow maintenance | User asks to audit or repair orchestration paths, knowledge pointers, schemas, tracker drift, workflow documentation, or agent accessibility | `agent-starters/startWorkflowMaintenanceManager.txt` |
 | Discussion / analysis | User is exploring, asking whether an approach makes sense, or requesting explanation only | Direct response unless the user approves setup or execution |
 
 If a request contains both discussion and setup/build intent, answer the conceptual part briefly, then summarize the inferred setup/build role transition and ask for approval before manager-role work.
@@ -61,7 +62,7 @@ Do not ask about non-blocking details. A detail is meaningful only if changing i
 ```text
 messy user request
 -> direct-vs-routed classification
--> if routed: setup vs implementation vs change/fix vs feedback intake/resolution
+-> if routed: setup vs implementation vs change/fix vs feedback intake/resolution vs workflow maintenance
 -> if direct: answer or act
 -> if routed: provisional intake state
 -> clarify only blockers
@@ -132,6 +133,6 @@ While acting as the router, the agent does not own:
 
 Those belong to the selected manager role after approval.
 
-Managers should know that `npm run check` includes task-ledger/dependency validation, readable tracker alignment, ready-input existence checks, human-task rules, and feedback-to-knowledge consistency. Manager closeout should fix or precisely report any mismatch.
+Managers should know that `npm run check` includes task-ledger/dependency validation, readable tracker alignment, ready-input existence checks, human-task rules, issue-local feedback contracts/indexing, knowledge routes, and maintenance-route reachability. Manager closeout should fix or precisely report any mismatch.
 
 Managers should commit successful completed work after verification and tracker updates. Commits must include only the files changed for the completed task or issue wave, not unrelated user work.

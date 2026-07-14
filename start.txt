@@ -18,6 +18,7 @@ Decide whether the user's request should be:
 4. routed to change/fix work
 5. routed to feedback intake
 6. routed to feedback resolution
+7. routed to workflow maintenance
 
 If routed work will begin, summarize the intended role transition and ask for approval unless the user has already clearly approved execution.
 
@@ -42,6 +43,7 @@ Only read these if needed:
 10. `agent/feedback/issue-index.md`
 11. `agent/progress/session-notes.md`
 12. `agent/progress/blockers.md`
+13. `docs/human-tasks/README.md`
 
 After classification, inspect only the additional context required to determine readiness or produce the role-transition summary.
 
@@ -55,10 +57,11 @@ ROUTING RULES
 4. Treat bounded bug fixes or product changes as change/fix work.
 5. Treat raw user feedback, UX pain, missing behavior, or bug reports that need triage as feedback intake.
 6. Treat requests to work through existing feedback issues as feedback resolution.
-7. Ask only blocking clarification questions.
-8. Do not ask the user to choose a starter file if the intent is clear.
-9. Do not delegate directly to workers.
-10. Do not update canonical task or feedback trackers from the router unless the request is only a simple administrative edit.
+7. Treat requests to audit or repair orchestration, knowledge pointers, schemas, trackers, workflow documentation, or agent-access paths as workflow maintenance.
+8. Ask only blocking clarification questions.
+9. Do not ask the user to choose a starter file if the intent is clear.
+10. Do not delegate directly to workers.
+11. Do not update canonical task or feedback trackers from the router unless the request is only a simple administrative edit.
 
 ==================================================
 NEXT ROLE PROMPTS
@@ -69,6 +72,7 @@ NEXT ROLE PROMPTS
 - Change/fix work: `agent-starters/startNewManager.txt`
 - Feedback intake: `agent-starters/startFeedbackCreationManager.txt`
 - Feedback resolution: `agent-starters/startFeedbackResolutionManager.txt`
+- Workflow maintenance: `agent-starters/startWorkflowMaintenanceManager.txt`
 - Worker execution: `agent-starters/startWorker.txt`, used only by managers
 
 ==================================================
@@ -110,7 +114,7 @@ After approval, assume the correct manager role by following its starter prompt.
 
 The manager owns planning, task selection, worker delegation, verification, tracker updates, and user-facing completion report.
 
-Managers should use `npm run check` for final verification when their work changes product code or agent workflow artifacts. The workflow guard validates task contracts and dependencies, task-status/graph alignment, ready-task input existence, human-task placement/indexing, and feedback-to-knowledge consistency.
+Managers should use `npm run check` for final verification when their work changes product code or agent workflow artifacts. The workflow guard validates task contracts and dependencies, task-status/graph alignment, ready-task input existence, human-task placement/indexing, feedback issue contracts/indexing, knowledge routes, and reachability of the workflow-maintenance route.
 
 When manager-role work completes successfully, the manager should create an intentional git commit for the completed task or issue wave after verification and tracker updates. Do not include unrelated user changes in the commit.
 

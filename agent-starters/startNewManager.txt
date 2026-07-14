@@ -43,14 +43,15 @@ Wave closeout:
 
 1. Review merged code.
 2. Run narrow verification.
-3. Update `tasks.json`.
-4. Align task statuses in `atomic-task-graph.md`.
-5. Update the exact `Next ready task: <task IDs>.` line in `README.md`, `plan.md`, `workflow-sheet.md`, and `agent/progress/task-status.md`.
-6. Append `agent/progress/session-notes.md`.
-7. Append `agent/progress/change-log.md`.
-8. Update `agent/progress/blockers.md` if needed.
-9. Update `agent/knowledge/index.md` if reusable context changed.
-10. Run `npm run check` when practical before handoff. This validates task contracts/dependencies, graph and next-task alignment, ready inputs, human-task rules, and feedback context.
-11. If the workflow guardrail fails, reconcile the exact mismatch or report why it is outside the task scope.
-12. If the task wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for this task wave and exclude unrelated user changes.
-13. Report completed tasks, verification, commit hash, next task, and blockers.
+3. Perform knowledge reconciliation: identify every approved behavior or architecture decision changed by the wave, update its canonical product/design source, and remove superseded guidance.
+4. Update `tasks.json`.
+5. Align task statuses in `atomic-task-graph.md`.
+6. Update the exact `Next ready task: <task IDs>.` line in `README.md`, `plan.md`, `workflow-sheet.md`, and `agent/progress/task-status.md`.
+7. Append `agent/progress/session-notes.md` and `agent/progress/change-log.md` for historical evidence.
+8. Update `agent/progress/blockers.md` so it describes only current blockers.
+9. Update `agent/knowledge/index.md` only with pointers, reusable decisions, uncertainty, or safety traps; do not copy task or issue history into it.
+10. Confirm any human operation is linked through `docs/human-tasks/README.md`.
+11. Run `npm run check` when practical before handoff. This validates task contracts/dependencies, graph and next-task alignment, ready inputs, human-task rules, issue-local feedback contracts, and knowledge handoffs.
+12. If the workflow guardrail fails, reconcile the exact mismatch or report why it is outside the task scope.
+13. If the task wave completed successfully, create a git commit after verification and tracker updates. Stage only files changed for this task wave and exclude unrelated user changes.
+14. Report completed tasks, canonical guidance updated, verification, commit hash, next task, and blockers.

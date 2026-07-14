@@ -167,3 +167,13 @@ Verification: `node --test tests/research.test.mjs` passed with 6 tests; full `n
 - Added focused feedback and Supabase adapter/migration tests.
 
 Verification: `npm run check` passed with 75 tests and 15 aligned tasks.
+
+## 2026-07-14 — Agent workflow drift prevention
+
+- Added `agent-starters/startWorkflowMaintenanceManager.txt` and routed workflow/knowledge maintenance through `start.txt`.
+- Added canonical-guidance reconciliation and pointer-only knowledge rules to manager closeout contracts.
+- Reworked `agent/knowledge/index.md` into an authority and context pointer layer.
+- Expanded `scripts/check-agent-workflow.mjs` to validate active feedback folders/task contracts and maintenance-route accessibility.
+- Updated current blocker and human-task path guidance.
+
+Verification: `npm run check` passed with 75 tests and 15 aligned tasks.
