@@ -6,7 +6,7 @@ The existing landing page, cohort directory, creation and interest flow, quorum 
 
 ## Setup Status
 
-Planning and task setup for the Piece of Pie branch is complete. Accounts, credit-funded product actions, and fake-provider Stripe Checkout with exactly-once fulfillment are implemented; cohesive local launch verification is next.
+The local Piece of Pie implementation through L019 includes accounts, credit-funded product actions, fake-provider Stripe Checkout with exactly-once fulfillment, cohesive launch verification, and the production configuration contract. L020 remains human-run provider setup, deployment, and production verification using the indexed launch checklist.
 
 - Canonical product rules: `docs/cohort15-piece-of-pie-mvp-spec.md`
 - Historical lofi baseline: `docs/cohort15-lofi-mvp-spec.md`
@@ -16,7 +16,7 @@ Planning and task setup for the Piece of Pie branch is complete. Accounts, credi
 - Current status: `agent/progress/task-status.md`
 - Human/provider continuity: `docs/human-tasks/README.md`
 
-Next ready task: L019.
+Next ready task: L020.
 
 A fresh user-facing chat should start only from `start.txt`. The router reads the canonical artifacts above and transitions approved planned work to the implementation manager without requiring prior chat history.
 
@@ -52,9 +52,9 @@ npm run lint
 npm start
 ```
 
-The local server defaults to `http://localhost:3000`. Production continues to require the lofi environment contract and will gain the additional auth and Stripe variables defined by the canonical specification during implementation.
+The local server defaults to `http://localhost:3000`. Production preserves the existing lofi environment contract and adds exactly `COHORT15_LOFI_SUPABASE_ANON_KEY`, `COHORT15_LOFI_STRIPE_SECRET_KEY`, `COHORT15_LOFI_STRIPE_PRICE_6_CREDITS`, and `COHORT15_LOFI_STRIPE_WEBHOOK_SECRET`. Startup fails clearly when any required production value is absent. `.env.example` and `render.yaml` enumerate the contract without embedding credentials or provider secret values.
 
-Never commit or paste Supabase keys, Stripe keys, webhook secrets, Resend keys, session tokens, customer data, or test payment details. Human dashboard and production verification work belongs only under `docs/human-tasks/`.
+Never commit or paste Supabase keys, Stripe keys, webhook secrets, Resend keys, session tokens, customer data, or test payment details. All dashboard, credential, migration, deployment, and production-verification steps are kept in `docs/human-tasks/piece-of-pie-launch.md`.
 
 ## Agent Workflow
 

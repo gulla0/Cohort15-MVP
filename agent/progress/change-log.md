@@ -232,3 +232,13 @@ Verification: focused L017 suites passed with 36 tests; authenticated local brow
 - Added focused fake-provider payment coverage and reconciled deferred-payment regression tests, workflow status, knowledge pointers, and the indexed human launch checklist.
 
 Verification: focused payment/runtime suites passed with 10 tests; full `npm run check` passed with 98 tests and 6 aligned active tasks. L019 is next.
+
+## 2026-07-15 — L019 Piece of Pie local launch gate
+
+- Added `tests/piece-of-pie-launch.test.mjs` for the complete provider-independent sign-in, grant, free-use, payment-gate, verified-purchase, replay, privacy, and purchased-use path.
+- Added exact environment-template and Render Blueprint contract checks, delegated every provider value safely, and targeted the Piece of Pie branch.
+- Updated public research descriptions to match the current account, credit, refund, and single-package payment behavior.
+- Clarified README configuration guidance and the indexed human provider checklist while keeping all credentials and production actions outside the repository workflow.
+- Completed desktop and mobile fake-provider browser smoke with exact viewport/overflow and console checks.
+
+Verification: focused launch/runtime/research suites passed; full `npm run check` passed with 101 tests and 6 aligned active tasks. L020 is next and requires the indexed human/provider workflow.

@@ -74,10 +74,10 @@ Do not place magic-link URLs or token parameters in screenshots or evidence.
 - [ ] In Stripe, complete preflight in test mode first.
 - [ ] Create or confirm one product named `Cohort15 Credits` with one one-time USD $6.00 price representing six credits.
 - [ ] Record the Price ID directly in Render under `COHORT15_LOFI_STRIPE_PRICE_6_CREDITS`. A Price ID is configuration, but it still does not need to appear in chat.
-- [ ] Place the server-side Stripe secret key directly in Render under the implemented secret variable name.
+- [ ] Place the server-side Stripe secret key directly in Render as `COHORT15_LOFI_STRIPE_SECRET_KEY`; do not commit or paste its value.
 - [ ] Create a Stripe webhook endpoint for `https://cohort15.com/webhooks/stripe`.
 - [ ] Subscribe only to the Checkout event type required by the implemented L018 contract, normally `checkout.session.completed`.
-- [ ] Place the endpoint signing secret directly in Render under the implemented webhook-secret variable name.
+- [ ] Place the endpoint signing secret directly in Render as `COHORT15_LOFI_STRIPE_WEBHOOK_SECRET`; do not commit or paste its value.
 - [ ] Repeat the product/price, API-key, and webhook setup in live mode before final verification. Keep test and live values in their corresponding Stripe/Render environments.
 - [ ] Never configure a client-exposed Stripe secret or accept a browser-supplied price/amount.
 
@@ -85,7 +85,7 @@ Do not place magic-link URLs or token parameters in screenshots or evidence.
 
 - [ ] Change the existing service deployment branch from the lofi branch to `codex/piece-of-pie` only after L019 passes and its commit is pushed.
 - [ ] Preserve every existing `COHORT15_LOFI_*` Supabase, Resend, app URL, sender, reply-to, and analytics value.
-- [ ] Add the Supabase anon/public-class key, Stripe secret key, six-credit Price ID, and Stripe webhook signing secret under the exact variable names verified by L019.
+- [ ] Add exactly `COHORT15_LOFI_SUPABASE_ANON_KEY`, `COHORT15_LOFI_STRIPE_SECRET_KEY`, `COHORT15_LOFI_STRIPE_PRICE_6_CREDITS`, and `COHORT15_LOFI_STRIPE_WEBHOOK_SECRET`; add no other provider variable for this extension.
 - [ ] Do not remove existing values or paste any value into repository files.
 - [ ] Keep `COHORT15_LOFI_APP_URL=https://cohort15.com`, the existing start command, and `/health` check unless implementation evidence requires a documented correction.
 - [ ] Trigger a deployment and confirm startup succeeds without printing secret values.

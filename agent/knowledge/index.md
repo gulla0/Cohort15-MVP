@@ -46,11 +46,11 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 | Area | Current files | Planned owner |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016 auth, L017 funded mutations, and L018 payment routes complete; L019 owns launch verification |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016–L019 auth, funded actions, payment routes, production contract, and local launch verification complete |
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L015 foundation complete; L016–L018 consume it |
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L015 ledger, L017 funded actions, and L018 purchase fulfillment integration complete |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L017 complete |
-| Browse/detail | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | Preserve; L016–L019 limited integration |
+| Browse/detail | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | Preserved through the completed L019 local launch gate |
 | Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L017 complete |
 | Email | `src/email/resend.mjs`, `src/services/notifications.mjs` | Preserved with private authenticated identity integration |
 | Feedback | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs` | Preserve/regression only |
@@ -83,7 +83,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 ## Current Pointers
 
-- Next task: `agent/progress/task-status.md` (L019).
+- Next task: `agent/progress/task-status.md` (L020 human/provider launch verification).
 - Current blockers: `agent/progress/blockers.md`.
 - Human/provider continuity and new actions: `docs/human-tasks/README.md`.
 - Active product source: `docs/cohort15-piece-of-pie-mvp-spec.md`.

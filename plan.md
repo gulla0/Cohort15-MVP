@@ -116,6 +116,6 @@ The only new human setup path is `docs/human-tasks/piece-of-pie-launch.md`. It d
 
 ## Next Ready Task
 
-Next ready task: L019.
+Next ready task: L020.
 
-L018 now provides the single Stripe package, signed webhook path, server-retrieved browser reconciliation, and exactly-once purchase credits. L019 can close the cohesive local launch gate and regression suite.
+L019 now verifies the cohesive local account, credit, payment-gate, fake-provider purchase, purchased-credit use, configuration, privacy, regression, and responsive browser path. L020 is the indexed human provider, deployment, live-payment, and production-verification task.

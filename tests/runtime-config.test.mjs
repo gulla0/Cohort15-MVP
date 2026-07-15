@@ -1,7 +1,41 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { listRuntimeEnvVars, loadRuntimeConfig } from '../src/config/runtime.mjs';
 import { createRuntimeRepositories } from '../src/server/app.mjs';
+
+const preservedProviderEnvVars = Object.freeze([
+  'COHORT15_LOFI_APP_ENV',
+  'COHORT15_LOFI_APP_URL',
+  'COHORT15_LOFI_GA_MEASUREMENT_ID',
+  'COHORT15_LOFI_SUPABASE_URL',
+  'COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY',
+  'COHORT15_LOFI_RESEND_API_KEY',
+  'COHORT15_LOFI_EMAIL_FROM',
+  'COHORT15_LOFI_EMAIL_REPLY_TO',
+]);
+
+const additiveProviderEnvVars = Object.freeze([
+  'COHORT15_LOFI_SUPABASE_ANON_KEY',
+  'COHORT15_LOFI_STRIPE_SECRET_KEY',
+  'COHORT15_LOFI_STRIPE_PRICE_6_CREDITS',
+  'COHORT15_LOFI_STRIPE_WEBHOOK_SECRET',
+]);
+
+const providerEnvVars = Object.freeze([
+  ...preservedProviderEnvVars,
+  ...additiveProviderEnvVars,
+]);
+
+const delegatedProviderEnvVars = Object.freeze([
+  'COHORT15_LOFI_SUPABASE_URL',
+  'COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY',
+  'COHORT15_LOFI_SUPABASE_ANON_KEY',
+  'COHORT15_LOFI_STRIPE_SECRET_KEY',
+  'COHORT15_LOFI_STRIPE_PRICE_6_CREDITS',
+  'COHORT15_LOFI_STRIPE_WEBHOOK_SECRET',
+  'COHORT15_LOFI_RESEND_API_KEY',
+]);
 
 const productionEnv = Object.freeze({
   COHORT15_LOFI_APP_ENV: 'production',
@@ -97,16 +131,42 @@ test('production repositories use the configured lofi Supabase project', async (
 
 test('runtime environment contract contains no legacy provider variables', () => {
   const names = listRuntimeEnvVars();
-  assert.ok(names.includes('COHORT15_LOFI_APP_URL'));
-  assert.ok(names.includes('COHORT15_LOFI_GA_MEASUREMENT_ID'));
-  assert.ok(names.includes('COHORT15_LOFI_SUPABASE_URL'));
-  assert.ok(names.includes('COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY'));
-  assert.ok(names.includes('COHORT15_LOFI_SUPABASE_ANON_KEY'));
-  assert.ok(names.includes('COHORT15_LOFI_STRIPE_SECRET_KEY'));
-  assert.ok(names.includes('COHORT15_LOFI_STRIPE_PRICE_6_CREDITS'));
-  assert.ok(names.includes('COHORT15_LOFI_STRIPE_WEBHOOK_SECRET'));
-  assert.ok(names.includes('COHORT15_LOFI_RESEND_API_KEY'));
-  assert.ok(names.includes('COHORT15_LOFI_EMAIL_FROM'));
-  assert.ok(names.includes('COHORT15_LOFI_EMAIL_REPLY_TO'));
-  assert.equal(names.some((name) => /SOCIAL|UPLOAD/.test(name)), false);
+  assert.deepEqual(
+    names.filter((name) => name.startsWith('COHORT15_LOFI_')).sort(),
+    [...providerEnvVars].sort(),
+  );
+  assert.deepEqual(additiveProviderEnvVars, [
+    'COHORT15_LOFI_SUPABASE_ANON_KEY',
+    'COHORT15_LOFI_STRIPE_SECRET_KEY',
+    'COHORT15_LOFI_STRIPE_PRICE_6_CREDITS',
+    'COHORT15_LOFI_STRIPE_WEBHOOK_SECRET',
+  ]);
+});
+
+test('environment example enumerates the exact provider contract without secret values', async () => {
+  const contents = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
+  const configuredNames = contents
+    .split('\n')
+    .map((line) => line.match(/^(COHORT15_LOFI_[A-Z0-9_]+)=/)?.[1])
+    .filter(Boolean);
+
+  assert.deepEqual(configuredNames.sort(), [...providerEnvVars].sort());
+  for (const name of delegatedProviderEnvVars) {
+    assert.match(contents, new RegExp(`^${name}=$`, 'm'));
+  }
+});
+
+test('Render Blueprint targets Piece of Pie and delegates every provider value safely', async () => {
+  const contents = await readFile(new URL('../render.yaml', import.meta.url), 'utf8');
+  const configuredNames = [...contents.matchAll(/^\s+- key: (COHORT15_LOFI_[A-Z0-9_]+)$/gm)]
+    .map((match) => match[1]);
+
+  assert.match(contents, /^\s+branch: codex\/piece-of-pie$/m);
+  assert.deepEqual(configuredNames.sort(), [...providerEnvVars].sort());
+  for (const name of delegatedProviderEnvVars) {
+    assert.match(
+      contents,
+      new RegExp(`^\\s+- key: ${name}\\n\\s+sync: false$`, 'm'),
+    );
+  }
 });

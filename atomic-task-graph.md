@@ -9,7 +9,7 @@ L015 Account and credit persistence foundation (done)
   └─ L016 Magic-link accounts and signup credits (done)
        └─ L017 Credit-gated creation and interest (done)
             └─ L018 Stripe checkout and idempotent fulfillment (done)
-                 └─ L019 Piece of Pie local launch gate (not_started)
+                 └─ L019 Piece of Pie local launch gate (done)
                       └─ L020 Live provider setup, deployment, and verification (not_started)
 ```
 
@@ -50,7 +50,7 @@ L015 Account and credit persistence foundation (done)
 ### L019 — Complete the Piece of Pie local launch gate
 
 - Depends on: L018
-- Status: not_started
+- Status: done
 - Owns: cohesive balance/payment-gate UX, production runtime contract, end-to-end and regression verification, launch-blocking fixes
 - Delivers: locally verified account → grant → use → payment gate → purchase → use flow with existing lofi features intact
 - Stops before: human provider mutations and real payment

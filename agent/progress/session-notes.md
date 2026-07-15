@@ -247,3 +247,14 @@ Verification completed with `npm run check` and 94 passing tests. L018 is next.
 - Added focused fake-provider adapter, signature, route, replay, concurrency, body-limit, privacy, and failure tests and updated obsolete deferred-payment regression assertions.
 
 Verification completed with `npm run check` and 98 passing tests. L019 is next.
+
+## 2026-07-15 — L019 Piece of Pie local launch gate
+
+- Added a cohesive provider-independent HTTP flow covering magic-link sign-in, concurrent callback replay, exactly-once signup grant, free-credit cohort creation, insufficient-credit gating, signed fake Stripe fulfillment, webhook replay, and purchased-credit reuse.
+- Locked `.env.example`, `render.yaml`, and runtime tests to the preserved production contract plus exactly four auth/Stripe variables; updated the Blueprint branch to `codex/piece-of-pie` without adding values.
+- Corrected public research pages that still described authentication, credits, and payments as absent, and added current-behavior regression assertions.
+- Aligned README and the indexed provider checklist with the L019 local/L020 human boundary and exact configuration names.
+- Verified the fake-provider flow in the local browser at 1280x720 and 390x844; the funded-create/payment-gate path and paid completion balance rendered without horizontal overflow or console errors.
+- Kept provider dashboards, credentials, migrations, deployment, live payment, and production verification outside the code-owned task.
+
+Verification completed with `npm run check` and 101 passing tests. L020 is next through `docs/human-tasks/piece-of-pie-launch.md`.

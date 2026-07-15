@@ -3,7 +3,7 @@ services:
     name: cohort15-lofi-mvp
     runtime: node
     plan: starter
-    branch: codex/do-not-merge-lofi-mvp
+    branch: codex/piece-of-pie
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health

@@ -54,7 +54,8 @@ test('formation field note preserves the draft thesis and separates current beha
   ]) assert.match(html, new RegExp(expected));
   assert.match(html, /This capability is not part of the current automated product flow/);
   assert.match(html, /seven days to reach that threshold/);
-  assert.match(html, /There is no authentication, payment, credit system, or automated social distribution/);
+  assert.match(html, /one email sign-in method, a two-credit signup grant, and one six-credit payment package/);
+  assert.match(html, /account email remains private/);
   assert.match(html, /Create a cohort/);
   assert.match(html, /Browse cohorts/);
   assert.doesNotMatch(html, /already proven|guaranteed to work/i);
@@ -67,8 +68,10 @@ test('product update embeds the supplied video and distinguishes original and cu
   assert.match(html, /youtube\.com\/watch\?v=E5f-qqNILlg&amp;t=4s/);
   assert.match(html, /This video captures the original vision/);
   assert.match(html, /What stayed true/);
-  assert.match(html, /What changed in the validation MVP/);
-  assert.match(html, /No credits, authentication, or payments/);
+  assert.match(html, /What changed in the current MVP/);
+  assert.match(html, /Email sign-in and credits/);
+  assert.match(html, /Six additional credits cost \$6 through Stripe Checkout/);
+  assert.match(html, /Credits are held while a cohort forms, consumed at quorum, and refunded/);
   assert.match(html, /No automated social publishing yet/);
   assert.match(html, /referrerpolicy="strict-origin-when-cross-origin"/);
   assert.match(html, /title="Introducing Cohort15: The original product thesis"/);

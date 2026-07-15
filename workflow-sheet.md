@@ -8,7 +8,7 @@ Day 3 — Launch Gate
 
 L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L019.
+Next ready task: L020.
 
 ## Ready Task Candidates
 

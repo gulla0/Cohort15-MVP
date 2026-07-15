@@ -173,7 +173,7 @@ export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLD
       <section class="video-embed" aria-labelledby="video-title"><h2 class="visually-hidden" id="video-title">Introducing Cohort15 video</h2><iframe src="https://www.youtube-nocookie.com/embed/E5f-qqNILlg?start=4" title="Introducing Cohort15: The original product thesis" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></section>
       <p class="video-link"><a class="text-link" href="${escapeHtml(YOUTUBE_URL)}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a></p>
 
-      <aside class="editorial-note" aria-labelledby="editorial-note-title"><p class="eyebrow">Editorial note</p><h2 id="editorial-note-title">This video captures the original vision.</h2><p>The central thesis remains intact, but several mechanics described in the video—credits, refunds, maximum membership, and automated social publishing—are not part of the current validation MVP. The update below documents that evolution.</p></aside>
+      <aside class="editorial-note" aria-labelledby="editorial-note-title"><p class="eyebrow">Editorial note</p><h2 id="editorial-note-title">This video captures the original vision.</h2><p>The central thesis remains intact. Cohort15 now uses credits for commitment and refunds held credits when a group expires below quorum, while maximum membership and automated social publishing remain outside the current MVP. The update below documents that evolution.</p></aside>
 
       <p class="article-intro">Cohort15 began with a personal experience: learning something difficult became possible after finding a small group of people willing to take the same journey seriously.</p>
 
@@ -204,10 +204,12 @@ export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLD
         <li>The product should be treated as an experiment and public good, not as a claim that every assumption is already correct.</li>
       </ul>
 
-      <h2>What changed in the validation MVP</h2>
-      <p>The current version tests the underlying demand before testing monetization or heavier filtering:</p>
+      <h2>What changed in the current MVP</h2>
+      <p>The current version keeps the small-group formation test and adds a deliberately narrow commitment and payment layer:</p>
       <ul>
-        <li><strong>No credits, authentication, or payments.</strong> Creating a cohort and showing interest require only a private email address.</li>
+        <li><strong>Email sign-in and credits.</strong> A new account receives two credits once; creating a cohort uses two credits and showing interest uses one.</li>
+        <li><strong>One payment option.</strong> Six additional credits cost $6 through Stripe Checkout, with no subscription or additional package.</li>
+        <li><strong>Commitment is ledger-backed.</strong> Credits are held while a cohort forms, consumed at quorum, and refunded if it expires below quorum.</li>
         <li><strong>Quorum instead of maximum membership.</strong> A creator chooses how many interested people are needed, from 1 through 15; interest closes when that threshold is reached.</li>
         <li><strong>The meeting link is supplied at creation.</strong> It remains private until quorum is reached.</li>
         <li><strong>No automated social publishing yet.</strong> Distribution is a separate assumption to test after the core formation flow.</li>
@@ -242,8 +244,8 @@ export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV
       <blockquote><p>The working question is simple: can scattered intent become a real group?</p></blockquote>
 
       <h2>What the current product tests</h2>
-      <p>The live validation MVP lets anyone publish a focused cohort request with a public goal, schedule, recurrence, and quorum. Interested people respond with a private email address. The meeting link stays private until enough people commit, and each request has seven days to reach that threshold.</p>
-      <p>This is deliberately smaller than the original product vision. There is no authentication, payment, credit system, or automated social distribution. The immediate signal is whether someone will propose a group or join one when its commitment is visible—not whether they will like a post or enter a generic waitlist.</p>
+      <p>The current MVP lets anyone browse focused cohort requests with a public goal, schedule, recurrence, and quorum. Signed-in people can create a request or show interest using credits; their account email remains private. The meeting link stays private until enough people commit, and each request has seven days to reach that threshold.</p>
+      <p>This is deliberately smaller than the original product vision. It has one email sign-in method, a two-credit signup grant, and one six-credit payment package, but no profiles, dashboard, subscriptions, or automated social distribution. The immediate signal remains whether someone will propose a group or join one when its commitment is visible—not whether they will like a post or enter a generic waitlist.</p>
 
       <h2>The formation loop</h2>
       <p>The next experiments follow a short loop:</p>

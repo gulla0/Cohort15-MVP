@@ -226,7 +226,7 @@
     {
       "id": "L019",
       "title": "Complete the Piece of Pie local launch gate",
-      "status": "not_started",
+      "status": "done",
       "phase": "Day 3 — Launch Gate",
       "dependencies": [
         "L018"
@@ -269,8 +269,8 @@
         "Inspect .env.example, render.yaml, README, and docs/human-tasks/piece-of-pie-launch.md for exact configuration alignment"
       ],
       "stop_condition": "Stop when the repository is locally launch-ready and only indexed human/provider actions remain.",
-      "evidence": "Pending.",
-      "notes": "Final code-owned launch gate before live provider setup and production verification."
+      "evidence": "Added one cohesive provider-independent account-to-grant-to-free-use-to-payment-gate-to-purchase-to-purchased-use test, exact production/template configuration assertions, current Piece of Pie public research copy, and responsive fake-provider browser verification. npm run check passed with 101 tests; desktop 1280x720 and mobile 390x844 smoke had no horizontal overflow or console errors on 2026-07-15 EDT.",
+      "notes": "Completed without provider dashboards, credentials, deployment, live payment, or production verification. Those human-run actions remain in the indexed L020 launch checklist."
     },
     {
       "id": "L020",
