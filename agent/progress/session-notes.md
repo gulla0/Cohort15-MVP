@@ -211,3 +211,15 @@ No product code was implemented in this setup wave. L015 is the first ready impl
 - Kept authentication routes/UI, cohort credit gating, Stripe HTTP calls, and provider operations outside this task.
 
 Verification completed with `npm run check` and 88 passing tests. L016 is next.
+
+## 2026-07-15 — L016 magic-link accounts and signup credits
+
+- Added dependency-free Supabase email magic-link request and token-hash verification through the configured server-side anon key.
+- Added opaque eight-hour application sessions with SHA-256-only persistence, production cookie attributes, random CSRF material, expiry handling, and server-side invalidation.
+- Added sign-in, generic magic-link request, verified callback, and CSRF-protected sign-out routes with strict relative return-path validation.
+- Routed verified identities through the L015 atomic provisioning primitive so callback replay, concurrent callbacks, repeated sign-in, and grant recovery remain exactly once.
+- Added shared anonymous/signed-in navigation with available credits, Buy credits, and sign-out controls without rendering account email.
+- Added injected provider-independent test auth, runtime anon-key validation/templates, and the indexed human email-template/configuration step.
+- Kept cohort creation and interest semantics unchanged for L017 and added no Stripe behavior.
+
+Verification completed with `npm run check` and 93 passing tests. L017 is next.

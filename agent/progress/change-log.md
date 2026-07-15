@@ -197,3 +197,15 @@ Verification: `npm run check` passed with 75 tests and 15 aligned tasks.
 - Added focused concurrency, idempotency, adapter, migration-isolation, and legacy-null-link tests.
 
 Verification: `npm run check` passed with 88 tests and 6 aligned active tasks. L016 is next.
+
+## 2026-07-15 — L016 magic-link accounts and signup credits
+
+- Added a privacy-safe Supabase Auth adapter for generic magic-link requests and verified token-hash callbacks.
+- Added durable opaque eight-hour app sessions, digest-only persistence, production cookie policy, CSRF validation, expiry failure, and invalidation.
+- Added sign-in, callback, and sign-out routes with safe return paths and exactly-once account/signup-grant provisioning.
+- Added shared account navigation with available credits, Buy credits, and sign-out while keeping email private.
+- Added provider-independent injected auth tests plus focused adapter, replay, concurrency, cookie, expiry, CSRF, unsafe-return, privacy, and failure coverage.
+- Added the anon-key runtime/template contract and clarified the indexed Supabase magic-link email-template action.
+- Preserved anonymous cohort creation/interest semantics for L017 and left Stripe behavior absent.
+
+Verification: `npm run check` passed with 93 tests and 6 aligned active tasks. L017 is next.

@@ -8,13 +8,13 @@ Day 1 — Identity and Ledger
 
 L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L016.
+Next ready task: L017.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L016 | L015 now provides atomic account provisioning, signup grants, digest-only sessions, and balance reads | Add Supabase magic-link authentication, secure application sessions, CSRF, and signed-in navigation without gating cohort mutations yet. |
+| L017 | L016 now provides verified accounts, secure sessions, CSRF, and exactly-once signup credits | Require authenticated credit holds for cohort creation and interest, then consume or refund them through quorum and expiry. |
 
 ## Known Parallelism
 

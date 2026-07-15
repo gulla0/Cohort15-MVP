@@ -1,5 +1,6 @@
 import { analyticsMarkup } from './analytics.mjs';
 import { renderFeedbackWidget } from './feedback-widget.mjs';
+import { renderAuthNavigation } from './auth.mjs';
 
 const ARTICLE_PATH = '/research/why-small-committed-groups';
 const VIDEO_ARTICLE_PATH = '/research/introducing-cohort15-original-product-thesis';
@@ -63,9 +64,9 @@ function formatDate(value) {
   }).format(date);
 }
 
-function pageStart({ title, description, googleAnalyticsId, researchIndex = false }) {
+function pageStart({ title, description, googleAnalyticsId, researchIndex = false, auth = null }) {
   return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="${escapeHtml(description)}"><title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body>
-    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/#cohorts">Browse cohorts</a><a class="text-link" href="/research"${researchIndex ? ' aria-current="page"' : ''}>Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a></nav></header>`;
+    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/#cohorts">Browse cohorts</a><a class="text-link" href="/research"${researchIndex ? ' aria-current="page"' : ''}>Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a>${renderAuthNavigation(auth)}</nav></header>`;
 }
 
 export function renderResearchCard(entry) {
@@ -81,13 +82,14 @@ export function renderResearchCard(entry) {
 }
 
 export function renderResearchIndexPage({
-  googleAnalyticsId = 'G-LF22TLDSBV', entries = RESEARCH_ENTRIES,
+  googleAnalyticsId = 'G-LF22TLDSBV', entries = RESEARCH_ENTRIES, auth = null,
 } = {}) {
   return `${pageStart({
     title: 'Research & Field Notes',
     description: 'Research, essays, field notes, and product updates shaping Cohort15.',
     googleAnalyticsId,
     researchIndex: true,
+    auth,
   })}<main>
     <section class="shell research-hero" aria-labelledby="research-title"><p class="eyebrow">Research &amp; Field Notes</p><h1 id="research-title">The thinking behind Cohort15.</h1><p class="lede">Research, product observations, and working ideas about helping a few serious people reliably show up around a concrete goal.</p></section>
     <section class="section research-lanes" aria-labelledby="collection-title"><div class="shell"><div class="section-heading"><div><p class="eyebrow">The collection</p><h2 id="collection-title">Evidence, ideas, and progress.</h2><p>Written work lives here. Product videos will include a useful written summary and a link to YouTube; selected external publications will be labeled clearly.</p></div></div><div class="editorial-lanes" aria-label="Content types"><span>Research</span><span>Essays</span><span>Field notes</span><span>Product updates</span><span>External publications</span></div></div></section>
@@ -95,11 +97,12 @@ export function renderResearchIndexPage({
   </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
-export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
+export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV', auth = null } = {}) {
   return `${pageStart({
     title: 'Why small, committed groups are worth building',
     description: 'What 20 public requests for serious peers reveal about small, structured, goal-oriented groups.',
     googleAnalyticsId,
+    auth,
   })}<main class="shell article-shell">
     <a class="text-link" href="/research">← All research &amp; field notes</a>
     <header class="article-header"><p class="eyebrow">Research</p><h1>Why small, committed groups are worth building</h1><p class="lede">What 20 public requests for serious peers reveal about accountability, group size, and the limits of broad online communities.</p><div class="article-byline"><span>By Cohort15</span><time datetime="2026-06-20">June 20, 2026</time><span>8 min read</span></div></header>
@@ -157,11 +160,12 @@ export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV'
   </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
-export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
+export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLDSBV', auth = null } = {}) {
   return `${pageStart({
     title: 'Introducing Cohort15: The original product thesis',
     description: 'The founder story and original product thesis behind Cohort15, with an update on what changed in the validation MVP.',
     googleAnalyticsId,
+    auth,
   })}<main class="shell article-shell">
     <a class="text-link" href="/research">← All research &amp; field notes</a>
     <header class="article-header"><p class="eyebrow">Product update</p><h1>Introducing Cohort15: The original product thesis</h1><p class="lede">The founder story, initial product mechanics, and early assumptions behind a place for small groups of high-intent people.</p><div class="article-byline"><span>By Cohort15</span><time datetime="2026-06-20">June 20, 2026</time><span>13 min watch</span></div></header>
@@ -219,11 +223,12 @@ export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLD
   </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}</body></html>`;
 }
 
-export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV' } = {}) {
+export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV', auth = null } = {}) {
   return `${pageStart({
     title: 'How Cohort15 is testing small-group formation',
     description: 'The formation loop and manual experiments guiding the next phase of Cohort15.',
     googleAnalyticsId,
+    auth,
   })}<main class="shell article-shell">
     <a class="text-link" href="/research">← All research &amp; field notes</a>
     <header class="article-header"><p class="eyebrow">Field note</p><h1>How Cohort15 is testing small-group formation</h1><p class="lede">The next phase is not about building a large community. It is about learning whether scattered intent can become a small group that actually starts.</p><div class="article-byline"><span>By Cohort15</span><time datetime="2026-06-20">June 20, 2026</time><span>6 min read</span></div></header>

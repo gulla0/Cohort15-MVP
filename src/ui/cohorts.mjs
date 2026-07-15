@@ -1,5 +1,6 @@
 import { analyticsMarkup } from './analytics.mjs';
 import { renderFeedbackWidget } from './feedback-widget.mjs';
+import { renderAuthNavigation } from './auth.mjs';
 import { cohortSocialDescription } from './social-image.mjs';
 
 function escapeHtml(value) {
@@ -200,8 +201,8 @@ export function localTimeScript() {
   </script>`;
 }
 
-function pageStart(title, googleAnalyticsId, socialMeta = '') {
-  return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${socialMeta}<title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a></nav></header>`;
+function pageStart(title, googleAnalyticsId, socialMeta = '', auth = null) {
+  return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${socialMeta}<title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a>${renderAuthNavigation(auth)}</nav></header>`;
 }
 
 function interestForm(cohort, { error } = {}) {
@@ -258,7 +259,7 @@ export function renderCohortDetailPage(cohort, options = {}) {
     ? `<div class="meeting-access unlocked"><p class="eyebrow">Quorum met</p><h2>The meeting is unlocked.</h2><a class="button-link" href="${escapeHtml(cohort.meetingLink)}" rel="noopener noreferrer">Open meeting link</a></div>`
     : `<div class="meeting-access"><p class="eyebrow">${cohort.quorumStatus === 'met' ? 'Meeting ended' : 'Link locked'}</p><h2>${cohort.quorumStatus === 'met' ? 'This meeting link is no longer public.' : 'The meeting link unlocks at quorum.'}</h2><p>Schedule details stay public throughout the cohort lifecycle.</p></div>`;
   const sessionLabel = cohort.meetingCount === 1 ? '1 meeting' : `${cohort.meetingCount} meetings`;
-  return `${pageStart(cohort.title, options.googleAnalyticsId ?? 'G-LF22TLDSBV', cohortSocialMeta(cohort, { appUrl: options.appUrl }))}<main class="shell detail-shell">
+  return `${pageStart(cohort.title, options.googleAnalyticsId ?? 'G-LF22TLDSBV', cohortSocialMeta(cohort, { appUrl: options.appUrl }), options.auth)}<main class="shell detail-shell">
     <a class="text-link" href="/#cohorts">← Browse all cohorts</a>
     <div class="detail-heading"><div><p class="eyebrow">${escapeHtml(label(cohort.category))} · ${escapeHtml(cohort.collectionStatus)}</p><h1>${escapeHtml(cohort.title)}</h1><p class="lede">${escapeHtml(cohort.topic)} · ${escapeHtml(label(cohort.targetSkillLevel))} · ${sessionLabel}</p></div>${meetingAccess}</div>
     ${progress(cohort)}

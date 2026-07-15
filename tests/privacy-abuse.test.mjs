@@ -106,10 +106,10 @@ test('honeypots, request guards, public responses, and logs preserve private val
   }
 });
 
-test('deferred product routes and mutations remain absent', async () => {
+test('payment, dashboard, admin, upload, and social routes remain absent', async () => {
   const handler = createRequestHandler({ config });
   const absentPaths = [
-    '/auth/sign-in', '/auth/callback', '/dashboard', '/credits', '/credits/buy',
+    '/dashboard', '/credits', '/credits/buy',
     '/payments', '/stripe/webhook', '/admin', '/admin/expire-cohorts', '/images',
     '/uploads', '/social', '/social/publish', '/cohorts/private-1/edit',
   ];

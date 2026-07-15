@@ -1,5 +1,6 @@
 import { CATEGORIES, RECURRENCES, TARGET_SKILL_LEVELS } from '../domain/constants.mjs';
 import { renderFeedbackWidget } from './feedback-widget.mjs';
+import { renderAuthNavigation } from './auth.mjs';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -39,7 +40,7 @@ function recurrenceSummary(recurrence, countValue) {
   return `This group will meet ${cadence.phrase} for ${cadence.span} ${unit}.`;
 }
 
-export function renderCreateCohortPage({ error, values = {} } = {}) {
+export function renderCreateCohortPage({ error, values = {}, auth = null } = {}) {
   const value = (field, fallback = '') => escapeHtml(values[field] ?? fallback);
   const recurrence = values.recurrence ?? 'none';
   const isRecurring = recurrence !== 'none';
@@ -52,7 +53,7 @@ export function renderCreateCohortPage({ error, values = {} } = {}) {
     <link rel="stylesheet" href="/assets/styles.css">
   </head>
   <body>
-    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><span class="status-pill">Create</span></nav></header>
+    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><span class="status-pill">Create</span>${renderAuthNavigation(auth)}</nav></header>
     <main class="shell form-shell">
       <p class="eyebrow">Anonymous cohort request</p>
       <h1>Create a focused cohort.</h1>

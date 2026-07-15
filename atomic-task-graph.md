@@ -6,7 +6,7 @@
 
 ```text
 L015 Account and credit persistence foundation (done)
-  └─ L016 Magic-link accounts and signup credits (not_started)
+  └─ L016 Magic-link accounts and signup credits (done)
        └─ L017 Credit-gated creation and interest (not_started)
             └─ L018 Stripe checkout and idempotent fulfillment (not_started)
                  └─ L019 Piece of Pie local launch gate (not_started)
@@ -26,7 +26,7 @@ L015 Account and credit persistence foundation (done)
 ### L016 — Implement magic-link accounts and signup credits
 
 - Depends on: L015
-- Status: not_started
+- Status: done
 - Owns: Supabase magic-link adapter, app sessions, CSRF, auth routes/UI, shared signed-in navigation
 - Delivers: verified email account creation, exactly-once two-credit grant, secure eight-hour session, safe sign-out and return paths
 - Stops before: changing cohort creation/interest semantics

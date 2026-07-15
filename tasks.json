@@ -64,7 +64,7 @@
     {
       "id": "L016",
       "title": "Implement magic-link accounts and signup credits",
-      "status": "not_started",
+      "status": "done",
       "phase": "Day 1 — Identity and Ledger",
       "dependencies": [
         "L015"
@@ -111,8 +111,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when account/session behavior and signup credits are verified without changing cohort mutation semantics.",
-      "evidence": "Pending.",
-      "notes": "Human Supabase Auth configuration remains in docs/human-tasks/piece-of-pie-launch.md and is not performed by this task."
+      "evidence": "Implemented dependency-free Supabase magic-link request/verification, atomic account and signup-grant provisioning, opaque eight-hour digest-backed sessions, CSRF-protected sign-out, safe returns, shared balance/navigation UI, injected test auth, anon-key runtime configuration, and privacy-safe failure handling. npm run check passed with 93 tests on 2026-07-15 EDT.",
+      "notes": "Completed without changing cohort creation/interest semantics or adding Stripe behavior. Human Supabase Auth, email-template, key, and callback configuration remains in docs/human-tasks/piece-of-pie-launch.md."
     },
     {
       "id": "L017",

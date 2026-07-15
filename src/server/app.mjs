@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadRuntimeConfig } from '../config/runtime.mjs';
+import { createInjectedTestAuth, createSupabaseMagicLinkAuth } from '../auth/supabase.mjs';
+import { createSessionService, safeReturnPath } from '../auth/session.mjs';
 import { createResendEmailProvider } from '../email/resend.mjs';
 import { DomainValidationError } from '../domain/validation.mjs';
 import { createLofiStore } from '../persistence/store.mjs';
@@ -20,6 +22,7 @@ import {
 } from '../services/rate-limit.mjs';
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
+import { renderSignInPage } from '../ui/auth.mjs';
 import { renderCohortDetailPage } from '../ui/cohorts.mjs';
 import { renderCohortSocialImage, renderCohortSocialPng } from '../ui/social-image.mjs';
 import {
@@ -51,8 +54,8 @@ function send(res, status, contentType, body, headers = {}) {
   res.end(body);
 }
 
-function redirect(res, status, location) {
-  res.writeHead(status, { location, 'x-content-type-options': 'nosniff' });
+function redirect(res, status, location, headers = {}) {
+  res.writeHead(status, { location, 'x-content-type-options': 'nosniff', ...headers });
   res.end();
 }
 
@@ -170,6 +173,19 @@ export function createRequestHandler(options = {}) {
   const feedback = options.feedback ?? createFeedbackService({
     repositories, limiter: feedbackLimiter,
   });
+  const authProvider = options.authProvider ?? (config.supabaseAnonKey
+    ? createSupabaseMagicLinkAuth({
+      url: config.supabaseUrl,
+      anonKey: config.supabaseAnonKey,
+      fetchImpl: options.fetchImpl,
+    })
+    : createInjectedTestAuth());
+  const sessions = options.sessions ?? createSessionService({
+    repositories,
+    isProduction: config.isProduction,
+    now: options.now,
+    randomBytes: options.randomBytes,
+  });
 
   async function sendInterestError(res, cohortId, status, error, headers = {}) {
     try {
@@ -189,6 +205,15 @@ export function createRequestHandler(options = {}) {
   return async function handleRequest(req, res) {
     const url = new URL(req.url ?? '/', 'http://localhost');
     const method = req.method ?? 'GET';
+    let resolvedAuth;
+    let authResolved = false;
+    async function currentAuth() {
+      if (!authResolved) {
+        resolvedAuth = await sessions.authenticate(req.headers?.cookie);
+        authResolved = true;
+      }
+      return resolvedAuth;
+    }
 
     if (method === 'GET' && url.pathname === '/health') {
       send(res, 200, 'application/json; charset=utf-8', JSON.stringify({
@@ -205,12 +230,92 @@ export function createRequestHandler(options = {}) {
       return;
     }
 
+    if (method === 'GET' && url.pathname === '/auth/sign-in') {
+      const returnTo = safeReturnPath(url.searchParams.get('return_to') ?? '/');
+      send(res, 200, 'text/html; charset=utf-8', renderSignInPage({
+        auth: await currentAuth(),
+        returnTo,
+        requested: url.searchParams.get('requested') === '1',
+        error: url.searchParams.get('error') === '1',
+      }));
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/auth/magic-link') {
+      const mediaType = String(req.headers?.['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      if (mediaType !== 'application/x-www-form-urlencoded') {
+        send(res, 415, 'text/plain; charset=utf-8', 'Unsupported media type');
+        return;
+      }
+      if (!sameOrigin(req, config)) {
+        send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+        return;
+      }
+      let returnTo = '/';
+      try {
+        const input = await readFormBody(req);
+        returnTo = safeReturnPath(input.returnTo ?? '/');
+        const callback = new URL('/auth/callback', config.appUrl);
+        callback.searchParams.set('return_to', returnTo);
+        await authProvider.requestMagicLink({ email: input.email, redirectTo: callback.href });
+      } catch {
+        // The response is intentionally identical for invalid, unknown, and provider-failed requests.
+      }
+      redirect(res, 303, `/auth/sign-in?requested=1&return_to=${encodeURIComponent(returnTo)}`);
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/auth/callback') {
+      const returnTo = safeReturnPath(url.searchParams.get('return_to') ?? '/');
+      try {
+        const identity = await authProvider.verifyCallback({
+          tokenHash: url.searchParams.get('token_hash') ?? '',
+          type: url.searchParams.get('type') ?? '',
+        });
+        const auth = await sessions.create(identity);
+        redirect(res, 303, returnTo, { 'set-cookie': auth.cookie });
+      } catch {
+        redirect(res, 303, `/auth/sign-in?error=1&return_to=${encodeURIComponent(returnTo)}`);
+      }
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/auth/sign-out') {
+      const mediaType = String(req.headers?.['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      if (mediaType !== 'application/x-www-form-urlencoded') {
+        send(res, 415, 'text/plain; charset=utf-8', 'Unsupported media type');
+        return;
+      }
+      if (!sameOrigin(req, config)) {
+        send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+        return;
+      }
+      const auth = await currentAuth();
+      if (!auth) {
+        send(res, 401, 'text/plain; charset=utf-8', 'Authentication required');
+        return;
+      }
+      let input;
+      try { input = await readFormBody(req); } catch {
+        send(res, 400, 'text/plain; charset=utf-8', 'Invalid request');
+        return;
+      }
+      if (!sessions.verifyCsrf(auth, input.csrf)) {
+        send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+        return;
+      }
+      await sessions.destroy(req.headers?.cookie);
+      redirect(res, 303, '/', { 'set-cookie': sessions.clearCookie() });
+      return;
+    }
+
     if (method === 'GET' && url.pathname === '/') {
       const listing = await eventBrowsing.list({ status: url.searchParams.get('status') ?? 'all' });
       send(res, 200, 'text/html; charset=utf-8', renderHomePage({
         googleAnalyticsId: config.googleAnalyticsId,
         cohorts: listing.cohorts,
         status: listing.status,
+        auth: await currentAuth(),
       }));
       return;
     }
@@ -218,6 +323,7 @@ export function createRequestHandler(options = {}) {
     if (method === 'GET' && url.pathname === '/research') {
       send(res, 200, 'text/html; charset=utf-8', renderResearchIndexPage({
         googleAnalyticsId: config.googleAnalyticsId,
+        auth: await currentAuth(),
       }));
       return;
     }
@@ -225,6 +331,7 @@ export function createRequestHandler(options = {}) {
     if (method === 'GET' && url.pathname === ARTICLE_PATH) {
       send(res, 200, 'text/html; charset=utf-8', renderDemandResearchArticle({
         googleAnalyticsId: config.googleAnalyticsId,
+        auth: await currentAuth(),
       }));
       return;
     }
@@ -232,6 +339,7 @@ export function createRequestHandler(options = {}) {
     if (method === 'GET' && url.pathname === VIDEO_ARTICLE_PATH) {
       send(res, 200, 'text/html; charset=utf-8', renderOriginalProductThesisPage({
         googleAnalyticsId: config.googleAnalyticsId,
+        auth: await currentAuth(),
       }));
       return;
     }
@@ -239,6 +347,7 @@ export function createRequestHandler(options = {}) {
     if (method === 'GET' && url.pathname === FORMATION_ARTICLE_PATH) {
       send(res, 200, 'text/html; charset=utf-8', renderFormationFieldNotePage({
         googleAnalyticsId: config.googleAnalyticsId,
+        auth: await currentAuth(),
       }));
       return;
     }
@@ -249,7 +358,7 @@ export function createRequestHandler(options = {}) {
     }
 
     if (method === 'GET' && url.pathname === '/cohorts/new') {
-      send(res, 200, 'text/html; charset=utf-8', renderCreateCohortPage());
+      send(res, 200, 'text/html; charset=utf-8', renderCreateCohortPage({ auth: await currentAuth() }));
       return;
     }
 
@@ -260,6 +369,7 @@ export function createRequestHandler(options = {}) {
         send(res, 200, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, {
           appUrl: config.appUrl,
           googleAnalyticsId: config.googleAnalyticsId,
+          auth: await currentAuth(),
         }));
       } catch (error) {
         if (error instanceof RepositoryNotFoundError) send(res, 404, 'text/plain; charset=utf-8', 'Not found');

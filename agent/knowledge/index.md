@@ -46,7 +46,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 | Area | Current files | Planned owner |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016–L019 |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016 auth complete; L017–L019 extend product/payment behavior |
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L015 foundation complete; L016–L018 consume it |
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L015 foundation complete; L017–L018 add atomic product integration |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L017 |
@@ -55,7 +55,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 | Email | `src/email/resend.mjs`, `src/services/notifications.mjs` | Preserve; L017 identity integration |
 | Feedback | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs` | Preserve/regression only |
 | Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | Preserve/regression only |
-| Future auth | Durable user, signup-grant, and digest-only session persistence now exists; HTTP/provider auth does not | L016 creates bounded auth/session modules |
+| Authentication | `src/auth/supabase.mjs`, `src/auth/session.mjs`, `src/ui/auth.mjs`, `src/server/app.mjs` | L016 complete; L017 consumes session/CSRF context for funded mutations |
 | Future payment | Does not exist on this branch yet | L018 creates bounded Stripe/purchase modules |
 
 ## Reusable Decisions
@@ -72,7 +72,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 ## Safety And Integration Traps
 
-- Never render or log emails, magic-link tokens, Supabase tokens, raw session/CSRF tokens, Stripe secrets, webhook secrets, Checkout URLs, full provider payloads, card/payment details, IPs, or pre-quorum links.
+- Never render emails or auth/provider secrets. Raw CSRF material is limited to the authenticated user's opaque cookie and hidden mutation controls; never log it or include it in errors. Never render or log magic-link tokens, Supabase tokens, raw session tokens, Stripe secrets, webhook secrets, Checkout URLs, full provider payloads, card/payment details, IPs, or pre-quorum links.
 - Never add a mutable credit balance. Derive all totals from immutable transactions.
 - Never grant on an unverified callback, browser redirect alone, unsigned webhook, mismatched purchase, or client-supplied amount/package/user.
 - Never duplicate signup or purchase credits under replay or concurrency.
@@ -83,7 +83,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 ## Current Pointers
 
-- Next task: `agent/progress/task-status.md` (L016).
+- Next task: `agent/progress/task-status.md` (L017).
 - Current blockers: `agent/progress/blockers.md`.
 - Human/provider continuity and new actions: `docs/human-tasks/README.md`.
 - Active product source: `docs/cohort15-piece-of-pie-mvp-spec.md`.

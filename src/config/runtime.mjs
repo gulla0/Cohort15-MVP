@@ -105,6 +105,11 @@ export function loadRuntimeConfig(env = process.env) {
       'COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY',
       isProduction,
     ),
+    supabaseAnonKey: requiredProductionValue(
+      env.COHORT15_LOFI_SUPABASE_ANON_KEY,
+      'COHORT15_LOFI_SUPABASE_ANON_KEY',
+      isProduction,
+    ),
     resendApiKey: requiredProductionValue(
       env.COHORT15_LOFI_RESEND_API_KEY,
       'COHORT15_LOFI_RESEND_API_KEY',
@@ -132,6 +137,7 @@ export function listRuntimeEnvVars() {
     'COHORT15_LOFI_GA_MEASUREMENT_ID',
     'COHORT15_LOFI_SUPABASE_URL',
     'COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY',
+    'COHORT15_LOFI_SUPABASE_ANON_KEY',
     'COHORT15_LOFI_RESEND_API_KEY',
     'COHORT15_LOFI_EMAIL_FROM',
     'COHORT15_LOFI_EMAIL_REPLY_TO',

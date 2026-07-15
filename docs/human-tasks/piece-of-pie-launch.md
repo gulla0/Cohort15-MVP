@@ -61,8 +61,8 @@ Do not copy database rows into the final report. Record pass/fail and non-sensit
 - [ ] Set the Site URL to `https://cohort15.com`.
 - [ ] Add the exact production callback URL `https://cohort15.com/auth/callback` to allowed redirect URLs.
 - [ ] If testing on the Render-generated URL first, add only its exact HTTPS callback URL temporarily and remove it after verification if no longer needed.
-- [ ] Review the email template so it identifies Cohort15 and does not expose internal configuration.
-- [ ] Obtain the project's anon/public-class key for the server's auth requests. Place it directly in Render under the variable name implemented by L019; do not commit or paste its value.
+- [ ] Configure the magic-link email action to send the user to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`; keep the surrounding copy Cohort15-specific and do not expose internal configuration.
+- [ ] Obtain the project's anon/public-class key for the server's auth requests. Place it directly in Render as `COHORT15_LOFI_SUPABASE_ANON_KEY`; do not commit or paste its value.
 - [ ] Request a test magic link using an operator-controlled email and confirm it returns only to an allowed callback.
 
 Do not place magic-link URLs or token parameters in screenshots or evidence.

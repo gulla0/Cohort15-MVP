@@ -9,6 +9,7 @@ const productionEnv = Object.freeze({
   COHORT15_LOFI_GA_MEASUREMENT_ID: 'G-LF22TLDSBV',
   COHORT15_LOFI_SUPABASE_URL: 'https://lofi-project.supabase.co',
   COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
+  COHORT15_LOFI_SUPABASE_ANON_KEY: 'test-anon-key',
   COHORT15_LOFI_RESEND_API_KEY: 'test-resend-key',
   COHORT15_LOFI_EMAIL_FROM: 'Cohort15 <updates@cohort15.com>',
   COHORT15_LOFI_EMAIL_REPLY_TO: 'cohort15dotcom@gmail.com',
@@ -43,6 +44,7 @@ test('production requires the complete isolated lofi environment contract', () =
     'COHORT15_LOFI_GA_MEASUREMENT_ID',
     'COHORT15_LOFI_SUPABASE_URL',
     'COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY',
+    'COHORT15_LOFI_SUPABASE_ANON_KEY',
     'COHORT15_LOFI_RESEND_API_KEY',
     'COHORT15_LOFI_EMAIL_FROM',
     'COHORT15_LOFI_EMAIL_REPLY_TO',
@@ -93,8 +95,9 @@ test('runtime environment contract contains no legacy provider variables', () =>
   assert.ok(names.includes('COHORT15_LOFI_GA_MEASUREMENT_ID'));
   assert.ok(names.includes('COHORT15_LOFI_SUPABASE_URL'));
   assert.ok(names.includes('COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY'));
+  assert.ok(names.includes('COHORT15_LOFI_SUPABASE_ANON_KEY'));
   assert.ok(names.includes('COHORT15_LOFI_RESEND_API_KEY'));
   assert.ok(names.includes('COHORT15_LOFI_EMAIL_FROM'));
   assert.ok(names.includes('COHORT15_LOFI_EMAIL_REPLY_TO'));
-  assert.equal(names.some((name) => /AUTH|STRIPE|CREDIT|SOCIAL|UPLOAD/.test(name)), false);
+  assert.equal(names.some((name) => /STRIPE|CREDIT|SOCIAL|UPLOAD/.test(name)), false);
 });

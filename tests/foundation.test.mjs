@@ -30,16 +30,17 @@ const config = Object.freeze({
   googleAnalyticsId: 'G-TEST'
 });
 
-test('lofi home renders branded foundation without legacy product surfaces', () => {
+test('Piece of Pie home renders the branded foundation and account entry point', () => {
   const html = renderHomePage({ googleAnalyticsId: 'G-TEST' });
 
   assert.match(html, /Form small, high-intent online groups/);
   assert.match(html, /seven days/);
   assert.match(html, /G-TEST/);
-  assert.doesNotMatch(html, /Sign in|Buy Credits|Stripe|Dashboard|event image/i);
+  assert.match(html, /Sign in/);
+  assert.doesNotMatch(html, /Stripe|Dashboard|event image/i);
 });
 
-test('shell exposes only home, styles, health, and 404 routes', async () => {
+test('shell exposes home, authentication entry, styles, health, and keeps deferred routes absent', async () => {
   const handler = createRequestHandler({ config });
 
   const home = await invoke(handler);
@@ -64,7 +65,11 @@ test('shell exposes only home, styles, health, and 404 routes', async () => {
     environment: 'test'
   });
 
-  for (const legacyPath of ['/auth/sign-in', '/credits/buy', '/dashboard', '/admin/expire-cohorts']) {
+  const signIn = await invoke(handler, { url: '/auth/sign-in' });
+  assert.equal(signIn.status, 200);
+  assert.match(signIn.body, /Email me a sign-in link/);
+
+  for (const legacyPath of ['/credits/buy', '/dashboard', '/admin/expire-cohorts']) {
     const response = await invoke(handler, { url: legacyPath });
     assert.equal(response.status, 404);
   }
