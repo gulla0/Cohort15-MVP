@@ -73,6 +73,8 @@ test('checkout, webhook, and browser return share exact-once verified fulfillmen
   let checkoutSession = null;
   const stripe = {
     async createCheckoutSession(input) {
+      assert.match(input.successUrl, /session_id=\{CHECKOUT_SESSION_ID\}/u);
+      assert.doesNotMatch(input.successUrl, /session_id=%7B/u);
       checkoutSession = {
         id: 'cs_test_paid', object: 'checkout.session', url: 'https://checkout.stripe.test/hosted',
         status: 'complete', payment_status: 'paid', amount_total: 600, currency: 'usd', payment_intent: 'pi_test_1',

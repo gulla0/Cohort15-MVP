@@ -47,12 +47,10 @@ export function createPurchaseService({ repositories, stripe, priceId, appUrl, r
         userId: user.id, ...CREDIT_PACKAGE,
         stripeCheckoutSessionId: null, stripePaymentIntentId: null, fulfilledAt: null,
       }, { id: randomUUID?.(), now: now?.() });
-      const complete = new URL('/credits/checkout/complete', appUrl);
-      complete.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
-      complete.searchParams.set('return_to', returnTo);
+      const complete = `${new URL('/credits/checkout/complete', appUrl).href}?session_id={CHECKOUT_SESSION_ID}&return_to=${encodeURIComponent(returnTo)}`;
       const session = await stripe.createCheckoutSession({
         priceId, purchaseId: purchase.id, userId: user.id,
-        successUrl: complete.href,
+        successUrl: complete,
         cancelUrl: new URL('/credits/buy?cancelled=1', appUrl).href,
       });
       await repositories.setPurchaseCheckoutSession(purchase.id, session.id, { now: now?.() });
