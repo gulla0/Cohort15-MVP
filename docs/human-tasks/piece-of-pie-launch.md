@@ -41,11 +41,13 @@ Official references to recheck when performing the task:
 
 Stop if the selected project/service differs or existing data is missing. Do not proceed by creating a replacement.
 
-### 2. Apply the additive account/credit/payment migration
+### 2. Apply the additive account/credit/payment migrations
 
-- [ ] Wait until L019 passes locally and the implementation manager identifies the final additive migration filename.
+- [ ] Wait until L019 passes locally and the implementation manager confirms the complete ordered migration list.
 - [ ] Open the existing `cohort15-lofi-mvp` Supabase project and use SQL Editor.
-- [ ] Run only the new Piece of Pie migration file after the already deployed lofi migrations.
+- [ ] Run `supabase/migrations/20260715000000_cohort15_lofi_accounts_credits.sql` after the already deployed lofi migrations.
+- [ ] Run `supabase/migrations/20260715010000_cohort15_lofi_funded_actions.sql` immediately after the account/credit migration.
+- [ ] Run any later L018/L019 Piece of Pie additive migrations in repository timestamp order.
 - [ ] Confirm existing cohort, interest, notification, and feedback row counts were not reduced.
 - [ ] Confirm every new table/function uses the `cohort15_lofi_` prefix.
 - [ ] Confirm users, sessions, credit transactions, purchases, and Stripe-event tables exist.

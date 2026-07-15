@@ -1,4 +1,4 @@
-import { DomainValidationError, normalizeEmail } from '../domain/validation.mjs';
+import { DomainValidationError } from '../domain/validation.mjs';
 
 export class InterestHoneypotSubmissionError extends Error {
   constructor() {
@@ -13,11 +13,11 @@ export function createShowInterestService({
   notifications = null,
   logger = console,
 } = {}) {
-  if (!repositories?.acceptInterest) throw new TypeError('repositories are required');
+  if (!repositories?.acceptFundedInterest || !repositories?.acceptInterest) throw new TypeError('repositories are required');
   if (!limiter?.run) throw new TypeError('limiter is required');
 
   return Object.freeze({
-    async show(cohortId, input, { clientIp } = {}) {
+    async show(cohortId, input, { clientIp, actor } = {}) {
       if (!input || typeof input !== 'object' || Array.isArray(input)) {
         throw new DomainValidationError('interest', 'must be an object');
       }
@@ -27,8 +27,11 @@ export function createShowInterestService({
         throw new InterestHoneypotSubmissionError();
       }
 
-      const email = normalizeEmail(input.email);
-      const result = await limiter.run(clientIp, () => repositories.acceptInterest({ cohortId, email }));
+      const result = await limiter.run(clientIp, () => (
+        actor?.userId && actor?.email
+          ? repositories.acceptFundedInterest({ cohortId }, actor)
+          : repositories.acceptInterest({ cohortId, email: input.email })
+      ));
       if (notifications) {
         try {
           await notifications.interestAccepted(result);

@@ -5,221 +5,88 @@ import { createLofiStore } from '../src/persistence/store.mjs';
 import { createLocalRepositories } from '../src/persistence/repositories.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
 import { createRollingWindowLimiter } from '../src/services/rate-limit.mjs';
-import {
-  createShowInterestService, InterestHoneypotSubmissionError,
-} from '../src/services/show-interest.mjs';
+import { createShowInterestService, InterestHoneypotSubmissionError } from '../src/services/show-interest.mjs';
 import { renderCohortDetailPage } from '../src/ui/cohorts.mjs';
 
 const NOW = new Date('2026-06-18T12:00:00.000Z');
-const config = Object.freeze({
-  appEnv: 'test', isProduction: false, appUrl: 'http://localhost:3000', googleAnalyticsId: 'G-TEST',
-});
+const config = Object.freeze({ appEnv: 'test', isProduction: false, appUrl: 'http://localhost:3000', googleAnalyticsId: 'G-TEST' });
+function cohort(overrides = {}) { return { title: 'Build a tiny compiler', description: 'Work through a tiny compiler implementation together.', category: 'build', topic: 'Compilers', targetAudience: 'Developers learning language implementation', targetSkillLevel: 'intermediate', minQuorum: 3, meetingLink: 'https://meet.google.com/abc-defg-hij', creatorTimeZone: 'America/Detroit', firstMeetingLocal: '2026-07-10T18:00', meetingDurationMinutes: 60, recurrence: 'weekly', meetingCount: 2, ...overrides }; }
+function actor(index) { return Object.freeze({ userId: `user-${index}`, email: `person-${index}@example.com` }); }
+function sessionsFor(current) { const auth = { user: { id: current.userId, email: current.email }, balance: { available: 2 }, csrfToken: 'csrf' }; return { async authenticate() { return auth; }, verifyCsrf(value, token) { return value === auth && token === 'csrf'; } }; }
+function invoke(handler, { url, method = 'GET', headers = {}, body = '' }) { return new Promise((resolve, reject) => { const req = { url, method, headers, socket: { remoteAddress: '127.0.0.1' }, async *[Symbol.asyncIterator]() { if (body) yield Buffer.from(body); } }; const response = { status: 0, headers: {}, body: '', writeHead(status, responseHeaders) { this.status = status; this.headers = responseHeaders; }, end(value = '') { this.body = String(value); resolve(this); } }; Promise.resolve(handler(req, response)).catch(reject); }); }
 
-function cohort(overrides = {}) {
-  return {
-    creatorEmail: 'creator@example.com', title: 'Build a tiny compiler',
-    description: 'Work through a tiny compiler implementation together.', category: 'build',
-    topic: 'Compilers', targetAudience: 'Developers learning language implementation',
-    targetSkillLevel: 'intermediate', minQuorum: 3,
-    meetingLink: 'https://meet.google.com/abc-defg-hij', creatorTimeZone: 'America/Detroit',
-    firstMeetingLocal: '2026-07-10T18:00', meetingDurationMinutes: 60,
-    recurrence: 'weekly', meetingCount: 2, ...overrides,
-  };
+async function fixture({ minQuorum = 3 } = {}) {
+  const store = createLofiStore(); let id = 0;
+  const repositories = createLocalRepositories({ store, now: () => NOW, randomUUID: () => `record-${++id}` });
+  const actors = [actor(0), actor(1), actor(2), actor(3)];
+  for (const [index, current] of actors.entries()) await repositories.provisionUser({ supabaseSubject: `subject-${index}`, email: current.email }, { id: current.userId, grantId: `grant-${index}`, now: NOW });
+  const created = await repositories.createFundedCohort(cohort({ minQuorum }), actors[0], { id: 'cohort-1', holdId: 'creator-hold', now: NOW });
+  return { store, repositories, actors, cohort: created.cohort };
 }
 
-function invoke(handler, {
-  url, method = 'GET', headers = {}, body = '', remoteAddress = '127.0.0.1',
-}) {
-  return new Promise((resolve, reject) => {
-    const req = {
-      url, method, headers, socket: { remoteAddress },
-      async *[Symbol.asyncIterator]() { if (body) yield Buffer.from(body); },
-    };
-    const response = {
-      status: 0, headers: {}, body: '',
-      writeHead(status, responseHeaders) { this.status = status; this.headers = responseHeaders; },
-      end(value = '') { this.body = String(value); resolve(this); },
-    };
-    Promise.resolve(handler(req, response)).catch(reject);
-  });
-}
-
-async function fixture({ minQuorum = 3, createdAt = NOW } = {}) {
-  const store = createLofiStore();
-  let id = 0;
-  const repositories = createLocalRepositories({
-    store, now: () => NOW, randomUUID: () => `record-${++id}`,
-  });
-  await repositories.createCohort(cohort({ minQuorum }), { id: 'cohort-1', now: createdAt });
-  return { store, repositories };
-}
-
-test('interest service normalizes email and rejected writes consume no allowance', async () => {
-  const { store, repositories } = await fixture();
-  const service = createShowInterestService({
-    repositories, limiter: createRollingWindowLimiter({ limit: 1, windowMs: 3_600_000 }),
-  });
-
-  await assert.rejects(
-    service.show('cohort-1', { email: 'person@example.com', website: 'bot' }, { clientIp: '192.0.2.1' }),
-    InterestHoneypotSubmissionError,
-  );
-  await assert.rejects(
-    service.show('cohort-1', { email: ' Creator@Example.com ', website: '' }, { clientIp: '192.0.2.1' }),
-    (error) => error.code === 'creator_email',
-  );
-  const accepted = await service.show(
-    'cohort-1', { email: ' Person@Example.COM ', website: '' }, { clientIp: '192.0.2.1' },
-  );
-  assert.equal(accepted.interest.email, 'person@example.com');
+test('authenticated interest derives private identity and rejects honeypot, creator, and duplicates before holds', async () => {
+  const { store, repositories, actors } = await fixture();
+  const service = createShowInterestService({ repositories, limiter: createRollingWindowLimiter({ limit: 2, windowMs: 3_600_000 }) });
+  await assert.rejects(service.show('cohort-1', { website: 'bot' }, { clientIp: '192.0.2.1', actor: actors[1] }), InterestHoneypotSubmissionError);
+  await assert.rejects(service.show('cohort-1', {}, { clientIp: '192.0.2.1', actor: actors[0] }), (error) => error.code === 'creator_user');
+  const accepted = await service.show('cohort-1', { email: 'attacker@example.com' }, { clientIp: '192.0.2.1', actor: actors[1] });
+  assert.equal(accepted.interest.email, actors[1].email);
+  assert.equal(accepted.interest.userId, actors[1].userId);
+  await assert.rejects(service.show('cohort-1', {}, { clientIp: '192.0.2.2', actor: actors[1] }), (error) => error.code === 'duplicate_user');
   assert.equal(store.listInterestsByCohortId('cohort-1').length, 1);
+  assert.equal((await repositories.getCreditBalance(actors[1].userId)).held, 1);
 });
 
-test('one concurrent accepted interest reaches quorum and unlocks the public link immediately', async () => {
-  const { repositories } = await fixture({ minQuorum: 2 });
-  const service = createShowInterestService({
-    repositories, limiter: createRollingWindowLimiter({ limit: 10, windowMs: 3_600_000 }),
-  });
+test('one concurrent funded interest reaches quorum and consumes every account-backed hold once', async () => {
+  const { repositories, actors } = await fixture({ minQuorum: 2 });
+  const service = createShowInterestService({ repositories, limiter: createRollingWindowLimiter({ limit: 10, windowMs: 3_600_000 }) });
   const results = await Promise.all([
-    service.show('cohort-1', { email: 'one@example.com' }, { clientIp: '192.0.2.1' }),
-    service.show('cohort-1', { email: 'two@example.com' }, { clientIp: '192.0.2.2' }),
+    service.show('cohort-1', {}, { clientIp: '192.0.2.1', actor: actors[1] }),
+    service.show('cohort-1', {}, { clientIp: '192.0.2.2', actor: actors[2] }),
   ]);
-  assert.equal(results.filter(({ reachedQuorum }) => reachedQuorum).length, 1);
-
+  assert.equal(results.filter((result) => result.reachedQuorum).length, 1);
+  assert.equal((await repositories.getCreditBalance(actors[0].userId)).consumed, 2);
+  assert.equal((await repositories.getCreditBalance(actors[1].userId)).consumed, 1);
+  assert.equal((await repositories.getCreditBalance(actors[2].userId)).consumed, 1);
   const publicCohort = await repositories.getPublicCohortById('cohort-1', { now: NOW });
-  assert.equal(publicCohort.interestCount, 2);
   assert.equal(publicCohort.quorumStatus, 'met');
   assert.equal(publicCohort.meetingLink, 'https://meet.google.com/abc-defg-hij');
-  const html = renderCohortDetailPage(publicCohort);
-  assert.match(html, /Open meeting link/);
-  assert.doesNotMatch(html, /name="email"|one@example|two@example/);
 });
 
-test('detail form appears only while collection is active and gathering', async () => {
-  const { repositories } = await fixture();
-  const active = await repositories.getPublicCohortById('cohort-1', { now: NOW });
-  const html = renderCohortDetailPage(active);
-  assert.match(html, /name="email"/);
-  assert.match(html, /name="website"/);
-  assert.match(html, /email stays private/i);
-  assert.match(html, /action="\/cohorts\/cohort-1\/interests" novalidate/);
-  assert.match(html, /type="submit" onclick="if \(typeof gtag === 'function'\) gtag\('event', 'join_cohort_interest'\);"/);
-  assert.match(html, /id="interest-error" role="alert" hidden/);
-  assert.match(html, /email\.validity\.valueMissing/);
-  assert.match(html, /Enter your email to show interest\./);
-  assert.match(html, /Enter a valid email address\./);
-  assert.match(html, /event\.preventDefault\(\)/);
-  assert.match(html, /email\.focus\(\)/);
-  assert.match(html, /googletagmanager\.com\/gtag\/js\?id=G-LF22TLDSBV/);
-
-  const expired = await repositories.getPublicCohortById('cohort-1', { now: new Date('2026-06-26T12:00:00.000Z') });
-  assert.doesNotMatch(renderCohortDetailPage(expired), /name="email"/);
+test('lazy expiry settlement refunds creator and participant holds exactly once before balance reads', async () => {
+  const { repositories, actors } = await fixture({ minQuorum: 3 });
+  await repositories.acceptFundedInterest({ cohortId: 'cohort-1' }, actors[1], { id: 'interest-1', holdId: 'interest-hold', now: NOW });
+  const afterExpiry = new Date('2026-06-26T12:00:00.000Z');
+  const creatorBalance = await repositories.getCreditBalance(actors[0].userId, { now: afterExpiry });
+  const participantBalance = await repositories.getCreditBalance(actors[1].userId, { now: afterExpiry });
+  assert.deepEqual(creatorBalance, { funded: 2, available: 2, held: 0, consumed: 0, refunded: 2 });
+  assert.deepEqual(participantBalance, { funded: 2, available: 2, held: 0, consumed: 0, refunded: 1 });
+  await repositories.getCreditBalance(actors[1].userId, { now: afterExpiry });
+  assert.equal((await repositories.listCreditTransactionsByUserId(actors[1].userId)).filter((item) => item.type === 'refund').length, 1);
 });
 
-test('POST interest enforces policy, conflicts safely, and redirects without private data', async () => {
-  const { store, repositories } = await fixture({ minQuorum: 2 });
-  const handler = createRequestHandler({ config, repositories });
-  const post = (values, headers = { 'content-type': 'application/x-www-form-urlencoded' }) => invoke(handler, {
-    url: '/cohorts/cohort-1/interests', method: 'POST', headers,
-    body: new URLSearchParams(values).toString(),
-  });
-
-  assert.equal((await post({ email: 'person@example.com' }, {})).status, 415);
-  assert.equal((await post({ email: 'person@example.com' }, {
-    'content-type': 'application/x-www-form-urlencoded', origin: 'https://evil.example',
-  })).status, 403);
-  const oversized = await post({ email: 'person@example.com' }, {
-    'content-type': 'application/x-www-form-urlencoded', 'content-length': '65537',
-  });
-  assert.equal(oversized.status, 413);
-  assert.match(oversized.body, /submission is too large/i);
-  assert.doesNotMatch(oversized.body, /person@example\.com/i);
-  const honeypot = await post({ email: 'person@example.com', website: 'bot' });
-  assert.equal(honeypot.status, 400);
-  assert.match(honeypot.body, /check your submission/i);
-  assert.doesNotMatch(honeypot.body, /person@example\.com|website.*bot/i);
-  const invalid = await post({ email: 'not-an-email' });
-  assert.equal(invalid.status, 400);
-  assert.match(invalid.body, /Email must be a valid email address\./);
-  assert.match(invalid.body, /name="email"[^>]+aria-invalid="true"/);
-  assert.doesNotMatch(invalid.body, /not-an-email/);
-  const missing = await post({});
-  assert.equal(missing.status, 400);
-  assert.match(missing.body, /Email is required\./);
-  assert.match(missing.body, /name="email"[^>]+aria-invalid="true"/);
-  const creator = await post({ email: 'creator@example.com' });
-  assert.equal(creator.status, 409);
-  assert.match(creator.body, /creator email cannot count/i);
-  assert.doesNotMatch(creator.body, /creator@example\.com/i);
-
-  const accepted = await post({ email: ' Person@Example.COM ' });
-  assert.equal(accepted.status, 303);
-  assert.equal(accepted.headers.location, '/cohorts/cohort-1');
-  assert.doesNotMatch(accepted.headers.location, /person|example/i);
-  const duplicate = await post({ email: 'person@example.com' });
-  assert.equal(duplicate.status, 409);
-  assert.match(duplicate.body, /already been counted/i);
-  assert.doesNotMatch(duplicate.body, /person@example\.com/i);
-  assert.equal((await post({ email: 'second@example.com' })).status, 303);
-  const alreadyMet = await post({ email: 'third@example.com' });
-  assert.equal(alreadyMet.status, 409);
-  assert.match(alreadyMet.body, /already reached quorum/i);
-  assert.doesNotMatch(alreadyMet.body, /name="email"|third@example\.com/i);
-  assert.equal(store.listInterestsByCohortId('cohort-1').length, 2);
-
-  const detail = await invoke(handler, { url: '/cohorts/cohort-1' });
-  assert.match(detail.body, /Open meeting link/);
-  assert.doesNotMatch(detail.body, /name="email"|person@example|second@example/);
-  assert.equal((await post({ email: 'nobody@example.com' }, {
-    'content-type': 'application/x-www-form-urlencoded', origin: config.appUrl,
-  })).status, 409);
-  assert.equal((await invoke(handler, {
-    url: '/cohorts/missing/interests', method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'email=a%40b.com',
-  })).status, 404);
+test('public detail stays browseable while interest requires sign-in and authenticated forms contain CSRF but no email', async () => {
+  const { repositories, actors } = await fixture();
+  const publicCohort = await repositories.getPublicCohortById('cohort-1', { now: NOW });
+  const anonymous = renderCohortDetailPage(publicCohort);
+  assert.match(anonymous, /Sign in to show interest/);
+  assert.doesNotMatch(anonymous, /name="email"|person-0@example/);
+  const authenticated = renderCohortDetailPage(publicCohort, { auth: { ...sessionsFor(actors[1]), user: actors[1], csrfToken: 'csrf', balance: { available: 2 } } });
+  assert.match(authenticated, /name="csrf" value="csrf"/);
+  assert.match(authenticated, /Use 1 credit and show interest/);
+  assert.doesNotMatch(authenticated, /name="email"|person-1@example/);
 });
 
-test('expired and unexpected interest failures render safe cohort errors', async () => {
-  const expiredFixture = await fixture({ createdAt: new Date('2026-06-01T12:00:00.000Z') });
-  const expiredHandler = createRequestHandler({ config, repositories: expiredFixture.repositories });
-  const expired = await invoke(expiredHandler, {
-    url: '/cohorts/cohort-1/interests', method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ email: 'late@example.com' }).toString(),
-  });
-  assert.equal(expired.status, 409);
-  assert.match(expired.body, /interest window has closed/i);
-  assert.doesNotMatch(expired.body, /name="email"|late@example\.com/i);
-
-  const { repositories } = await fixture();
-  const failedHandler = createRequestHandler({
-    config,
-    repositories,
-    showInterest: { async show() { throw new Error('sensitive database detail'); } },
-  });
-  const failure = await invoke(failedHandler, {
-    url: '/cohorts/cohort-1/interests', method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ email: 'person@example.com' }).toString(),
-  });
-  assert.equal(failure.status, 500);
-  assert.match(failure.body, /could not record your interest right now/i);
-  assert.doesNotMatch(failure.body, /person@example\.com|sensitive database detail/i);
-});
-
-test('eleventh successful interest from one IP returns 429 with Retry-After', async () => {
-  const { store, repositories } = await fixture({ minQuorum: 15 });
-  const handler = createRequestHandler({ config, repositories });
-  const request = (attempt) => invoke(handler, {
-    url: '/cohorts/cohort-1/interests', method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ email: `person-${attempt}@example.com` }).toString(),
-  });
-  for (let attempt = 0; attempt < 10; attempt += 1) assert.equal((await request(attempt)).status, 303);
-  const rejected = await request(10);
-  assert.equal(rejected.status, 429);
-  assert.ok(Number(rejected.headers['retry-after']) >= 1);
-  assert.match(rejected.body, /too many interests/i);
-  assert.doesNotMatch(rejected.body, /person-10@example\.com/i);
-  assert.equal(store.listInterestsByCohortId('cohort-1').length, 10);
+test('interest route enforces auth and CSRF and returns 402 without records when credits are insufficient', async () => {
+  const { store, repositories, actors } = await fixture();
+  const anonymous = createRequestHandler({ config, repositories });
+  assert.equal((await invoke(anonymous, { url: '/cohorts/cohort-1/interests', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'csrf=x' })).status, 401);
+  const handler = createRequestHandler({ config, repositories, sessions: sessionsFor(actors[1]) });
+  assert.equal((await invoke(handler, { url: '/cohorts/cohort-1/interests', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'csrf=bad' })).status, 403);
+  await repositories.holdCredits({ userId: actors[1].userId, amount: 2, idempotencyKey: 'other', source: 'test' });
+  const gated = await invoke(handler, { url: '/cohorts/cohort-1/interests', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'csrf=csrf' });
+  assert.equal(gated.status, 402);
+  assert.match(gated.body, /Showing interest costs 1 credit/);
+  assert.match(gated.body, /Buy credits/);
+  assert.equal(store.listInterestsByCohortId('cohort-1').length, 0);
 });

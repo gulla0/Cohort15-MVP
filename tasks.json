@@ -117,7 +117,7 @@
     {
       "id": "L017",
       "title": "Credit-gate cohort creation and interest",
-      "status": "not_started",
+      "status": "done",
       "phase": "Day 2 — Product Gate and Payment",
       "dependencies": [
         "L016"
@@ -167,8 +167,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when free credits fund the real cohort flow and insufficient balance reaches a non-functional Buy Credits gate; Stripe belongs to L018.",
-      "evidence": "Pending.",
-      "notes": "This task converts the lofi mutation boundary without redesigning its public content or legacy data."
+      "evidence": "Implemented authenticated and CSRF-protected create/interest routes, private account-derived identity, atomic local/Supabase create-plus-hold and interest-plus-hold operations, quorum consumption, lazy expiry refunds, HTTP 402 Buy Credits gates, and legacy/public behavior preservation. Focused persistence, concurrency, route, notification, migration, privacy, and browser-flow checks passed; npm run check passed with 94 tests on 2026-07-15 EDT.",
+      "notes": "Completed without Stripe network behavior or public-content redesign. Existing anonymous rows remain nullable and continue to participate in public lifecycle/quorum behavior without credit transactions."
     },
     {
       "id": "L018",

@@ -16,7 +16,7 @@ Planning and task setup for the Piece of Pie branch is complete. The account, cr
 - Current status: `agent/progress/task-status.md`
 - Human/provider continuity: `docs/human-tasks/README.md`
 
-Next ready task: L017.
+Next ready task: L018.
 
 A fresh user-facing chat should start only from `start.txt`. The router reads the canonical artifacts above and transitions approved planned work to the implementation manager without requiring prior chat history.
 

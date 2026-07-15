@@ -205,55 +205,32 @@ function pageStart(title, googleAnalyticsId, socialMeta = '', auth = null) {
   return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${socialMeta}<title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a>${renderAuthNavigation(auth)}</nav></header>`;
 }
 
-function interestForm(cohort, { error } = {}) {
+function interestForm(cohort, { error, auth } = {}) {
   if (cohort.collectionStatus !== 'active' || cohort.quorumStatus !== 'gathering') return '';
+  if (!auth) return `<section class="interest-panel" aria-labelledby="interest-heading">
+    <p class="eyebrow">Join this cohort · 1 credit</p><h2 id="interest-heading">Sign in to show interest</h2>
+    <p>Your account email stays private and is used only for updates about this cohort.</p>
+    <a class="button-link" href="/auth/sign-in?return_to=${encodeURIComponent(`/cohorts/${cohort.id}`)}">Sign in to continue</a>
+  </section>`;
   return `<section class="interest-panel" aria-labelledby="interest-heading">
-    <p class="eyebrow">Join this cohort</p><h2 id="interest-heading">Show your interest</h2>
-    <p>Enter your email to count toward quorum. Your email stays private and is used only for updates about this cohort.</p>
+    <p class="eyebrow">Join this cohort · 1 credit</p><h2 id="interest-heading">Show your interest</h2>
+    <p>We’ll use your signed-in email privately for cohort updates.</p>
     <form class="interest-form" method="post" action="/cohorts/${encodeURIComponent(cohort.id)}/interests" novalidate>
+      <input type="hidden" name="csrf" value="${escapeHtml(auth.csrfToken)}">
       <div class="honeypot" aria-hidden="true"><label>Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
-      <label for="interest-email">Email</label><input id="interest-email" name="email" type="email" autocomplete="email" required maxlength="254"${error?.field === 'email' ? ' aria-invalid="true" aria-describedby="interest-error"' : ''}>
-      <button class="button-link" type="submit" onclick="if (typeof gtag === 'function') gtag('event', 'join_cohort_interest');">I’m interested</button>
+      <button class="button-link" type="submit" onclick="if (typeof gtag === 'function') gtag('event', 'join_cohort_interest');">Use 1 credit and show interest</button>
     </form>
   </section>`;
 }
 
 function interestFormScript() {
-  return `<script>
-    (() => {
-      const form = document.querySelector('.interest-form');
-      if (!form) return;
-      const email = form.querySelector('[name="email"]');
-      const error = document.querySelector('#interest-error');
-      const showError = (message) => {
-        error.textContent = message;
-        error.hidden = false;
-        email.setAttribute('aria-invalid', 'true');
-        email.setAttribute('aria-describedby', 'interest-error');
-        email.focus();
-      };
-      email.addEventListener('input', () => {
-        error.hidden = true;
-        email.removeAttribute('aria-invalid');
-        email.removeAttribute('aria-describedby');
-      });
-      form.addEventListener('submit', (event) => {
-        if (email.validity.valueMissing) {
-          event.preventDefault();
-          showError('Enter your email to show interest.');
-        } else if (!email.validity.valid) {
-          event.preventDefault();
-          showError('Enter a valid email address.');
-        }
-      });
-    })();
-  </script>`;
+  return '';
 }
 
 export function renderCohortDetailPage(cohort, options = {}) {
   const acceptsInterest = cohort.collectionStatus === 'active' && cohort.quorumStatus === 'gathering';
   const errorNotice = options.error
-    ? `<p class="form-error" id="interest-error" role="alert">${escapeHtml(options.error.message)}</p>`
+    ? `<div class="form-error" id="interest-error" role="alert">${escapeHtml(options.error.message)}${options.error.code === 'insufficient_credits' ? '<br><a class="button-link compact" href="/credits/buy">Buy credits</a>' : ''}</div>`
     : acceptsInterest ? '<p class="form-error" id="interest-error" role="alert" hidden></p>' : '';
   const meetingAccess = cohort.meetingLink
     ? `<div class="meeting-access unlocked"><p class="eyebrow">Quorum met</p><h2>The meeting is unlocked.</h2><a class="button-link" href="${escapeHtml(cohort.meetingLink)}" rel="noopener noreferrer">Open meeting link</a></div>`

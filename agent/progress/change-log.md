@@ -209,3 +209,15 @@ Verification: `npm run check` passed with 88 tests and 6 aligned active tasks. L
 - Preserved anonymous cohort creation/interest semantics for L017 and left Stripe behavior absent.
 
 Verification: `npm run check` passed with 93 tests and 6 aligned active tasks. L017 is next.
+
+## 2026-07-15 — L017 credit-gated cohort creation and interest
+
+- Added authenticated, CSRF-protected create and interest routes using verified account identity instead of editable email inputs.
+- Added atomic local/Supabase funded-action boundaries for cohort/interest writes and their two-credit/one-credit holds.
+- Added deterministic quorum consumption and lazy below-quorum expiry refunds while leaving legacy null-linked rows untouched.
+- Added clear HTTP 402 Buy Credits gates and cost-aware creation/interest UI without implementing Stripe behavior.
+- Preserved request guards, rate limits, honeypots, notifications, public browsing, research, feedback, lifecycle rendering, and privacy boundaries.
+- Added the additive service-role-only funded-actions migration and updated the indexed human launch checklist with ordered migration application.
+- Added focused product-credit, concurrency, expiry, insufficient-balance, CSRF, privacy, notification, Supabase adapter, migration, and end-to-end coverage.
+
+Verification: focused L017 suites passed with 36 tests; authenticated local browser create/interest/quorum smoke passed with no console errors; full `npm run check` passed with 94 tests and 6 aligned active tasks. L018 is next.

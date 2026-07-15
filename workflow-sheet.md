@@ -8,7 +8,7 @@ Day 1 — Identity and Ledger
 
 L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L017.
+Next ready task: L018.
 
 ## Ready Task Candidates
 

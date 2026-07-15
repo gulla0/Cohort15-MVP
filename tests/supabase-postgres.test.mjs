@@ -521,6 +521,47 @@ test('Supabase credit holds use the atomic RPC and return a derived immutable ba
   assert.match(calls[4].url, new RegExp(`/rest/v1/rpc/${RPCS.creditBalance}$`, 'u'));
 });
 
+test('Supabase funded cohort creation settles expiry then uses one atomic create-and-hold RPC', async () => {
+  const userId = '11111111-1111-4111-8111-111111111111';
+  const cohortId = '22222222-2222-4222-8222-222222222222';
+  const holdId = '33333333-3333-4333-8333-333333333333';
+  const cohortRow = {
+    id: cohortId, creator_email: 'person@example.com', creator_user_id: userId,
+    title: 'Lofi founders circle', description: 'A focused group for founders validating a lofi product direction.',
+    category: 'build', topic: 'Founder validation', target_audience: 'Early stage builders',
+    target_skill_level: 'intermediate', additional_details: 'Bring one open product question.',
+    min_quorum: 2, meeting_link: 'https://meet.google.com/abc-defg-hij',
+    creator_time_zone: 'America/Detroit', first_meeting_at: '2026-01-10T15:00:00.000Z',
+    first_meeting_local: '2026-01-10T10:00', meeting_duration_minutes: 60,
+    recurrence: 'weekly', meeting_count: 3, created_at: CREATED_AT, updated_at: CREATED_AT,
+    expires_at: '2026-01-08T12:00:00.000Z', quorum_met_at: null,
+  };
+  const holdRow = {
+    id: holdId, user_id: userId, type: 'hold', amount: 2,
+    idempotency_key: `cohort:${cohortId}:creator_hold`, cohort_id: cohortId,
+    purchase_id: null, source: 'cohort_creation', created_at: CREATED_AT,
+  };
+  const { fetchImpl, calls } = createFetchStub(
+    { body: [{ refunded_count: 0 }] },
+    { body: [{ cohort_id: cohortId, hold_transaction_id: holdId }] },
+    { body: cohortRow },
+    { body: holdRow },
+    { body: { id: userId, supabase_subject: 'subject', email: 'person@example.com', created_at: CREATED_AT, updated_at: CREATED_AT } },
+    { body: [{ funded: 2, available: 0, held: 2, consumed: 0, refunded: 0 }] },
+  );
+  const repositories = createSupabasePostgresRepositories({ url: SUPABASE_URL, serviceRoleKey: SERVICE_ROLE_KEY, fetchImpl });
+  const result = await repositories.createFundedCohort(validCohortInput(), {
+    userId, email: 'person@example.com',
+  }, { id: cohortId, holdId, now: CREATED_AT });
+  assert.equal(result.cohort.creatorUserId, userId);
+  assert.equal(result.hold.amount, 2);
+  assert.equal(result.balance.available, 0);
+  assert.match(calls[0].url, new RegExp(`/rest/v1/rpc/${RPCS.settleExpiredHolds}$`, 'u'));
+  assert.match(calls[1].url, new RegExp(`/rest/v1/rpc/${RPCS.createFundedCohort}$`, 'u'));
+  assert.equal(calls[1].body.p_email, 'person@example.com');
+  assert.equal(calls[1].body.p_min_quorum, 2);
+});
+
 test('Supabase purchase fulfillment and Stripe event recording expose idempotent boundaries', async () => {
   const userId = '11111111-1111-4111-8111-111111111111';
   const purchaseId = '55555555-5555-4555-8555-555555555555';

@@ -223,3 +223,16 @@ Verification completed with `npm run check` and 88 passing tests. L016 is next.
 - Kept cohort creation and interest semantics unchanged for L017 and added no Stripe behavior.
 
 Verification completed with `npm run check` and 93 passing tests. L017 is next.
+
+## 2026-07-15 — L017 credit-gated cohort creation and interest
+
+- Required authentication and CSRF for cohort creation and interest while keeping listing, detail, research, feedback, schedules, and meeting-link timing public and unchanged.
+- Replaced editable mutation emails with the verified account identity and kept all emails private in rendering, redirects, errors, and logs.
+- Added atomic local and Supabase operations for two-credit creation holds and one-credit accepted-interest holds.
+- Consumed all account-backed cohort holds once when quorum was reached and lazily refunded below-quorum holds once before balance reads or funded mutations.
+- Added HTTP 402 insufficient-credit responses with balance/cost context and a non-functional Buy Credits action; Stripe remains L018 scope.
+- Preserved legacy anonymous cohort and interest rows without account links or historical credit transactions.
+- Added the service-role-only funded-actions migration plus focused lifecycle, concurrency, rollback/gating, notification, privacy, route, migration, and Supabase adapter coverage.
+- Completed local in-app browser smoke for creator funding, participant funding, quorum unlock, balance updates, private identity, and a clean console.
+
+Verification completed with `npm run check` and 94 passing tests. L018 is next.

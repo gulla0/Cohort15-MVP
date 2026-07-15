@@ -6,7 +6,8 @@ function escapeHtml(value) {
 
 export function renderAuthNavigation(auth) {
   if (!auth) return '<a class="button-link compact" href="/auth/sign-in">Sign in</a>';
-  return `<span class="credit-count" aria-label="Available credits">${auth.balance.available} credits</span><a class="text-link" href="/credits/buy">Buy credits</a><form class="inline-form" method="post" action="/auth/sign-out"><input type="hidden" name="csrf" value="${escapeHtml(auth.csrfToken)}"><button class="text-button" type="submit">Sign out</button></form>`;
+  const unit = auth.balance.available === 1 ? 'credit' : 'credits';
+  return `<span class="credit-count" aria-label="Available credits">${auth.balance.available} ${unit}</span><a class="text-link" href="/credits/buy">Buy credits</a><form class="inline-form" method="post" action="/auth/sign-out"><input type="hidden" name="csrf" value="${escapeHtml(auth.csrfToken)}"><button class="text-button" type="submit">Sign out</button></form>`;
 }
 
 export function renderSignInPage({ auth = null, returnTo = '/', requested = false, error = false } = {}) {

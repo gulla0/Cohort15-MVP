@@ -9,7 +9,7 @@ import { createResendEmailProvider } from '../email/resend.mjs';
 import { DomainValidationError } from '../domain/validation.mjs';
 import { createLofiStore } from '../persistence/store.mjs';
 import {
-  createLocalRepositories, RepositoryConflictError, RepositoryNotFoundError,
+  createLocalRepositories, InsufficientCreditsError, RepositoryConflictError, RepositoryNotFoundError,
 } from '../persistence/repositories.mjs';
 import { createSupabasePostgresRepositories } from '../persistence/supabase-postgres.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../services/create-cohort.mjs';
@@ -136,7 +136,9 @@ function createValidationMessage(error) {
 function interestConflictMessage(code) {
   return {
     creator_email: 'The creator email cannot count toward this cohort’s quorum.',
+    creator_user: 'You cannot show interest in a cohort you created.',
     duplicate_email: 'This email has already been counted toward this cohort’s quorum.',
+    duplicate_user: 'Your account has already been counted toward this cohort’s quorum.',
     expired: 'This cohort’s interest window has closed.',
     already_met: 'This cohort has already reached quorum and is no longer accepting interest.',
   }[code] ?? 'Your interest could not be recorded because the cohort’s state changed. Please review the cohort and try again.';
@@ -187,11 +189,11 @@ export function createRequestHandler(options = {}) {
     randomBytes: options.randomBytes,
   });
 
-  async function sendInterestError(res, cohortId, status, error, headers = {}) {
+  async function sendInterestError(res, cohortId, status, error, headers = {}, auth = null) {
     try {
       const cohort = await eventBrowsing.getById(cohortId);
       send(res, status, 'text/html; charset=utf-8', renderCohortDetailPage(cohort, {
-        appUrl: config.appUrl, error, googleAnalyticsId: config.googleAnalyticsId,
+        appUrl: config.appUrl, error, googleAnalyticsId: config.googleAnalyticsId, auth,
       }), headers);
     } catch (readError) {
       if (readError instanceof RepositoryNotFoundError) {
@@ -358,7 +360,12 @@ export function createRequestHandler(options = {}) {
     }
 
     if (method === 'GET' && url.pathname === '/cohorts/new') {
-      send(res, 200, 'text/html; charset=utf-8', renderCreateCohortPage({ auth: await currentAuth() }));
+      const auth = await currentAuth();
+      if (!auth) {
+        redirect(res, 303, '/auth/sign-in?return_to=%2Fcohorts%2Fnew');
+        return;
+      }
+      send(res, 200, 'text/html; charset=utf-8', renderCreateCohortPage({ auth }));
       return;
     }
 
@@ -417,16 +424,29 @@ export function createRequestHandler(options = {}) {
         return;
       }
 
+      const auth = await currentAuth();
+      if (!auth) {
+        send(res, 401, 'text/plain; charset=utf-8', 'Authentication required');
+        return;
+      }
+
       let input = {};
       try {
         input = await readFormBody(req, CREATE_COHORT_BODY_LIMIT_BYTES);
+        if (!sessions.verifyCsrf(auth, input.csrf)) {
+          send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+          return;
+        }
+        delete input.csrf;
         const cohort = await cohortCreator.create(input, {
           clientIp: clientIpFromRequest(req, config),
+          actor: { userId: auth.user.id, email: auth.user.email },
         });
         redirect(res, 303, `/cohorts/${encodeURIComponent(cohort.id)}`);
       } catch (error) {
         if (error?.code === 'body_too_large') {
           send(res, 413, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth,
             error: {
               field: '',
               message: 'This submission is too large. Shorten the entered text and try again.',
@@ -435,6 +455,7 @@ export function createRequestHandler(options = {}) {
           }));
         } else if (error instanceof RateLimitExceededError) {
           send(res, 429, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth,
             error: {
               field: '',
               message: 'Too many cohorts have been created from this connection. Please wait and try again.',
@@ -443,8 +464,17 @@ export function createRequestHandler(options = {}) {
           }), {
             'retry-after': String(error.retryAfterSeconds),
           });
+        } else if (error instanceof InsufficientCreditsError) {
+          send(res, 402, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth: { ...auth, balance: error.balance },
+            error: {
+              code: 'insufficient_credits', field: '',
+              message: `Creating a cohort costs 2 credits. You have ${error.balance.available} available.`,
+            }, values: input,
+          }));
         } else if (error instanceof RepositoryConflictError) {
           send(res, 409, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth,
             error: {
               field: '',
               message: 'The cohort could not be created because of a temporary conflict. Please resubmit.',
@@ -453,17 +483,20 @@ export function createRequestHandler(options = {}) {
           }));
         } else if (error instanceof DomainValidationError) {
           send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth,
             error: createValidationMessage(error),
             values: input,
           }));
         } else if (error instanceof HoneypotSubmissionError) {
           send(res, 400, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth,
             error: {
               field: '', message: 'Please check your submission and try again.', preserveValues: false,
             },
           }));
         } else {
           send(res, 500, 'text/html; charset=utf-8', renderCreateCohortPage({
+            auth,
             error: {
               field: '',
               message: 'We could not create the cohort right now. Your entries are safe to resubmit.',
@@ -488,42 +521,58 @@ export function createRequestHandler(options = {}) {
         return;
       }
 
+      const auth = await currentAuth();
+      if (!auth) {
+        send(res, 401, 'text/plain; charset=utf-8', 'Authentication required');
+        return;
+      }
+
       try {
         const input = await readFormBody(req);
-        await showInterest.show(cohortId, input, { clientIp: clientIpFromRequest(req, config) });
+        if (!sessions.verifyCsrf(auth, input.csrf)) {
+          send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+          return;
+        }
+        delete input.csrf;
+        await showInterest.show(cohortId, input, {
+          clientIp: clientIpFromRequest(req, config),
+          actor: { userId: auth.user.id, email: auth.user.email },
+        });
         redirect(res, 303, `/cohorts/${encodeURIComponent(cohortId)}`);
       } catch (error) {
         if (error?.code === 'body_too_large') {
           await sendInterestError(res, cohortId, 413, {
-            field: '', message: 'This submission is too large. Enter only your email and try again.',
-          });
+            field: '', message: 'This submission is too large. Please try again.',
+          }, {}, auth);
         } else if (error instanceof RateLimitExceededError) {
           await sendInterestError(res, cohortId, 429, {
             field: '',
             message: 'Too many interests have been submitted from this connection. Please wait and try again.',
           }, {
             'retry-after': String(error.retryAfterSeconds),
-          });
+          }, auth);
         } else if (error instanceof RepositoryNotFoundError) {
           send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+        } else if (error instanceof InsufficientCreditsError) {
+          await sendInterestError(res, cohortId, 402, {
+            code: 'insufficient_credits', field: '',
+            message: `Showing interest costs 1 credit. You have ${error.balance.available} available.`,
+          }, {}, { ...auth, balance: error.balance });
         } else if (error instanceof RepositoryConflictError) {
           await sendInterestError(res, cohortId, 409, {
-            field: 'email', message: interestConflictMessage(error.code),
-          });
+            field: '', message: interestConflictMessage(error.code),
+          }, {}, auth);
         } else if (error instanceof DomainValidationError || error instanceof InterestHoneypotSubmissionError) {
           const validationError = error instanceof DomainValidationError
             ? {
-              field: error.field === 'email' ? 'email' : '',
-              message: error.field === 'email'
-                ? `Email ${error.rule}.`
-                : 'Please check your submission and try again.',
+              field: '', message: 'Please check your submission and try again.',
             }
             : { field: '', message: 'Please check your submission and try again.' };
-          await sendInterestError(res, cohortId, 400, validationError);
+          await sendInterestError(res, cohortId, 400, validationError, {}, auth);
         } else {
           await sendInterestError(res, cohortId, 500, {
             field: '', message: 'We could not record your interest right now. Please try again.',
-          });
+          }, {}, auth);
         }
       }
       return;

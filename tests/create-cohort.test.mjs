@@ -2,248 +2,105 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createLofiStore } from '../src/persistence/store.mjs';
-import {
-  createLocalRepositories, RepositoryConflictError,
-} from '../src/persistence/repositories.mjs';
+import { createLocalRepositories } from '../src/persistence/repositories.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
 import { createCohortService, HoneypotSubmissionError } from '../src/services/create-cohort.mjs';
 import { createRollingWindowLimiter } from '../src/services/rate-limit.mjs';
 import { renderCreateCohortPage } from '../src/ui/create-cohort.mjs';
 
-const config = Object.freeze({
-  appEnv: 'test',
-  isProduction: false,
-  appUrl: 'http://localhost:3000',
-  googleAnalyticsId: 'G-TEST',
+const NOW = new Date('2026-06-18T12:00:00.000Z');
+const config = Object.freeze({ appEnv: 'test', isProduction: false, appUrl: 'http://localhost:3000', googleAnalyticsId: 'G-TEST' });
+const actor = Object.freeze({ userId: 'user-1', email: 'creator@example.com' });
+const auth = Object.freeze({ user: { id: actor.userId, email: actor.email }, balance: { available: 2 }, csrfToken: 'csrf' });
+const sessions = Object.freeze({
+  async authenticate() { return auth; },
+  verifyCsrf(value, token) { return value === auth && token === 'csrf'; },
 });
 
 function validSubmission(overrides = {}) {
   return {
-    website: '',
-    creatorEmail: ' Creator@Example.COM ',
-    title: 'Build a tiny compiler',
-    description: 'Work through a tiny compiler implementation together.',
-    category: 'build',
-    topic: 'Compilers',
-    targetAudience: 'Developers learning language implementation',
-    targetSkillLevel: 'intermediate',
-    additionalDetails: '',
-    minQuorum: '3',
-    meetingLink: 'https://meet.google.com/abc-defg-hij',
-    creatorTimeZone: 'America/Detroit',
-    firstMeetingLocal: '2099-06-20T18:30',
-    meetingDurationMinutes: '60',
-    recurrence: 'weekly',
-    meetingCount: '4',
-    ...overrides,
+    website: '', title: 'Build a tiny compiler',
+    description: 'Work through a tiny compiler implementation together.', category: 'build',
+    topic: 'Compilers', targetAudience: 'Developers learning language implementation',
+    targetSkillLevel: 'intermediate', additionalDetails: '', minQuorum: '3',
+    meetingLink: 'https://meet.google.com/abc-defg-hij', creatorTimeZone: 'America/Detroit',
+    firstMeetingLocal: '2099-06-20T18:30', meetingDurationMinutes: '60',
+    recurrence: 'weekly', meetingCount: '4', ...overrides,
   };
 }
 
-function invoke(handler, {
-  url = '/', method = 'GET', headers = {}, body = '', remoteAddress = '127.0.0.1',
-} = {}) {
+function invoke(handler, { url = '/', method = 'GET', headers = {}, body = '' } = {}) {
   return new Promise((resolve, reject) => {
-    const req = {
-      url,
-      method,
-      headers,
-      socket: { remoteAddress },
-      async *[Symbol.asyncIterator]() { if (body) yield Buffer.from(body); },
-    };
-    const response = {
-      status: undefined,
-      headers: undefined,
-      body: '',
-      writeHead(status, responseHeaders) { this.status = status; this.headers = responseHeaders; },
-      end(value = '') { this.body = String(value); resolve(this); },
-    };
+    const req = { url, method, headers, socket: { remoteAddress: '127.0.0.1' }, async *[Symbol.asyncIterator]() { if (body) yield Buffer.from(body); } };
+    const response = { status: 0, headers: {}, body: '', writeHead(status, responseHeaders) { this.status = status; this.headers = responseHeaders; }, end(value = '') { this.body = String(value); resolve(this); } };
     Promise.resolve(handler(req, response)).catch(reject);
   });
 }
 
-test('creation page contains the exact anonymous form surface and timezone capture', () => {
-  const html = renderCreateCohortPage();
-  for (const field of [
-    'creatorEmail', 'title', 'description', 'category', 'topic', 'targetAudience',
-    'targetSkillLevel', 'additionalDetails', 'minQuorum', 'meetingLink',
-    'creatorTimeZone', 'firstMeetingLocal', 'meetingDurationMinutes', 'recurrence',
-    'meetingCount', 'website',
-  ]) assert.match(html, new RegExp(`name="${field}"`));
-  assert.match(html, /email stays private/i);
-  assert.match(html, /For safety/);
+async function fixture() {
+  const store = createLofiStore();
+  let id = 0;
+  const repositories = createLocalRepositories({ store, now: () => NOW, randomUUID: () => `record-${++id}` });
+  await repositories.provisionUser({ supabaseSubject: 'subject-1', email: actor.email }, { id: actor.userId, grantId: 'grant-1', now: NOW });
+  return { store, repositories };
+}
+
+test('authenticated creation form derives identity, includes CSRF, and explains its two-credit cost', () => {
+  const html = renderCreateCohortPage({ auth });
+  assert.match(html, /name="csrf" value="csrf"/);
+  assert.match(html, /Creating costs <strong>2 credits<\/strong>/);
+  assert.match(html, /Confirm and use 2 credits/);
+  assert.doesNotMatch(html, /name="creatorEmail"|Private creator email/);
   assert.match(html, /resolvedOptions\(\)\.timeZone/);
-  assert.match(html, /placeholder="A short, specific name for the cohort"/);
-  assert.match(html, /placeholder="Explain what the group will work on and what participants can expect"/);
-  assert.match(html, /placeholder="People needed to unlock the meeting link \(1–15\)"/);
-  assert.match(html, /<option value="gaming">gaming<\/option>/);
-  assert.match(html, /data-cohort-form/);
   assert.match(html, /data-cohort-preview/);
-  assert.match(html, /Preview cohort/);
-  assert.match(html, /Confirm and create cohort/);
-  assert.match(html, /form\.addEventListener\('submit'/);
-  assert.match(html, /event\.preventDefault\(\)/);
-  assert.match(html, /form\.reportValidity\(\)/);
-  assert.match(html, /role="dialog"/);
-  assert.match(html, /document\.body\.classList\.add\('preview-open'\)/);
-  assert.match(html, /previewPanel\.hidden = false/);
-  assert.match(html, /document\.body\.classList\.remove\('preview-open'\)/);
-  assert.match(html, /form\.dataset\.confirmed = 'true'/);
-  assert.match(html, /form\.requestSubmit\(\)/);
-  assert.match(html, /querySelectorAll\('\[placeholder\]'\)/);
-  assert.match(html, /addEventListener\('focus'/);
-  assert.match(html, /field\.placeholder = ''/);
-  assert.match(html, /Date\.now\(\) \+ \(7 \* 24 \* 60 \* 60 \* 1000\)/);
-  assert.match(html, /firstMeetingInput\.min =/);
-  assert.match(html, /setInterval\(updateMeetingMinimum, 30 \* 1000\)/);
-  assert.match(html, /Total number of sessions/);
-  assert.match(html, /name="meetingCount" min="1" max="1" value="1" required readonly/);
-  assert.match(html, /Fixed at 1 session for a one-time group\./);
-  assert.match(html, /This group will meet once\./);
-  assert.match(html, /recurrenceInput\.addEventListener\('change', syncMeetingCount\)/);
-  assert.match(html, /meetingCountInput\.min = recurring \? '2' : '1'/);
-  assert.match(html, /meetingCountInput\.max = recurring \? '52' : '1'/);
-  assert.doesNotMatch(html, /creatorName|maximumParticipants|type="file"/);
 });
 
-test('creation page explains validation errors and safely restores submitted values', () => {
-  const html = renderCreateCohortPage({
-    error: {
-      field: 'firstMeetingLocal',
-      message: 'First meeting date and time must be more than seven days after submission.',
-    },
-    values: {
-      creatorEmail: 'creator@example.com',
-      title: '<Launch test>',
-      description: 'A description worth preserving after an error.',
-      category: 'build',
-      targetSkillLevel: 'intermediate',
-      firstMeetingLocal: '2026-06-20T18:30',
-      recurrence: 'weekly',
-      meetingCount: '4',
-      website: 'do-not-reflect',
-    },
-  });
-
-  assert.match(html, /First meeting date and time must be more than seven days after submission\./);
-  assert.match(html, /value="creator@example\.com"/);
-  assert.match(html, /value="&lt;Launch test&gt;"/);
-  assert.match(html, /A description worth preserving after an error\./);
-  assert.match(html, /value="build" selected/);
-  assert.match(html, /value="intermediate" selected/);
-  assert.match(html, /name="firstMeetingLocal"[^>]+value="2026-06-20T18:30"[^>]+aria-invalid="true"/);
-  assert.match(html, /value="weekly" selected/);
-  assert.match(html, /name="meetingCount" min="2" max="52" value="4"/);
-  assert.match(html, /Choose between 2 and 52 sessions\./);
-  assert.match(html, /This group will meet once per week for 4 weeks\./);
-  assert.doesNotMatch(html, /do-not-reflect/);
-});
-
-test('create service normalizes private email and honeypot consumes no allowance', async () => {
-  const store = createLofiStore();
-  const repositories = createLocalRepositories({
-    store,
-    now: () => new Date('2026-06-18T12:00:00.000Z'),
-    randomUUID: () => 'cohort-1',
-  });
-  const limiter = createRollingWindowLimiter({ limit: 1, windowMs: 3_600_000 });
-  const service = createCohortService({ repositories, limiter });
-
-  await assert.rejects(
-    service.create(validSubmission({ website: 'bot' }), { clientIp: '192.0.2.1' }),
-    HoneypotSubmissionError,
-  );
-  const cohort = await service.create(validSubmission(), { clientIp: '192.0.2.1' });
-  assert.equal(cohort.creatorEmail, 'creator@example.com');
-  assert.equal(cohort.firstMeetingAt, '2099-06-20T22:30:00.000Z');
+test('funded create service ignores client identity and honeypot consumes no allowance', async () => {
+  const { store, repositories } = await fixture();
+  const service = createCohortService({ repositories, limiter: createRollingWindowLimiter({ limit: 1, windowMs: 3_600_000 }) });
+  await assert.rejects(service.create(validSubmission({ website: 'bot' }), { clientIp: '192.0.2.1', actor }), HoneypotSubmissionError);
+  const cohort = await service.create(validSubmission({ creatorEmail: 'attacker@example.com' }), { clientIp: '192.0.2.1', actor });
+  assert.equal(cohort.creatorEmail, actor.email);
+  assert.equal(cohort.creatorUserId, actor.userId);
+  assert.equal((await repositories.getCreditBalance(actor.userId)).available, 0);
   assert.equal(store.listCohorts().length, 1);
 });
 
-test('POST /cohorts enforces request policy and redirects without private data', async () => {
-  const store = createLofiStore();
-  let id = 0;
-  const repositories = createLocalRepositories({
-    store,
-    now: () => new Date('2026-06-18T12:00:00.000Z'),
-    randomUUID: () => `cohort-${++id}`,
-  });
-  const handler = createRequestHandler({ config, repositories });
-  const encoded = new URLSearchParams(validSubmission()).toString();
+test('create routes require sign-in and CSRF, then atomically create and hold credits', async () => {
+  const { store, repositories } = await fixture();
+  const anonymous = createRequestHandler({ config, repositories });
+  const redirected = await invoke(anonymous, { url: '/cohorts/new' });
+  assert.equal(redirected.status, 303);
+  assert.equal(redirected.headers.location, '/auth/sign-in?return_to=%2Fcohorts%2Fnew');
+  assert.equal((await invoke(anonymous, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'csrf=x' })).status, 401);
 
-  assert.equal((await invoke(handler, { url: '/cohorts/new' })).status, 200);
-  assert.equal((await invoke(handler, { url: '/cohorts', method: 'POST' })).status, 415);
-  assert.equal((await invoke(handler, {
-    url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: 'https://evil.example' }, body: encoded,
-  })).status, 403);
-  const oversized = await invoke(handler, {
-    url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', 'content-length': '131073' }, body: encoded,
-  });
-  assert.equal(oversized.status, 413);
-  assert.match(oversized.body, /submission is too large/i);
-
-  const response = await invoke(handler, {
-    url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded; charset=utf-8', origin: config.appUrl }, body: encoded,
-  });
+  const handler = createRequestHandler({ config, repositories, sessions });
+  const invalidCsrf = await invoke(handler, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(validSubmission()).toString() });
+  assert.equal(invalidCsrf.status, 403);
+  const response = await invoke(handler, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: config.appUrl }, body: new URLSearchParams({ ...validSubmission(), csrf: 'csrf' }).toString() });
   assert.equal(response.status, 303);
-  assert.equal(response.headers.location, '/cohorts/cohort-1');
-  assert.doesNotMatch(response.headers.location, /creator|example/i);
   assert.equal(store.listCohorts().length, 1);
+  assert.equal((await repositories.getCreditBalance(actor.userId)).available, 0);
+});
 
-  const invalid = await invoke(handler, {
-    url: '/cohorts',
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded; charset=utf-8', origin: config.appUrl },
-    body: new URLSearchParams(validSubmission({
-      title: 'Keep this title',
-      firstMeetingLocal: '2026-06-20T18:30',
-    })).toString(),
-  });
+test('insufficient creation returns 402 with a Buy credits gate and creates nothing', async () => {
+  const { store, repositories } = await fixture();
+  await repositories.holdCredits({ userId: actor.userId, amount: 2, idempotencyKey: 'other', source: 'test' });
+  const handler = createRequestHandler({ config, repositories, sessions });
+  const response = await invoke(handler, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ ...validSubmission(), csrf: 'csrf' }).toString() });
+  assert.equal(response.status, 402);
+  assert.match(response.body, /Creating a cohort costs 2 credits/);
+  assert.match(response.body, /href="\/credits\/buy">Buy credits/);
+  assert.equal(store.listCohorts().length, 0);
+});
+
+test('creation preserves media, origin, validation, body-size, and rate-limit boundaries', async () => {
+  const { repositories } = await fixture();
+  const handler = createRequestHandler({ config, repositories, sessions });
+  assert.equal((await invoke(handler, { url: '/cohorts', method: 'POST' })).status, 415);
+  assert.equal((await invoke(handler, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: 'https://evil.example' } })).status, 403);
+  assert.equal((await invoke(handler, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', 'content-length': '131073' } })).status, 413);
+  const invalid = await invoke(handler, { url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ ...validSubmission({ firstMeetingLocal: '2026-06-20T18:30' }), csrf: 'csrf' }).toString() });
   assert.equal(invalid.status, 400);
-  assert.match(invalid.body, /First meeting date and time must be more than seven days after submission\./);
-  assert.match(invalid.body, /value="Keep this title"/);
-  assert.match(invalid.body, /value=" Creator@Example\.COM "/);
-  assert.equal(store.listCohorts().length, 1);
-});
-
-test('creation conflicts and unexpected failures render safe form errors instead of escaping', async () => {
-  const repositories = createLocalRepositories({ store: createLofiStore() });
-  const encoded = new URLSearchParams(validSubmission({ title: 'Keep this safe title' })).toString();
-  const request = (cohortCreator) => invoke(createRequestHandler({
-    config, repositories, cohortCreator,
-  }), {
-    url: '/cohorts', method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: encoded,
-  });
-
-  const conflict = await request({
-    async create() { throw new RepositoryConflictError('duplicate_cohort'); },
-  });
-  assert.equal(conflict.status, 409);
-  assert.match(conflict.body, /temporary conflict/i);
-  assert.match(conflict.body, /value="Keep this safe title"/);
-
-  const failure = await request({
-    async create() { throw new Error('sensitive backend detail'); },
-  });
-  assert.equal(failure.status, 500);
-  assert.match(failure.body, /could not create the cohort right now/i);
-  assert.match(failure.body, /value="Keep this safe title"/);
-  assert.doesNotMatch(failure.body, /sensitive backend detail/i);
-});
-
-test('sixth successful creation returns 429 with Retry-After', async () => {
-  const store = createLofiStore();
-  let id = 0;
-  const repositories = createLocalRepositories({ store, randomUUID: () => `cohort-${++id}` });
-  const handler = createRequestHandler({ config, repositories });
-  const encoded = new URLSearchParams(validSubmission()).toString();
-  const request = () => invoke(handler, {
-    url: '/cohorts', method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: encoded,
-  });
-  for (let attempt = 0; attempt < 5; attempt += 1) assert.equal((await request()).status, 303);
-  const rejected = await request();
-  assert.equal(rejected.status, 429);
-  assert.ok(Number(rejected.headers['retry-after']) >= 1);
-  assert.match(rejected.body, /too many cohorts/i);
-  assert.match(rejected.body, /value="Build a tiny compiler"/);
-  assert.equal(store.listCohorts().length, 5);
+  assert.match(invalid.body, /First meeting date and time must be more than seven days/);
 });

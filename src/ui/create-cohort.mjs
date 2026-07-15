@@ -55,13 +55,13 @@ export function renderCreateCohortPage({ error, values = {}, auth = null } = {})
   <body>
     <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><span class="status-pill">Create</span>${renderAuthNavigation(auth)}</nav></header>
     <main class="shell form-shell">
-      <p class="eyebrow">Anonymous cohort request</p>
+      <p class="eyebrow">Funded cohort request</p>
       <h1>Create a focused cohort.</h1>
-      <p class="lede">Collect interest for seven days. Your email stays private and is used only for updates about this cohort.</p>
-      ${error ? `<div class="form-error" id="form-error" role="alert"><strong>${escapeHtml(error.message)}</strong>${error.preserveValues === false ? '' : '<br>Your entries have been kept so you can correct the submission and resubmit.'}</div>` : ''}
+      <p class="lede">Creating costs <strong>2 credits</strong>. We’ll use your signed-in email privately for cohort updates.</p>
+      ${error ? `<div class="form-error" id="form-error" role="alert"><strong>${escapeHtml(error.message)}</strong>${error.code === 'insufficient_credits' ? '<br><a class="button-link compact" href="/credits/buy">Buy credits</a>' : error.preserveValues === false ? '' : '<br>Your entries have been kept so you can correct the submission and resubmit.'}</div>` : ''}
       <form class="cohort-form" method="post" action="/cohorts" data-cohort-form>
+        <input type="hidden" name="csrf" value="${escapeHtml(auth?.csrfToken)}">
         <div class="honeypot" aria-hidden="true"><label>Website <input name="website" autocomplete="off" tabindex="-1"></label></div>
-        <label>Creator email <input type="email" name="creatorEmail" value="${value('creatorEmail')}" maxlength="254" required autocomplete="email" placeholder="you@example.com — kept private and used for cohort updates"${fieldState(error, 'creatorEmail')}></label>
         <label>Title <input name="title" value="${value('title')}" minlength="3" maxlength="120" required placeholder="A short, specific name for the cohort"${fieldState(error, 'title')}></label>
         <label class="full">Description <textarea name="description" minlength="20" maxlength="4000" required placeholder="Explain what the group will work on and what participants can expect"${fieldState(error, 'description')}>${value('description')}</textarea></label>
         <label>Category <select name="category" required${fieldState(error, 'category')}><option value="">Choose the cohort's purpose</option>${selectedOptions(CATEGORIES, values.category)}</select></label>
@@ -94,12 +94,11 @@ export function renderCreateCohortPage({ error, values = {}, auth = null } = {})
             <div><dt>Minimum quorum</dt><dd data-preview-value="minQuorum"></dd></div>
             <div class="full"><dt>Schedule</dt><dd data-preview-value="schedule"></dd></div>
             <div class="full"><dt>Additional details</dt><dd class="preview-text" data-preview-value="additionalDetails"></dd></div>
-            <div class="full"><dt>Private creator email</dt><dd data-preview-value="creatorEmail"></dd></div>
             <div class="full"><dt>Approved meeting link</dt><dd data-preview-value="meetingLink"></dd></div>
           </dl>
           <div class="button-row">
             <button class="button-link secondary" type="button" data-edit-button>Edit</button>
-            <button class="button-link" type="button" data-confirm-button>Confirm and create cohort</button>
+            <button class="button-link" type="button" data-confirm-button>Confirm and use 2 credits</button>
           </div>
         </div>
       </section>
@@ -210,7 +209,6 @@ export function renderCreateCohortPage({ error, values = {}, auth = null } = {})
         previewValue('minQuorum', fieldValue('minQuorum') + ' people');
         previewValue('schedule', schedule);
         previewValue('additionalDetails', fieldValue('additionalDetails'));
-        previewValue('creatorEmail', fieldValue('creatorEmail'));
         previewValue('meetingLink', fieldValue('meetingLink'));
       };
       form.addEventListener('submit', (event) => {

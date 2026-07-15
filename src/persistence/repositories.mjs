@@ -124,6 +124,44 @@ export function createLocalRepositories({
     return total;
   }
 
+  function findCohortHold(userId, cohortId, source) {
+    return store.listCreditTransactionsByUserId(userId).find((transaction) => (
+      transaction.type === 'hold' && transaction.cohortId === cohortId && transaction.source === source
+    ));
+  }
+
+  function insertSettlement(type, hold, cohortId, timestamp, id = randomUUID()) {
+    if (!hold || settledAmount(hold.id) !== 0) return null;
+    const transaction = createCreditTransaction({
+      userId: hold.userId,
+      type,
+      amount: hold.amount,
+      idempotencyKey: `${type}:${hold.id}`,
+      cohortId,
+      purchaseId: null,
+      source: hold.id,
+    }, { id, now: timestamp });
+    if (!store.insertCreditTransaction(transaction)) {
+      return store.getCreditTransactionByIdempotencyKey(transaction.idempotencyKey);
+    }
+    return transaction;
+  }
+
+  async function settleExpiredCreditHolds(userId, currentNow = now()) {
+    requireUser(userId);
+    return store.withLock(`credits:${userId}`, async () => {
+      const refunded = [];
+      for (const hold of store.listCreditTransactionsByUserId(userId)) {
+        if (hold.type !== 'hold' || settledAmount(hold.id) !== 0 || !hold.cohortId) continue;
+        const cohort = store.getCohort(hold.cohortId);
+        if (!cohort || cohort.quorumMetAt != null || collectionStatus(cohort, currentNow) !== 'expired') continue;
+        const transaction = insertSettlement('refund', hold, cohort.id, currentNow);
+        if (transaction) refunded.push(transaction);
+      }
+      return Object.freeze({ refunded: Object.freeze(refunded), balance: creditBalance(userId) });
+    });
+  }
+
   return Object.freeze({
     async provisionUser(input, options = {}) {
       const normalizedEmail = normalizeEmail(input.email);
@@ -190,7 +228,12 @@ export function createLocalRepositories({
     },
     async deleteSessionByTokenDigest(tokenDigest) { return store.deleteSessionByTokenDigest(tokenDigest); },
 
-    async getCreditBalance(userId) { requireUser(userId); return creditBalance(userId); },
+    async getCreditBalance(userId, options = {}) {
+      return (await settleExpiredCreditHolds(userId, options.now ?? now())).balance;
+    },
+    async settleExpiredCreditHolds(userId, options = {}) {
+      return settleExpiredCreditHolds(userId, options.now ?? now());
+    },
     async listCreditTransactionsByUserId(userId) { requireUser(userId); return store.listCreditTransactionsByUserId(userId); },
 
     async holdCredits(input, options = {}) {
@@ -351,6 +394,31 @@ export function createLocalRepositories({
       return cohort;
     },
 
+    async createFundedCohort(input, actor, options = {}) {
+      const user = requireUser(actor.userId);
+      if (normalizeEmail(actor.email) !== user.email) throw new RepositoryConflictError('identity_conflict');
+      const timestamp = options.now ?? now();
+      const cohort = createCohort({ ...input, creatorEmail: user.email, creatorUserId: user.id }, {
+        id: options.id ?? randomUUID(), now: timestamp,
+      });
+      const hold = createCreditTransaction({
+        userId: user.id, type: 'hold', amount: 2,
+        idempotencyKey: `cohort:${cohort.id}:creator_hold`, cohortId: cohort.id,
+        purchaseId: null, source: 'cohort_creation',
+      }, { id: options.holdId ?? randomUUID(), now: timestamp });
+      await settleExpiredCreditHolds(user.id, timestamp);
+      return store.withLock(`credits:${user.id}`, async () => {
+        const balance = creditBalance(user.id);
+        if (balance.available < 2) throw new InsufficientCreditsError(balance, 2);
+        if (store.getCreditTransactionByIdempotencyKey(hold.idempotencyKey)) {
+          throw new RepositoryConflictError('duplicate_cohort');
+        }
+        if (!store.insertCohort(cohort)) throw new RepositoryConflictError('duplicate_cohort');
+        if (!store.insertCreditTransaction(hold)) throw new RepositoryConflictError('duplicate_credit_transaction');
+        return Object.freeze({ cohort, hold, balance: creditBalance(user.id) });
+      });
+    },
+
     async getCohortById(id) {
       return requireCohort(id);
     },
@@ -415,6 +483,66 @@ export function createLocalRepositories({
           cohort: storedCohort,
           interestCount,
           reachedQuorum,
+        });
+      });
+    },
+
+    async acceptFundedInterest(input, actor, options = {}) {
+      const user = requireUser(actor.userId);
+      if (normalizeEmail(actor.email) !== user.email) throw new RepositoryConflictError('identity_conflict');
+      const timestamp = options.now ?? now();
+      const interest = createInterest({ cohortId: input.cohortId, email: user.email, userId: user.id }, {
+        id: options.id ?? randomUUID(), now: timestamp,
+      });
+      const hold = createCreditTransaction({
+        userId: user.id, type: 'hold', amount: 1,
+        idempotencyKey: `cohort:${interest.cohortId}:interest:${user.id}`,
+        cohortId: interest.cohortId, purchaseId: null, source: 'cohort_interest',
+      }, { id: options.holdId ?? randomUUID(), now: timestamp });
+
+      await settleExpiredCreditHolds(user.id, timestamp);
+
+      return store.withCohortLock(interest.cohortId, async () => {
+        const cohort = await requireCohort(interest.cohortId);
+        if (user.email === cohort.creatorEmail || user.id === cohort.creatorUserId) {
+          throw new RepositoryConflictError('creator_user');
+        }
+        if (cohort.quorumMetAt != null) throw new RepositoryConflictError('already_met');
+        if (collectionStatus(cohort, timestamp) !== 'active') throw new RepositoryConflictError('expired');
+        if (store.getInterestByCohortAndEmail(cohort.id, user.email)
+          || store.getInterestByCohortAndUserId(cohort.id, user.id)) {
+          throw new RepositoryConflictError('duplicate_user');
+        }
+
+        return store.withLock(`credits:${user.id}`, async () => {
+          const balance = creditBalance(user.id);
+          if (balance.available < 1) throw new InsufficientCreditsError(balance, 1);
+          if (!store.insertCreditTransaction(hold)) throw new RepositoryConflictError('duplicate_credit_transaction');
+          if (!store.insertInterest(interest)) throw new RepositoryConflictError('duplicate_user');
+
+          const interestCount = store.countInterestsByCohortId(cohort.id);
+          const reachedQuorum = interestCount >= cohort.minQuorum;
+          const storedCohort = reachedQuorum
+            ? store.updateCohort({ ...cohort, quorumMetAt: interest.createdAt, updatedAt: interest.createdAt })
+            : cohort;
+          const consumed = [];
+          if (reachedQuorum) {
+            const accountActions = [
+              ...(cohort.creatorUserId ? [{ userId: cohort.creatorUserId, source: 'cohort_creation' }] : []),
+              ...store.listInterestsByCohortId(cohort.id)
+                .filter((item) => item.userId != null)
+                .map((item) => ({ userId: item.userId, source: 'cohort_interest' })),
+            ];
+            for (const action of accountActions) {
+              const actionHold = findCohortHold(action.userId, cohort.id, action.source);
+              const transaction = insertSettlement('consume', actionHold, cohort.id, timestamp);
+              if (transaction) consumed.push(transaction);
+            }
+          }
+          return Object.freeze({
+            interest, cohort: storedCohort, interestCount, reachedQuorum, hold,
+            consumed: Object.freeze(consumed), balance: creditBalance(user.id),
+          });
         });
       });
     },

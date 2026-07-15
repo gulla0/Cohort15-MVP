@@ -116,6 +116,6 @@ The only new human setup path is `docs/human-tasks/piece-of-pie-launch.md`. It d
 
 ## Next Ready Task
 
-Next ready task: L017.
+Next ready task: L018.
 
-L016 established verified magic-link accounts, secure application sessions, CSRF-protected sign-out, and exactly-once signup credits. L017 can now require those accounts and atomic credit holds for cohort creation and interest.
+L017 now funds authenticated cohort creation and interest through atomic holds, consumes account-backed holds at quorum, lazily refunds below-quorum expiry, and presents the non-functional Buy Credits gate. L018 can connect that gate to the single Stripe package and idempotent fulfillment path.

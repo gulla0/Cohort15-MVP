@@ -39,6 +39,9 @@ export const RPCS = Object.freeze({
   holdCredits: 'cohort15_lofi_hold_credits',
   consumeCreditHold: 'cohort15_lofi_consume_credit_hold',
   refundCreditHold: 'cohort15_lofi_refund_credit_hold',
+  createFundedCohort: 'cohort15_lofi_create_funded_cohort',
+  acceptFundedInterest: 'cohort15_lofi_accept_funded_interest',
+  settleExpiredHolds: 'cohort15_lofi_settle_expired_holds',
   fulfillPurchase: 'cohort15_lofi_fulfill_purchase',
 });
 
@@ -468,7 +471,8 @@ export function createSupabasePostgresRepositories({
       for (const code of [
         'identity_conflict', 'invalid_hold', 'hold_settled', 'duplicate_purchase',
         'duplicate_checkout_session', 'duplicate_credit_transaction', 'idempotency_mismatch',
-        'purchase_mismatch',
+        'purchase_mismatch', 'creator_user', 'duplicate_user', 'duplicate_email',
+        'expired', 'already_met',
       ]) {
         if (message.includes(code)) throw new RepositoryConflictError(code, code);
       }
@@ -591,8 +595,21 @@ export function createSupabasePostgresRepositories({
       return Boolean(row);
     },
 
-    async getCreditBalance(userId) {
+    async getCreditBalance(userId, options = {}) {
+      await client.rpc(RPCS.settleExpiredHolds, {
+        p_user_id: userId,
+        p_now: new Date(options.now ?? now()).toISOString(),
+      });
       return createSupabaseBalance(userId);
+    },
+
+    async settleExpiredCreditHolds(userId, options = {}) {
+      const payload = await client.rpc(RPCS.settleExpiredHolds, {
+        p_user_id: userId,
+        p_now: new Date(options.now ?? now()).toISOString(),
+      });
+      const row = Array.isArray(payload) ? payload[0] : payload;
+      return Object.freeze({ refunded: Number(row?.refunded_count ?? 0), balance: await createSupabaseBalance(userId) });
     },
 
     async listCreditTransactionsByUserId(userId) {
@@ -750,6 +767,40 @@ export function createSupabasePostgresRepositories({
       }
     },
 
+    async createFundedCohort(input, actor, options = {}) {
+      const timestamp = options.now ?? now();
+      const cohort = createCohort({ ...input, creatorEmail: actor.email, creatorUserId: actor.userId }, {
+        id: options.id ?? randomUUID(), now: timestamp,
+      });
+      const holdId = options.holdId ?? randomUUID();
+      await client.rpc(RPCS.settleExpiredHolds, {
+        p_user_id: actor.userId, p_now: new Date(timestamp).toISOString(),
+      });
+      try {
+        await atomicRpc(RPCS.createFundedCohort, {
+          p_cohort_id: cohort.id, p_hold_id: holdId, p_user_id: actor.userId,
+          p_email: actor.email, p_title: cohort.title, p_description: cohort.description,
+          p_category: cohort.category, p_topic: cohort.topic, p_target_audience: cohort.targetAudience,
+          p_target_skill_level: cohort.targetSkillLevel, p_additional_details: cohort.additionalDetails,
+          p_min_quorum: cohort.minQuorum, p_meeting_link: cohort.meetingLink,
+          p_creator_time_zone: cohort.creatorTimeZone, p_first_meeting_at: cohort.firstMeetingAt,
+          p_first_meeting_local: cohort.firstMeetingLocal,
+          p_meeting_duration_minutes: cohort.meetingDurationMinutes, p_recurrence: cohort.recurrence,
+          p_meeting_count: cohort.meetingCount, p_expires_at: cohort.expiresAt, p_now: cohort.createdAt,
+        });
+      } catch (error) {
+        if (`${error.payload?.message ?? error.message}`.includes('insufficient_credits')) {
+          throw new InsufficientCreditsError(await createSupabaseBalance(actor.userId), 2);
+        }
+        throw error;
+      }
+      return Object.freeze({
+        cohort: await requireCohort(cohort.id),
+        hold: await requireCreditTransaction(holdId),
+        balance: await createSupabaseBalance(actor.userId),
+      });
+    },
+
     async getCohortById(id) {
       return requireCohort(id);
     },
@@ -807,6 +858,39 @@ export function createSupabasePostgresRepositories({
         cohort,
         interestCount: result.interest_count,
         reachedQuorum: result.reached_quorum,
+      });
+    },
+
+    async acceptFundedInterest(input, actor, options = {}) {
+      const timestamp = new Date(options.now ?? now()).toISOString();
+      const interestId = options.id ?? randomUUID();
+      const holdId = options.holdId ?? randomUUID();
+      await client.rpc(RPCS.settleExpiredHolds, { p_user_id: actor.userId, p_now: timestamp });
+      let result;
+      try {
+        result = await atomicRpc(RPCS.acceptFundedInterest, {
+          p_cohort_id: input.cohortId, p_interest_id: interestId, p_hold_id: holdId,
+          p_user_id: actor.userId, p_email: actor.email, p_now: timestamp,
+        });
+      } catch (error) {
+        const message = `${error.payload?.message ?? error.message}`;
+        if (message.includes('not_found')) throw new RepositoryNotFoundError('cohort', input.cohortId);
+        if (message.includes('insufficient_credits')) {
+          throw new InsufficientCreditsError(await createSupabaseBalance(actor.userId), 1);
+        }
+        throw error;
+      }
+      const cohort = await requireCohort(input.cohortId);
+      return Object.freeze({
+        interest: mapRowToInterest({
+          id: interestId, cohort_id: input.cohortId, email: actor.email,
+          user_id: actor.userId, created_at: timestamp,
+        }),
+        cohort, interestCount: Number(result.interest_count),
+        reachedQuorum: Boolean(result.reached_quorum),
+        hold: await requireCreditTransaction(holdId),
+        consumed: Object.freeze([]),
+        balance: await createSupabaseBalance(actor.userId),
       });
     },
 

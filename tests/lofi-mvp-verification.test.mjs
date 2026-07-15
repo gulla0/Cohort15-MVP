@@ -56,12 +56,12 @@ function postForm(handler, url, values, headers = {}) {
     url,
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded', ...headers },
-    body: new URLSearchParams(values).toString(),
+    body: new URLSearchParams({ ...values, csrf: 'csrf' }).toString(),
     remoteAddress: '192.0.2.20',
   });
 }
 
-test('complete anonymous flow creates, browses, filters, reaches quorum, expires, and hides the ended link', async () => {
+test('complete account-funded flow creates, browses, reaches quorum, and hides the ended link', async () => {
   let now = new Date('2026-06-18T12:00:00.000Z');
   let id = 0;
   const store = createLofiStore();
@@ -71,13 +71,29 @@ test('complete anonymous flow creates, browses, filters, reaches quorum, expires
     randomUUID: () => `record-${++id}`,
   });
   const sent = [];
+  const actors = [
+    { id: 'user-0', email: 'creator@example.com' },
+    { id: 'user-1', email: 'person@example.com' },
+    { id: 'user-2', email: 'second@example.com' },
+  ];
+  for (const [index, actor] of actors.entries()) {
+    await repositories.provisionUser({ supabaseSubject: `subject-${index}`, email: actor.email }, { id: actor.id, grantId: `grant-${index}`, now });
+  }
+  const sessions = {
+    async authenticate(cookie) {
+      const user = actors[Number(/^user=(\d)$/u.exec(String(cookie))?.[1])];
+      return user ? { user, balance: await repositories.getCreditBalance(user.id), csrfToken: 'csrf' } : null;
+    },
+    verifyCsrf(auth, value) { return Boolean(auth && value === 'csrf'); },
+  };
   const handler = createRequestHandler({
     config,
     repositories,
+    sessions,
     emailProvider: { async send(message) { sent.push(message); } },
   });
 
-  const created = await postForm(handler, '/cohorts', submission());
+  const created = await postForm(handler, '/cohorts', submission(), { cookie: 'user=0' });
   assert.equal(created.status, 303);
   assert.equal(created.headers.location, '/cohorts/record-1');
 
@@ -90,25 +106,17 @@ test('complete anonymous flow creates, browses, filters, reaches quorum, expires
   assert.doesNotMatch((await invoke(handler, { url: '/?status=expired' })).body, /Build a launch-ready compiler/);
   assert.match((await invoke(handler, { url: '/?status=active' })).body, /Build a launch-ready compiler/);
 
-  const creatorAttempt = await postForm(handler, '/cohorts/record-1/interests', {
-    email: 'creator@example.com', website: '',
-  });
+  const creatorAttempt = await postForm(handler, '/cohorts/record-1/interests', { website: '' }, { cookie: 'user=0' });
   assert.equal(creatorAttempt.status, 409);
 
-  const first = await postForm(handler, '/cohorts/record-1/interests', {
-    email: ' Person@Example.com ', website: '',
-  });
+  const first = await postForm(handler, '/cohorts/record-1/interests', { website: '' }, { cookie: 'user=1' });
   assert.equal(first.status, 303);
-  assert.equal((await postForm(handler, '/cohorts/record-1/interests', {
-    email: 'person@example.com', website: '',
-  })).status, 409);
+  assert.equal((await postForm(handler, '/cohorts/record-1/interests', { website: '' }, { cookie: 'user=1' })).status, 409);
 
   const beforeQuorum = await invoke(handler, { url: '/cohorts/record-1' });
   assert.doesNotMatch(beforeQuorum.body, /launch-gate-room|person@example\.com/);
 
-  const second = await postForm(handler, '/cohorts/record-1/interests', {
-    email: 'second@example.com', website: '',
-  });
+  const second = await postForm(handler, '/cohorts/record-1/interests', { website: '' }, { cookie: 'user=2' });
   assert.equal(second.status, 303);
   const atQuorum = await invoke(handler, { url: '/cohorts/record-1' });
   assert.match(atQuorum.body, /Open meeting link/);

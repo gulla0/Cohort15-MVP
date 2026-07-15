@@ -7,7 +7,7 @@
 ```text
 L015 Account and credit persistence foundation (done)
   └─ L016 Magic-link accounts and signup credits (done)
-       └─ L017 Credit-gated creation and interest (not_started)
+       └─ L017 Credit-gated creation and interest (done)
             └─ L018 Stripe checkout and idempotent fulfillment (not_started)
                  └─ L019 Piece of Pie local launch gate (not_started)
                       └─ L020 Live provider setup, deployment, and verification (not_started)
