@@ -663,6 +663,7 @@ body.preview-open { overflow: hidden; }
 .auth-form { display: grid; gap: 16px; margin-top: 28px; }
 .auth-form label { display: grid; gap: 8px; font-weight: 800; }
 .auth-form input { width: 100%; }
+.auth-card .payment-note { margin: 16px 0 0; }
 .notice { margin-block: 20px; padding: 16px; border-left: 4px solid var(--accent); background: var(--background); }
 .notice p { margin: 4px 0 0; }
 

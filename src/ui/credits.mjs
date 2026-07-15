@@ -12,9 +12,9 @@ function shell(title, auth, content) {
 export function renderBuyCreditsPage({ auth = null, cancelled = false, returnTo = '/' } = {}) {
   const notice = cancelled ? '<div class="notice" role="status"><strong>Checkout was cancelled.</strong><p>No credits were added and you were not charged by Cohort15.</p></div>' : '';
   const action = auth
-    ? `<form class="auth-form" method="post" action="/credits/checkout"><input type="hidden" name="csrf" value="${escapeHtml(auth.csrfToken)}"><input type="hidden" name="returnTo" value="${escapeHtml(returnTo)}"><button type="submit">Buy 6 credits for $6</button></form>`
+    ? `<form class="auth-form" method="post" action="/credits/checkout"><input type="hidden" name="csrf" value="${escapeHtml(auth.csrfToken)}"><input type="hidden" name="returnTo" value="${escapeHtml(returnTo)}"><button class="button-link" type="submit">Buy 6 credits for $6</button></form>`
     : `<a class="button-link" href="/auth/sign-in?return_to=${encodeURIComponent(`/credits/buy?return_to=${encodeURIComponent(returnTo)}`)}">Sign in to buy credits</a>`;
-  return shell('Buy credits', auth, `<section class="auth-card"><p class="eyebrow">One-time credit package</p><h1>6 credits for $6.</h1><p class="lede">Use credits to create cohorts (2 credits) or show interest (1 credit). Card processing happens securely on Stripe Checkout.</p>${notice}${action}<p class="field-note">One-time payment. No subscription.</p></section>`);
+  return shell('Buy credits', auth, `<section class="auth-card"><p class="eyebrow">One-time credit package</p><h1>6 credits for $6.</h1><p class="lede">Use credits to create cohorts (2 credits) or show interest (1 credit). Card processing happens securely on Stripe Checkout.</p>${notice}${action}<p class="field-note payment-note">One-time payment. No subscription.</p></section>`);
 }
 
 export function renderCheckoutCompletePage({ auth, state, returnTo = '/' } = {}) {

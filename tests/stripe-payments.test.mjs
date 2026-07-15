@@ -91,6 +91,10 @@ test('checkout, webhook, and browser return share exact-once verified fulfillmen
   const home = await invoke(handler, { headers: { cookie } });
   const csrf = /name="csrf" value="([^"]+)"/u.exec(home.body)[1];
 
+  const buyCredits = await invoke(handler, { url: '/credits/buy', headers: { cookie } });
+  assert.match(buyCredits.body, /class="button-link" type="submit">Buy 6 credits for \$6/u);
+  assert.match(buyCredits.body, /class="field-note payment-note">One-time payment\. No subscription\./u);
+
   assert.equal((await postForm(handler, '/credits/checkout', { csrf: 'wrong' }, { cookie })).status, 403);
   assert.equal((await postForm(handler, '/credits/checkout', { csrf })).status, 401);
   const checkout = await postForm(handler, '/credits/checkout', { csrf, returnTo: '/cohorts/new' }, { cookie });
@@ -125,4 +129,3 @@ test('webhook rejects invalid signatures and safely ignores unknown events', asy
   assert.equal((await invoke(handler, { url: '/webhooks/stripe', method: 'POST', headers: { 'stripe-signature': signature(body) }, body })).status, 200);
   assert.equal((await invoke(handler, { url: '/webhooks/stripe', method: 'POST', headers: { 'stripe-signature': signature(body), 'content-length': String(256 * 1024 + 1) }, body })).status, 413);
 });
-
