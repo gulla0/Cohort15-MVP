@@ -64,7 +64,7 @@ Do not copy database rows into the final report. Record pass/fail and non-sensit
 - [ ] Add the exact production callback URL `https://cohort15.com/auth/callback` to allowed redirect URLs.
 - [ ] If testing on the Render-generated URL first, add only its exact HTTPS callback URL temporarily and remove it after verification if no longer needed.
 - [ ] Configure Supabase Auth custom SMTP with the existing verified Resend sender/domain so production magic links can reach non-team users and the hosted email template can be edited. Enter the Resend SMTP credential only in the Supabase dashboard, keep email-link tracking disabled, and do not paste or commit the credential.
-- [ ] Configure the magic-link email action to send the user to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`; keep the surrounding copy Cohort15-specific and do not expose internal configuration.
+- [ ] Configure both the Confirm signup and Magic Link email actions to send the user to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`; first-time users receive the confirmation template while returning users receive the magic-link template. Keep the surrounding copy Cohort15-specific and do not expose internal configuration.
 - [ ] Obtain the project's anon/public-class key for the server's auth requests. Place it directly in Render as `COHORT15_LOFI_SUPABASE_ANON_KEY`; do not commit or paste its value.
 - [ ] Request a test magic link using an operator-controlled email and confirm it returns only to an allowed callback.
 
