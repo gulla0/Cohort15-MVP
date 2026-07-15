@@ -73,7 +73,7 @@ Do not place magic-link URLs or token parameters in screenshots or evidence.
 
 - [ ] In Stripe, complete preflight in test mode first.
 - [ ] Create or confirm one product named `Cohort15 Credits` with one one-time USD $6.00 price representing six credits.
-- [ ] Record the Price ID directly in Render under the variable name implemented by L019. A Price ID is configuration, but it still does not need to appear in chat.
+- [ ] Record the Price ID directly in Render under `COHORT15_LOFI_STRIPE_PRICE_6_CREDITS`. A Price ID is configuration, but it still does not need to appear in chat.
 - [ ] Place the server-side Stripe secret key directly in Render under the implemented secret variable name.
 - [ ] Create a Stripe webhook endpoint for `https://cohort15.com/webhooks/stripe`.
 - [ ] Subscribe only to the Checkout event type required by the implemented L018 contract, normally `checkout.session.completed`.

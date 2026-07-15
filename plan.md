@@ -116,6 +116,6 @@ The only new human setup path is `docs/human-tasks/piece-of-pie-launch.md`. It d
 
 ## Next Ready Task
 
-Next ready task: L018.
+Next ready task: L019.
 
-L017 now funds authenticated cohort creation and interest through atomic holds, consumes account-backed holds at quorum, lazily refunds below-quorum expiry, and presents the non-functional Buy Credits gate. L018 can connect that gate to the single Stripe package and idempotent fulfillment path.
+L018 now provides the single Stripe package, signed webhook path, server-retrieved browser reconciliation, and exactly-once purchase credits. L019 can close the cohesive local launch gate and regression suite.

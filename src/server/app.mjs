@@ -6,6 +6,7 @@ import { loadRuntimeConfig } from '../config/runtime.mjs';
 import { createInjectedTestAuth, createSupabaseMagicLinkAuth } from '../auth/supabase.mjs';
 import { createSessionService, safeReturnPath } from '../auth/session.mjs';
 import { createResendEmailProvider } from '../email/resend.mjs';
+import { createStripeClient, StripeProviderError, verifyStripeSignature } from '../payments/stripe.mjs';
 import { DomainValidationError } from '../domain/validation.mjs';
 import { createLofiStore } from '../persistence/store.mjs';
 import {
@@ -16,6 +17,7 @@ import { createCohortService, HoneypotSubmissionError } from '../services/create
 import { createEventBrowsingService } from '../services/event-browsing.mjs';
 import { createFeedbackService } from '../services/feedback.mjs';
 import { createShowInterestService, InterestHoneypotSubmissionError } from '../services/show-interest.mjs';
+import { createPurchaseService, PurchaseVerificationError } from '../services/purchases.mjs';
 import { createNotificationService } from '../services/notifications.mjs';
 import {
   clientIpFromRequest, createRollingWindowLimiter, RateLimitExceededError,
@@ -23,6 +25,7 @@ import {
 import { renderCreateCohortPage } from '../ui/create-cohort.mjs';
 import { renderHomePage } from '../ui/home.mjs';
 import { renderSignInPage } from '../ui/auth.mjs';
+import { renderBuyCreditsPage, renderCheckoutCompletePage } from '../ui/credits.mjs';
 import { renderCohortDetailPage } from '../ui/cohorts.mjs';
 import { renderCohortSocialImage, renderCohortSocialPng } from '../ui/social-image.mjs';
 import {
@@ -33,6 +36,7 @@ import {
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const CREATE_COHORT_BODY_LIMIT_BYTES = 128 * 1024;
 const FEEDBACK_BODY_LIMIT_BYTES = 32 * 1024;
+const STRIPE_WEBHOOK_BODY_LIMIT_BYTES = 256 * 1024;
 
 export function createRuntimeRepositories(config, options = {}) {
   if (config.isProduction) {
@@ -107,6 +111,28 @@ async function readJsonBody(req, maximumBytes = 32 * 1024) {
     error.code = 'malformed_json';
     throw error;
   }
+}
+
+async function readRawBody(req, maximumBytes) {
+  const contentLength = Number(req.headers?.['content-length']);
+  if (Number.isFinite(contentLength) && contentLength > maximumBytes) {
+    const error = new Error('Request body too large');
+    error.code = 'body_too_large';
+    throw error;
+  }
+  let size = 0;
+  const chunks = [];
+  for await (const chunk of req) {
+    const buffer = Buffer.from(chunk);
+    size += buffer.length;
+    if (size > maximumBytes) {
+      const error = new Error('Request body too large');
+      error.code = 'body_too_large';
+      throw error;
+    }
+    chunks.push(buffer);
+  }
+  return Buffer.concat(chunks);
 }
 
 function sameOrigin(req, config) {
@@ -188,6 +214,15 @@ export function createRequestHandler(options = {}) {
     now: options.now,
     randomBytes: options.randomBytes,
   });
+  const stripe = options.stripe ?? (config.stripeSecretKey
+    ? createStripeClient({ secretKey: config.stripeSecretKey, fetchImpl: options.fetchImpl })
+    : null);
+  const purchases = options.purchases ?? (stripe && config.stripePrice6Credits
+    ? createPurchaseService({
+      repositories, stripe, priceId: config.stripePrice6Credits, appUrl: config.appUrl,
+      randomUUID: options.randomUUID, now: options.now,
+    })
+    : null);
 
   async function sendInterestError(res, cohortId, status, error, headers = {}, auth = null) {
     try {
@@ -308,6 +343,84 @@ export function createRequestHandler(options = {}) {
       }
       await sessions.destroy(req.headers?.cookie);
       redirect(res, 303, '/', { 'set-cookie': sessions.clearCookie() });
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/credits/buy') {
+      const returnTo = safeReturnPath(url.searchParams.get('return_to') ?? '/');
+      send(res, 200, 'text/html; charset=utf-8', renderBuyCreditsPage({
+        auth: await currentAuth(), cancelled: url.searchParams.get('cancelled') === '1', returnTo,
+      }));
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/credits/checkout') {
+      const mediaType = String(req.headers?.['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      if (mediaType !== 'application/x-www-form-urlencoded') {
+        send(res, 415, 'text/plain; charset=utf-8', 'Unsupported media type');
+        return;
+      }
+      if (!sameOrigin(req, config)) {
+        send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+        return;
+      }
+      const auth = await currentAuth();
+      if (!auth) {
+        send(res, 401, 'text/plain; charset=utf-8', 'Authentication required');
+        return;
+      }
+      try {
+        const input = await readFormBody(req);
+        if (!sessions.verifyCsrf(auth, input.csrf)) {
+          send(res, 403, 'text/plain; charset=utf-8', 'Forbidden');
+          return;
+        }
+        if (!purchases) throw new StripeProviderError('payments_unavailable');
+        const checkout = await purchases.startCheckout(auth.user, safeReturnPath(input.returnTo ?? '/'));
+        redirect(res, 303, checkout.checkoutUrl);
+      } catch {
+        send(res, 502, 'text/html; charset=utf-8', renderBuyCreditsPage({ auth }));
+      }
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/credits/checkout/complete') {
+      const auth = await currentAuth();
+      const returnTo = safeReturnPath(url.searchParams.get('return_to') ?? '/');
+      if (!auth) {
+        redirect(res, 303, `/auth/sign-in?return_to=${encodeURIComponent(url.pathname + url.search)}`);
+        return;
+      }
+      let state = 'failure';
+      try {
+        if (!purchases) throw new StripeProviderError('payments_unavailable');
+        await purchases.reconcileSession(url.searchParams.get('session_id') ?? '', auth.user.id);
+        state = 'paid';
+      } catch (error) {
+        if (error instanceof PurchaseVerificationError && error.code === 'session_not_paid_or_mismatched') state = 'pending';
+      }
+      const refreshed = await sessions.authenticate(req.headers?.cookie);
+      send(res, state === 'failure' ? 400 : 200, 'text/html; charset=utf-8', renderCheckoutCompletePage({
+        auth: refreshed ?? auth, state, returnTo,
+      }));
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/webhooks/stripe') {
+      try {
+        const rawBody = await readRawBody(req, STRIPE_WEBHOOK_BODY_LIMIT_BYTES);
+        verifyStripeSignature(rawBody, req.headers?.['stripe-signature'], config.stripeWebhookSecret, { now: options.now?.() });
+        const event = JSON.parse(rawBody.toString('utf8'));
+        if (!purchases) throw new StripeProviderError('payments_unavailable');
+        await purchases.handleEvent(event);
+        send(res, 200, 'application/json; charset=utf-8', JSON.stringify({ received: true }));
+      } catch (error) {
+        if (error?.code === 'body_too_large') send(res, 413, 'text/plain; charset=utf-8', 'Payload too large');
+        else if (error instanceof StripeProviderError && error.code === 'invalid_signature') send(res, 400, 'text/plain; charset=utf-8', 'Invalid signature');
+        else if (error instanceof SyntaxError || (error instanceof PurchaseVerificationError && error.code === 'invalid_event')) send(res, 400, 'text/plain; charset=utf-8', 'Invalid event');
+        else if (error instanceof PurchaseVerificationError) send(res, 200, 'application/json; charset=utf-8', JSON.stringify({ received: true }));
+        else send(res, 500, 'text/plain; charset=utf-8', 'Webhook processing failed');
+      }
       return;
     }
 

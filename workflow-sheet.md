@@ -2,19 +2,19 @@
 
 ## Current Phase
 
-Day 1 — Identity and Ledger
+Day 3 — Launch Gate
 
 ## Current Critical Path
 
 L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L018.
+Next ready task: L019.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L017 | L016 now provides verified accounts, secure sessions, CSRF, and exactly-once signup credits | Require authenticated credit holds for cohort creation and interest, then consume or refund them through quorum and expiry. |
+| L019 | L018 now provides verified Checkout, signed webhook handling, and idempotent purchase fulfillment | Verify and refine the complete local account, credit, payment, and funded-use flow. |
 
 ## Known Parallelism
 

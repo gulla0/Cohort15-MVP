@@ -221,3 +221,14 @@ Verification: `npm run check` passed with 93 tests and 6 aligned active tasks. L
 - Added focused product-credit, concurrency, expiry, insufficient-balance, CSRF, privacy, notification, Supabase adapter, migration, and end-to-end coverage.
 
 Verification: focused L017 suites passed with 36 tests; authenticated local browser create/interest/quorum smoke passed with no console errors; full `npm run check` passed with 94 tests and 6 aligned active tasks. L018 is next.
+
+## 2026-07-15 — L018 Stripe checkout and idempotent fulfillment
+
+- Added fixed six-credit/$6 Stripe Checkout creation with a pending purchase written first, configured Price ID, server-owned user/purchase metadata, safe fixed origins, and purchase-scoped provider idempotency.
+- Added raw 256 KiB webhook handling with timing-safe Stripe HMAC validation and five-minute timestamp tolerance.
+- Added shared transaction-safe fulfillment for signed completed-paid events and server-retrieved authenticated browser returns, preserving exact-once credits under concurrency, retry, and refresh.
+- Added Buy Credits, checkout, cancellation, and completion routes/UI with auth, CSRF, ownership, mismatch, and privacy boundaries.
+- Extended production runtime validation, `.env.example`, and `render.yaml` with the exact three Stripe configuration variables and kept all values non-secret.
+- Added focused fake-provider payment coverage and reconciled deferred-payment regression tests, workflow status, knowledge pointers, and the indexed human launch checklist.
+
+Verification: focused payment/runtime suites passed with 10 tests; full `npm run check` passed with 98 tests and 6 aligned active tasks. L019 is next.

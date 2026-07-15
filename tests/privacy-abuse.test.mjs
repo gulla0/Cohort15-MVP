@@ -118,11 +118,10 @@ test('honeypots, request guards, public responses, and logs preserve private val
   }
 });
 
-test('payment, dashboard, admin, upload, and social routes remain absent', async () => {
+test('dashboard, admin, upload, and social routes remain absent after payment is added', async () => {
   const handler = createRequestHandler({ config });
   const absentPaths = [
-    '/dashboard', '/credits', '/credits/buy',
-    '/payments', '/stripe/webhook', '/admin', '/admin/expire-cohorts', '/images',
+    '/dashboard', '/credits', '/payments', '/stripe/webhook', '/admin', '/admin/expire-cohorts', '/images',
     '/uploads', '/social', '/social/publish', '/cohorts/private-1/edit',
   ];
   for (const url of absentPaths) {
@@ -131,4 +130,7 @@ test('payment, dashboard, admin, upload, and social routes remain absent', async
       assert.equal(response.status, 404, `${method} ${url} should remain absent`);
     }
   }
+  assert.equal((await invoke(handler, { url: '/credits/buy' })).status, 200);
+  assert.equal((await invoke(handler, { url: '/credits/buy', method: 'POST' })).status, 404);
+  assert.equal((await invoke(handler, { url: '/webhooks/stripe' })).status, 404);
 });

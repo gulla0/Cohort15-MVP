@@ -173,7 +173,7 @@
     {
       "id": "L018",
       "title": "Implement Stripe checkout and idempotent fulfillment",
-      "status": "not_started",
+      "status": "done",
       "phase": "Day 2 — Product Gate and Payment",
       "dependencies": [
         "L017"
@@ -220,8 +220,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when local/fake-provider checkout and fulfillment are money-safe and tested; leave real dashboard configuration and live payment to L020.",
-      "evidence": "Pending.",
-      "notes": "The incomplete browser-return payment concepts on main are reference material only; signed webhook reliability is mandatory here."
+      "evidence": "Implemented the fixed six-credit/$6 Stripe Checkout adapter, pending-purchase creation, server-owned metadata and price selection, raw-body HMAC verification with five-minute tolerance and 256 KiB limit, shared webhook/browser-return fulfillment, authenticated payment UI, production runtime/template configuration, and focused fake-provider concurrency, replay, mismatch, privacy, and failure tests. npm run check passed with 98 tests on 2026-07-15 EDT.",
+      "notes": "Completed without live Stripe calls, dashboard configuration, card handling, or provider payload persistence. Real provider setup and payment verification remain in the indexed L020 human checklist."
     },
     {
       "id": "L019",

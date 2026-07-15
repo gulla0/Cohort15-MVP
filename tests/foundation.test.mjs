@@ -40,7 +40,7 @@ test('Piece of Pie home renders the branded foundation and account entry point',
   assert.doesNotMatch(html, /Stripe|Dashboard|event image/i);
 });
 
-test('shell exposes home, authentication entry, styles, health, and keeps deferred routes absent', async () => {
+test('shell exposes home, authentication and credit entry, styles, health, and keeps deferred routes absent', async () => {
   const handler = createRequestHandler({ config });
 
   const home = await invoke(handler);
@@ -69,7 +69,12 @@ test('shell exposes home, authentication entry, styles, health, and keeps deferr
   assert.equal(signIn.status, 200);
   assert.match(signIn.body, /Email me a sign-in link/);
 
-  for (const legacyPath of ['/credits/buy', '/dashboard', '/admin/expire-cohorts']) {
+  const buyCredits = await invoke(handler, { url: '/credits/buy' });
+  assert.equal(buyCredits.status, 200);
+  assert.match(buyCredits.body, /6 credits for \$6/u);
+  assert.match(buyCredits.body, /Sign in to buy credits/u);
+
+  for (const legacyPath of ['/dashboard', '/admin/expire-cohorts']) {
     const response = await invoke(handler, { url: legacyPath });
     assert.equal(response.status, 404);
   }

@@ -110,6 +110,21 @@ export function loadRuntimeConfig(env = process.env) {
       'COHORT15_LOFI_SUPABASE_ANON_KEY',
       isProduction,
     ),
+    stripeSecretKey: requiredProductionValue(
+      env.COHORT15_LOFI_STRIPE_SECRET_KEY,
+      'COHORT15_LOFI_STRIPE_SECRET_KEY',
+      isProduction,
+    ),
+    stripePrice6Credits: requiredProductionValue(
+      env.COHORT15_LOFI_STRIPE_PRICE_6_CREDITS,
+      'COHORT15_LOFI_STRIPE_PRICE_6_CREDITS',
+      isProduction,
+    ),
+    stripeWebhookSecret: requiredProductionValue(
+      env.COHORT15_LOFI_STRIPE_WEBHOOK_SECRET,
+      'COHORT15_LOFI_STRIPE_WEBHOOK_SECRET',
+      isProduction,
+    ),
     resendApiKey: requiredProductionValue(
       env.COHORT15_LOFI_RESEND_API_KEY,
       'COHORT15_LOFI_RESEND_API_KEY',
@@ -138,6 +153,9 @@ export function listRuntimeEnvVars() {
     'COHORT15_LOFI_SUPABASE_URL',
     'COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY',
     'COHORT15_LOFI_SUPABASE_ANON_KEY',
+    'COHORT15_LOFI_STRIPE_SECRET_KEY',
+    'COHORT15_LOFI_STRIPE_PRICE_6_CREDITS',
+    'COHORT15_LOFI_STRIPE_WEBHOOK_SECRET',
     'COHORT15_LOFI_RESEND_API_KEY',
     'COHORT15_LOFI_EMAIL_FROM',
     'COHORT15_LOFI_EMAIL_REPLY_TO',

@@ -6,7 +6,7 @@ The existing landing page, cohort directory, creation and interest flow, quorum 
 
 ## Setup Status
 
-Planning and task setup for the Piece of Pie branch is complete. The account, credit, magic-link authentication, and secure session foundation is implemented; credit-gating the cohort actions is next.
+Planning and task setup for the Piece of Pie branch is complete. Accounts, credit-funded product actions, and fake-provider Stripe Checkout with exactly-once fulfillment are implemented; cohesive local launch verification is next.
 
 - Canonical product rules: `docs/cohort15-piece-of-pie-mvp-spec.md`
 - Historical lofi baseline: `docs/cohort15-lofi-mvp-spec.md`
@@ -16,7 +16,7 @@ Planning and task setup for the Piece of Pie branch is complete. The account, cr
 - Current status: `agent/progress/task-status.md`
 - Human/provider continuity: `docs/human-tasks/README.md`
 
-Next ready task: L018.
+Next ready task: L019.
 
 A fresh user-facing chat should start only from `start.txt`. The router reads the canonical artifacts above and transitions approved planned work to the implementation manager without requiring prior chat history.
 

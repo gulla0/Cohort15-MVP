@@ -23,6 +23,12 @@ services:
         sync: false
       - key: COHORT15_LOFI_SUPABASE_ANON_KEY
         sync: false
+      - key: COHORT15_LOFI_STRIPE_SECRET_KEY
+        sync: false
+      - key: COHORT15_LOFI_STRIPE_PRICE_6_CREDITS
+        sync: false
+      - key: COHORT15_LOFI_STRIPE_WEBHOOK_SECRET
+        sync: false
       - key: COHORT15_LOFI_RESEND_API_KEY
         sync: false
       - key: COHORT15_LOFI_EMAIL_FROM

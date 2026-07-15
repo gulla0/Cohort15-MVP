@@ -236,3 +236,14 @@ Verification completed with `npm run check` and 93 passing tests. L017 is next.
 - Completed local in-app browser smoke for creator funding, participant funding, quorum unlock, balance updates, private identity, and a clean console.
 
 Verification completed with `npm run check` and 94 passing tests. L018 is next.
+
+## 2026-07-15 — L018 Stripe checkout and idempotent fulfillment
+
+- Added a dependency-free Stripe adapter for fixed-price Checkout creation, server-side session retrieval, and timing-safe raw-body webhook signature verification with a five-minute tolerance.
+- Added a single six-credit/$6 purchase service that persists pending purchases before provider calls and fixes price, quantity, metadata, user, amount, currency, redirect origins, and provider idempotency server-side.
+- Routed signed webhook delivery and authenticated browser-return reconciliation through the existing atomic fulfillment primitive so concurrent delivery, retries, and refreshes add credits once.
+- Added public Buy Credits UI, authenticated CSRF-protected checkout, cancellation messaging, and paid/pending/failure completion states without handling card data or exposing private identity.
+- Added the three Stripe production variables to runtime validation and non-secret templates, while leaving dashboard configuration and live payment verification in the indexed human task.
+- Added focused fake-provider adapter, signature, route, replay, concurrency, body-limit, privacy, and failure tests and updated obsolete deferred-payment regression assertions.
+
+Verification completed with `npm run check` and 98 passing tests. L019 is next.

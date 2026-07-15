@@ -8,7 +8,7 @@
 L015 Account and credit persistence foundation (done)
   └─ L016 Magic-link accounts and signup credits (done)
        └─ L017 Credit-gated creation and interest (done)
-            └─ L018 Stripe checkout and idempotent fulfillment (not_started)
+            └─ L018 Stripe checkout and idempotent fulfillment (done)
                  └─ L019 Piece of Pie local launch gate (not_started)
                       └─ L020 Live provider setup, deployment, and verification (not_started)
 ```
@@ -34,7 +34,7 @@ L015 Account and credit persistence foundation (done)
 ### L017 — Credit-gate cohort creation and interest
 
 - Depends on: L016
-- Status: not_started
+- Status: done
 - Owns: authenticated mutation boundary, account-derived private emails, atomic holds, quorum consumption, lazy expiry refunds, insufficient-credit notices
 - Delivers: real two-credit creation and one-credit interest utility while preserving public lofi behavior and legacy data
 - Stops before: Stripe checkout
@@ -42,7 +42,7 @@ L015 Account and credit persistence foundation (done)
 ### L018 — Implement Stripe checkout and idempotent fulfillment
 
 - Depends on: L017
-- Status: not_started
+- Status: done
 - Owns: one six-credit/$6 package, Checkout Session creation, raw signed webhook, verified return reconciliation, shared fulfillment, payment UI
 - Delivers: exactly-once verified purchase credits with no card handling or browser-controlled pricing
 - Stops before: live Stripe/Render/Supabase dashboard configuration

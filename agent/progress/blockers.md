@@ -1,6 +1,6 @@
 # Blockers
 
-No known blocker prevents local implementation. L018 is ready after the verified L017 funded product-action lifecycle.
+No known blocker prevents local implementation. L019 is ready after the verified L018 payment lifecycle.
 
 The user reported the existing Supabase project, Render service, `cohort15.com` domain, Resend/email notification setup, and related lofi human work complete. Treat those as retained infrastructure and verify them through `docs/human-tasks/piece-of-pie-launch.md`; do not recreate them.
 

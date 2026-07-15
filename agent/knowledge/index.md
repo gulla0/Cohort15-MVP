@@ -46,9 +46,9 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 | Area | Current files | Planned owner |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016 auth and L017 funded mutations complete; L018–L019 extend payment/launch behavior |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016 auth, L017 funded mutations, and L018 payment routes complete; L019 owns launch verification |
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L015 foundation complete; L016–L018 consume it |
-| Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L015 ledger and L017 atomic funded actions complete; L018 adds fulfillment integration |
+| Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L015 ledger, L017 funded actions, and L018 purchase fulfillment integration complete |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L017 complete |
 | Browse/detail | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | Preserve; L016–L019 limited integration |
 | Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L017 complete |
@@ -56,7 +56,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 | Feedback | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs` | Preserve/regression only |
 | Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | Preserve/regression only |
 | Authentication | `src/auth/supabase.mjs`, `src/auth/session.mjs`, `src/ui/auth.mjs`, `src/server/app.mjs` | L016 complete; L017 consumes session/CSRF context for funded mutations |
-| Future payment | Does not exist on this branch yet | L018 creates bounded Stripe/purchase modules |
+| Payment | `src/payments/stripe.mjs`, `src/services/purchases.mjs`, `src/ui/credits.mjs`, `src/server/app.mjs` | Fixed Checkout package, signed webhook, verified return, and shared idempotent fulfillment complete |
 
 ## Reusable Decisions
 
@@ -83,7 +83,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 ## Current Pointers
 
-- Next task: `agent/progress/task-status.md` (L018).
+- Next task: `agent/progress/task-status.md` (L019).
 - Current blockers: `agent/progress/blockers.md`.
 - Human/provider continuity and new actions: `docs/human-tasks/README.md`.
 - Active product source: `docs/cohort15-piece-of-pie-mvp-spec.md`.
