@@ -187,3 +187,16 @@ Full `npm run check` passed with 75 tests. Commit and push are approved by the u
 - Corrected stale blocker guidance and replaced machine-specific migration paths in human-task documents with repository-relative paths.
 
 Full `npm run check` passed with 75 tests. L010 remains the next ready product task.
+
+## 2026-07-14 — Piece of Pie setup handoff
+
+- Created `codex/piece-of-pie` from the current lofi branch rather than merging the older production MVP on `main`.
+- Confirmed the goal is a three-day, publicly usable payment-gated MVP for the Gimbalabs Builder Pie requirement.
+- Locked the minimum flow: Supabase email magic-link account, exactly-once two-credit signup grant, two-credit creation, one-credit interest, hold/consume/refund lifecycle, one six-credit/$6 Stripe package, and signed idempotent fulfillment.
+- Preserved public browsing, schedules, meeting-link timing, research, feedback, Resend notifications, rate limits, privacy boundaries, and existing anonymous data.
+- Reset the active ledger to L015–L020 and arranged it across identity/ledger, product gate/payment, and local/live launch phases.
+- Recorded the user's existing Supabase, Render, `cohort15.com`, Resend/email, analytics, and production setup as retained infrastructure rather than work to recreate.
+- Added one indexed human checklist for additive Supabase Auth/migration, Stripe, Render branch/environment, deployment, live payment/use proof, and hackathon evidence.
+- Made `start.txt` the sole fresh-chat entry; the repository artifacts contain the complete goal, constraints, next task, and provider handoff without relying on this conversation.
+
+No product code was implemented in this setup wave. L015 is the first ready implementation task.

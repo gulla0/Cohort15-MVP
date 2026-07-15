@@ -1,34 +1,33 @@
-# Lofi MVP Workflow Sheet
+# Piece of Pie MVP Workflow Sheet
 
 ## Current Phase
 
-Launch Verification
+Day 1 — Identity and Ledger
 
 ## Current Critical Path
 
-L000 → L001 → L002 → L003 → L004 → L005 → L006 → L007 → L008 → L009 → L010
+L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L010.
+Next ready task: L015.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L010 | L009 is complete from user-reported human setup and every current input exists | Run production smoke verification against the live `cohort15.com` deployment before closing the launch gate. |
-
-L011–L014, the user-approved Research & Field Notes, product-video, formation-field-note, and first-party feedback waves, are complete. L014 does not close L010.
+| L015 | The canonical Piece of Pie specification and all current persistence/migration inputs exist | Build the additive account/session/ledger/purchase boundary before any route or UI work. |
 
 ## Known Parallelism
 
-None. The lofi critical path is intentionally linear so each implementation chat has one unambiguous next task and shared server/UI files never receive concurrent edits.
+None. The three-day path is intentionally linear because persistence, server routes, shared UI, production configuration, and launch verification are tightly coupled.
 
 ## Known Coupling
 
 | Tasks / areas | Why coupled | Sequencing |
 |---|---|---|
-| L001 and L002 | Persistence must encode the final domain fields and constraints. | Complete L001 first. |
-| L003, L004, L005 | All touch routes and public cohort UI. | Integrate creation and browsing before interest. |
-| L005 and L006 | Quorum notifications depend on accepted-interest and activation semantics. | Complete L005 first. |
-| L007 and L009 | Provider setup depends on finalized environment names and deployment config. | Complete L007/L008 before dashboard and DNS work. |
+| L015 and L016 | Auth provisioning depends on atomic user/grant/session persistence. | Complete L015 first. |
+| L016 and L017 | Credit-funded mutations require a verified user and CSRF-protected session. | Complete L016 first. |
+| L017 and L018 | The payment gate must lead into a working credit-funded product action. | Complete product credit semantics before Stripe. |
+| L018 and L019 | Launch verification must cover the final checkout/webhook contract and UI. | Complete Stripe locally before the full gate. |
+| L019 and L020 | Human provider mutation is safe only after local code/config verification. | Complete L019 before dashboard or production changes. |
 
-`tasks.json` remains canonical.
+`tasks.json` remains canonical. Every fresh chat begins with `start.txt`.

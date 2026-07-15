@@ -1,11 +1,15 @@
 # Human Tasks
 
-This directory is the only location for external dashboard, credential, DNS, operational-decision, and production-verification instructions.
+This directory is the only location for external dashboard, credential, DNS, migration, operational-decision, hackathon-evidence, and production-verification instructions.
 
-## Current Lofi MVP Task
+## Current Piece of Pie Task
 
-- `lofi-mvp-launch.md` — create isolated Supabase, Render, and Resend resources; verify the generated deployment; replace the Netlify site at `cohort15.com`; run non-secret launch checks.
-- `feedback-production-migration.md` — apply the first-party feedback table migration in the isolated Supabase project and verify production feedback capture after deployment.
+- `piece-of-pie-launch.md` — preserve the existing Supabase, Render, `cohort15.com`, Resend/email, analytics, and production data while adding Supabase Auth, the additive account/credit/payment migration, Stripe Checkout/webhook configuration, Piece of Pie deployment, live payment/use verification, and non-secret Builder Pie evidence checks.
+
+## Existing Lofi Tasks
+
+- `lofi-mvp-launch.md` — historical checklist that created the isolated Supabase, Render, Resend, and `cohort15.com` baseline; the user reported this setup complete.
+- `feedback-production-migration.md` — apply the first-party feedback table migration in the isolated Supabase project and verify production feedback capture after deployment if it is not already installed.
 
 ## Repository Rule
 

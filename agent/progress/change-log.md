@@ -168,6 +168,16 @@ Verification: `node --test tests/research.test.mjs` passed with 6 tests; full `n
 
 Verification: `npm run check` passed with 75 tests and 15 aligned tasks.
 
+## 2026-07-14 — Piece of Pie MVP setup
+
+- Added `docs/cohort15-piece-of-pie-mvp-spec.md` as the current product authority for accounts, free credits, credit lifecycle, Stripe payment, security/privacy, provider continuity, and launch acceptance.
+- Replaced the active task ledger and readable graph/status views with the linear L015–L020 three-day implementation and launch path.
+- Updated README, plan, workflow sheet, knowledge routes, blockers, and `start.txt` for a complete fresh-chat handoff.
+- Added and indexed `docs/human-tasks/piece-of-pie-launch.md`, preserving completed lofi provider work and separating all new dashboard, secret, migration, deployment, live-payment, and evidence actions.
+- Kept all product source code unchanged; implementation begins with L015.
+
+Verification: `npm run check` passed with 75 tests, 6 aligned active tasks, 0 indexed feedback issues, and 3 indexed human-task files.
+
 ## 2026-07-14 — Agent workflow drift prevention
 
 - Added `agent-starters/startWorkflowMaintenanceManager.txt` and routed workflow/knowledge maintenance through `start.txt`.

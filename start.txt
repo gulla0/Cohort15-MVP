@@ -6,6 +6,8 @@ Routing normally means a role transition within this same user-facing agent/sess
 
 Workers should never be the user's direct entry point. Workers are managed by manager agents and report back to the manager, not to the user.
 
+Treat the repository artifacts read below as a complete fresh-chat handoff. Do not require prior conversation when the product goal, next task, and constraints are available in those artifacts.
+
 ==================================================
 PRIMARY OBJECTIVE
 ==================================================

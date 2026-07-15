@@ -1,152 +1,75 @@
-# Cohort15 Lofi MVP Atomic Task Graph
+# Cohort15 Piece of Pie MVP Atomic Task Graph
 
-`tasks.json` is canonical. This file is the readable dependency view.
+`tasks.json` is canonical. This file is the readable dependency view for the active three-day build. Completed lofi task history remains in Git and progress logs.
 
 ## Execution Graph
 
 ```text
-L000 Clean lofi application shell (done)
-  └─ L001 Lofi domain and validation (done)
-       └─ L002 Isolated persistence and Supabase migration (done)
-            └─ L003 Anonymous cohort creation (done)
-                 └─ L004 Landing, listing, and lifecycle views (done)
-                      └─ L005 Anonymous interest and quorum unlock (done)
-                           └─ L006 Resend notifications (done)
-                                └─ L007 Isolated production config/deployment (done)
-                                     └─ L008 Privacy, abuse, and end-to-end verification (done)
-                                          ├─ L009 Human provider setup and deployment (done)
-                                          │    └─ L010 Production smoke test (not_started)
-                                          └─ L011 Research & Field Notes pages (done)
-                                               └─ L012 Original product thesis video update (done)
-                                                    └─ L013 Small-group formation field note (done)
-                                                         └─ L014 First-party feedback capture (done)
+L015 Account and credit persistence foundation (not_started)
+  └─ L016 Magic-link accounts and signup credits (not_started)
+       └─ L017 Credit-gated creation and interest (not_started)
+            └─ L018 Stripe checkout and idempotent fulfillment (not_started)
+                 └─ L019 Piece of Pie local launch gate (not_started)
+                      └─ L020 Live provider setup, deployment, and verification (not_started)
 ```
 
 ## Atomic Task Contracts
 
-### L000 — Establish the clean lofi application shell
+### L015 — Add account and credit persistence foundation
 
 - Depends on: none
-- Status: done
-- Owned: minimal config/server/UI shell, focused tests, legacy runtime deletion, lofi deployment placeholders
-- Delivered: runnable home/styles/health shell with auth, credits, payments, dashboards, social, images, old persistence/domain/services, migrations, runbooks, and tests removed
-- Stops before: lofi domain and product behavior
+- Status: not_started
+- Owns: users, hashed sessions, immutable ledger, purchases, Stripe events, nullable account links, additive migration, local/Supabase atomic primitives
+- Delivers: concurrency-safe account provisioning, two-credit grant idempotency, balances, holds, consumes, refunds, and purchase fulfillment boundaries
+- Stops before: authentication routes, product gating, and Stripe HTTP calls
 
-### L001 — Define the lofi domain and validation policy
+### L016 — Implement magic-link accounts and signup credits
 
-- Depends on: L000
-- Status: done
-- Owns: domain constants, models, validation, focused tests
-- Delivers: exact records/enums, all validation limits, seven-day lifecycle, quorum 1–15, recurrence/month-end/DST behavior, exact approved hosts, public schedule serialization, and final-meeting link cutoff
-- Stops before: persistence and HTTP integration
+- Depends on: L015
+- Status: not_started
+- Owns: Supabase magic-link adapter, app sessions, CSRF, auth routes/UI, shared signed-in navigation
+- Delivers: verified email account creation, exactly-once two-credit grant, secure eight-hour session, safe sign-out and return paths
+- Stops before: changing cohort creation/interest semantics
 
-### L002 — Add isolated lofi persistence and Supabase migration
+### L017 — Credit-gate cohort creation and interest
 
-- Depends on: L001
-- Owns: lofi repositories, Supabase mapping, `cohort15_lofi_*` migration, persistence tests
-- Delivers: three isolated lofi tables, private emails, atomic concurrent interest/quorum transition, duplicate/idempotency constraints, and notification outcome storage; no rate-limit table
-- Stops before: public forms and live provider setup
+- Depends on: L016
+- Status: not_started
+- Owns: authenticated mutation boundary, account-derived private emails, atomic holds, quorum consumption, lazy expiry refunds, insufficient-credit notices
+- Delivers: real two-credit creation and one-credit interest utility while preserving public lofi behavior and legacy data
+- Stops before: Stripe checkout
 
-### L003 — Build anonymous cohort creation
+### L018 — Implement Stripe checkout and idempotent fulfillment
 
-- Depends on: L002
-- Status: done
-- Owns: create service/route/form, timezone capture, honeypot, five-per-hour IP limit, tests
-- Delivers: no-auth creation, documented validation/status responses, hashed-IP five-success rolling limit, honeypot handling, and 303 redirect
-- Stops before: interest and live email
+- Depends on: L017
+- Status: not_started
+- Owns: one six-credit/$6 package, Checkout Session creation, raw signed webhook, verified return reconciliation, shared fulfillment, payment UI
+- Delivers: exactly-once verified purchase credits with no card handling or browser-controlled pricing
+- Stops before: live Stripe/Render/Supabase dashboard configuration
 
-### L004 — Build the landing page, listing, and lifecycle views
+### L019 — Complete the Piece of Pie local launch gate
 
-- Depends on: L003
-- Status: done
-- Owns: supplied landing-page adaptation, public browsing, filters, sorting, local-time rendering, safe link display, tests
-- Delivers: full listing on `/`, All/Active/Expired filters, active-first default, persistent expired posts, and meeting schedules visible throughout
-- Stops before: form mutations
+- Depends on: L018
+- Status: not_started
+- Owns: cohesive balance/payment-gate UX, production runtime contract, end-to-end and regression verification, launch-blocking fixes
+- Delivers: locally verified account → grant → use → payment gate → purchase → use flow with existing lofi features intact
+- Stops before: human provider mutations and real payment
 
-### L005 — Build anonymous interest and quorum unlock
+### L020 — Configure, deploy, and verify the live payment MVP
 
-- Depends on: L004
-- Status: done
-- Owns: interest service/route/form, duplicate and creator exclusion, honeypot, ten-per-hour IP limit, tests
-- Delivers: email-only interest, atomic conflict handling, hashed-IP ten-success rolling limit, and immediate public link unlock at quorum
-- Stops before: notification delivery
-
-### L006 — Add Resend confirmation and quorum notifications
-
-- Depends on: L005
-- Status: done
-- Owns: email adapter/composition/config/integration, delivery outcomes, tests
-- Delivers: creator confirmation, participant confirmation, quorum notifications
-- Stops before: live Resend dashboard configuration
-
-### L007 — Isolate lofi production configuration and deployment
-
-- Depends on: L006
-- Status: done
-- Owns: runtime config, startup, `.env.example`, `render.yaml`, deployment docs/tests
-- Delivers: finalized lofi-only Supabase/Resend environment contract
-- Stops before: provider or DNS changes
-
-### L008 — Complete lofi privacy, abuse, and end-to-end verification
-
-- Depends on: L007
-- Status: done
-- Owns: integration tests, privacy/abuse/concurrency coverage, launch-blocking fixes, local smoke verification
-- Delivers: local launch gate with `npm run check` passing
-- Stops before: external deployment
-
-### L009 — Create isolated provider resources and deploy
-
-- Depends on: L008
-- Status: done
-- Owns: human dashboard and DNS actions documented in `docs/human-tasks/lofi-mvp-launch.md`
-- Delivers: separate Supabase project, Render service, Resend setup, and `cohort15.com` cutover
-- Stops on: exact provider blocker or verified deployment
-
-### L010 — Run production lofi smoke test
-
-- Depends on: L009
-- Owns: deployed-flow verification and closeout evidence
-- Delivers: verified production flow, emails, database isolation, analytics, HTTPS/domain behavior
-- Stops on: passing launch gate or documented launch blocker
-
-### L011 — Add public Research & Field Notes editorial pages
-
-- Depends on: L008
-- Status: done
-- Owns: research index/article rendering, public routes/navigation/styles, focused tests
-- Delivers: `/research`, a stable public demand-research synthesis, and a safe content model for later field notes, video updates, and external publications
-- Stops before: publishing any YouTube entry without the user-supplied transcript and URL
-
-### L012 — Publish the original Cohort15 product thesis video update
-
-- Depends on: L011
-- Status: done
-- Owns: product-update article, supplied YouTube embed/link, transcript-derived summary, explicit current-vs-original framing, focused tests
-- Delivers: a stable first-party video update that preserves the founder story and original thesis without presenting retired mechanics as current behavior
-- Stops before: reintroducing credits, payments, maximum membership, or automated social publishing into the validation MVP
-
-### L013 — Publish the small-group formation field note
-
-- Depends on: L012
-- Status: done
-- Owns: edited field-note article, research index entry, public route, focused tests, workflow alignment
-- Delivers: a concise account of the current formation thesis, implemented MVP, proposed manual experiments, success criteria, and open assumptions
-- Stops before: adding admin-created cohorts, subscription infrastructure, automated distribution, or claiming unobserved results
-
-### L014 — Add first-party feedback capture
-
-- Depends on: L013
-- Status: done
-- Owns: feedback service, local/Supabase persistence, `POST /feedback`, global widget, client action context, focused tests, workflow alignment
-- Delivers: first-party partial/completed feedback capture with founder contact icons, optional best-contact fields, desktop panel, mobile full-screen modal, auto-open triggers, autosave, close-save, and private Supabase storage
-- Stops before: production migration until user completes the indexed human task
+- Depends on: L019
+- Status: not_started
+- Owns: indexed human Supabase Auth/migration, Stripe, Render branch/env, deployment, live payment/use smoke, non-secret evidence
+- Delivers: publicly usable `cohort15.com` payment-gated MVP and verified live payment utility
+- Stops on: passing launch evidence or a precisely documented human/provider blocker
 
 ## Execution Rules
 
-- Execute exactly one task per implementation chat; do not create parallel task waves.
-- Each implementation chat starts through `start.txt` or directly with `agent-starters/startNewManager.txt`.
-- The manager selects the next unblocked task from `tasks.json`; workers do not select tasks.
-- After implementation and verification, update `tasks.json`, `atomic-task-graph.md`, `README.md`, `plan.md`, `workflow-sheet.md`, `agent/progress/task-status.md`, session notes, and change log.
-- Commit each successful task wave separately.
-- External provider work must follow `docs/human-tasks/lofi-mvp-launch.md`; never place credentials in repository artifacts or chat.
+- Start every fresh user-facing chat through `start.txt`; prior conversation is not required.
+- Execute exactly one task per implementation chat unless the user explicitly changes the workflow.
+- The implementation manager selects the next unblocked task from `tasks.json`; workers do not select tasks.
+- Consult `main` only as read-only reference. Do not merge or cherry-pick it into this branch.
+- Reconcile observable behavior with `docs/cohort15-piece-of-pie-mvp-spec.md` before implementation.
+- After implementation and verification, update `tasks.json`, this graph, `README.md`, `plan.md`, `workflow-sheet.md`, `agent/progress/task-status.md`, session notes, change log, and relevant knowledge pointers.
+- Run `npm run check` and commit each successful task wave separately.
+- External provider work follows `docs/human-tasks/piece-of-pie-launch.md`; never place credentials or secret values in repository artifacts or chat.

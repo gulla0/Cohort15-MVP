@@ -1,80 +1,90 @@
 # Knowledge Index
 
-Pointer-based context router for the lofi MVP branch. Verify against code and canonical ledgers before acting.
+Pointer-based context router for the `codex/piece-of-pie` branch. Verify against code and canonical ledgers before acting.
 
 ## Authority Map
 
 | Artifact | Purpose | Authority |
 |---|---|---|
-| `docs/cohort15-lofi-mvp-spec.md` | Locked observable product behavior and boundary policy | Product source |
-| `plan.md` | Scope, architecture direction, phases, and risks | Planning source |
-| `tasks.json` | Main task contracts and status | Canonical main task ledger |
-| `atomic-task-graph.md` | Readable task dependencies | Derived planning view |
-| `agent/progress/task-status.md` | Readable task state and next ready task | Derived status view |
+| `docs/cohort15-piece-of-pie-mvp-spec.md` | Locked account, credit, payment, preserved-product, security, and launch behavior | Current product source |
+| `docs/cohort15-lofi-mvp-spec.md` | Historical description of the anonymous baseline | Context only; superseded where current spec differs |
+| `plan.md` | Three-day scope, architecture direction, phases, assumptions, and risks | Planning source |
+| `tasks.json` | Active L015–L020 task contracts and status | Canonical main task ledger |
+| `atomic-task-graph.md` | Readable active-task dependencies | Derived planning view |
+| `agent/progress/task-status.md` | Readable state and next ready task | Derived status view |
 | `agent/feedback/issue-index.md` | Feedback issue status and issue-folder routes | Canonical issue index |
-| `docs/human-tasks/README.md` | Index of dashboard, credential, operational-decision, and production-verification work | Human operations index |
+| `docs/human-tasks/README.md` | Index of provider, credential, migration, deployment, and production-verification work | Human operations index |
 | `schemas/main-task.schema.json` | Main task contract shape | Task schema |
 | `schemas/routed-work-request.md` | Approved role-transition request shape | Routing schema |
 
-Historical evidence belongs in `agent/progress/session-notes.md`, `agent/progress/change-log.md`, and issue-local logs. Do not duplicate those histories here.
+Historical evidence belongs in `agent/progress/session-notes.md`, `agent/progress/change-log.md`, and Git. Do not restore the retired lofi task ledger from history.
 
 ## Agent Workflow Routes
 
-- User-facing entry and intent classification: `start.txt` then `agent/router/intent-router.md`.
+- Sole fresh-chat entry: `start.txt`, then `agent/router/intent-router.md`.
+- Planned Piece of Pie implementation: `agent-starters/startNewManager.txt` after router approval when required.
 - Setup/bootstrap: `agent-starters/startSetupManager.txt`.
-- Main implementation or bounded change/fix: `agent-starters/startNewManager.txt`.
 - Feedback intake: `agent-starters/startFeedbackCreationManager.txt`.
 - Feedback resolution: `agent-starters/startFeedbackResolutionManager.txt`.
-- Workflow, knowledge, schema, tracker, or accessibility maintenance: `agent-starters/startWorkflowMaintenanceManager.txt`.
+- Workflow/knowledge/schema/tracker maintenance: `agent-starters/startWorkflowMaintenanceManager.txt`.
 - Bounded internal execution delegated by a manager: `agent-starters/startWorker.txt`.
 
-Managers own knowledge reconciliation: approved behavior changes must update the appropriate canonical product/design source before derived trackers or this index. `npm run check` validates structural handoffs.
+The repository artifacts are a complete fresh-chat handoff. Do not require the prior setup conversation or ask the user to choose a starter when the next task is clear.
 
 ## Context Routes
 
 | Work type | Read first | Then inspect |
 |---|---|---|
-| Main task | `tasks.json`, `agent/progress/task-status.md` | Selected task inputs and write scope |
-| Product behavior question | `docs/cohort15-lofi-mvp-spec.md` | Relevant service/UI code and tests |
-| Feedback intake or resolution | `agent/feedback/issue-index.md`, `agent/feedback/README.md` | Only selected issue folders and affected code |
-| Human/provider operation | `docs/human-tasks/README.md` | The one indexed checklist relevant to the operation |
-| Workflow or knowledge drift | `start.txt`, this index, `agent-starters/startWorkflowMaintenanceManager.txt` | Router, starters, schemas, trackers, and workflow guard |
+| Main implementation | `tasks.json`, `agent/progress/task-status.md` | Selected task inputs and exact write scope |
+| Product behavior | `docs/cohort15-piece-of-pie-mvp-spec.md` | Relevant current service/UI code and tests |
+| Existing lofi regression | Current product spec's preserved behavior | `docs/cohort15-lofi-mvp-spec.md` and affected code/tests |
+| Human/provider operation | `docs/human-tasks/README.md` | `docs/human-tasks/piece-of-pie-launch.md` or the one indexed checklist involved |
+| Feedback work | `agent/feedback/issue-index.md`, `agent/feedback/README.md` | Only the selected issue folder and affected code |
+| Workflow drift | `start.txt`, this index, `agent-starters/startWorkflowMaintenanceManager.txt` | Router, starters, schemas, trackers, and workflow guard |
 
-## Application Routes
+## Current Application Routes
 
-| Area | Current files |
-|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` |
-| Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` |
-| Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` |
-| Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` |
-| Browse/detail flow | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` |
-| Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` |
-| Feedback flow | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs`, `src/server/app.mjs` |
-| Email | `src/email/resend.mjs`, `src/services/notifications.mjs` |
-| Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` |
-| Tests | `tests/*.test.mjs` |
+| Area | Current files | Planned owner |
+|---|---|---|
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016–L019 |
+| Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L015 |
+| Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L015, then L017–L018 atomic integration |
+| Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L017 |
+| Browse/detail | `src/services/event-browsing.mjs`, `src/ui/home.mjs`, `src/ui/cohorts.mjs`, `src/ui/styles.css` | Preserve; L016–L019 limited integration |
+| Interest flow | `src/services/show-interest.mjs`, `src/ui/cohorts.mjs`, `src/server/app.mjs` | L017 |
+| Email | `src/email/resend.mjs`, `src/services/notifications.mjs` | Preserve; L017 identity integration |
+| Feedback | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs` | Preserve/regression only |
+| Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | Preserve/regression only |
+| Future auth | Does not exist on this branch yet | L016 creates bounded auth/session modules |
+| Future payment | Does not exist on this branch yet | L018 creates bounded Stripe/purchase modules |
 
 ## Reusable Decisions
 
-- Stack remains dependency-free Node.js ES modules with server-rendered HTML.
-- User-facing signal language may differ from internal `cohort` route/model names.
-- Creation submits the browser timezone/absolute timestamp; `localDateTimeToInstant` handles DST gaps and ambiguity.
-- Notification idempotency keys contain no raw email; quorum keys hash normalized recipient email.
-- Supabase uses the server-only PostgREST adapter and isolated `cohort15_lofi_*` objects.
-- Current visual implementation lives in the public UI modules and `src/ui/styles.css`; external source files listed in completed tasks are provenance, not active portable dependencies.
+- The active branch is `codex/piece-of-pie`, based on the deployed lofi branch. `main` is read-only reference only; do not merge or cherry-pick it.
+- Stack remains Node.js ES modules with server-rendered HTML and server-only Supabase access.
+- Production identity uses Supabase email magic links only for this MVP.
+- New accounts receive two ledger-backed credits exactly once.
+- Creation costs two credits; interest costs one; credits are held, consumed at quorum, and refunded below quorum at expiry.
+- Payment has one package: six credits for USD $6 via Stripe Checkout.
+- Signed webhook and verified browser return share one idempotent fulfillment path.
+- Existing anonymous rows remain nullable/unclaimed and keep their public/quorum behavior without historical credits.
+- Current provider resources are retained and extended; human changes route through the indexed Piece of Pie checklist.
 
-## Safety And Isolation Traps
+## Safety And Integration Traps
 
-- Never render creator or participant emails or log raw emails, IPs, secrets, private meeting links, session tokens, or provider responses containing secrets.
-- Never point lofi configuration at another Cohort15 Supabase project or Render service.
-- Public meeting links remain visible from quorum until the final meeting ends; schedule metadata remains public throughout.
-- Expiry is computed on reads; no scheduler or expiry email is required.
-- Human dashboard, credential, DNS, operational-decision, and production-verification work must be indexed under `docs/human-tasks/`.
+- Never render or log emails, magic-link tokens, Supabase tokens, raw session/CSRF tokens, Stripe secrets, webhook secrets, Checkout URLs, full provider payloads, card/payment details, IPs, or pre-quorum links.
+- Never add a mutable credit balance. Derive all totals from immutable transactions.
+- Never grant on an unverified callback, browser redirect alone, unsigned webhook, mismatched purchase, or client-supplied amount/package/user.
+- Never duplicate signup or purchase credits under replay or concurrency.
+- Never replace the live Supabase project, Render service, domain, Resend sender, or analytics configuration without an explicit user-approved operational decision.
+- Never destructively migrate existing cohort, interest, notification, or feedback data.
+- Keep public meeting-link timing, schedules, research, feedback, emails, rate limits, and privacy behavior intact.
+- Human dashboard, credential, migration, DNS, deployment, hackathon-evidence, and production-verification work belongs only under `docs/human-tasks/`.
 
 ## Current Pointers
 
-- Main status and next task: `agent/progress/task-status.md`.
+- Next task: `agent/progress/task-status.md` (L015).
 - Current blockers: `agent/progress/blockers.md`.
-- Feedback backlog: `agent/feedback/issue-index.md`.
-- Human operations: `docs/human-tasks/README.md`.
+- Human/provider continuity and new actions: `docs/human-tasks/README.md`.
+- Active product source: `docs/cohort15-piece-of-pie-mvp-spec.md`.
+- Last setup update: 2026-07-14 EDT.

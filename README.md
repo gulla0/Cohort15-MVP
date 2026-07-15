@@ -1,36 +1,46 @@
-# Cohort15 Lofi MVP
+# Cohort15 Piece of Pie MVP
 
-This branch prepares a lightweight public validation product before the authenticated production MVP.
+This branch extends the deployed Cohort15 lofi product with the smallest account, credit, and real-payment flow required for a publicly usable, payment-gated MVP.
 
-Visitors will be able to create cohort requests or show interest with a mandatory private email. A cohort's approved meeting link becomes public at quorum. Listings collect interest for seven days and remain browsable afterward.
-
-The public `/research` collection hosts Cohort15 research, essays, field notes, and written product updates. It includes an edited demand-research synthesis, a video-backed account of the original product thesis, and a current field note on testing small-group formation.
+The existing landing page, cohort directory, creation and interest flow, quorum unlock, research collection, feedback capture, Supabase persistence, Render deployment, Resend notifications, analytics, and `cohort15.com` domain remain the base. The new work adds email magic-link accounts, a one-time two-credit signup grant, credit-funded cohort actions, and one Stripe Checkout package.
 
 ## Setup Status
 
-The complete local lofi product flow, isolated production configuration, and privacy/abuse/end-to-end launch gate are implemented and verified. External provider setup and deployment are next; no production-MVP runtime code remains in this branch.
+Planning and task setup for the Piece of Pie branch is complete. Product implementation has not started.
 
-- Product rules: `docs/cohort15-lofi-mvp-spec.md`
-- Plan: `plan.md`
+- Canonical product rules: `docs/cohort15-piece-of-pie-mvp-spec.md`
+- Historical lofi baseline: `docs/cohort15-lofi-mvp-spec.md`
+- Three-day plan: `plan.md`
 - Canonical task ledger: `tasks.json`
 - Dependency graph: `atomic-task-graph.md`
 - Current status: `agent/progress/task-status.md`
-- Provider setup: `docs/human-tasks/lofi-mvp-launch.md`
+- Human/provider continuity: `docs/human-tasks/README.md`
 
-Next ready task: L010.
+Next ready task: L015.
 
-The lofi specification and task contracts include the validation, recurrence/DST, lifecycle, ordering, concurrency, idempotency, privacy, HTTP, editorial, feedback, and deployment boundaries required for implementation without additional product decisions. `npm run check` rejects task-ledger drift and missing inputs for ready tasks.
+A fresh user-facing chat should start only from `start.txt`. The router reads the canonical artifacts above and transitions approved planned work to the implementation manager without requiring prior chat history.
+
+## Locked MVP
+
+- Anonymous visitors can browse public cohorts and research.
+- Supabase email magic links create authenticated accounts.
+- A new account receives exactly two free credits once.
+- Creating a cohort holds two credits; showing interest holds one.
+- Quorum consumes holds; below-quorum expiry refunds holds.
+- Insufficient balance presents a clear Buy Credits gate.
+- Stripe sells one six-credit package for USD $6.
+- Signed, idempotent fulfillment prevents duplicate purchase credits.
+- Existing provider resources and production data are extended, not replaced.
 
 ## Intended Stack
 
-- dependency-free Node.js 24 HTTP server and ES modules
+- Node.js 24 HTTP server and ES modules
 - server-rendered HTML/CSS
-- isolated Supabase Postgres project
-- separate Render Web Service
+- existing isolated Supabase Postgres project plus Supabase Auth
+- existing Render Web Service and `cohort15.com` domain
+- Stripe Checkout and signed webhooks
 - Resend transactional email
 - Google Analytics measurement ID `G-LF22TLDSBV`
-
-The lofi environment must not share a Supabase project, Render service, or credentials with the later production MVP.
 
 ## Commands
 
@@ -42,15 +52,14 @@ npm run lint
 npm start
 ```
 
-The local server defaults to `http://localhost:3000`.
+The local server defaults to `http://localhost:3000`. Production continues to require the lofi environment contract and will gain the additional auth and Stripe variables defined by the canonical specification during implementation.
 
-Production starts only when all `COHORT15_LOFI_*` values in `.env.example` are
-set. It uses the separate lofi Supabase project and never falls back to local
-in-memory persistence. Do not reuse credentials from another Cohort15 service;
-provider setup belongs in `docs/human-tasks/lofi-mvp-launch.md`.
+Never commit or paste Supabase keys, Stripe keys, webhook secrets, Resend keys, session tokens, customer data, or test payment details. Human dashboard and production verification work belongs only under `docs/human-tasks/`.
 
 ## Agent Workflow
 
-Use `start.txt` for user-facing routing, including workflow/knowledge maintenance, or `agent-starters/startNewManager.txt` when directly starting an implementation task. Workflow audits route to `agent-starters/startWorkflowMaintenanceManager.txt`. Managers select the next unblocked task from `tasks.json`, reconcile approved behavior with canonical guidance, verify it, align status-facing artifacts, and commit the completed task wave. `npm run check` rejects stale next-task summaries, task-graph statuses, malformed issue contracts, and a missing maintenance route.
+Use `start.txt` as the sole fresh-chat entry point. It reads `tasks.json` and `agent/progress/task-status.md`, classifies planned work as main implementation, and transitions to `agent-starters/startNewManager.txt` after approval when needed.
 
-Old production tasks and resolved feedback issues were removed from the active workflow. Git history remains their archive.
+Managers select the next unblocked task, verify the bounded task, align the task ledger and readable trackers, run `npm run check`, and commit the completed task wave. Workers are internal executors and are never the user's direct entry point.
+
+The lofi implementation history remains in Git and the progress logs. The active ledger now contains only the Piece of Pie implementation and launch tasks.

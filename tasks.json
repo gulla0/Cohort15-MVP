@@ -9,695 +9,312 @@
   ],
   "tasks": [
     {
-      "id": "L000",
-      "title": "Establish the clean lofi application shell",
-      "status": "done",
-      "phase": "Foundation Cleanup",
+      "id": "L015",
+      "title": "Add account and credit persistence foundation",
+      "status": "not_started",
+      "phase": "Day 1 — Identity and Ledger",
       "dependencies": [],
-      "objective": "Remove the legacy production-MVP runtime and leave a runnable lofi-only Node application shell for incremental implementation.",
+      "objective": "Extend the existing lofi local and Supabase persistence boundaries with users, hashed sessions, immutable credit transactions, purchases, processed Stripe events, nullable account links, and atomic credit primitives.",
       "inputs": [
-        "src",
-        "tests",
-        "supabase/migrations",
-        "public/assets",
-        "docs",
-        "render.yaml",
-        ".env.example"
-      ],
-      "write_scope": [
-        "minimal config/server/UI shell",
-        "foundation tests",
-        "legacy runtime deletion",
-        "lofi deployment placeholders",
-        "workflow tracker alignment"
-      ],
-      "authority": [
-        "Delete auth, credits, payments, dashboards, social promotion, uploads, old persistence/domain/services, legacy tests, and production-MVP migrations/runbooks.",
-        "Retain scripts, agent workflow, lofi planning artifacts, and a branded runnable shell.",
-        "Do not implement cohort domain, persistence, forms, interest, or email behavior."
-      ],
-      "acceptance_criteria": [
-        "Only lofi shell modules remain under src.",
-        "Legacy product routes return 404.",
-        "Home, styles, and health routes work.",
-        "Environment and Render placeholders use lofi-specific names.",
-        "Old migrations, production runbooks, assets, and tests are removed.",
-        "npm run check passes."
-      ],
-      "verification": [
-        "Run npm run check",
-        "Inspect repository tree for legacy runtime artifacts",
-        "Smoke test home and health routes"
-      ],
-      "stop_condition": "Stop when the clean shell is runnable and ready for L001.",
-      "evidence": "2026-06-18: legacy runtime removed; lofi home/health/style shell and focused tests added; npm run check passed.",
-      "notes": "Git history preserves all removed production-MVP code and documentation."
-    },
-    {
-      "id": "L001",
-      "title": "Define the lofi domain and validation policy",
-      "status": "done",
-      "phase": "Domain and Data Isolation",
-      "dependencies": [
-        "L000"
-      ],
-      "objective": "Implement the complete anonymous lofi cohort domain, validation, recurrence, lifecycle, quorum, and public-serialization policy.",
-      "inputs": [
-        "docs/cohort15-lofi-mvp-spec.md"
-      ],
-      "write_scope": [
-        "src/domain/constants.mjs",
+        "docs/cohort15-piece-of-pie-mvp-spec.md",
         "src/domain/models.mjs",
         "src/domain/validation.mjs",
-        "tests/domain-validation.test.mjs"
-      ],
-      "authority": [
-        "Do not introduce credits, maximum participants, images, social status, or authenticated link-authorization fields into the lofi domain.",
-        "Implement the exact categories, audience, skill level, recurrence, duration, meeting count, and approved meeting-host policies from the specification.",
-        "Do not change persistence, routes, or UI in this task."
-      ],
-      "acceptance_criteria": [
-        "Cohort, interest, and notification-delivery records expose exactly the fields and enums in the lofi specification.",
-        "Normalization and validation implement every email, text-length, unknown-field, quorum, duration, meeting-count, timezone, date, and link rule in the specification.",
-        "Expiry is exactly 168 hours and firstMeetingAt must be strictly later.",
-        "Daily, weekly, biweekly, and monthly recurrence implement the documented calendar, month-clamping, and DST rules through finalMeetingEndsAt.",
-        "Collection and quorum states are derived according to the documented boundary instants.",
-        "Public serialization always includes schedule metadata, never includes emails, and includes the meeting link only from quorum until finalMeetingEndsAt.",
-        "Focused tests cover minimum, maximum, equality, invalid-date, month-end, spring-forward, fall-back, normalization, and privacy boundaries."
-      ],
-      "verification": [
-        "Run node --test tests/domain-validation.test.mjs",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when the lofi domain contract is tested without integrating persistence or HTTP routes.",
-      "evidence": "2026-06-18: domain records, normalization/validation, timezone-aware recurrence, lifecycle derivation, public serialization, and focused boundary/privacy tests implemented; npm run check passed.",
-      "notes": "Complete. L002 is the next ready task."
-    },
-    {
-      "id": "L002",
-      "title": "Add isolated lofi persistence and Supabase migration",
-      "status": "done",
-      "phase": "Domain and Data Isolation",
-      "dependencies": [
-        "L001"
-      ],
-      "objective": "Persist anonymous lofi cohorts, interests, and notification outcomes through repositories and an isolated Supabase migration; rate limiting remains process-local.",
-      "inputs": [
-        "docs/cohort15-lofi-mvp-spec.md",
-        "src/domain/constants.mjs",
-        "src/domain/models.mjs",
-        "src/domain/validation.mjs"
-      ],
-      "write_scope": [
         "src/persistence/store.mjs",
         "src/persistence/repositories.mjs",
         "src/persistence/supabase-postgres.mjs",
         "supabase/migrations/20260618000000_cohort15_lofi.sql",
-        "tests/persistence.test.mjs",
-        "tests/supabase-postgres.test.mjs",
+        "supabase/migrations/20260618000001_fix_cohort15_lofi_accept_interest.sql",
+        "supabase/migrations/20260624000000_cohort15_lofi_feedback.sql"
+      ],
+      "write_scope": [
+        "account, session, credit, purchase, and Stripe-event domain records",
+        "local store and repository persistence",
+        "credit ledger and balance service",
+        "additive cohort15_lofi_* Supabase migration and adapter mappings",
+        "focused persistence, migration, balance, concurrency, and idempotency tests",
         "src/persistence/README.md"
       ],
       "authority": [
-        "Create new table names prefixed cohort15_lofi_.",
-        "Create only cohorts, interests, and notification-delivery tables; do not create users, auth, credits, purchases, images, social posts, or rate-limit tables.",
-        "Enforce unique normalized interest email per cohort at repository and database levels.",
-        "Make interest insertion and the quorum transition atomic with equivalent in-memory and Supabase RPC behavior.",
-        "Keep service-role credentials server-only."
+        "Create only additive cohort15_lofi_* objects and nullable creator_user_id/user_id links; do not drop, rename, or rewrite existing production rows.",
+        "Persist only SHA-256 session-token digests and private CSRF verification material, never raw session tokens.",
+        "Use immutable positive-integer grant, purchase, hold, consume, and refund entries; do not add a mutable balance column.",
+        "Provide transaction-safe primitives for account-plus-signup-grant provisioning, credit holds, quorum consumption, expiry refunds, and purchase fulfillment.",
+        "Enforce unique normalized email, Supabase subject, ledger idempotency key, provider checkout ID, purchase credit transaction, and Stripe event ID constraints.",
+        "Keep all new tables RLS-enabled with no browser policies and revoke public execution of security-definer functions.",
+        "Do not add HTTP routes, auth UI, Stripe network calls, or live provider changes in this task."
       ],
       "acceptance_criteria": [
-        "A clean local store persists cohorts, interests, and notification deliveries only.",
-        "Database uniqueness prevents duplicate interest by cohort and normalized email.",
-        "Creator and participant emails remain non-public repository fields.",
-        "Atomic interest acceptance rejects creator, duplicate, expired, and already-met submissions and returns whether this write reached quorum.",
-        "Exactly one concurrent interest transition can set quorumMetAt.",
-        "Notification idempotency keys are unique and delivery outcomes can be recorded without blocking submissions.",
-        "The migration contains only cohort15_lofi_ objects and enables RLS without browser policies."
+        "Local and Supabase repositories expose equivalent user, session, credit transaction, purchase, and Stripe-event behavior.",
+        "Account provisioning can atomically create or find a user and add exactly one two-credit signup grant.",
+        "Balance derivation reports funded, available, held, consumed, and refunded totals and cannot become negative.",
+        "Hold, consume, and refund primitives reject insufficient or missing holds and are safe under concurrent calls.",
+        "Existing cohort/interest rows with null user IDs remain readable and participate in existing quorum counts without credit transactions.",
+        "The additive migration preserves existing lofi tables/data, uses a safe function search path, RLS, service-role-only execution, and all documented uniqueness constraints.",
+        "Focused tests cover duplicate signup grants, concurrent holds, duplicate consume/refund, purchase idempotency, legacy null links, serialization, and migration isolation."
       ],
       "verification": [
-        "Run focused persistence and Supabase adapter tests",
-        "Inspect migration for cohort15_lofi_ table isolation",
+        "Run focused persistence, credit ledger, and Supabase adapter tests",
+        "Inspect the additive migration for destructive SQL, unsafe grants, mutable balances, and non-lofi objects",
         "Run npm run check"
       ],
-      "stop_condition": "Stop when isolated data access is tested; do not build forms or deploy a live database.",
-      "evidence": "2026-06-18: isolated local repositories, server-only Supabase adapter, atomic interest/quorum RPC, lofi-only migration, RLS posture, privacy boundaries, and focused concurrency/idempotency tests implemented; npm run check passed.",
-      "notes": "Complete. Uses a new Supabase project in production. L003 is the next ready task."
+      "stop_condition": "Stop when the durable data and transaction boundary is verified; leave authentication, product routes, and Stripe HTTP integration to later tasks.",
+      "evidence": "Pending.",
+      "notes": "First ready Piece of Pie implementation task. Concepts from main may be consulted but must be adapted to the current lofi repository interfaces."
     },
     {
-      "id": "L003",
-      "title": "Build anonymous cohort creation",
-      "status": "done",
-      "phase": "Public Product Flow",
+      "id": "L016",
+      "title": "Implement magic-link accounts and signup credits",
+      "status": "not_started",
+      "phase": "Day 1 — Identity and Ledger",
       "dependencies": [
-        "L002"
+        "L015"
       ],
-      "objective": "Allow any visitor to create a cohort with the retained form fields, mandatory private creator email, no auth, and lightweight abuse controls.",
+      "objective": "Add production Supabase email magic-link sign-in, opaque persisted application sessions, CSRF protection, sign-out, and the exactly-once two-credit signup grant.",
       "inputs": [
-        "docs/cohort15-lofi-mvp-spec.md",
-        "src/domain/validation.mjs",
-        "src/persistence/repositories.mjs",
-        "src/server/app.mjs",
-        "src/ui/styles.css"
-      ],
-      "write_scope": [
-        "src/services/create-cohort.mjs",
-        "src/services/rate-limit.mjs",
-        "src/ui/create-cohort.mjs",
-        "src/server/app.mjs",
-        "src/ui/styles.css",
-        "tests/create-cohort.test.mjs",
-        "tests/rate-limit.test.mjs"
-      ],
-      "authority": [
-        "Do not introduce auth, credits, image upload, or social outbox behavior into creation.",
-        "Accept creator email privately and normalize it.",
-        "Limit accepted cohort creations to five per IP per rolling hour.",
-        "Use the documented in-memory hashed-IP rolling-window and honeypot behavior.",
-        "Redirect successful creation to the cohort detail page.",
-        "Do not implement interest submission or email delivery."
-      ],
-      "acceptance_criteria": [
-        "Creation works without a session.",
-        "The form implements every required and optional field enumerated in the lofi specification, with no creator-name, image, or maximum-participant field.",
-        "Friendly email-use and approved-link safety notes are visible.",
-        "The browser timezone is captured automatically and submitted meeting time is converted correctly.",
-        "Validation and conflict responses use the documented HTTP status codes without echoing private values.",
-        "Creation enforces the documented media type, 64 KiB body limit, and browser Origin policy.",
-        "Honeypot submissions create nothing; the sixth successful creation within a rolling hour returns 429 with Retry-After.",
-        "POST /cohorts responds 303 to public detail without displaying creator email or placing it in the URL."
-      ],
-      "verification": [
-        "Run focused create service and route tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when anonymous creation and redirect work locally; leave notifications to L006.",
-      "evidence": "2026-06-18: anonymous creation form/service/route, browser timezone capture, request-policy guards, honeypot, and hashed-IP five-success rolling limit verified.",
-      "notes": "Five accepted creations per IP per hour."
-    },
-    {
-      "id": "L004",
-      "title": "Build the landing page, listing, and lifecycle views",
-      "status": "done",
-      "phase": "Public Product Flow",
-      "dependencies": [
-        "L003"
-      ],
-      "objective": "Turn the current early-interest design into the lofi landing page with the full public listing, active-first sorting, filters, local meeting times, and safe link visibility.",
-      "inputs": [
-        "/Users/gzero/Desktop/cohort15/Marketing/early-interest-landing-page/index.html",
-        "docs/cohort15-lofi-mvp-spec.md",
-        "src/domain/validation.mjs",
-        "src/persistence/repositories.mjs",
-        "src/ui/home.mjs",
-        "src/ui/styles.css",
-        "src/server/app.mjs"
-      ],
-      "write_scope": [
-        "src/services/event-browsing.mjs",
-        "src/ui/home.mjs",
-        "src/ui/cohorts.mjs",
-        "src/server/app.mjs",
-        "src/ui/styles.css",
-        "tests/event-browsing.test.mjs"
-      ],
-      "authority": [
-        "Reuse the supplied page's visual language and Google Analytics ID G-LF22TLDSBV.",
-        "Show all listings by default with active listings before expired listings.",
-        "Support All, Active, and Expired filters.",
-        "Use the exact status query, ordering, tie-breaker, and route contract from the specification.",
-        "Never render email addresses.",
-        "Do not implement form mutations in this task."
-      ],
-      "acceptance_criteria": [
-        "The home page explains the product and exposes Create a cohort and browsing actions.",
-        "The full cohort listing appears on the landing page.",
-        "All/Active/Expired filters work; invalid filters use All; ordering and deterministic ties match the specification.",
-        "Exact interest count and quorum progress are public.",
-        "Meeting date, time, duration, recurrence, and meeting count remain public before quorum, after quorum, and after listing expiry.",
-        "Meeting times are labeled and rendered in each visitor's local timezone.",
-        "Meeting links obey quorum and final-meeting visibility rules.",
-        "Expired listings remain visible."
-      ],
-      "verification": [
-        "Run focused event browsing and UI tests",
-        "Verify rendered HTML contains the Google Analytics measurement ID",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when read-only public pages match the lofi contract.",
-      "evidence": "2026-06-18: landing-page listing, lifecycle filters and sorting, public detail pages, local-time enhancement, quorum progress, privacy escaping, and meeting-link visibility verified with focused tests and npm run check.",
-      "notes": "Complete. GET /cohorts redirects to the landing-page listing; L005 is next."
-    },
-    {
-      "id": "L005",
-      "title": "Build anonymous interest and quorum unlock",
-      "status": "done",
-      "phase": "Public Product Flow",
-      "dependencies": [
-        "L004"
-      ],
-      "objective": "Collect email-only interest without auth, prevent duplicates and creator self-interest, and unlock the public meeting link at quorum.",
-      "inputs": [
-        "docs/cohort15-lofi-mvp-spec.md",
-        "src/domain/validation.mjs",
-        "src/persistence/repositories.mjs",
-        "src/server/app.mjs",
-        "src/ui/cohorts.mjs"
-      ],
-      "write_scope": [
-        "src/services/show-interest.mjs",
-        "src/services/rate-limit.mjs",
-        "src/ui/cohorts.mjs",
-        "src/server/app.mjs",
-        "tests/show-interest.test.mjs",
-        "tests/rate-limit.test.mjs"
-      ],
-      "authority": [
-        "Normalize email before comparison and persistence.",
-        "Reject creator email and duplicate cohort/email pairs.",
-        "Limit accepted interest submissions to ten per IP per rolling hour.",
-        "Use the repository's atomic interest/quorum operation and documented HTTP conflict statuses.",
-        "Close interest submission once quorum is met.",
-        "Do not send emails in this task."
-      ],
-      "acceptance_criteria": [
-        "Open below-quorum cohorts show one email field and one interest button.",
-        "Friendly email-use consent text and a honeypot are present.",
-        "Creator, duplicate, expired, and already-met submissions return 409 and do not increment counts or rate allowances.",
-        "Quorum is based only on accepted interests.",
-        "Exactly one accepted concurrent interest reaches quorum, sets quorumMetAt, and makes the approved meeting link public immediately.",
-        "The interest form is absent after quorum or expiry.",
-        "Interest submission enforces the documented media type, 64 KiB body limit, and browser Origin policy.",
-        "The eleventh successful interest write within a rolling hour returns 429 with Retry-After.",
-        "POST interest follows the documented 303 redirect and no email or IP address appears in public HTML, URLs, or logs."
-      ],
-      "verification": [
-        "Run focused show-interest and route tests",
-        "Run a create-to-quorum integration test",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when the anonymous quorum flow works without notification delivery.",
-      "evidence": "2026-06-18: normalized email-only interest service, lifecycle-aware form, guarded POST route, atomic quorum transition, immediate link unlock, privacy boundaries, and ten-success IP limit verified.",
-      "notes": "Complete. Ten accepted interests per IP per hour; L006 is next."
-    },
-    {
-      "id": "L006",
-      "title": "Add Resend confirmation and quorum notifications",
-      "status": "done",
-      "phase": "Notifications and Production Runtime",
-      "dependencies": [
-        "L005"
-      ],
-      "objective": "Send creator and participant confirmations plus quorum-met notifications through a small Resend adapter.",
-      "inputs": [
-        "docs/cohort15-lofi-mvp-spec.md",
-        "src/services/create-cohort.mjs",
-        "src/services/show-interest.mjs",
+        "docs/cohort15-piece-of-pie-mvp-spec.md",
         "src/config/runtime.mjs",
+        "src/server/app.mjs",
+        "src/ui/home.mjs",
+        "src/ui/styles.css",
         "src/persistence/repositories.mjs"
       ],
       "write_scope": [
-        "src/email/resend.mjs",
-        "src/services/notifications.mjs",
+        "Supabase magic-link auth adapter",
+        "application session and CSRF service",
+        "sign-in, callback, and sign-out routes",
+        "auth UI and shared navigation state",
+        "local test-auth support",
+        "auth/session runtime configuration",
+        "focused auth, session, privacy, and grant tests"
+      ],
+      "authority": [
+        "Implement email magic links only; do not add passwords, Google, GitHub, profiles, or account management.",
+        "Use verified Supabase identity data as the only production account-provisioning authority.",
+        "Provision the account and two-credit signup grant through the L015 atomic primitive; callback replay and concurrent callbacks must not duplicate grants.",
+        "Use opaque eight-hour sessions with hashed persisted tokens and Secure, HttpOnly, SameSite=Lax production cookies.",
+        "Require CSRF for authenticated browser mutations and validate all return paths as safe relative application paths.",
+        "Return generic magic-link request responses and never log emails, auth tokens, session tokens, CSRF tokens, or provider bodies.",
+        "Do not gate cohort creation/interest or add Stripe checkout in this task."
+      ],
+      "acceptance_criteria": [
+        "Production sign-in requests a Supabase email magic link without revealing account existence.",
+        "A verified callback creates or finds the application account, ensures exactly one two-credit grant, creates a durable app session, and redirects safely.",
+        "Repeated login, callback replay, concurrent callbacks, and an existing account missing its grant result in exactly one signup grant total.",
+        "Signed-in navigation shows the account's available credits and Buy Credits/sign-out actions without exposing the email publicly.",
+        "Expired, unknown, or signed-out sessions fail closed; sign-out deletes the session and clears the cookie.",
+        "Production local seeded-account selection is absent, while injected local test identity keeps automated tests provider-independent.",
+        "Focused tests cover cookie attributes, session expiry, CSRF, unsafe returns, generic responses, privacy, and provider failures."
+      ],
+      "verification": [
+        "Run focused Supabase auth and session-security tests",
+        "Run route tests for sign-in, callback, replay, and sign-out",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop when account/session behavior and signup credits are verified without changing cohort mutation semantics.",
+      "evidence": "Pending.",
+      "notes": "Human Supabase Auth configuration remains in docs/human-tasks/piece-of-pie-launch.md and is not performed by this task."
+    },
+    {
+      "id": "L017",
+      "title": "Credit-gate cohort creation and interest",
+      "status": "not_started",
+      "phase": "Day 2 — Product Gate and Payment",
+      "dependencies": [
+        "L016"
+      ],
+      "objective": "Require authenticated accounts and atomic credit holds for cohort creation and interest, then consume at quorum and refund at below-quorum expiry while preserving the public lofi experience.",
+      "inputs": [
+        "docs/cohort15-piece-of-pie-mvp-spec.md",
+        "src/server/app.mjs",
         "src/services/create-cohort.mjs",
         "src/services/show-interest.mjs",
-        "src/config/runtime.mjs",
-        "src/server/app.mjs",
-        "src/persistence/repositories.mjs",
-        ".env.example",
-        "tests/notifications.test.mjs"
-      ],
-      "authority": [
-        "Use updates@cohort15.com as sender and cohort15dotcom@gmail.com as reply-to.",
-        "Do not send expiry emails or marketing broadcasts.",
-        "Do not expose the API key or recipient list in logs.",
-        "A provider failure must not roll back an accepted cohort or interest submission."
-      ],
-      "acceptance_criteria": [
-        "Creators receive one creation confirmation after persistence succeeds.",
-        "Participants receive one interest confirmation after persistence succeeds.",
-        "At quorum, the creator and all accepted participants receive a quorum notification with public cohort/meeting details.",
-        "The quorum-reaching participant receives separate participant-confirmation and quorum deliveries.",
-        "Deterministic idempotency keys and unique persistence prevent duplicate notifications.",
-        "Each recipient is sent separately; delivery failures are sanitized, recorded, and never roll back submissions.",
-        "Each provider request uses the documented five-second timeout with no automatic retry.",
-        "Tests use a fake adapter and make no live email calls."
-      ],
-      "verification": [
-        "Run focused email adapter and notification tests",
-        "Run create/interest integration tests with a fake email provider",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when transactional notification behavior is tested; do not configure the live Resend dashboard.",
-      "evidence": "2026-06-18: Resend HTTP adapter, deterministic delivery orchestration, creator/participant confirmations, per-recipient quorum notifications, sanitized failure outcomes, and fake-provider integration coverage implemented; npm run check passed.",
-      "notes": "Complete. Live domain and key setup remains L009; L007 is next."
-    },
-    {
-      "id": "L007",
-      "title": "Isolate lofi production configuration and deployment",
-      "status": "done",
-      "phase": "Notifications and Production Runtime",
-      "dependencies": [
-        "L006"
-      ],
-      "objective": "Make the lofi runtime start with only its own Render, Supabase, Resend, analytics, and app URL settings and no production-MVP service dependencies.",
-      "inputs": [
-        "src/config/runtime.mjs",
-        "src/server/app.mjs",
-        ".env.example",
-        "render.yaml",
-        "README.md",
-        "docs/human-tasks/lofi-mvp-launch.md"
-      ],
-      "write_scope": [
-        "src/config/runtime.mjs",
-        "src/server/app.mjs",
-        ".env.example",
-        "render.yaml",
-        "README.md",
-        "docs/human-tasks/lofi-mvp-launch.md",
-        "tests/runtime-config.test.mjs"
-      ],
-      "authority": [
-        "Name the Render service cohort15-lofi-mvp and target this branch until merge/deployment policy changes.",
-        "Require lofi-specific Supabase URL/service key and Resend key only in production.",
-        "Use exactly COHORT15_LOFI_APP_ENV, COHORT15_LOFI_APP_URL, COHORT15_LOFI_GA_MEASUREMENT_ID, COHORT15_LOFI_SUPABASE_URL, COHORT15_LOFI_SUPABASE_SERVICE_ROLE_KEY, COHORT15_LOFI_RESEND_API_KEY, COHORT15_LOFI_EMAIL_FROM, and COHORT15_LOFI_EMAIL_REPLY_TO.",
-        "Do not add production requirements for Supabase Auth, sessions, admin, Stripe, social publishing, or uploads.",
-        "Do not create provider resources or change DNS."
-      ],
-      "acceptance_criteria": [
-        "Production startup cannot silently use local/demo persistence.",
-        "Production config has no auth, Stripe, credit, social, or upload requirement.",
-        "The service binds to Render's host/port and exposes a health endpoint.",
-        "Configuration documentation clearly forbids credential reuse with the production MVP.",
-        "Render and env examples use exactly the variable names in the human launch runbook and reject missing production Supabase/Resend values."
-      ],
-      "verification": [
-        "Run focused runtime configuration tests",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when local code/config is deployment-ready; provider dashboards remain a human task.",
-      "evidence": "2026-06-18: production now requires the complete lofi-only environment contract, selects the isolated Supabase repositories without local fallback, and has aligned Render/env/runbook configuration; focused tests and npm run check passed.",
-      "notes": "Complete. External setup remains documented in docs/human-tasks/lofi-mvp-launch.md; L008 is next."
-    },
-    {
-      "id": "L008",
-      "title": "Complete lofi privacy, abuse, and end-to-end verification",
-      "status": "done",
-      "phase": "Launch Verification",
-      "dependencies": [
-        "L007"
-      ],
-      "objective": "Verify the complete lofi behavior, privacy boundaries, abuse controls, concurrency semantics, and absence of deferred product surfaces.",
-      "inputs": [
-        "src",
-        "tests",
-        "README.md",
-        "docs/cohort15-lofi-mvp-spec.md"
-      ],
-      "write_scope": [
-        "tests/lofi-mvp-verification.test.mjs",
-        "tests/privacy-abuse.test.mjs",
-        "src modules requiring launch-blocking fixes",
-        "README.md"
-      ],
-      "authority": [
-        "Keep auth, dashboard, credit, payment, image, admin, and social routes absent from the lofi runtime.",
-        "Do not broaden product scope or add an admin UI."
-      ],
-      "acceptance_criteria": [
-        "Automated tests cover create, browse, filter, interest, duplicate rejection, creator rejection, quorum unlock, seven-day expiry, final-meeting link hiding, and local-time labels.",
-        "Tests cover both IP limits and honeypots.",
-        "Tests cover body-size, media-type, Origin, concurrency, and notification-idempotency boundaries.",
-        "Rendered pages and logs do not expose emails, IPs, secrets, or pre-quorum links.",
-        "Auth, credit, payment, social, image, dashboard, and admin routes remain absent from the lofi runtime.",
-        "npm run check passes."
-      ],
-      "verification": [
-        "Run npm run check",
-        "Run a local browser smoke test for primary mobile and desktop flows"
-      ],
-      "stop_condition": "Stop when local launch verification passes and only external setup remains.",
-      "evidence": "2026-06-18: integrated create/browse/interest/quorum/lifecycle verification, privacy and abuse launch gates, absent deferred-route checks, and mobile/desktop browser smoke verification passed; browser-local time formatter launch defect fixed.",
-      "notes": "Complete. Local launch gate passed; only external provider setup remains."
-    },
-    {
-      "id": "L009",
-      "title": "Create isolated provider resources and deploy",
-      "status": "done",
-      "phase": "Launch Verification",
-      "dependencies": [
-        "L008"
-      ],
-      "objective": "Complete the documented human setup for a new Supabase project, Render service, Resend sender domain/key, and cohort15.com cutover.",
-      "inputs": [
-        "docs/human-tasks/lofi-mvp-launch.md",
-        "supabase/migrations/20260618000000_cohort15_lofi.sql",
-        "render.yaml"
-      ],
-      "write_scope": [
-        "provider dashboards and DNS only; repository changes only for discovered configuration corrections"
-      ],
-      "authority": [
-        "Follow the human setup checklist and never paste credentials into chat or commit them.",
-        "Do not select or modify the existing production-MVP Supabase project or Render service.",
-        "Keep the Netlify site available until the Render generated URL passes smoke verification."
-      ],
-      "acceptance_criteria": [
-        "A new Supabase project contains only the lofi schema.",
-        "A new Render service deploys the lofi branch with lofi-only environment variables.",
-        "Resend verifies cohort15.com and sends from updates@cohort15.com.",
-        "The generated Render URL passes health and primary-flow checks.",
-        "cohort15.com resolves to the new Render service over HTTPS."
-      ],
-      "verification": [
-        "Perform the non-secret checks in docs/human-tasks/lofi-mvp-launch.md",
-        "Record only provider resource names, URLs, and pass/fail status"
-      ],
-      "stop_condition": "Stop when the domain cutover is verified or report the exact human/provider blocker.",
-      "evidence": "2026-06-24: user reported all human setup tasks complete and cohort15.com live.",
-      "notes": "This task necessarily required the user to operate provider dashboards; no credentials or secret values recorded."
-    },
-    {
-      "id": "L010",
-      "title": "Run production lofi smoke test",
-      "status": "not_started",
-      "phase": "Launch Verification",
-      "dependencies": [
-        "L009"
-      ],
-      "objective": "Verify the deployed cohort15.com experience and database/email side effects without touching production-MVP resources.",
-      "inputs": [
-        "https://cohort15.com",
-        "docs/human-tasks/lofi-mvp-launch.md",
-        "README.md"
-      ],
-      "write_scope": [
-        "smoke-test evidence",
-        "small blocker fixes if authorized",
-        "task/progress closeout"
-      ],
-      "authority": [
-        "Use test email addresses controlled by the operator.",
-        "Do not expose test emails in committed evidence.",
-        "Do not mark complete if data appears in a production-MVP database."
-      ],
-      "acceptance_criteria": [
-        "Landing, creation, detail redirect, interest, quorum unlock, filters, expiry rendering, and meeting-link timing pass in production.",
-        "Creator, participant, and quorum emails arrive with correct sender/reply-to.",
-        "Supabase rows appear only in the isolated lofi project.",
-        "Analytics loads and HTTPS/domain routing are correct.",
-        "No launch-blocking privacy or abuse failure remains."
-      ],
-      "verification": [
-        "Run the production checklist in docs/human-tasks/lofi-mvp-launch.md",
-        "Run npm run check after any repository fix"
-      ],
-      "stop_condition": "Stop when the production smoke passes or launch blockers are documented precisely.",
-      "evidence": "Pending.",
-      "notes": "Final lofi launch gate."
-    },
-    {
-      "id": "L011",
-      "title": "Add public Research & Field Notes editorial pages",
-      "status": "done",
-      "phase": "Public Product Flow",
-      "dependencies": [
-        "L008"
-      ],
-      "objective": "Add a first-party editorial index and publish a privacy-safe synthesis of the Cohort15 demand-validation research.",
-      "inputs": [
-        "/Users/gzero/Desktop/cohort15/Marketing/idea-validation-research /deep-research-report.md",
-        "src/server/app.mjs",
-        "src/ui/home.mjs",
-        "src/ui/styles.css"
-      ],
-      "write_scope": [
-        "src/ui/research.mjs",
-        "src/server/app.mjs",
-        "public page navigation and styles",
-        "tests/research.test.mjs",
-        "workflow tracker alignment"
-      ],
-      "authority": [
-        "Publish an edited synthesis, not the raw report.",
-        "Exclude public handles, outreach notes, internal scores, and research-tool citation markers.",
-        "Support future article, field note, YouTube update, and external publication entries without inventing unavailable URLs or transcripts.",
-        "Preserve the dependency-free Node/ESM and server-rendered architecture."
-      ],
-      "acceptance_criteria": [
-        "GET /research renders an editorial index integrated into public navigation.",
-        "A stable /research/... route hosts methodology, patterns, limitations, product implications, and a cohort CTA.",
-        "The index communicates supported content types without placeholder external links.",
-        "Entry rendering escapes public content and rejects unsafe internal or external links.",
-        "Focused route, rendering, accessibility, privacy, and escaping tests pass.",
-        "npm run check passes."
-      ],
-      "verification": [
-        "Run node --test tests/research.test.mjs",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when the public editorial surface and first research synthesis are verified without requiring YouTube content input.",
-      "evidence": "2026-06-20: /research index, stable demand-research article, site navigation, responsive styles, safe extensible entry renderer, and focused route/privacy/accessibility tests implemented.",
-      "notes": "Complete. L012 publishes the subsequently supplied YouTube update. L010 remains the next ready deployment verification task."
-    },
-    {
-      "id": "L012",
-      "title": "Publish the original Cohort15 product thesis video update",
-      "status": "done",
-      "phase": "Public Product Flow",
-      "dependencies": [
-        "L011"
-      ],
-      "objective": "Publish the supplied Cohort15 YouTube video and transcript as a first-party product update that distinguishes the original vision from the current validation MVP.",
-      "inputs": [
-        "/Users/gzero/.codex/attachments/2fdb3c1b-78ef-46e8-8f31-d2d496e284d9/pasted-text.txt",
-        "https://www.youtube.com/watch?v=E5f-qqNILlg&t=4s",
-        "src/ui/research.mjs",
-        "src/server/app.mjs",
-        "src/ui/styles.css"
-      ],
-      "write_scope": [
-        "src/ui/research.mjs",
-        "src/server/app.mjs",
-        "src/ui/styles.css",
-        "tests/research.test.mjs",
-        "workflow tracker alignment"
-      ],
-      "authority": [
-        "Embed only the user-supplied YouTube video and link.",
-        "Derive the written product update from the supplied transcript without publishing raw timestamp noise.",
-        "Label credits, refunds, maximum membership, and automated social publishing as original mechanics rather than current MVP behavior.",
-        "State current no-auth, no-payment, quorum, meeting-link, seven-day, and distribution behavior accurately."
-      ],
-      "acceptance_criteria": [
-        "The research index lists the product update without replacing the demand-research article.",
-        "A stable /research/... route embeds the privacy-enhanced YouTube player and provides a direct safe YouTube link.",
-        "The page includes the founder story, original mechanics, retained thesis, changed MVP behavior, and current-product CTAs.",
-        "The page cannot reasonably be mistaken for the current credit-backed production specification.",
-        "Focused route, rendering, accessibility, privacy, and external-link tests pass.",
-        "npm run check passes."
-      ],
-      "verification": [
-        "Run node --test tests/research.test.mjs",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when the supplied video update is published and verified without introducing legacy product behavior into the runtime.",
-      "evidence": "2026-06-20: supplied video embedded through YouTube's privacy-enhanced domain; transcript-derived founder story, original mechanics, explicit MVP changes, and focused route/rendering tests added.",
-      "notes": "Complete. L010 remains the next ready deployment verification task."
-    },
-    {
-      "id": "L013",
-      "title": "Publish the small-group formation field note",
-      "status": "done",
-      "phase": "Public Product Flow",
-      "dependencies": [
-        "L012"
-      ],
-      "objective": "Edit the supplied draft into a concise first-party article about how Cohort15 is testing small-group formation and publish it in the existing Research & Field Notes collection.",
-      "inputs": [
-        "/Users/gzero/.codex/attachments/bebd309c-3639-448a-b2d0-bade32e29799/pasted-text.txt",
-        "src/ui/research.mjs",
-        "src/server/app.mjs",
-        "tests/research.test.mjs"
-      ],
-      "write_scope": [
-        "src/ui/research.mjs",
-        "src/server/app.mjs",
-        "tests/research.test.mjs",
-        "workflow tracker alignment"
-      ],
-      "authority": [
-        "Preserve the draft's core argument about testing the smallest viable group-formation loop.",
-        "Tighten the draft to match the tone, structure, and length of existing first-party articles.",
-        "Describe the current implemented MVP accurately and distinguish current behavior from future manual-routing, admin-hosted-intent, and permissioned-distribution experiments.",
-        "Do not add product behavior, external provider work, credentials, or invented results."
-      ],
-      "acceptance_criteria": [
-        "The research index lists the new article without replacing existing entries.",
-        "A stable /research/... route publishes a concise edited article with the draft's group-formation thesis, next experiments, success criteria, and explicit non-assumptions.",
-        "Current product behavior and proposed experiments cannot reasonably be confused.",
-        "Focused index, route, rendering, content-boundary, and unknown-route tests pass.",
-        "npm run check passes."
-      ],
-      "verification": [
-        "Run node --test tests/research.test.mjs",
-        "Run npm run check"
-      ],
-      "stop_condition": "Stop when the edited article is published, verified, and represented in the canonical workflow trackers.",
-      "evidence": "2026-06-20: supplied draft condensed into a first-party field note, current product behavior separated from proposed manual experiments, stable route and index entry added, and focused tests passed.",
-      "notes": "Complete. L010 remains the next ready deployment verification task."
-    },
-    {
-      "id": "L014",
-      "title": "Add first-party feedback capture",
-      "status": "done",
-      "phase": "Product Learning",
-      "dependencies": [
-        "L013"
-      ],
-      "objective": "Add a first-party feedback widget that captures partial and completed qualitative feedback from visitors after key Cohort15 actions.",
-      "inputs": [
-        "src/server/app.mjs",
-        "src/persistence/store.mjs",
-        "src/persistence/repositories.mjs",
-        "src/persistence/supabase-postgres.mjs",
-        "src/ui/home.mjs",
+        "src/services/event-browsing.mjs",
+        "src/services/notifications.mjs",
         "src/ui/create-cohort.mjs",
         "src/ui/cohorts.mjs",
-        "src/ui/research.mjs",
-        "src/ui/styles.css"
+        "src/persistence/repositories.mjs"
       ],
       "write_scope": [
-        "feedback service and validation",
-        "local and Supabase feedback persistence",
-        "POST /feedback route",
-        "global feedback widget UI and client context capture",
-        "focused tests",
-        "workflow tracker alignment"
+        "authenticated create and interest service orchestration",
+        "atomic local/Supabase hold, quorum-consume, and expiry-refund integration",
+        "create/detail forms and insufficient-credit notices",
+        "server routes and session/CSRF enforcement",
+        "notification identity integration",
+        "focused product credit, lifecycle, concurrency, privacy, and regression tests"
       ],
       "authority": [
-        "Use a first-party Supabase table prefixed cohort15_lofi_; do not add an external form provider.",
-        "Capture partial feedback as visitors progress or close the widget after starting.",
-        "Show founder social links as clickable icons, not raw URLs.",
-        "Make the widget a bottom-right panel on desktop and a full-screen modal on mobile.",
-        "Do not store raw IP addresses; use only existing hashed-IP rate limiting patterns for abuse control."
+        "Keep public browsing, schedules, filters, research, feedback, and public meeting-link timing unchanged.",
+        "Derive creator and participant email from the authenticated account; remove editable email fields for new mutations.",
+        "Hold exactly two credits with successful creation and one with accepted interest in the same transaction.",
+        "Reject insufficient credits with HTTP 402 and a clear Buy Credits action without creating a record or hold.",
+        "Consume account-backed holds once at quorum and lazily refund below-quorum holds once before balance reads or funded mutations.",
+        "Preserve legacy anonymous rows with null user IDs; do not claim, backfill, grant, hold, consume, or refund credits for them.",
+        "Preserve existing validation, honeypot, rate-limit, media-type, body-size, Origin, email-notification, and privacy boundaries.",
+        "Do not add Stripe network behavior in this task."
       ],
       "acceptance_criteria": [
-        "The feedback widget appears on public pages and opens from the bottom-right affordance.",
-        "Visitors can answer the conditional small-group formation questions and optionally provide one best contact method.",
-        "Partial feedback is saved after answered steps and when closing after progress; completed feedback records completion metadata.",
-        "Client-submitted action context captures only non-sensitive page/action signals.",
-        "Feedback/contact details are persisted privately and never rendered on public pages.",
-        "Focused service, persistence, route, privacy, and UI rendering tests pass.",
-        "npm run check passes."
+        "Anonymous visitors can browse but must sign in before opening the create flow or submitting interest.",
+        "A new two-credit account can create exactly one cohort and then encounters the payment gate for another funded action.",
+        "Accepted interest holds one credit; duplicates, creator self-interest, expired/already-met cohorts, and rejected requests create no hold.",
+        "Exactly one concurrent interest request reaches quorum and consumes each account-backed hold once.",
+        "Below-quorum expiry refunds creator and participant holds once through lazy settlement and restores available balance.",
+        "Existing anonymous data and current public rendering remain intact, and notifications use the private authenticated email.",
+        "Focused tests cover insufficient balance, concurrent actions, rollback, quorum, expiry, legacy rows, CSRF, rate limits, and public privacy."
       ],
       "verification": [
-        "Run node --test tests/feedback.test.mjs",
-        "Run npm run check",
-        "Smoke test the widget on desktop and mobile viewports"
+        "Run focused create, interest, credit lifecycle, notification, and Supabase concurrency tests",
+        "Run the local account-to-create and account-to-interest browser flow",
+        "Run npm run check"
       ],
-      "stop_condition": "Stop when first-party feedback capture works locally and is ready for user approval before commit/push.",
-      "evidence": "2026-06-24: first-party feedback widget, autosave/close-save behavior, conditional prompts, founder contact icons, local/Supabase persistence, migration, route, and focused tests implemented; npm run check passed.",
-      "notes": "Complete. Production requires applying the indexed feedback migration human task before deployed feedback capture works."
+      "stop_condition": "Stop when free credits fund the real cohort flow and insufficient balance reaches a non-functional Buy Credits gate; Stripe belongs to L018.",
+      "evidence": "Pending.",
+      "notes": "This task converts the lofi mutation boundary without redesigning its public content or legacy data."
+    },
+    {
+      "id": "L018",
+      "title": "Implement Stripe checkout and idempotent fulfillment",
+      "status": "not_started",
+      "phase": "Day 2 — Product Gate and Payment",
+      "dependencies": [
+        "L017"
+      ],
+      "objective": "Add one authenticated USD $6/six-credit Stripe Checkout package with signed webhooks, verified browser-return reconciliation, and exactly-once purchase credit fulfillment.",
+      "inputs": [
+        "docs/cohort15-piece-of-pie-mvp-spec.md",
+        "src/config/runtime.mjs",
+        "src/server/app.mjs",
+        "src/ui/home.mjs",
+        "src/ui/styles.css",
+        "src/persistence/repositories.mjs"
+      ],
+      "write_scope": [
+        "Stripe HTTP and signature-verification adapter",
+        "purchase checkout and fulfillment service",
+        "Buy Credits, checkout, webhook, and completion routes",
+        "one-package payment UI",
+        "Stripe runtime configuration and non-secret templates",
+        "focused adapter, signature, route, purchase, idempotency, and failure tests"
+      ],
+      "authority": [
+        "Offer only six credits for USD $6 through a server-selected configured Stripe Price ID.",
+        "Use Stripe-hosted Checkout; never receive or persist card data.",
+        "Persist a pending purchase before Checkout Session creation and set server-owned user/purchase metadata and provider idempotency key.",
+        "Verify the raw webhook signature and five-minute timestamp tolerance before parsing or acting; limit webhook bodies to 256 KiB.",
+        "Accept only completed, paid sessions matching stored checkout ID, metadata, user, amount, currency, and package.",
+        "Route webhook and server-retrieved browser return through one transaction-safe, idempotent fulfillment service.",
+        "Cancellation, unpaid, mismatched, invalid-signature, wrong-owner, and provider-failure paths grant no credits.",
+        "Do not log secrets, full provider payloads, card data, emails, session cookies, or Checkout URLs."
+      ],
+      "acceptance_criteria": [
+        "A signed-in user can start the configured six-credit Checkout and an anonymous or CSRF-invalid request cannot.",
+        "The browser cannot control price, amount, currency, quantity, user ID, purchase ID, or redirect origins.",
+        "A valid paid webhook adds one six-credit purchase transaction and marks the purchase paid.",
+        "Duplicate events, concurrent webhook/return calls, webhook retries, and completion-page refreshes cannot add credits more than once.",
+        "The completion route retrieves Stripe state server-side, verifies ownership, invokes shared fulfillment, and renders paid/pending/failure safely.",
+        "Invalid signatures return 400, unknown valid events return 200, retryable internal failures return 500, and cancellation grants nothing.",
+        "Automated tests use fake Stripe transports and secrets and make no live provider calls."
+      ],
+      "verification": [
+        "Run focused Stripe adapter, webhook signature, checkout, fulfillment, and route tests",
+        "Inspect logs/errors and fixtures for secret, email, card, and provider-payload leakage",
+        "Run npm run check"
+      ],
+      "stop_condition": "Stop when local/fake-provider checkout and fulfillment are money-safe and tested; leave real dashboard configuration and live payment to L020.",
+      "evidence": "Pending.",
+      "notes": "The incomplete browser-return payment concepts on main are reference material only; signed webhook reliability is mandatory here."
+    },
+    {
+      "id": "L019",
+      "title": "Complete the Piece of Pie local launch gate",
+      "status": "not_started",
+      "phase": "Day 3 — Launch Gate",
+      "dependencies": [
+        "L018"
+      ],
+      "objective": "Finish the cohesive account/balance/payment experience, production configuration, documentation, privacy/security regression suite, and local end-to-end launch verification.",
+      "inputs": [
+        "docs/cohort15-piece-of-pie-mvp-spec.md",
+        "docs/human-tasks/piece-of-pie-launch.md",
+        "src",
+        "tests",
+        ".env.example",
+        "render.yaml",
+        "README.md"
+      ],
+      "write_scope": [
+        "shared navigation and payment-gate UX refinements",
+        "production runtime validation and non-secret configuration templates",
+        "Piece of Pie end-to-end, privacy, abuse, session, payment, and regression tests",
+        "README and provider-impact documentation corrections",
+        "launch-blocking source fixes discovered during verification"
+      ],
+      "authority": [
+        "Do not add deferred profiles, dashboards, packages, subscriptions, social login, admin UI, or unrelated redesign.",
+        "Preserve all existing lofi production variables and add only the four auth/Stripe variables named in the specification.",
+        "Fail production startup clearly when required auth or Stripe values are missing; never fall back to unsafe local behavior.",
+        "Keep provider instructions under docs/human-tasks and do not perform dashboard, credential, DNS, migration, or production-payment actions.",
+        "Treat any duplicate grant/purchase, negative balance, auth bypass, CSRF bypass, payment mismatch, secret leak, public email leak, or broken existing lofi flow as launch-blocking."
+      ],
+      "acceptance_criteria": [
+        "The local end-to-end flow covers sign-in, exactly-once grant, free-credit use, insufficient-credit gate, fake verified purchase, and purchased-credit use.",
+        "Balance and Buy Credits controls are understandable and responsive without a full dashboard.",
+        "Regression coverage proves public browsing, research, feedback, notifications, quorum link timing, rate limits, and legacy rows still work.",
+        "Security/privacy coverage proves cookie, session, CSRF, return-path, webhook, Origin, body-limit, concurrency, and no-secret/no-PII boundaries.",
+        "Runtime tests require the complete preserved-plus-additive production contract and non-secret templates contain no credential values.",
+        "npm run check and desktop/mobile browser smoke verification pass."
+      ],
+      "verification": [
+        "Run npm run check",
+        "Run local desktop and mobile browser smoke for the complete account/payment/use path with fake providers",
+        "Inspect .env.example, render.yaml, README, and docs/human-tasks/piece-of-pie-launch.md for exact configuration alignment"
+      ],
+      "stop_condition": "Stop when the repository is locally launch-ready and only indexed human/provider actions remain.",
+      "evidence": "Pending.",
+      "notes": "Final code-owned launch gate before live provider setup and production verification."
+    },
+    {
+      "id": "L020",
+      "title": "Configure, deploy, and verify the live payment MVP",
+      "status": "not_started",
+      "phase": "Day 3 — Launch Gate",
+      "dependencies": [
+        "L019"
+      ],
+      "objective": "Use the indexed human checklist to extend the existing providers, deploy codex/piece-of-pie, complete one live payment, use the purchased credits, and record non-secret Builder Pie launch evidence.",
+      "inputs": [
+        "docs/human-tasks/piece-of-pie-launch.md",
+        "https://cohort15.com",
+        "README.md"
+      ],
+      "write_scope": [
+        "provider dashboards, additive production migration, deployment branch, and production verification performed by the user",
+        "non-secret smoke evidence and task/progress closeout",
+        "small repository blocker fixes only when separately authorized"
+      ],
+      "authority": [
+        "Reuse the existing Supabase project, Render service, cohort15.com domain, Resend setup, and analytics configuration.",
+        "Follow docs/human-tasks/piece-of-pie-launch.md and never paste or commit credentials, webhook secrets, magic links, session cookies, payment details, customer email, or raw provider records.",
+        "Use Stripe live mode for final payment proof and an operator-controlled account; test mode is a preflight only.",
+        "Do not mark complete until a paid purchase is fulfilled once and those purchased credits fund a real create or interest action.",
+        "Do not claim the application alone satisfies weekly-post, registration, public-repo, or presentation requirements; record only confirmed evidence."
+      ],
+      "acceptance_criteria": [
+        "The additive migration and Supabase Auth configuration are applied to the existing isolated lofi project without data loss.",
+        "The existing Render service deploys codex/piece-of-pie with the preserved and new environment values and passes health checks.",
+        "A new production account receives exactly two credits and repeated login does not add more.",
+        "A real live-mode USD $6 purchase adds six credits exactly once through signed fulfillment.",
+        "Purchased credits successfully fund a real cohort creation or interest action on https://cohort15.com.",
+        "Existing public browsing, notifications, feedback, analytics, HTTPS/domain routing, privacy, and meeting-link timing pass production smoke checks.",
+        "The final report records only non-secret pass/fail evidence and links the user can use for the final presentation."
+      ],
+      "verification": [
+        "Complete every applicable item in docs/human-tasks/piece-of-pie-launch.md",
+        "Verify non-secret Stripe, Supabase, Render, Resend, domain, and product outcomes",
+        "Run npm run check after any repository correction"
+      ],
+      "stop_condition": "Stop when the live account-to-payment-to-product-use flow passes or report the exact human/provider blocker without exposing secrets.",
+      "evidence": "Pending.",
+      "notes": "This task requires the user to operate provider dashboards and perform production verification."
     }
   ]
 }
