@@ -116,6 +116,6 @@ The only new human setup path is `docs/human-tasks/piece-of-pie-launch.md`. It d
 
 ## Next Ready Task
 
-Next ready task: L015.
+Next ready task: L016.
 
-L015 establishes the durable account, session, ledger, purchase, and Stripe-event boundary required by every later task.
+L015 established the durable account, session, ledger, purchase, and Stripe-event boundary. L016 can now add magic-link authentication and secure application sessions without changing cohort mutation semantics.

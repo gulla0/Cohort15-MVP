@@ -8,13 +8,13 @@ Day 1 — Identity and Ledger
 
 L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L015.
+Next ready task: L016.
 
 ## Ready Task Candidates
 
 | Task | Why ready | Notes |
 |---|---|---|
-| L015 | The canonical Piece of Pie specification and all current persistence/migration inputs exist | Build the additive account/session/ledger/purchase boundary before any route or UI work. |
+| L016 | L015 now provides atomic account provisioning, signup grants, digest-only sessions, and balance reads | Add Supabase magic-link authentication, secure application sessions, CSRF, and signed-in navigation without gating cohort mutations yet. |
 
 ## Known Parallelism
 

@@ -187,3 +187,13 @@ Verification: `npm run check` passed with 75 tests, 6 aligned active tasks, 0 in
 - Updated current blocker and human-task path guidance.
 
 Verification: `npm run check` passed with 75 tests and 15 aligned tasks.
+
+## 2026-07-15 — L015 account and credit persistence foundation
+
+- Extended domain records with users, digest-only sessions, immutable grant/purchase/hold/consume/refund transactions, purchases, Stripe event receipts, and nullable account links.
+- Extended local and Supabase repositories with equivalent provisioning, session, balance, hold, settlement, purchase, fulfillment, and Stripe-event boundaries.
+- Added the isolated additive account/credit migration with RLS, browser-role revocation, service-role-only security-definer RPCs, immutable-ledger enforcement, and uniqueness/concurrency safeguards.
+- Preserved anonymous cohort/interest behavior and all existing lofi persistence, notification, feedback, research, privacy, and public rendering behavior.
+- Added focused concurrency, idempotency, adapter, migration-isolation, and legacy-null-link tests.
+
+Verification: `npm run check` passed with 88 tests and 6 aligned active tasks. L016 is next.

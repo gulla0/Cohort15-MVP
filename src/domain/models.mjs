@@ -8,7 +8,7 @@ import {
   normalizeEmail,
 } from './validation.mjs';
 
-const INTEREST_FIELDS = ['id', 'cohortId', 'email', 'createdAt'];
+const INTEREST_FIELDS = ['id', 'cohortId', 'email', 'userId', 'createdAt'];
 const FEEDBACK_FIELDS = [
   'id', 'sessionId', 'path', 'actionContext', 'lookingForGroup', 'lookingForInstead',
   'groupIntent', 'didCreateOrJoin', 'whyOrWhyNot', 'contactEmail', 'contactX',
@@ -26,6 +26,8 @@ export const FEEDBACK_DID_CREATE_OR_JOIN_VALUES = Object.freeze([
   'created', 'joined', 'both', 'not_yet', 'tried_but_stopped',
 ]);
 export const FEEDBACK_COMPLETION_STATES = Object.freeze(['partial', 'completed']);
+export const CREDIT_TRANSACTION_TYPES = Object.freeze(['grant', 'purchase', 'hold', 'consume', 'refund']);
+export const PURCHASE_STATUSES = Object.freeze(['pending', 'fulfilled']);
 
 function instant(value, field, { nullable = false } = {}) {
   if (nullable && (value === null || value === undefined)) return null;
@@ -121,6 +123,7 @@ export function createCohort(input, { id = randomUUID(), now = new Date() } = {}
   return Object.freeze({
     id: requiredString(id, 'id'),
     creatorEmail: normalized.creatorEmail,
+    creatorUserId: normalized.creatorUserId,
     title: normalized.title,
     description: normalized.description,
     category: normalized.category,
@@ -144,11 +147,12 @@ export function createCohort(input, { id = randomUUID(), now = new Date() } = {}
 }
 
 export function createInterest(input, { id = randomUUID(), now = new Date() } = {}) {
-  assertKnownFields(input, ['cohortId', 'email'], 'interest');
+  assertKnownFields(input, ['cohortId', 'email', 'userId'], 'interest');
   return Object.freeze({
     id: requiredString(id, 'id'),
     cohortId: requiredString(input.cohortId, 'cohortId'),
     email: normalizeEmail(input.email),
+    userId: input.userId == null ? null : requiredString(input.userId, 'userId'),
     createdAt: instant(now, 'createdAt'),
   });
 }
@@ -220,7 +224,94 @@ export function hydrateInterest(record) {
     id: requiredString(record.id, 'id'),
     cohortId: requiredString(record.cohortId, 'cohortId'),
     email: normalizeEmail(record.email),
+    userId: record.userId == null ? null : requiredString(record.userId, 'userId'),
     createdAt: instant(record.createdAt, 'createdAt'),
+  });
+}
+
+export function createUser(input, { id = randomUUID(), now = new Date() } = {}) {
+  assertKnownFields(input, ['supabaseSubject', 'email'], 'user');
+  const timestamp = instant(now, 'createdAt');
+  return Object.freeze({
+    id: requiredString(id, 'id'),
+    supabaseSubject: requiredString(input.supabaseSubject, 'supabaseSubject'),
+    email: normalizeEmail(input.email),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  });
+}
+
+export function createSession(input, { id = randomUUID(), now = new Date() } = {}) {
+  assertKnownFields(input, ['userId', 'tokenDigest', 'csrfDigest', 'expiresAt'], 'session');
+  const timestamp = instant(now, 'createdAt');
+  const tokenDigest = requiredString(input.tokenDigest, 'tokenDigest');
+  const csrfDigest = requiredString(input.csrfDigest, 'csrfDigest');
+  if (!/^[a-f0-9]{64}$/u.test(tokenDigest)) {
+    throw new DomainValidationError('tokenDigest', 'must be a lowercase SHA-256 digest');
+  }
+  if (!/^[a-f0-9]{64}$/u.test(csrfDigest)) {
+    throw new DomainValidationError('csrfDigest', 'must be a lowercase SHA-256 digest');
+  }
+  const expiresAt = instant(input.expiresAt, 'expiresAt');
+  if (Date.parse(expiresAt) <= Date.parse(timestamp)) {
+    throw new DomainValidationError('expiresAt', 'must be after creation');
+  }
+  return Object.freeze({
+    id: requiredString(id, 'id'), userId: requiredString(input.userId, 'userId'),
+    tokenDigest, csrfDigest, expiresAt, createdAt: timestamp, updatedAt: timestamp,
+  });
+}
+
+export function createCreditTransaction(input, { id = randomUUID(), now = new Date() } = {}) {
+  assertKnownFields(input, [
+    'userId', 'type', 'amount', 'idempotencyKey', 'cohortId', 'purchaseId', 'source',
+  ], 'creditTransaction');
+  const type = allowedEnum(input.type, 'type', CREDIT_TRANSACTION_TYPES);
+  if (!Number.isInteger(input.amount) || input.amount <= 0) {
+    throw new DomainValidationError('amount', 'must be a positive integer');
+  }
+  return Object.freeze({
+    id: requiredString(id, 'id'),
+    userId: requiredString(input.userId, 'userId'),
+    type,
+    amount: input.amount,
+    idempotencyKey: requiredString(input.idempotencyKey, 'idempotencyKey'),
+    cohortId: input.cohortId == null ? null : requiredString(input.cohortId, 'cohortId'),
+    purchaseId: input.purchaseId == null ? null : requiredString(input.purchaseId, 'purchaseId'),
+    source: input.source == null ? null : requiredString(input.source, 'source'),
+    createdAt: instant(now, 'createdAt'),
+  });
+}
+
+export function createPurchase(input, { id = randomUUID(), now = new Date() } = {}) {
+  assertKnownFields(input, [
+    'userId', 'packageId', 'credits', 'amountCents', 'currency', 'status',
+    'stripeCheckoutSessionId', 'stripePaymentIntentId', 'fulfilledAt',
+  ], 'purchase');
+  for (const [field, value] of [['credits', input.credits], ['amountCents', input.amountCents]]) {
+    if (!Number.isInteger(value) || value <= 0) throw new DomainValidationError(field, 'must be a positive integer');
+  }
+  const timestamp = instant(now, 'createdAt');
+  const status = allowedEnum(input.status ?? 'pending', 'status', PURCHASE_STATUSES);
+  return Object.freeze({
+    id: requiredString(id, 'id'), userId: requiredString(input.userId, 'userId'),
+    packageId: requiredString(input.packageId, 'packageId'), credits: input.credits,
+    amountCents: input.amountCents, currency: requiredString(input.currency, 'currency').toLowerCase(),
+    status,
+    stripeCheckoutSessionId: input.stripeCheckoutSessionId == null ? null : requiredString(input.stripeCheckoutSessionId, 'stripeCheckoutSessionId'),
+    stripePaymentIntentId: input.stripePaymentIntentId == null ? null : requiredString(input.stripePaymentIntentId, 'stripePaymentIntentId'),
+    createdAt: timestamp, updatedAt: timestamp,
+    fulfilledAt: status === 'fulfilled' ? instant(input.fulfilledAt ?? timestamp, 'fulfilledAt') : null,
+  });
+}
+
+export function createStripeEvent(input, { now = new Date() } = {}) {
+  assertKnownFields(input, ['eventId', 'eventType', 'outcome'], 'stripeEvent');
+  return Object.freeze({
+    eventId: requiredString(input.eventId, 'eventId'),
+    eventType: requiredString(input.eventType, 'eventType'),
+    outcome: requiredString(input.outcome, 'outcome'),
+    createdAt: instant(now, 'createdAt'),
   });
 }
 

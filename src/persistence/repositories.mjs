@@ -1,8 +1,13 @@
 import {
   createCohort,
+  createCreditTransaction,
   createFeedback,
   createInterest,
   createNotificationDelivery,
+  createPurchase,
+  createSession,
+  createStripeEvent,
+  createUser,
   hydrateFeedback,
   hydrateNotificationDelivery,
 } from '../domain/models.mjs';
@@ -26,6 +31,15 @@ export class RepositoryNotFoundError extends Error {
     this.name = 'RepositoryNotFoundError';
     this.entity = entity;
     this.id = id;
+  }
+}
+
+export class InsufficientCreditsError extends RepositoryConflictError {
+  constructor(balance, required) {
+    super('insufficient_credits', `requires ${required} credits; ${balance.available} available`);
+    this.name = 'InsufficientCreditsError';
+    this.balance = balance;
+    this.required = required;
   }
 }
 
@@ -69,7 +83,263 @@ export function createLocalRepositories({
     });
   }
 
+  function requireUser(id) {
+    const user = store.getUser(id);
+    if (!user) throw new RepositoryNotFoundError('user', id);
+    return user;
+  }
+
+  function creditBalance(userId) {
+    const totals = { funded: 0, available: 0, held: 0, consumed: 0, refunded: 0 };
+    for (const transaction of store.listCreditTransactionsByUserId(userId)) {
+      if (transaction.type === 'grant' || transaction.type === 'purchase') totals.funded += transaction.amount;
+      if (transaction.type === 'hold') totals.held += transaction.amount;
+      if (transaction.type === 'consume') {
+        totals.held -= transaction.amount;
+        totals.consumed += transaction.amount;
+      }
+      if (transaction.type === 'refund') {
+        totals.held -= transaction.amount;
+        totals.refunded += transaction.amount;
+      }
+    }
+    totals.available = totals.funded - totals.held - totals.consumed;
+    if (totals.available < 0 || totals.held < 0) throw new Error('credit ledger invariant violated');
+    return Object.freeze(totals);
+  }
+
+  function requireHold(userId, holdId) {
+    const hold = store.getCreditTransaction(holdId);
+    if (!hold || hold.type !== 'hold' || hold.userId !== userId) {
+      throw new RepositoryConflictError('invalid_hold', 'credit hold does not belong to user');
+    }
+    return hold;
+  }
+
+  function settledAmount(holdId) {
+    let total = 0;
+    for (const transaction of store.listCreditTransactionsByUserId(store.getCreditTransaction(holdId)?.userId)) {
+      if ((transaction.type === 'consume' || transaction.type === 'refund') && transaction.source === holdId) total += transaction.amount;
+    }
+    return total;
+  }
+
   return Object.freeze({
+    async provisionUser(input, options = {}) {
+      const normalizedEmail = normalizeEmail(input.email);
+      return store.withLock(`identity:${input.supabaseSubject}:${normalizedEmail}`, async () => {
+        const bySubject = store.getUserBySupabaseSubject(input.supabaseSubject);
+        const byEmail = store.getUserByEmail(normalizedEmail);
+        if ((bySubject && bySubject.email !== normalizedEmail)
+          || (byEmail && byEmail.supabaseSubject !== input.supabaseSubject)) {
+          throw new RepositoryConflictError('identity_conflict', 'verified identity conflicts with an existing account');
+        }
+        let user = bySubject ?? byEmail;
+        let created = false;
+        if (!user) {
+          user = createUser({ supabaseSubject: input.supabaseSubject, email: normalizedEmail }, {
+            id: options.id ?? randomUUID(), now: options.now ?? now(),
+          });
+          if (!store.insertUser(user)) throw new RepositoryConflictError('identity_conflict');
+          created = true;
+        }
+        const key = `signup_grant:${user.id}`;
+        let grant = store.getCreditTransactionByIdempotencyKey(key);
+        let grantCreated = false;
+        if (!grant) {
+          grant = createCreditTransaction({
+            userId: user.id, type: 'grant', amount: 2, idempotencyKey: key,
+            source: 'signup_grant', cohortId: null, purchaseId: null,
+          }, { id: options.grantId ?? randomUUID(), now: options.now ?? now() });
+          if (!store.insertCreditTransaction(grant)) {
+            grant = store.getCreditTransactionByIdempotencyKey(key);
+            if (!grant) throw new RepositoryConflictError('duplicate_credit_transaction');
+          }
+          else grantCreated = true;
+        }
+        return Object.freeze({ user, created, grant, grantCreated });
+      });
+    },
+
+    async getUserById(id) { return requireUser(id); },
+    async getUserBySupabaseSubject(subject) {
+      const user = store.getUserBySupabaseSubject(subject);
+      if (!user) throw new RepositoryNotFoundError('user', subject);
+      return user;
+    },
+    async getUserByEmail(email) {
+      const normalized = normalizeEmail(email);
+      const user = store.getUserByEmail(normalized);
+      if (!user) throw new RepositoryNotFoundError('user', normalized);
+      return user;
+    },
+
+    async createSession(input, options = {}) {
+      requireUser(input.userId);
+      const session = createSession(input, { id: options.id ?? randomUUID(), now: options.now ?? now() });
+      if (!store.insertSession(session)) throw new RepositoryConflictError('duplicate_session');
+      return session;
+    },
+    async getSessionByTokenDigest(tokenDigest, options = {}) {
+      const session = store.getSessionByTokenDigest(tokenDigest);
+      if (!session || Date.parse(session.expiresAt) <= new Date(options.now ?? now()).valueOf()) {
+        if (session) store.deleteSessionByTokenDigest(tokenDigest);
+        throw new RepositoryNotFoundError('session', tokenDigest);
+      }
+      return Object.freeze({ ...session, user: requireUser(session.userId) });
+    },
+    async deleteSessionByTokenDigest(tokenDigest) { return store.deleteSessionByTokenDigest(tokenDigest); },
+
+    async getCreditBalance(userId) { requireUser(userId); return creditBalance(userId); },
+    async listCreditTransactionsByUserId(userId) { requireUser(userId); return store.listCreditTransactionsByUserId(userId); },
+
+    async holdCredits(input, options = {}) {
+      requireUser(input.userId);
+      return store.withLock(`credits:${input.userId}`, async () => {
+        const existing = store.getCreditTransactionByIdempotencyKey(input.idempotencyKey);
+        if (existing) {
+          if (existing.userId !== input.userId || existing.type !== 'hold' || existing.amount !== input.amount) {
+            throw new RepositoryConflictError('idempotency_mismatch');
+          }
+          return Object.freeze({ transaction: existing, created: false, balance: creditBalance(input.userId) });
+        }
+        const balance = creditBalance(input.userId);
+        if (!Number.isInteger(input.amount) || input.amount <= 0) {
+          createCreditTransaction({ ...input, type: 'hold' }, { id: options.id ?? randomUUID(), now: options.now ?? now() });
+        }
+        if (balance.available < input.amount) throw new InsufficientCreditsError(balance, input.amount);
+        const transaction = createCreditTransaction({
+          userId: input.userId, type: 'hold', amount: input.amount,
+          idempotencyKey: input.idempotencyKey, cohortId: input.cohortId ?? null,
+          purchaseId: null, source: input.source ?? null,
+        }, { id: options.id ?? randomUUID(), now: options.now ?? now() });
+        if (!store.insertCreditTransaction(transaction)) throw new RepositoryConflictError('duplicate_credit_transaction');
+        return Object.freeze({ transaction, created: true, balance: creditBalance(input.userId) });
+      });
+    },
+
+    async consumeCreditHold(input, options = {}) {
+      requireUser(input.userId);
+      return store.withLock(`credits:${input.userId}`, async () => {
+        const existing = store.getCreditTransactionByIdempotencyKey(input.idempotencyKey);
+        if (existing) {
+          if (existing.userId !== input.userId || existing.type !== 'consume' || existing.source !== input.holdId) {
+            throw new RepositoryConflictError('idempotency_mismatch');
+          }
+          return Object.freeze({ transaction: existing, created: false, balance: creditBalance(input.userId) });
+        }
+        const hold = requireHold(input.userId, input.holdId);
+        if (settledAmount(hold.id) !== 0) throw new RepositoryConflictError('hold_settled');
+        const transaction = createCreditTransaction({
+          userId: input.userId, type: 'consume', amount: hold.amount,
+          idempotencyKey: input.idempotencyKey, cohortId: input.cohortId ?? hold.cohortId,
+          purchaseId: null, source: hold.id,
+        }, { id: options.id ?? randomUUID(), now: options.now ?? now() });
+        store.insertCreditTransaction(transaction);
+        return Object.freeze({ transaction, created: true, balance: creditBalance(input.userId) });
+      });
+    },
+
+    async refundCreditHold(input, options = {}) {
+      requireUser(input.userId);
+      return store.withLock(`credits:${input.userId}`, async () => {
+        const existing = store.getCreditTransactionByIdempotencyKey(input.idempotencyKey);
+        if (existing) {
+          if (existing.userId !== input.userId || existing.type !== 'refund' || existing.source !== input.holdId) {
+            throw new RepositoryConflictError('idempotency_mismatch');
+          }
+          return Object.freeze({ transaction: existing, created: false, balance: creditBalance(input.userId) });
+        }
+        const hold = requireHold(input.userId, input.holdId);
+        if (settledAmount(hold.id) !== 0) throw new RepositoryConflictError('hold_settled');
+        const transaction = createCreditTransaction({
+          userId: input.userId, type: 'refund', amount: hold.amount,
+          idempotencyKey: input.idempotencyKey, cohortId: input.cohortId ?? hold.cohortId,
+          purchaseId: null, source: hold.id,
+        }, { id: options.id ?? randomUUID(), now: options.now ?? now() });
+        store.insertCreditTransaction(transaction);
+        return Object.freeze({ transaction, created: true, balance: creditBalance(input.userId) });
+      });
+    },
+
+    async createPendingPurchase(input, options = {}) {
+      requireUser(input.userId);
+      const purchase = createPurchase({ ...input, status: 'pending' }, { id: options.id ?? randomUUID(), now: options.now ?? now() });
+      if (!store.insertPurchase(purchase)) throw new RepositoryConflictError('duplicate_purchase');
+      return purchase;
+    },
+    async setPurchaseCheckoutSession(purchaseId, stripeCheckoutSessionId, options = {}) {
+      return store.withLock(`purchase:${purchaseId}`, async () => {
+        const purchase = store.getPurchase(purchaseId);
+        if (!purchase) throw new RepositoryNotFoundError('purchase', purchaseId);
+        if (purchase.stripeCheckoutSessionId != null && purchase.stripeCheckoutSessionId !== stripeCheckoutSessionId) {
+          throw new RepositoryConflictError('purchase_mismatch');
+        }
+        const updated = Object.freeze({
+          ...purchase, stripeCheckoutSessionId,
+          updatedAt: new Date(options.now ?? now()).toISOString(),
+        });
+        if (!store.updatePurchase(updated)) throw new RepositoryConflictError('duplicate_checkout_session');
+        return updated;
+      });
+    },
+    async getPurchaseById(id) {
+      const purchase = store.getPurchase(id);
+      if (!purchase) throw new RepositoryNotFoundError('purchase', id);
+      return purchase;
+    },
+    async getPurchaseByStripeCheckoutSessionId(id) {
+      const purchase = store.getPurchaseByStripeCheckoutSessionId(id);
+      if (!purchase) throw new RepositoryNotFoundError('purchase', id);
+      return purchase;
+    },
+
+    async fulfillPurchase(input, options = {}) {
+      return store.withLock(`purchase:${input.purchaseId}`, async () => {
+        const purchase = store.getPurchase(input.purchaseId);
+        if (!purchase) throw new RepositoryNotFoundError('purchase', input.purchaseId);
+        const matches = purchase.userId === input.userId
+          && purchase.packageId === input.packageId
+          && purchase.credits === input.credits
+          && purchase.amountCents === input.amountCents
+          && purchase.currency === String(input.currency).toLowerCase()
+          && purchase.stripeCheckoutSessionId === input.stripeCheckoutSessionId;
+        if (!matches) throw new RepositoryConflictError('purchase_mismatch');
+        const key = `purchase:${purchase.id}`;
+        const prior = store.getCreditTransactionByIdempotencyKey(key);
+        if (purchase.status === 'fulfilled') {
+          return Object.freeze({ purchase, transaction: prior, fulfilled: false });
+        }
+        const transaction = createCreditTransaction({
+          userId: purchase.userId, type: 'purchase', amount: purchase.credits,
+          idempotencyKey: key, cohortId: null, purchaseId: purchase.id, source: 'stripe',
+        }, { id: options.transactionId ?? randomUUID(), now: options.now ?? now() });
+        if (!store.insertCreditTransaction(transaction)) throw new RepositoryConflictError('duplicate_credit_transaction');
+        const timestamp = new Date(options.now ?? now()).toISOString();
+        const fulfilled = Object.freeze({
+          ...purchase, status: 'fulfilled', stripePaymentIntentId: input.stripePaymentIntentId ?? null,
+          fulfilledAt: timestamp, updatedAt: timestamp,
+        });
+        store.updatePurchase(fulfilled);
+        return Object.freeze({ purchase: fulfilled, transaction, fulfilled: true });
+      });
+    },
+
+    async recordStripeEvent(input, options = {}) {
+      return store.withLock(`stripe-event:${input.eventId}`, async () => {
+        const existing = store.getStripeEvent(input.eventId);
+        if (existing) return Object.freeze({ event: existing, created: false });
+        const event = createStripeEvent(input, { now: options.now ?? now() });
+        store.insertStripeEvent(event);
+        return Object.freeze({ event, created: true });
+      });
+    },
+    async getStripeEventById(eventId) {
+      const event = store.getStripeEvent(eventId);
+      if (!event) throw new RepositoryNotFoundError('stripeEvent', eventId);
+      return event;
+    },
+
     async createCohort(input, options = {}) {
       const cohort = createCohort(input, {
         id: options.id ?? randomUUID(),
@@ -109,6 +379,9 @@ export function createLocalRepositories({
         if (interest.email === cohort.creatorEmail) {
           throw new RepositoryConflictError('creator_email', 'creator email cannot count toward quorum');
         }
+        if (interest.userId != null && interest.userId === cohort.creatorUserId) {
+          throw new RepositoryConflictError('creator_user', 'creator account cannot count toward quorum');
+        }
         if (cohort.quorumMetAt != null) {
           throw new RepositoryConflictError('already_met', 'cohort already reached quorum');
         }
@@ -117,6 +390,9 @@ export function createLocalRepositories({
         }
         if (store.getInterestByCohortAndEmail(interest.cohortId, interest.email)) {
           throw new RepositoryConflictError('duplicate_email', 'email already counted for cohort');
+        }
+        if (interest.userId != null && store.getInterestByCohortAndUserId(interest.cohortId, interest.userId)) {
+          throw new RepositoryConflictError('duplicate_user', 'account already counted for cohort');
         }
         if (!store.insertInterest(interest)) {
           throw new RepositoryConflictError('duplicate_email', 'email already counted for cohort');

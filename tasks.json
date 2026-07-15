@@ -11,7 +11,7 @@
     {
       "id": "L015",
       "title": "Add account and credit persistence foundation",
-      "status": "not_started",
+      "status": "done",
       "phase": "Day 1 — Identity and Ledger",
       "dependencies": [],
       "objective": "Extend the existing lofi local and Supabase persistence boundaries with users, hashed sessions, immutable credit transactions, purchases, processed Stripe events, nullable account links, and atomic credit primitives.",
@@ -58,8 +58,8 @@
         "Run npm run check"
       ],
       "stop_condition": "Stop when the durable data and transaction boundary is verified; leave authentication, product routes, and Stripe HTTP integration to later tasks.",
-      "evidence": "Pending.",
-      "notes": "First ready Piece of Pie implementation task. Concepts from main may be consulted but must be adapted to the current lofi repository interfaces."
+      "evidence": "Implemented local and Supabase users, digest-only sessions, immutable credit ledger, derived balances, purchases, Stripe-event receipts, nullable account links, and atomic provisioning/hold/settlement/fulfillment primitives. Added the isolated additive migration and focused concurrency, replay, privacy, adapter, and migration tests. npm run check passed with 88 tests on 2026-07-15 EDT.",
+      "notes": "Completed without HTTP routes, auth UI, Stripe network calls, or live provider changes. Concepts from main were consulted only as read-only reference and adapted to the lofi repository interfaces."
     },
     {
       "id": "L016",

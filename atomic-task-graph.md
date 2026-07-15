@@ -5,7 +5,7 @@
 ## Execution Graph
 
 ```text
-L015 Account and credit persistence foundation (not_started)
+L015 Account and credit persistence foundation (done)
   └─ L016 Magic-link accounts and signup credits (not_started)
        └─ L017 Credit-gated creation and interest (not_started)
             └─ L018 Stripe checkout and idempotent fulfillment (not_started)
@@ -18,7 +18,7 @@ L015 Account and credit persistence foundation (not_started)
 ### L015 — Add account and credit persistence foundation
 
 - Depends on: none
-- Status: not_started
+- Status: done
 - Owns: users, hashed sessions, immutable ledger, purchases, Stripe events, nullable account links, additive migration, local/Supabase atomic primitives
 - Delivers: concurrency-safe account provisioning, two-credit grant idempotency, balances, holds, consumes, refunds, and purchase fulfillment boundaries
 - Stops before: authentication routes, product gating, and Stripe HTTP calls

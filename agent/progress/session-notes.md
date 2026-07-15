@@ -200,3 +200,14 @@ Full `npm run check` passed with 75 tests. L010 remains the next ready product t
 - Made `start.txt` the sole fresh-chat entry; the repository artifacts contain the complete goal, constraints, next task, and provider handoff without relying on this conversation.
 
 No product code was implemented in this setup wave. L015 is the first ready implementation task.
+
+## 2026-07-15 — L015 account and credit persistence foundation
+
+- Added local and Supabase persistence for normalized Supabase-backed users, SHA-256-only sessions/CSRF material, immutable credit transactions, purchases, and processed Stripe event receipts.
+- Added nullable cohort creator and interest user links while preserving legacy anonymous rows and public serialization.
+- Added atomic, idempotent primitives for user-plus-signup-grant provisioning, serialized credit holds, mutually exclusive consume/refund settlement, and purchase fulfillment.
+- Added an additive `cohort15_lofi_*` migration with RLS, no browser policies, service-role-only RPC execution, safe search paths, uniqueness constraints, and immutable-ledger enforcement.
+- Added focused local concurrency/replay/privacy coverage, Supabase adapter/RPC coverage, and migration isolation/security coverage.
+- Kept authentication routes/UI, cohort credit gating, Stripe HTTP calls, and provider operations outside this task.
+
+Verification completed with `npm run check` and 88 passing tests. L016 is next.

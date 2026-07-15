@@ -413,3 +413,172 @@ test('interest RPC correction qualifies table columns that conflict with output 
   assert.match(migration, /returning cohorts\.quorum_met_at into v_quorum_met_at/u);
   assert.match(migration, /select cohorts\.quorum_met_at/u);
 });
+
+test('Supabase provisioning uses the atomic user and signup-grant RPC exactly once', async () => {
+  const userRow = {
+    id: '11111111-1111-4111-8111-111111111111',
+    supabase_subject: 'supabase-subject-1',
+    email: 'person@example.com',
+    created_at: CREATED_AT,
+    updated_at: CREATED_AT,
+  };
+  const grantRow = {
+    id: '22222222-2222-4222-8222-222222222222',
+    user_id: userRow.id,
+    type: 'grant',
+    amount: 2,
+    idempotency_key: `signup_grant:${userRow.id}`,
+    cohort_id: null,
+    purchase_id: null,
+    source: 'signup_grant',
+    created_at: CREATED_AT,
+  };
+  const { fetchImpl, calls } = createFetchStub(
+    { body: [{ user_id: userRow.id, user_created: true, grant_transaction_id: grantRow.id, grant_created: true }] },
+    { body: userRow },
+    { body: grantRow },
+  );
+  const repositories = createSupabasePostgresRepositories({
+    url: SUPABASE_URL, serviceRoleKey: SERVICE_ROLE_KEY, fetchImpl,
+  });
+
+  const result = await repositories.provisionUser({
+    supabaseSubject: 'supabase-subject-1', email: ' Person@Example.com ',
+  }, { id: userRow.id, grantId: grantRow.id, now: CREATED_AT });
+
+  assert.equal(result.created, true);
+  assert.equal(result.grantCreated, true);
+  assert.equal(result.grant.amount, 2);
+  assert.match(calls[0].url, new RegExp(`/rest/v1/rpc/${RPCS.provisionUser}$`, 'u'));
+  assert.deepEqual(calls[0].body, {
+    p_user_id: userRow.id,
+    p_grant_transaction_id: grantRow.id,
+    p_supabase_subject: 'supabase-subject-1',
+    p_email: 'person@example.com',
+    p_now: CREATED_AT,
+  });
+});
+
+test('Supabase sessions persist only token and CSRF digests', async () => {
+  const userRow = {
+    id: '11111111-1111-4111-8111-111111111111', supabase_subject: 'subject',
+    email: 'person@example.com', created_at: CREATED_AT, updated_at: CREATED_AT,
+  };
+  const tokenDigest = 'a'.repeat(64);
+  const csrfDigest = 'b'.repeat(64);
+  const sessionRow = {
+    id: '33333333-3333-4333-8333-333333333333', user_id: userRow.id,
+    token_digest: tokenDigest, csrf_digest: csrfDigest,
+    expires_at: '2026-01-01T20:00:00.000Z', created_at: CREATED_AT, updated_at: CREATED_AT,
+  };
+  const { fetchImpl, calls } = createFetchStub({ body: userRow }, { body: [sessionRow] });
+  const repositories = createSupabasePostgresRepositories({
+    url: SUPABASE_URL, serviceRoleKey: SERVICE_ROLE_KEY, fetchImpl,
+  });
+
+  await repositories.createSession({
+    userId: userRow.id, tokenDigest, csrfDigest, expiresAt: sessionRow.expires_at,
+  }, { id: sessionRow.id, now: CREATED_AT });
+
+  assert.match(calls[1].url, new RegExp(`/rest/v1/${TABLES.sessions}$`, 'u'));
+  assert.equal(calls[1].body.token_digest, tokenDigest);
+  assert.equal(calls[1].body.csrf_digest, csrfDigest);
+  assert.equal('token' in calls[1].body, false);
+  assert.equal('csrf_token' in calls[1].body, false);
+});
+
+test('Supabase credit holds use the atomic RPC and return a derived immutable balance', async () => {
+  const userId = '11111111-1111-4111-8111-111111111111';
+  const transactionId = '44444444-4444-4444-8444-444444444444';
+  const userRow = {
+    id: userId, supabase_subject: 'subject', email: 'person@example.com',
+    created_at: CREATED_AT, updated_at: CREATED_AT,
+  };
+  const holdRow = {
+    id: transactionId, user_id: userId, type: 'hold', amount: 1,
+    idempotency_key: 'interest:one', cohort_id: null, purchase_id: null,
+    source: 'interest', created_at: CREATED_AT,
+  };
+  const { fetchImpl, calls } = createFetchStub(
+    { body: userRow },
+    { body: [{ transaction_id: transactionId, created: true, available: 1, held: 1 }] },
+    { body: holdRow },
+    { body: userRow },
+    { body: [{ funded: 2, available: 1, held: 1, consumed: 0, refunded: 0 }] },
+  );
+  const repositories = createSupabasePostgresRepositories({
+    url: SUPABASE_URL, serviceRoleKey: SERVICE_ROLE_KEY, fetchImpl,
+  });
+
+  const result = await repositories.holdCredits({
+    userId, amount: 1, idempotencyKey: 'interest:one', cohortId: null, source: 'interest',
+  }, { id: transactionId, now: CREATED_AT });
+
+  assert.equal(result.created, true);
+  assert.deepEqual(result.balance, { funded: 2, available: 1, held: 1, consumed: 0, refunded: 0 });
+  assert.match(calls[1].url, new RegExp(`/rest/v1/rpc/${RPCS.holdCredits}$`, 'u'));
+  assert.equal(calls[1].body.p_source, 'interest');
+  assert.match(calls[4].url, new RegExp(`/rest/v1/rpc/${RPCS.creditBalance}$`, 'u'));
+});
+
+test('Supabase purchase fulfillment and Stripe event recording expose idempotent boundaries', async () => {
+  const userId = '11111111-1111-4111-8111-111111111111';
+  const purchaseId = '55555555-5555-4555-8555-555555555555';
+  const transactionId = '66666666-6666-4666-8666-666666666666';
+  const pendingPurchase = {
+    id: purchaseId, user_id: userId, package_id: 'six_credits', credits: 6,
+    amount_cents: 600, currency: 'usd', status: 'pending',
+    stripe_checkout_session_id: 'cs_123', stripe_payment_intent_id: null,
+    created_at: CREATED_AT, updated_at: CREATED_AT, fulfilled_at: null,
+  };
+  const fulfilledPurchase = {
+    ...pendingPurchase, status: 'fulfilled', stripe_payment_intent_id: 'pi_123',
+    updated_at: '2026-01-01T12:10:00.000Z', fulfilled_at: '2026-01-01T12:10:00.000Z',
+  };
+  const transaction = {
+    id: transactionId, user_id: userId, type: 'purchase', amount: 6,
+    idempotency_key: `purchase:${purchaseId}`, cohort_id: null, purchase_id: purchaseId,
+    source: 'stripe', created_at: '2026-01-01T12:10:00.000Z',
+  };
+  const stripeEvent = {
+    event_id: 'evt_123', event_type: 'checkout.session.completed', outcome: 'fulfilled',
+    created_at: '2026-01-01T12:10:00.000Z',
+  };
+  const { fetchImpl, calls } = createFetchStub(
+    { body: pendingPurchase },
+    { body: [{ purchase_id: purchaseId, credit_transaction_id: transactionId, fulfilled: true }] },
+    { body: fulfilledPurchase },
+    { body: transaction },
+    { body: [stripeEvent] },
+  );
+  const repositories = createSupabasePostgresRepositories({
+    url: SUPABASE_URL, serviceRoleKey: SERVICE_ROLE_KEY, fetchImpl,
+  });
+
+  const result = await repositories.fulfillPurchase({
+    purchaseId, userId, packageId: 'six_credits', credits: 6, amountCents: 600,
+    currency: 'USD', stripeCheckoutSessionId: 'cs_123', stripePaymentIntentId: 'pi_123',
+  }, { transactionId, now: '2026-01-01T12:10:00.000Z' });
+  const recorded = await repositories.recordStripeEvent({
+    eventId: 'evt_123', eventType: 'checkout.session.completed', outcome: 'fulfilled',
+  }, { now: '2026-01-01T12:10:00.000Z' });
+
+  assert.equal(result.fulfilled, true);
+  assert.equal(result.transaction.amount, 6);
+  assert.equal(recorded.created, true);
+  assert.match(calls[1].url, new RegExp(`/rest/v1/rpc/${RPCS.fulfillPurchase}$`, 'u'));
+  assert.deepEqual(calls[1].body, {
+    p_purchase_id: purchaseId,
+    p_user_id: userId,
+    p_checkout_session_id: 'cs_123',
+    p_payment_intent_id: 'pi_123',
+    p_package_id: 'six_credits',
+    p_credits: 6,
+    p_amount_cents: 600,
+    p_currency: 'USD',
+    p_transaction_id: transactionId,
+    p_now: '2026-01-01T12:10:00.000Z',
+  });
+  assert.match(calls[4].url, new RegExp(`/rest/v1/${TABLES.stripeEvents}$`, 'u'));
+  assert.equal(calls[4].body.event_id, 'evt_123');
+});

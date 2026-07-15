@@ -6,7 +6,7 @@ The existing landing page, cohort directory, creation and interest flow, quorum 
 
 ## Setup Status
 
-Planning and task setup for the Piece of Pie branch is complete. Product implementation has not started.
+Planning and task setup for the Piece of Pie branch is complete. The account and credit persistence foundation is implemented; authentication is next.
 
 - Canonical product rules: `docs/cohort15-piece-of-pie-mvp-spec.md`
 - Historical lofi baseline: `docs/cohort15-lofi-mvp-spec.md`
@@ -16,7 +16,7 @@ Planning and task setup for the Piece of Pie branch is complete. Product impleme
 - Current status: `agent/progress/task-status.md`
 - Human/provider continuity: `docs/human-tasks/README.md`
 
-Next ready task: L015.
+Next ready task: L016.
 
 A fresh user-facing chat should start only from `start.txt`. The router reads the canonical artifacts above and transitions approved planned work to the implementation manager without requiring prior chat history.
 

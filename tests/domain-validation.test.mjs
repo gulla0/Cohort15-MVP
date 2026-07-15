@@ -199,7 +199,7 @@ test('public serialization never exposes emails and gates only the meeting link'
 test('record factories expose only the specified fields and normalize private email', () => {
   const value = cohort();
   assert.deepEqual(Object.keys(value), [
-    'id', 'creatorEmail', 'title', 'description', 'category', 'topic',
+    'id', 'creatorEmail', 'creatorUserId', 'title', 'description', 'category', 'topic',
     'targetAudience', 'targetSkillLevel', 'additionalDetails', 'minQuorum',
     'meetingLink', 'creatorTimeZone', 'firstMeetingAt', 'firstMeetingLocal',
     'meetingDurationMinutes', 'recurrence', 'meetingCount', 'createdAt',
@@ -210,7 +210,7 @@ test('record factories expose only the specified fields and normalize private em
     { id: 'interest-1', now: CREATED_AT },
   );
   assert.equal(interest.email, 'person@example.com');
-  assert.deepEqual(Object.keys(interest), ['id', 'cohortId', 'email', 'createdAt']);
+  assert.deepEqual(Object.keys(interest), ['id', 'cohortId', 'email', 'userId', 'createdAt']);
 
   const delivery = createNotificationDelivery({
     idempotencyKey: 'participant_confirmation:interest-1',

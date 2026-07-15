@@ -11,7 +11,7 @@ import {
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/u;
 const LOCAL_DATE_TIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/u;
 const SUBMISSION_FIELDS = Object.freeze([
-  'creatorEmail', 'title', 'description', 'category', 'topic', 'targetAudience',
+  'creatorEmail', 'creatorUserId', 'title', 'description', 'category', 'topic', 'targetAudience',
   'targetSkillLevel', 'additionalDetails', 'minQuorum', 'meetingLink',
   'creatorTimeZone', 'firstMeetingLocal', 'meetingDurationMinutes',
   'recurrence', 'meetingCount',
@@ -267,6 +267,7 @@ export function normalizeCohortSubmission(input, { createdAt = new Date() } = {}
 
   return Object.freeze({
     creatorEmail: normalizeEmail(input.creatorEmail, 'creatorEmail'),
+    creatorUserId: input.creatorUserId == null ? null : stringValue(input.creatorUserId, 'creatorUserId'),
     title: textValue(input.title, 'title'),
     description: textValue(input.description, 'description'),
     category: enumValue(input.category, 'category', CATEGORIES),

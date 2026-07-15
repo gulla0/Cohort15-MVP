@@ -43,7 +43,7 @@ test('local repositories persist only required cohort fields and public views hi
   });
 
   assert.deepEqual(Object.keys(cohort), [
-    'id', 'creatorEmail', 'title', 'description', 'category', 'topic',
+    'id', 'creatorEmail', 'creatorUserId', 'title', 'description', 'category', 'topic',
     'targetAudience', 'targetSkillLevel', 'additionalDetails', 'minQuorum',
     'meetingLink', 'creatorTimeZone', 'firstMeetingAt', 'firstMeetingLocal',
     'meetingDurationMinutes', 'recurrence', 'meetingCount', 'createdAt',
@@ -52,6 +52,7 @@ test('local repositories persist only required cohort fields and public views hi
 
   const publicCohort = await repositories.getPublicCohortById(cohort.id, { now: CREATED_AT });
   assert.equal('creatorEmail' in publicCohort, false);
+  assert.equal('creatorUserId' in publicCohort, false);
   assert.equal('meetingLink' in publicCohort, false);
   assert.doesNotMatch(JSON.stringify(publicCohort), /creator@example.com/u);
 });

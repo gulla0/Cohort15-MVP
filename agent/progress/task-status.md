@@ -4,13 +4,13 @@
 
 | Task | Title | Status | Dependencies Ready | Evidence |
 |---|---|---|---|---|
-| L015 | Add account and credit persistence foundation | not_started | yes | Pending. |
-| L016 | Implement magic-link accounts and signup credits | not_started | no | Pending L015. |
+| L015 | Add account and credit persistence foundation | done | yes | Local/Supabase account, session, immutable-ledger, purchase, Stripe-event, nullable-link, migration, concurrency, and idempotency coverage; `npm run check` passed with 88 tests. |
+| L016 | Implement magic-link accounts and signup credits | not_started | yes | Ready after L015. |
 | L017 | Credit-gate cohort creation and interest | not_started | no | Pending L016. |
 | L018 | Implement Stripe checkout and idempotent fulfillment | not_started | no | Pending L017. |
 | L019 | Complete the Piece of Pie local launch gate | not_started | no | Pending L018. |
 | L020 | Configure, deploy, and verify the live payment MVP | not_started | no | Pending L019 and indexed human/provider work. |
 
-Next ready task: L015.
+Next ready task: L016.
 
 Provider continuity: the user reported the existing lofi Supabase, Render, `cohort15.com`, Resend/email, and related human setup in place. New provider actions must extend those resources through `docs/human-tasks/piece-of-pie-launch.md`.
