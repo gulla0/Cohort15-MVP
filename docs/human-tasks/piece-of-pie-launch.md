@@ -73,6 +73,7 @@ Do not place magic-link URLs or token parameters in screenshots or evidence.
 ### 4. Configure the single Stripe product and webhook
 
 - [ ] In Stripe, complete preflight in test mode first.
+- [ ] Before live-mode setup, complete Stripe account activation using the operator's truthful legal/business, identity, tax, and payout information. Enter this information only in Stripe, do not share it in chat or repository evidence, and stop for professional guidance if the correct legal classification is uncertain.
 - [ ] Create or confirm one product named `Cohort15 Credits` with one one-time USD $6.00 price representing six credits.
 - [ ] Record the Price ID directly in Render under `COHORT15_LOFI_STRIPE_PRICE_6_CREDITS`. A Price ID is configuration, but it still does not need to appear in chat.
 - [ ] Place the server-side Stripe secret key directly in Render as `COHORT15_LOFI_STRIPE_SECRET_KEY`; do not commit or paste its value.
