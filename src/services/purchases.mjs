@@ -60,8 +60,20 @@ export function createPurchaseService({ repositories, stripe, priceId, appUrl, r
     },
 
     async reconcileSession(sessionId, userId) {
-      const session = await stripe.retrieveCheckoutSession(sessionId);
-      return fulfillSession(session, { expectedUserId: userId });
+      try {
+        const session = await stripe.retrieveCheckoutSession(sessionId);
+        return await fulfillSession(session, { expectedUserId: userId });
+      } catch (error) {
+        try {
+          const purchase = await repositories.getPurchaseByStripeCheckoutSessionId(sessionId);
+          if (purchase.userId === userId && purchase.status === 'fulfilled') {
+            return Object.freeze({ purchase, fulfilled: false });
+          }
+        } catch {
+          // The signed webhook may not have fulfilled this session yet; preserve the original failure.
+        }
+        throw error;
+      }
     },
 
     async handleEvent(event) {
@@ -78,4 +90,3 @@ export function createPurchaseService({ repositories, stripe, priceId, appUrl, r
     },
   });
 }
-

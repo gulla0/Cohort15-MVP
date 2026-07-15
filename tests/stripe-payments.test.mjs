@@ -112,6 +112,7 @@ test('checkout, webhook, and browser return share exact-once verified fulfillmen
   assert.equal((await repositories.getCreditBalance(user.id)).available, 8);
 
   assert.equal((await invoke(handler, { url: '/webhooks/stripe', method: 'POST', headers: webhookHeaders, body: event })).status, 200);
+  stripe.retrieveCheckoutSession = async () => { throw new Error('provider unavailable'); };
   const complete = await invoke(handler, { url: '/credits/checkout/complete?session_id=cs_test_paid', headers: { cookie } });
   assert.match(complete.body, /Six credits were added/u);
   assert.equal((await repositories.getCreditBalance(user.id)).available, 8);
