@@ -119,3 +119,30 @@ Artifacts Updated:
 - `tests/feedback.test.mjs`
 - `agent/feedback/issues/ISSUE-L003-intentional-two-page-feedback/`
 - `agent/feedback/issue-index.md`
+
+### 2026-07-16 00:55 EDT
+
+User Feedback:
+- Start the resolution manager and resolve the first available issue.
+
+Issue Mapping:
+- Resolved `ISSUE-L004` as the first `not_started` issue in the canonical index.
+
+Reasoning:
+- The issue tasks were sequential: the shared navigation and account-disclosure contract had to be canonical before replacing six independently assembled headers.
+- One shared renderer now keeps Browse cohorts, Create a cohort, Research & Field Notes, and the auth/account region in a stable order across every full page.
+- Native disclosure semantics retain visible available credits while grouping Buy credits and CSRF-protected Sign out without adding a dashboard or new route.
+
+Artifacts Updated:
+- `docs/cohort15-piece-of-pie-mvp-spec.md`
+- `src/ui/navigation.mjs`
+- `src/ui/auth.mjs`
+- `src/ui/home.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/create-cohort.mjs`
+- `src/ui/research.mjs`
+- `src/ui/credits.mjs`
+- `src/ui/styles.css`
+- `tests/navigation.test.mjs`
+- `agent/feedback/issues/ISSUE-L004-consistent-navigation/`
+- `agent/feedback/issue-index.md`

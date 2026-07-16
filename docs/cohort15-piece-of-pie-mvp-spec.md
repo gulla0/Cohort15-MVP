@@ -188,13 +188,39 @@ Local in-memory repositories must implement equivalent observable behavior for t
 - The feedback dialog opens only when a visitor explicitly activates the visible `Feedback` control. Routes, timers, form activity, submissions, and other observed behavior never open it automatically.
 - Feedback has exactly two pages: a general feedback textarea stored privately in the existing `whyOrWhyNot` field, followed by the existing founder introduction, social links, and optional contact fields. The first page may autosave as a partial response; selecting `Next` submits and completes the feedback before showing the optional contact page. Contact edits update that same completed response, closing the second page keeps it completed, and `Send feedback` saves any optional contact additions before confirmation.
 - The removed qualification and branching fields remain nullable for backward compatibility. Existing feedback rows and their historical values are not rewritten, and no feedback schema migration is required for this interaction change.
-- The shared header shows `Sign in` while anonymous.
-- While signed in it shows available credit count, `Buy credits`, and `Sign out`.
 - The create and interest actions show their costs before submission.
 - Insufficient-credit states explain the required and available amounts and provide a direct Buy Credits action.
 - A successful purchase page states that six credits were added and links back to the previously intended safe path when available.
 - No full account dashboard is required. The header balance and payment/action pages are sufficient.
 - Existing responsive behavior, accessible labels, keyboard focus, semantic notices, and HTML escaping remain.
+
+### Shared navigation contract
+
+Every full server-rendered page uses one shared header with the same information architecture. This includes the landing page, cohort detail, cohort creation, research index and articles, sign-in, Buy Credits, and checkout-result pages. The header contains, in DOM and visual order:
+
+1. the `Cohort15` brand link to `/`;
+2. a primary navigation region labeled `Primary navigation`, containing `Browse cohorts` linking to `/#cohorts`, `Create a cohort` linking to `/cohorts/new`, and `Research & Field Notes` linking to `/research`; and
+3. one account region: `Sign in` linking to `/auth/sign-in` for an anonymous visitor, or the signed-in credit/account disclosure defined below.
+
+`Browse cohorts` and `Create a cohort` are the two primary destinations and receive equal primary emphasis. `Research & Field Notes` remains visible in the same navigation region and order on every page but uses the quieter text-link treatment. The account region is visually separate from those destinations. Page shells must not omit, reorder, or add destination peers, and must not introduce a dashboard, profile, or other route to satisfy this contract.
+
+Exactly one current-page indicator is exposed with `aria-current="page"` when the current route belongs to a destination or account action:
+
+| Current route | Current header item |
+|---|---|
+| `/` or `/cohorts/:id` | `Browse cohorts` |
+| `/cohorts/new` | `Create a cohort` |
+| `/research` or any current research article route | `Research & Field Notes` |
+| `/auth/sign-in` while anonymous | `Sign in` |
+| `/credits/buy` or `/credits/checkout/complete` while signed in | `Buy credits` inside the openable account disclosure |
+
+Query strings, fragments, error states, and checkout-result states do not change route-family matching. The brand is not a second current-page item. A route with no matching item has no `aria-current`, and visual active styling must not be the only current-page cue.
+
+For a signed-in visitor, the available balance remains visible at all times as a disclosure summary labeled `1 credit` or `{n} credits`; its accessible name identifies it as the account control and says that these are available credits. The balance displayed is the settled available balance required by the credit contract, not held, consumed, or total funded credits. Activating this one control reveals a small account panel containing, in order, a `Buy credits` link to `/credits/buy` and a `Sign out` submit button. Sign out remains a `POST /auth/sign-out` form containing the current session's hidden CSRF token; it is never converted to a link or GET request. Email and other account identifiers do not appear in the header. The panel is closed on initial render except on the two credit-route families in the table, where it opens initially so the current `Buy credits` item is exposed; navigation to any other route returns it to closed. The visible summary preserves credit state while reducing `Buy credits` and `Sign out` from top-level peers.
+
+The account disclosure uses native disclosure semantics (`details` and `summary`) with only the behavior enhancement needed here; it is not assigned menu roles or custom arrow-key semantics. `Tab` follows the visual order from the brand through the three destinations to `Sign in` or the credit summary. `Enter` or `Space` toggles the credit summary, and when open, ordinary `Tab` order reaches `Buy credits` and then `Sign out`. `Escape` closes an open disclosure and returns focus to its summary. An open disclosure also closes after a pointer activation outside it or after focus moves outside the disclosure; moving focus among its summary, link, and form does not close it. All links, the summary, and the sign-out button retain a clearly visible focus indicator.
+
+At mobile widths the same destinations, labels, order, auth state, and current-page state remain available without a hover requirement or hamburger-only alternative. The header may wrap into rows, with the brand and account region together and the three destinations in their canonical order, but it must not hide Research or the visible credit summary. Controls provide at least a 44-by-44 CSS-pixel touch target. The open account panel stays within the viewport, appears adjacent to or directly below its summary, and does not cause horizontal page overflow; outside-tap, focus, keyboard, link, and CSRF-protected sign-out paths behave the same as on desktop.
 
 ### Portable cohort request contract
 

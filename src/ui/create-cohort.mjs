@@ -1,6 +1,6 @@
 import { CATEGORIES, RECURRENCES, TARGET_SKILL_LEVELS } from '../domain/constants.mjs';
 import { renderFeedbackWidget } from './feedback-widget.mjs';
-import { renderAuthNavigation } from './auth.mjs';
+import { renderSiteHeader } from './navigation.mjs';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -53,7 +53,7 @@ export function renderCreateCohortPage({ error, values = {}, auth = null } = {})
     <link rel="stylesheet" href="/assets/styles.css">
   </head>
   <body>
-    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/research">Research &amp; Field Notes</a><span class="status-pill">Create</span>${renderAuthNavigation(auth)}</nav></header>
+    ${renderSiteHeader({ auth, currentPath: '/cohorts/new' })}
     <main class="shell form-shell">
       <p class="eyebrow">Funded cohort request</p>
       <h1>Create a focused cohort.</h1>

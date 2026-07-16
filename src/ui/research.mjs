@@ -1,6 +1,6 @@
 import { analyticsMarkup } from './analytics.mjs';
 import { renderFeedbackWidget } from './feedback-widget.mjs';
-import { renderAuthNavigation } from './auth.mjs';
+import { renderSiteHeader } from './navigation.mjs';
 
 const ARTICLE_PATH = '/research/why-small-committed-groups';
 const VIDEO_ARTICLE_PATH = '/research/introducing-cohort15-original-product-thesis';
@@ -64,9 +64,9 @@ function formatDate(value) {
   }).format(date);
 }
 
-function pageStart({ title, description, googleAnalyticsId, researchIndex = false, auth = null }) {
+function pageStart({ title, description, googleAnalyticsId, currentPath = '/research', auth = null }) {
   return `<!doctype html><html lang="en"><head>${analyticsMarkup(googleAnalyticsId)}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="${escapeHtml(description)}"><title>${escapeHtml(title)} | Cohort15</title><link rel="stylesheet" href="/assets/styles.css"></head><body>
-    <header class="shell topbar"><a class="brand" href="/">Cohort15</a><nav class="site-nav" aria-label="Primary navigation"><a class="text-link" href="/#cohorts">Browse cohorts</a><a class="text-link" href="/research"${researchIndex ? ' aria-current="page"' : ''}>Research &amp; Field Notes</a><a class="button-link compact" href="/cohorts/new">Create a cohort</a>${renderAuthNavigation(auth)}</nav></header>`;
+    ${renderSiteHeader({ auth, currentPath })}`;
 }
 
 export function renderResearchCard(entry) {
@@ -88,7 +88,7 @@ export function renderResearchIndexPage({
     title: 'Research & Field Notes',
     description: 'Research, essays, field notes, and product updates shaping Cohort15.',
     googleAnalyticsId,
-    researchIndex: true,
+    currentPath: '/research',
     auth,
   })}<main>
     <section class="shell research-hero" aria-labelledby="research-title"><p class="eyebrow">Research &amp; Field Notes</p><h1 id="research-title">The thinking behind Cohort15.</h1><p class="lede">Research, product observations, and working ideas about helping a few serious people reliably show up around a concrete goal.</p></section>
@@ -102,6 +102,7 @@ export function renderDemandResearchArticle({ googleAnalyticsId = 'G-LF22TLDSBV'
     title: 'Why small, committed groups are worth building',
     description: 'What 20 public requests for serious peers reveal about small, structured, goal-oriented groups.',
     googleAnalyticsId,
+    currentPath: ARTICLE_PATH,
     auth,
   })}<main class="shell article-shell">
     <a class="text-link" href="/research">← All research &amp; field notes</a>
@@ -165,6 +166,7 @@ export function renderOriginalProductThesisPage({ googleAnalyticsId = 'G-LF22TLD
     title: 'Introducing Cohort15: The original product thesis',
     description: 'The founder story and original product thesis behind Cohort15, with an update on what changed in the validation MVP.',
     googleAnalyticsId,
+    currentPath: VIDEO_ARTICLE_PATH,
     auth,
   })}<main class="shell article-shell">
     <a class="text-link" href="/research">← All research &amp; field notes</a>
@@ -230,6 +232,7 @@ export function renderFormationFieldNotePage({ googleAnalyticsId = 'G-LF22TLDSBV
     title: 'How Cohort15 is testing small-group formation',
     description: 'The formation loop and manual experiments guiding the next phase of Cohort15.',
     googleAnalyticsId,
+    currentPath: FORMATION_ARTICLE_PATH,
     auth,
   })}<main class="shell article-shell">
     <a class="text-link" href="/research">← All research &amp; field notes</a>
