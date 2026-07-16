@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-L002",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-L002-T01",
+      "title": "Define the 280-character portable request contract",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Specify the field priority, formatting, length accounting, truncation, privacy, and copy-interaction behavior for portable cohort requests.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/cohorts.mjs", "src/ui/social-image.mjs"],
+      "write_scope": ["docs/cohort15-piece-of-pie-mvp-spec.md", "issue-local notes for exact formatting decisions"],
+      "authority": ["Cap the complete copied plain-text payload, including the public URL, at 280 characters.", "Prioritize title, condensed purpose, useful schedule/formation context, and the public URL.", "Never include private identity or a meeting link before existing public-release rules allow it.", "Keep copying available to anonymous visitors."],
+      "acceptance_criteria": ["The canonical contract defines deterministic output and truncation for short and maximum-length cohort data.", "The copied text remains understandable away from Cohort15 and always includes a usable public URL.", "Privacy and quorum-gated meeting-link rules are explicit."],
+      "verification": ["Exercise the specified algorithm against minimum and maximum allowed field lengths.", "Confirm the complete resulting payload is never longer than 280 characters."],
+      "files_expected": ["docs/cohort15-piece-of-pie-mvp-spec.md"],
+      "area": "sharing contract",
+      "risk": "medium",
+      "shared_dependencies": ["docs/cohort15-piece-of-pie-mvp-spec.md"],
+      "stop_condition": "Stop when the format and length/privacy rules are precise enough for deterministic tests."
+    },
+    {
+      "id": "ISSUE-L002-T02",
+      "title": "Implement portable request copy controls",
+      "status": "not_started",
+      "dependencies": ["ISSUE-L002-T01"],
+      "objective": "Generate and copy the approved compact request from every public cohort card and detail page.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/cohorts.mjs", "src/ui/home.mjs", "src/ui/styles.css"],
+      "write_scope": ["cohort portable-text helper", "card and detail copy controls", "clipboard behavior and accessible status UI", "focused rendering, length, privacy, and browser tests"],
+      "authority": ["Use progressive enhancement and preserve a useful public URL if the Clipboard API is unavailable.", "Do not require sign-in to copy.", "Escape user content in HTML and do not expose private fields in script data.", "Keep existing social metadata behavior intact."],
+      "acceptance_criteria": ["A visitor can copy a cohort from both listing and detail views.", "The copied payload contains useful public context and its URL and is at most 280 characters.", "The interface reports copy success or failure accessibly.", "Maximum-length and pre-quorum test cases expose no private email or meeting link."],
+      "verification": ["Run focused event-browsing, privacy, and UI tests.", "Run browser smoke for copy success and fallback behavior on desktop and mobile.", "Run npm run check."],
+      "files_expected": ["src/ui/cohorts.mjs", "src/ui/home.mjs", "src/ui/styles.css", "tests/event-browsing.test.mjs"],
+      "area": "public cohort sharing",
+      "risk": "medium",
+      "shared_dependencies": ["src/ui/cohorts.mjs", "src/ui/styles.css", "tests/event-browsing.test.mjs"],
+      "stop_condition": "Stop when both public views produce a tested, private-safe payload within 280 characters."
+    }
+  ]
+}

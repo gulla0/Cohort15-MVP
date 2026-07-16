@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-L004",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-L004-T01",
+      "title": "Define the shared navigation contract",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Lock the destination hierarchy, account disclosure behavior, active states, and responsive/accessibility rules for one shared header.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/auth.mjs", "src/ui/home.mjs", "src/ui/cohorts.mjs", "src/ui/create-cohort.mjs", "src/ui/research.mjs", "src/ui/credits.mjs"],
+      "write_scope": ["docs/cohort15-piece-of-pie-mvp-spec.md", "issue-local interaction notes"],
+      "authority": ["Keep Browse and Create a cohort as primary destinations.", "Keep Research visible but visually secondary.", "Keep the available credit count visible and use its account control to expose Buy credits and CSRF-protected Sign out.", "Show Sign in for anonymous visitors.", "Use the same information architecture on every full page."],
+      "acceptance_criteria": ["The canonical UI contract defines anonymous, signed-in, current-page, keyboard, outside-click/focus, and mobile behavior.", "The design reduces equally prominent controls without hiding essential credit state.", "No full account dashboard or new product route is required."],
+      "verification": ["Review the contract against every current page shell and auth/CSRF requirements.", "Confirm all destinations and actions have an accessible path at desktop and mobile widths."],
+      "files_expected": ["docs/cohort15-piece-of-pie-mvp-spec.md"],
+      "area": "navigation contract",
+      "risk": "medium",
+      "shared_dependencies": ["docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/auth.mjs"],
+      "stop_condition": "Stop when one deterministic header contract covers every current page and auth state."
+    },
+    {
+      "id": "ISSUE-L004-T02",
+      "title": "Build and adopt the shared navigation renderer",
+      "status": "not_started",
+      "dependencies": ["ISSUE-L004-T01"],
+      "objective": "Centralize header rendering and migrate every page to the approved navigation and account interaction.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/auth.mjs", "src/ui/home.mjs", "src/ui/cohorts.mjs", "src/ui/create-cohort.mjs", "src/ui/research.mjs", "src/ui/credits.mjs", "src/ui/styles.css"],
+      "write_scope": ["shared navigation renderer", "all duplicated page headers", "navigation/account styles and minimal interaction script", "focused navigation, auth, route, responsive, and accessibility tests"],
+      "authority": ["Preserve CSRF-protected POST sign-out and current route destinations.", "Keep credit balance visible without exposing email or account identifiers.", "Use semantic navigation, predictable tab order, visible focus, and an accessible disclosure on keyboard and touch.", "Do not mix unrelated landing, sharing, or feedback changes into this task."],
+      "acceptance_criteria": ["All full pages render the same destination hierarchy and auth-state controls.", "Signed-in navigation shows the credit count and exposes Buy credits and Sign out through one coherent account control.", "Anonymous navigation shows Sign in.", "Desktop and mobile headers do not overflow and current-page state remains understandable."],
+      "verification": ["Run focused rendering, authentication, research, cohort, and credit-page tests.", "Run keyboard plus desktop/mobile browser smoke across every page shell.", "Run npm run check."],
+      "files_expected": ["src/ui/auth.mjs", "src/ui/home.mjs", "src/ui/cohorts.mjs", "src/ui/create-cohort.mjs", "src/ui/research.mjs", "src/ui/credits.mjs", "src/ui/styles.css", "tests"],
+      "area": "shared site navigation",
+      "risk": "high",
+      "shared_dependencies": ["src/ui/styles.css", "src/ui/auth.mjs", "multiple UI regression tests"],
+      "stop_condition": "Stop when every page uses one verified, responsive, accessible header without changing product routes or account mechanics."
+    }
+  ]
+}

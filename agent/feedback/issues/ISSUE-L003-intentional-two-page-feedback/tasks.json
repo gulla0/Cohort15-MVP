@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "ISSUE-L003",
+  "source_of_truth": "issue-local tasks.json",
+  "tasks": [
+    {
+      "id": "ISSUE-L003-T01",
+      "title": "Lock the click-only two-page feedback contract",
+      "status": "not_started",
+      "dependencies": [],
+      "objective": "Update the canonical feedback interaction contract and verify that the simplified payload fits existing private persistence without a migration.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/feedback-widget.mjs", "src/services/feedback.mjs", "src/persistence/repositories.mjs"],
+      "write_scope": ["docs/cohort15-piece-of-pie-mvp-spec.md", "issue-local compatibility findings"],
+      "authority": ["The dialog may open only from an explicit visitor action on the Feedback control.", "The form has exactly two pages: general feedback, then the existing founder/social/contact content.", "Prefer existing optional storage fields and preserve historical feedback rows.", "No external provider or human dashboard task is authorized during this issue unless a verified schema blocker is separately approved."],
+      "acceptance_criteria": ["The canonical contract removes automatic opening and six-step survey behavior.", "The payload-to-existing-schema mapping and partial/completed save behavior are explicit.", "No destructive data or migration requirement is introduced."],
+      "verification": ["Trace the simplified payload through service validation and both repository implementations.", "Confirm existing stored feedback remains readable and untouched."],
+      "files_expected": ["docs/cohort15-piece-of-pie-mvp-spec.md"],
+      "area": "feedback interaction contract",
+      "risk": "medium",
+      "shared_dependencies": ["docs/cohort15-piece-of-pie-mvp-spec.md", "src/services/feedback.mjs"],
+      "stop_condition": "Stop when the two-page behavior and migration-free compatibility are proven or an exact schema blocker is documented."
+    },
+    {
+      "id": "ISSUE-L003-T02",
+      "title": "Implement intentional two-page feedback",
+      "status": "not_started",
+      "dependencies": ["ISSUE-L003-T01"],
+      "objective": "Replace the auto-opening branched survey with the approved click-only two-page dialog while preserving private saves and contact options.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/feedback-widget.mjs", "src/ui/styles.css", "src/services/feedback.mjs", "tests/feedback.test.mjs"],
+      "write_scope": ["feedback widget markup and client behavior", "only required backward-compatible service validation changes", "feedback styles", "focused UI, route, persistence, accessibility, and regression tests"],
+      "authority": ["Delete route, timer, form-action, and session-triggered automatic opening behavior.", "Keep founder social destinations and optional contact fields from the current last page.", "Preserve Origin, body-size, rate-limit, validation, privacy, autosave/close behavior where it still makes sense, and mobile full-screen presentation.", "Do not expose saved feedback publicly."],
+      "acceptance_criteria": ["The dialog remains closed until Feedback is clicked on every rendered route.", "Only general feedback and founder/contact pages are presented.", "General feedback can be submitted without contact information, and contact fields remain optional.", "Private persistence and desktop/mobile accessibility tests pass."],
+      "verification": ["Run focused feedback service, route, repository, and widget tests.", "Run desktop and mobile browser smoke confirming no automatic opening and a successful two-page submission.", "Run npm run check."],
+      "files_expected": ["src/ui/feedback-widget.mjs", "src/ui/styles.css", "tests/feedback.test.mjs"],
+      "area": "feedback UI",
+      "risk": "medium",
+      "shared_dependencies": ["src/ui/styles.css", "tests/feedback.test.mjs"],
+      "stop_condition": "Stop when feedback is voluntary, exactly two pages, privately saved, accessible, and verified without destructive schema work."
+    }
+  ]
+}
