@@ -275,7 +275,7 @@
     {
       "id": "L020",
       "title": "Configure, deploy, and verify the live payment MVP",
-      "status": "not_started",
+      "status": "done",
       "phase": "Day 3 — Launch Gate",
       "dependencies": [
         "L019"
@@ -313,8 +313,8 @@
         "Run npm run check after any repository correction"
       ],
       "stop_condition": "Stop when the live account-to-payment-to-product-use flow passes or report the exact human/provider blocker without exposing secrets.",
-      "evidence": "Pending.",
-      "notes": "This task requires the user to operate provider dashboards and perform production verification."
+      "evidence": "Extended the retained production Supabase and Render resources, applied both additive migrations without changing the 3 cohort, 1 interest, 6 notification-delivery, or 4 feedback baseline rows, enabled server-side magic-link authentication through Resend SMTP, deployed codex/piece-of-pie, and completed test- and live-mode Stripe verification. Production evidence showed an exactly-once two-credit signup grant, an insufficient-credit gate, one test and one live fulfilled purchase, two purchase ledger entries totaling 12 credits, two processed Stripe events, and three funded cohort requests holding 6 credits with 8 still available. The live USD $6 purchase and a subsequent two-credit cohort creation passed on 2026-07-15 EDT; npm run check passed with 101 tests after all launch-blocking corrections.",
+      "notes": "Completed through the indexed user-operated provider workflow without exposing credentials, payment details, customer identity, provider record identifiers, or pre-quorum links. The retained Supabase project, Render service, cohort15.com domain, Resend sender, analytics configuration, and existing data were preserved. Builder Pie registration, weekly-post, and final-presentation compliance were not independently verified by the application and are not claimed here."
     }
   ]
 }

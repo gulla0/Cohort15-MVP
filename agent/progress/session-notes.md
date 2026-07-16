@@ -258,3 +258,16 @@ Verification completed with `npm run check` and 98 passing tests. L019 is next.
 - Kept provider dashboards, credentials, migrations, deployment, live payment, and production verification outside the code-owned task.
 
 Verification completed with `npm run check` and 101 passing tests. L020 is next through `docs/human-tasks/piece-of-pie-launch.md`.
+
+## 2026-07-15 — L020 live provider launch and payment verification
+
+- Retained the existing `cohort15-lofi-mvp` Supabase project and Render service, `cohort15.com`, Resend sender/domain, analytics, and production data.
+- Applied the account/credit and funded-action migrations with unchanged baseline row counts and verified RLS, zero browser policies, and service-role-only functions.
+- Enabled Supabase email accounts, Resend-backed custom SMTP, the production callback allowlist, and server-side token-hash links for both first-time confirmation and returning magic-link templates.
+- Configured the single six-credit/$6 Stripe package in test and live mode, signed webhooks, and the four additive Render environment values.
+- Deployed `codex/piece-of-pie` and fixed three production-discovered blockers: credit-page spacing, webhook-first browser return rendering, and preservation of Stripe's literal Checkout Session placeholder.
+- Verified exactly-once signup credits, the free-credit cohort action, insufficient-credit gate, test purchase and purchased-credit use, then one real live-mode USD $6 purchase and another funded cohort action.
+- Recorded only aggregate ledger evidence: two fulfilled purchases, two purchase transactions totaling 12 credits, two processed Stripe events, 8 available credits, and 6 credits held across three cohort requests.
+- Kept credentials, email identity, magic links, sessions, card/payment details, Stripe/customer identifiers, and pre-quorum links out of repository evidence.
+
+Full `npm run check` passed with 101 tests after the launch corrections. L015–L020 are complete; no main task is ready.

@@ -46,7 +46,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 | Area | Current files | Planned owner |
 |---|---|---|
-| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016–L019 auth, funded actions, payment routes, production contract, and local launch verification complete |
+| Runtime | `src/server/app.mjs`, `src/config/runtime.mjs` | L016–L020 auth, funded actions, payment routes, production contract, deployment, and live verification complete |
 | Domain | `src/domain/constants.mjs`, `src/domain/models.mjs`, `src/domain/validation.mjs` | L015 foundation complete; L016–L018 consume it |
 | Persistence | `src/persistence/store.mjs`, `src/persistence/repositories.mjs`, `src/persistence/supabase-postgres.mjs` | L015 ledger, L017 funded actions, and L018 purchase fulfillment integration complete |
 | Create flow | `src/services/create-cohort.mjs`, `src/services/rate-limit.mjs`, `src/ui/create-cohort.mjs` | L017 complete |
@@ -56,7 +56,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 | Feedback | `src/services/feedback.mjs`, `src/ui/feedback-widget.mjs` | Preserve/regression only |
 | Editorial | `src/ui/research.mjs`, `tests/research.test.mjs` | Preserve/regression only |
 | Authentication | `src/auth/supabase.mjs`, `src/auth/session.mjs`, `src/ui/auth.mjs`, `src/server/app.mjs` | L016 complete; L017 consumes session/CSRF context for funded mutations |
-| Payment | `src/payments/stripe.mjs`, `src/services/purchases.mjs`, `src/ui/credits.mjs`, `src/server/app.mjs` | Fixed Checkout package, signed webhook, verified return, and shared idempotent fulfillment complete |
+| Payment | `src/payments/stripe.mjs`, `src/services/purchases.mjs`, `src/ui/credits.mjs`, `src/server/app.mjs` | Fixed Checkout package, signed webhook, verified return, shared idempotent fulfillment, and live payment verification complete |
 
 ## Reusable Decisions
 
@@ -83,7 +83,7 @@ The repository artifacts are a complete fresh-chat handoff. Do not require the p
 
 ## Current Pointers
 
-- Next task: `agent/progress/task-status.md` (L020 human/provider launch verification).
+- Next task: none; route future requests through `start.txt`.
 - Current blockers: `agent/progress/blockers.md`.
 - Human/provider continuity and new actions: `docs/human-tasks/README.md`.
 - Active product source: `docs/cohort15-piece-of-pie-mvp-spec.md`.

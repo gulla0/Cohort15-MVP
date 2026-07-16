@@ -242,3 +242,14 @@ Verification: focused payment/runtime suites passed with 10 tests; full `npm run
 - Completed desktop and mobile fake-provider browser smoke with exact viewport/overflow and console checks.
 
 Verification: focused launch/runtime/research suites passed; full `npm run check` passed with 101 tests and 6 aligned active tasks. L020 is next and requires the indexed human/provider workflow.
+
+## 2026-07-15 — L020 live payment MVP launch
+
+- Applied the two additive production migrations to the retained Supabase project without reducing baseline cohort, interest, notification-delivery, or feedback rows.
+- Configured Supabase Auth with Resend SMTP and server-verifiable first-time and returning email links.
+- Configured the one-package Stripe test/live Checkout and signed webhook contract, extended the retained Render service, and deployed the Piece of Pie branch.
+- Fixed the production credit-page spacing, webhook-first completion rendering, and encoded Checkout Session placeholder discovered during smoke verification.
+- Verified the two-credit signup grant once, insufficient-credit gate, test and live exactly-once six-credit purchases, and purchased-credit cohort creation.
+- Closed the ledger with two fulfilled purchases, 12 purchased credits, two processed Stripe events, 8 available credits, and 6 held credits.
+
+Verification: production health, account, credit, payment, replay, and funded-use checks passed; full `npm run check` passed with 101 tests. No main task is ready.

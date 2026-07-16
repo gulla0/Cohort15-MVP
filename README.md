@@ -6,7 +6,7 @@ The existing landing page, cohort directory, creation and interest flow, quorum 
 
 ## Setup Status
 
-The local Piece of Pie implementation through L019 includes accounts, credit-funded product actions, fake-provider Stripe Checkout with exactly-once fulfillment, cohesive launch verification, and the production configuration contract. L020 remains human-run provider setup, deployment, and production verification using the indexed launch checklist.
+The Piece of Pie implementation and L020 launch are complete. The retained Supabase and Render resources now run magic-link accounts, immutable credits, the one-package Stripe Checkout flow, signed exactly-once fulfillment, and credit-funded cohort actions on `cohort15.com`.
 
 - Canonical product rules: `docs/cohort15-piece-of-pie-mvp-spec.md`
 - Historical lofi baseline: `docs/cohort15-lofi-mvp-spec.md`
@@ -16,7 +16,7 @@ The local Piece of Pie implementation through L019 includes accounts, credit-fun
 - Current status: `agent/progress/task-status.md`
 - Human/provider continuity: `docs/human-tasks/README.md`
 
-Next ready task: L020.
+Next ready task: none.
 
 A fresh user-facing chat should start only from `start.txt`. The router reads the canonical artifacts above and transitions approved planned work to the implementation manager without requiring prior chat history.
 

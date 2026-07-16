@@ -2,19 +2,17 @@
 
 ## Current Phase
 
-Day 3 — Launch Gate
+Piece of Pie MVP launched
 
 ## Current Critical Path
 
 L015 → L016 → L017 → L018 → L019 → L020
 
-Next ready task: L020.
+Next ready task: none.
 
 ## Ready Task Candidates
 
-| Task | Why ready | Notes |
-|---|---|---|
-| L019 | L018 now provides verified Checkout, signed webhook handling, and idempotent purchase fulfillment | Verify and refine the complete local account, credit, payment, and funded-use flow. |
+No active task is ready. L015–L020 are complete.
 
 ## Known Parallelism
 

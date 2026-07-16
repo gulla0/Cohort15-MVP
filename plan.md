@@ -116,6 +116,6 @@ The only new human setup path is `docs/human-tasks/piece-of-pie-launch.md`. It d
 
 ## Next Ready Task
 
-Next ready task: L020.
+Next ready task: none.
 
-L019 now verifies the cohesive local account, credit, payment-gate, fake-provider purchase, purchased-credit use, configuration, privacy, regression, and responsive browser path. L020 is the indexed human provider, deployment, live-payment, and production-verification task.
+L015–L020 are complete. The retained production resources now serve the verified account, free-credit, payment-gate, live-purchase, and funded-product-use flow; any future work should enter through a new routed change, feedback, or planning task.

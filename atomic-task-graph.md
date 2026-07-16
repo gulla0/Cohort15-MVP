@@ -10,7 +10,7 @@ L015 Account and credit persistence foundation (done)
        └─ L017 Credit-gated creation and interest (done)
             └─ L018 Stripe checkout and idempotent fulfillment (done)
                  └─ L019 Piece of Pie local launch gate (done)
-                      └─ L020 Live provider setup, deployment, and verification (not_started)
+                      └─ L020 Live provider setup, deployment, and verification (done)
 ```
 
 ## Atomic Task Contracts
@@ -58,7 +58,7 @@ L015 Account and credit persistence foundation (done)
 ### L020 — Configure, deploy, and verify the live payment MVP
 
 - Depends on: L019
-- Status: not_started
+- Status: done
 - Owns: indexed human Supabase Auth/migration, Stripe, Render branch/env, deployment, live payment/use smoke, non-secret evidence
 - Delivers: publicly usable `cohort15.com` payment-gated MVP and verified live payment utility
 - Stops on: passing launch evidence or a precisely documented human/provider blocker
