@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-L001-T01",
       "title": "Lock the value-first landing message",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Translate the approved landing direction and familiar illustrative cohort examples into concise canonical product copy and interaction requirements.",
       "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/home.mjs"],
@@ -18,12 +18,13 @@
       "area": "product copy",
       "risk": "medium",
       "shared_dependencies": ["docs/cohort15-piece-of-pie-mvp-spec.md"],
-      "stop_condition": "Stop when the canonical copy and hierarchy are explicit enough to implement without inventing product behavior."
+      "stop_condition": "Stop when the canonical copy and hierarchy are explicit enough to implement without inventing product behavior.",
+      "evidence": "Updated the canonical UI contract with the value-first hierarchy, four explicitly illustrative examples, all four plain-language credit facts, and boundaries against subscriptions, guaranteed formation, jargon, or behavior changes."
     },
     {
       "id": "ISSUE-L001-T02",
       "title": "Implement and verify the landing message",
-      "status": "not_started",
+      "status": "done",
       "dependencies": ["ISSUE-L001-T01"],
       "objective": "Render the approved value-first message, familiar illustrative cohort examples, and compact credit explanation on the landing page.",
       "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/home.mjs", "src/ui/styles.css"],
@@ -35,7 +36,8 @@
       "area": "landing UI",
       "risk": "low",
       "shared_dependencies": ["src/ui/styles.css", "tests/piece-of-pie-launch.test.mjs"],
-      "stop_condition": "Stop when the approved message is visible, tested, and responsive without changing credit mechanics."
+      "stop_condition": "Stop when the approved message is visible, tested, and responsive without changing credit mechanics.",
+      "evidence": "Rendered the approved benefit-led hero, labeled example cohort chips, compact credit explanation, preserved Create/Browse destinations, and focused regression coverage. Nine focused tests passed; desktop 1280x720 and mobile 390x844 browser smoke showed no horizontal overflow or console warnings/errors."
     }
   ]
 }

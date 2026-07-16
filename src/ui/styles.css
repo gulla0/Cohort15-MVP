@@ -97,6 +97,39 @@ h1 {
   font-size: clamp(1.1rem, 2vw, 1.35rem);
 }
 
+.example-cohorts {
+  max-width: 720px;
+  margin-top: 26px;
+}
+
+.example-label {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.example-cohorts ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.example-cohorts li {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: #33433b;
+  font-size: 0.92rem;
+  font-weight: 750;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -151,6 +184,10 @@ article h2 {
 article p:last-child {
   margin: 0;
   color: #4d5c53;
+}
+
+.credit-explainer p + p {
+  margin-top: 14px;
 }
 
 .section {

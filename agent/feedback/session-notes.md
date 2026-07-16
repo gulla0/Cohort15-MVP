@@ -45,3 +45,23 @@ Artifacts Updated:
 - `agent/feedback/issues/ISSUE-L002-portable-cohort-requests/`
 - `agent/feedback/issues/ISSUE-L003-intentional-two-page-feedback/`
 - `agent/feedback/issues/ISSUE-L004-consistent-navigation/`
+
+### 2026-07-15 22:38 EDT
+
+User Feedback:
+- Resolve the first available feedback issue.
+
+Issue Mapping:
+- Resolved `ISSUE-L001` as the first `not_started` issue in the canonical index.
+
+Reasoning:
+- The two issue-local tasks were sequential and tightly coupled: the canonical wording contract had to be locked before the landing implementation could be verified.
+- The final hierarchy leads with the group-forming value, uses clearly illustrative examples rather than fake listings, and explains the complete credit bargain in plain language.
+
+Artifacts Updated:
+- `docs/cohort15-piece-of-pie-mvp-spec.md`
+- `src/ui/home.mjs`
+- `src/ui/styles.css`
+- `tests/foundation.test.mjs`
+- `agent/feedback/issues/ISSUE-L001-landing-credit-messaging/`
+- `agent/feedback/issue-index.md`

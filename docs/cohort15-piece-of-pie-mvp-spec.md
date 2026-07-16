@@ -182,6 +182,9 @@ Local in-memory repositories must implement equivalent observable behavior for t
 
 ## User Interface Contract
 
+- The public landing page leads with the value of finding a few people who will show up for a focused shared goal, before explaining mechanics.
+- The first landing experience includes a compact group labeled `Example cohorts` with familiar illustrative uses: interview practice, language learning, founder accountability, and a focused book group. These examples are explanatory only and must remain visually distinct from live cohort listings.
+- The same first landing experience explains in plain language that creating costs two credits, joining costs one credit, credits are returned when a group does not form, and every new account starts with two credits. It does not use ledger or hold terminology, imply a subscription or guaranteed formation, or change credit behavior.
 - The shared header shows `Sign in` while anonymous.
 - While signed in it shows available credit count, `Buy credits`, and `Sign out`.
 - The create and interest actions show their costs before submission.

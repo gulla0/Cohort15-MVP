@@ -33,8 +33,19 @@ const config = Object.freeze({
 test('Piece of Pie home renders the branded foundation and account entry point', () => {
   const html = renderHomePage({ googleAnalyticsId: 'G-TEST' });
 
-  assert.match(html, /Form small, high-intent online groups/);
-  assert.match(html, /seven days/);
+  assert.match(html, /Find a few people who will actually show up/);
+  assert.match(html, /Example cohorts/);
+  assert.match(html, /Interview practice/);
+  assert.match(html, /Language learning/);
+  assert.match(html, /Founder accountability/);
+  assert.match(html, /A focused book group/);
+  assert.match(html, /Create your first cohort for free/);
+  assert.match(html, /Free to start/);
+  assert.doesNotMatch(html, /Credits, simply/);
+  assert.match(html, /New accounts get <strong>2 credits<\/strong>—enough to create one cohort or join two/);
+  assert.match(html, /If a cohort doesn’t form, those credits come back/);
+  assert.ok(html.indexOf('Example cohorts') < html.indexOf('Open directory'));
+  assert.doesNotMatch(html, /ledger|credit hold/i);
   assert.match(html, /G-TEST/);
   assert.match(html, /Sign in/);
   assert.doesNotMatch(html, /Stripe|Dashboard|event image/i);
