@@ -97,6 +97,38 @@ test('feedback service upserts partial and completed responses by session id', a
   assert.equal((await repo.listFeedback()).length, 1);
 });
 
+test('simplified feedback uses the existing text field and completes without contact details', async () => {
+  const repo = repositories();
+  const service = createFeedbackService({ repositories: repo });
+
+  const partial = await service.submit({
+    sessionId: 'two-page-session',
+    path: '/cohorts/example',
+    actionContext: {},
+    whyOrWhyNot: 'The credit explanation was clear, but I wanted better filters.',
+    completionState: 'partial',
+    lastStep: 1,
+    submittedOnClose: false,
+  });
+  assert.equal(partial.whyOrWhyNot, 'The credit explanation was clear, but I wanted better filters.');
+  assert.equal(partial.lookingForGroup, null);
+  assert.equal(partial.contactEmail, null);
+
+  const completed = await service.submit({
+    sessionId: 'two-page-session',
+    path: '/cohorts/example',
+    actionContext: {},
+    whyOrWhyNot: partial.whyOrWhyNot,
+    completionState: 'completed',
+    lastStep: 2,
+    submittedOnClose: false,
+  });
+  assert.equal(completed.id, partial.id);
+  assert.equal(completed.completionState, 'completed');
+  assert.equal(completed.contactEmail, null);
+  assert.equal((await repo.listFeedback()).length, 1);
+});
+
 test('feedback service rejects unsafe paths, invalid enums, malformed context, and rate limits', async () => {
   const repo = repositories();
   const service = createFeedbackService({
@@ -187,36 +219,37 @@ test('POST /feedback enforces media type, origin, body size, JSON, and validatio
   });
 });
 
-test('feedback widget renders founder icon links and mobile-friendly controls', () => {
+test('feedback widget renders a click-only two-page flow with founder contacts', () => {
   const html = renderHomePage({ googleAnalyticsId: 'G-TEST' });
   assert.match(html, /data-feedback-widget/);
   assert.match(html, /data-feedback-open aria-expanded="false"/);
-  assert.match(html, /<input type="radio" name="lookingForGroup" value="yes"> Yes/);
-  assert.match(html, /<input type="radio" name="lookingForGroup" value="no"> No/);
-  assert.doesNotMatch(html, /value="not_sure"|Send feedback/);
+  assert.equal((html.match(/data-feedback-step="/g) ?? []).length, 2);
+  assert.match(html, /name="whyOrWhyNot"[^>]*data-feedback-message/);
+  assert.match(html, /What would you like us to know\?/);
+  assert.match(html, /Send feedback/);
+  assert.doesNotMatch(html, /name="lookingForGroup"|name="lookingForInstead"|name="groupIntent"|name="didCreateOrJoin"/);
   assert.match(html, /href="https:\/\/x\.com\/cohort15dotcom"/);
   assert.match(html, /href="https:\/\/www\.linkedin\.com\/in\/harsha-gullapalli-4b23451a"/);
   assert.match(html, /href="mailto:cohort15dotcom@gmail\.com"/);
   assert.match(html, /Founder’s socials/);
   assert.match(html, /I’m Harsha, the founder of Cohort15/);
   assert.match(html, /Reach me directly/);
-  assert.match(html, /One is enough\. Use whatever feels easiest\./);
-  assert.match(html, /data-feedback-step-5-title>How was the experience\?/);
+  assert.match(html, /Your feedback has been sent\./);
+  assert.match(html, /Every field is optional; one is enough\./);
   assert.match(html, /What felt clear, confusing, useful, or missing\?/);
-  assert.match(html, /What got in the way\?/);
-  assert.match(html, /Timing, unclear fit, missing group, form friction, or anything else\./);
   assert.match(html, /fetch\('\/feedback'/);
   assert.match(html, /keepalive: closing/);
   assert.match(html, /scheduleAutoSave/);
+  assert.match(html, /We couldn’t save your feedback\. Your response is still here—select Send feedback to try again\./);
+  assert.match(html, /We couldn’t save your feedback\. Your response is still here—select Next to try again\./);
+  assert.match(html, /We couldn’t save your latest changes\. They’re still here—select/);
+  assert.match(html, /await save\(\{ completed: true \}\)/);
+  assert.match(html, /feedbackSubmitted = true/);
+  assert.match(html, /Feedback sent\. Contact details are optional\./);
+  assert.doesNotMatch(html, /We could not save that yet/);
   assert.match(html, /setTimeout\(\(\) => \{/);
-  assert.match(html, /cohort15\.feedback\.opened-session\.v1/);
-  assert.match(html, /cohort15\.feedback\.dismissed-session\.v1/);
-  assert.match(html, /setTimeout\(autoOpen, 25000\)/);
-  assert.match(html, /setTimeout\(autoOpen, 500\)/);
-  assert.match(html, /location\.pathname\.startsWith\('\/research'\)/);
-  assert.match(html, /location\.pathname === '\/cohorts\/new'/);
-  assert.match(html, /location\.pathname\.startsWith\('\/cohorts\/'\)/);
-  assert.match(html, /clearBranchValues/);
+  assert.doesNotMatch(html, /autoOpen|shouldAutoOpen|opened-session|dismissed-session/);
+  assert.doesNotMatch(html, /setTimeout\(autoOpen|markAction|data-cohort-form|\.interest-form/);
   assert.match(html, /setTimeout\(\(\) => \{ closePanel\(\); \}, 1200\)/);
   assert.doesNotMatch(html, /https:\/\/www\.linkedin\.com\/in\/harsha-gullapalli-4b23451a[^"]*<\/a>/);
   assert.equal((html.match(/We’re building Cohort15/g) ?? []).length, 1);

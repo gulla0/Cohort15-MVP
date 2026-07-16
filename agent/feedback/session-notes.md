@@ -96,3 +96,26 @@ Follow-up Review:
 - Rebalanced the card action row so navigation remains primary and the compact copy action is visibly secondary, with responsive stacking on narrow screens.
 - Removed the details-link arrow after the refreshed preview showed that it visually connected the link to the adjacent copy button.
 - Final review retained the arrow as an explicit second-page cue, preserved opposite-end desktop and stacked mobile action placement, and made non-interactive card clicks open the request page without intercepting copy or text selection.
+
+### 2026-07-16 00:18 EDT
+
+User Feedback:
+- Start the resolution manager and resolve the first available issue.
+- Explain any database change plan and the effect on current data.
+- During review, clarify save failures, own them as a product failure, and name the exact recovery action.
+
+Issue Mapping:
+- Resolved `ISSUE-L003` as the first `not_started` issue in the canonical index.
+
+Reasoning:
+- The existing nullable `whyOrWhyNot` field safely stores the new general response, so no migration is needed and historical survey values remain untouched.
+- The two issue tasks were sequential: compatibility and canonical behavior were locked before replacing the widget.
+- Save failure copy now tells visitors their response remains in the form and directs them to `Next` or `Send feedback` as appropriate.
+- `Next` now submits the general feedback immediately; the second page only adds optional contact details to the same completed response.
+
+Artifacts Updated:
+- `docs/cohort15-piece-of-pie-mvp-spec.md`
+- `src/ui/feedback-widget.mjs`
+- `tests/feedback.test.mjs`
+- `agent/feedback/issues/ISSUE-L003-intentional-two-page-feedback/`
+- `agent/feedback/issue-index.md`

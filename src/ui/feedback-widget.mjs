@@ -30,44 +30,11 @@ export function renderFeedbackWidget() {
 
           <section class="feedback-step" data-feedback-step="1">
             <p class="feedback-intro">We’re building Cohort15 for people trying to form serious, high-commitment groups. Your feedback directly shapes what we build next.</p>
-            <h3>Are you looking to form a small, high-commitment group?</h3>
-            <div class="feedback-options">
-              <label><input type="radio" name="lookingForGroup" value="yes"> Yes</label>
-              <label><input type="radio" name="lookingForGroup" value="no"> No</label>
-            </div>
+            <label for="feedback-message">What would you like us to know?</label>
+            <textarea id="feedback-message" name="whyOrWhyNot" maxlength="2000" data-feedback-message placeholder="What felt clear, confusing, useful, or missing?"></textarea>
           </section>
 
           <section class="feedback-step" data-feedback-step="2" hidden>
-            <h3 data-feedback-step-2-title>What are you looking for instead?</h3>
-            <textarea name="lookingForInstead" maxlength="1000" placeholder="Optional"></textarea>
-          </section>
-
-          <section class="feedback-step" data-feedback-step="3" hidden>
-            <h3>Are you looking to create a group, join a group, or both?</h3>
-            <div class="feedback-options">
-              <label><input type="radio" name="groupIntent" value="create"> Create</label>
-              <label><input type="radio" name="groupIntent" value="join"> Join</label>
-              <label><input type="radio" name="groupIntent" value="both"> Both</label>
-            </div>
-          </section>
-
-          <section class="feedback-step" data-feedback-step="4" hidden>
-            <h3>Did you create or join a group on Cohort15?</h3>
-            <div class="feedback-options">
-              <label><input type="radio" name="didCreateOrJoin" value="created"> Created</label>
-              <label><input type="radio" name="didCreateOrJoin" value="joined"> Joined</label>
-              <label><input type="radio" name="didCreateOrJoin" value="both"> Both</label>
-              <label><input type="radio" name="didCreateOrJoin" value="not_yet"> Not yet</label>
-              <label><input type="radio" name="didCreateOrJoin" value="tried_but_stopped"> Tried but stopped</label>
-            </div>
-          </section>
-
-          <section class="feedback-step" data-feedback-step="5" hidden>
-            <h3 data-feedback-step-5-title>How was the experience?</h3>
-            <textarea name="whyOrWhyNot" maxlength="2000" data-feedback-step-5-text placeholder="What felt clear, confusing, useful, or missing?"></textarea>
-          </section>
-
-          <section class="feedback-step" data-feedback-step="6" hidden>
             <h3>Founder’s socials</h3>
             <p>I’m Harsha, the founder of Cohort15. If this is the kind of group you’re looking for, I’d genuinely love to hear what you’re trying to form and what got in the way.</p>
             <p class="founder-social-label">Reach me directly</p>
@@ -76,7 +43,7 @@ export function renderFeedbackWidget() {
               <a href="https://www.linkedin.com/in/harsha-gullapalli-4b23451a" target="_blank" rel="noopener noreferrer" aria-label="Founder on LinkedIn">${icon('linkedin')}</a>
               <a href="mailto:cohort15dotcom@gmail.com" aria-label="Email the founder">${icon('mail')}</a>
             </nav>
-            <p class="field-note">If you’re open to it, leave the best way to reach you. One is enough. Use whatever feels easiest.</p>
+            <p class="field-note">Your feedback has been sent. If you’re open to a follow-up, leave the best way to reach you. Every field is optional; one is enough.</p>
             <label>Best contact email <input type="email" name="contactEmail" maxlength="254" autocomplete="email"></label>
             <label>X / Twitter <input name="contactX" maxlength="200" placeholder="@handle"></label>
             <label>LinkedIn <input name="contactLinkedin" maxlength="500" placeholder="Profile link or name"></label>
@@ -117,16 +84,12 @@ function feedbackScript() {
       const lastStepInput = widget.querySelector('[data-feedback-last-step]');
       const completionInput = widget.querySelector('[data-feedback-completion]');
       const closeField = widget.querySelector('[data-feedback-close-field]');
-      const stepFiveTitle = widget.querySelector('[data-feedback-step-5-title]');
-      const stepFiveText = widget.querySelector('[data-feedback-step-5-text]');
       const steps = [...widget.querySelectorAll('[data-feedback-step]')];
       const storageKey = 'cohort15.feedback.v1';
-      const contextKey = 'cohort15.feedback.context.v1';
-      const sessionOpenKey = 'cohort15.feedback.opened-session.v1';
-      const sessionDismissedKey = 'cohort15.feedback.dismissed-session.v1';
       let currentStep = 1;
       let dirty = false;
       let hasProgress = false;
+      let feedbackSubmitted = false;
       let completed = false;
       let saveTimer = null;
 
@@ -142,120 +105,39 @@ function feedbackScript() {
         saveJson(storageKey, feedbackState);
       }
 
-      const markAction = (key) => {
-        const context = loadJson(contextKey, {});
-        context[key] = true;
-        saveJson(contextKey, context);
-      };
-      const shouldAutoOpen = () => sessionStorage.getItem(sessionOpenKey) !== 'true'
-        && sessionStorage.getItem(sessionDismissedKey) !== 'true'
-        && panel.hidden;
-      const openPanel = ({ automatic = false } = {}) => {
-        if (automatic && !shouldAutoOpen()) return;
+      const openPanel = () => {
         panel.hidden = false;
         openButton.setAttribute('aria-expanded', 'true');
         document.body.classList.add('feedback-open');
         showStep(currentStep);
-        if (automatic) {
-          sessionStorage.setItem(sessionOpenKey, 'true');
-        } else {
-          panel.querySelector('input, textarea, button')?.focus();
-        }
+        panel.querySelector('textarea, input, button')?.focus();
       };
-      const autoOpen = () => {
-        openPanel({ automatic: true });
-      };
-      if (location.pathname === '/cohorts/new') markAction('openedCohortRequest');
-      if (location.pathname.startsWith('/cohorts/') && location.pathname !== '/cohorts/new') markAction('openedCohortDetail');
-      if (location.pathname.startsWith('/research')) markAction('readResearch');
-      if (location.pathname === '/cohorts/new') {
-        setTimeout(autoOpen, 500);
-      }
-      if (location.pathname.startsWith('/cohorts/') && location.pathname !== '/cohorts/new') {
-        setTimeout(autoOpen, 500);
-      }
-      if (location.pathname.startsWith('/research')) {
-        setTimeout(autoOpen, 25000);
-      }
-      document.querySelector('a[href="/cohorts/new"]')?.addEventListener('click', () => {
-        markAction('openedCohortRequest');
-      }, { once: true });
-      document.querySelector('[data-cohort-form]')?.addEventListener('input', () => {
-        markAction('startedCohortForm');
-        autoOpen();
-      }, { once: true });
-      document.querySelector('[data-cohort-form]')?.addEventListener('submit', () => {
-        markAction('submittedCohortRequest');
-        autoOpen();
-      }, { once: true });
-      document.querySelector('.interest-form')?.addEventListener('submit', () => {
-        markAction('submittedInterest');
-        autoOpen();
-      }, { once: true });
 
       const values = () => Object.fromEntries(new FormData(form).entries());
       const refreshHidden = () => {
         sessionInput.value = feedbackState.sessionId;
         pathInput.value = location.pathname + location.search;
-        contextInput.value = JSON.stringify(loadJson(contextKey, {}));
+        contextInput.value = '{}';
         lastStepInput.value = String(currentStep);
       };
       const showStep = (step) => {
-        const data = values();
-        if (step === 5) {
-          const hadExperience = ['created', 'joined', 'both'].includes(data.didCreateOrJoin);
-          stepFiveTitle.textContent = hadExperience ? 'How was the experience?' : 'What got in the way?';
-          stepFiveText.placeholder = hadExperience
-            ? 'What felt clear, confusing, useful, or missing?'
-            : 'Timing, unclear fit, missing group, form friction, or anything else.';
-        }
         currentStep = step;
         for (const section of steps) section.hidden = Number(section.dataset.feedbackStep) !== step;
         back.hidden = step <= 1;
-        next.textContent = step >= 6 || (step === 2 && data.lookingForGroup === 'no') ? 'Done' : 'Next';
+        next.textContent = step === 2 ? 'Send feedback' : 'Next';
         refreshHidden();
-      };
-      const nextStep = () => {
-        const data = values();
-        if (currentStep === 1 && data.lookingForGroup === 'no') return 2;
-        if (currentStep === 1 && data.lookingForGroup) return 3;
-        if (currentStep === 2) return 6;
-        return Math.min(6, currentStep + 1);
-      };
-      const previousStep = () => {
-        const data = values();
-        if (currentStep === 6 && data.lookingForGroup === 'no') return 2;
-        if (currentStep === 3) return 1;
-        return Math.max(1, currentStep - 1);
       };
       const validStep = () => {
         const data = values();
-        if (currentStep === 1 && !data.lookingForGroup) return 'Choose one option to continue.';
-        if (currentStep === 3 && !data.groupIntent) return 'Choose one option to continue.';
-        if (currentStep === 4 && !data.didCreateOrJoin) return 'Choose one option to continue.';
+        if (currentStep === 1 && !data.whyOrWhyNot?.trim()) return 'Write a little feedback to continue.';
         return '';
       };
       const answered = () => {
         const data = values();
-        return Boolean(data.lookingForGroup || data.lookingForInstead || data.groupIntent || data.didCreateOrJoin || data.whyOrWhyNot || data.contactEmail || data.contactX || data.contactLinkedin || data.contactOther);
-      };
-      const clearBranchValues = () => {
-        const data = values();
-        if (data.lookingForGroup === 'no') {
-          form.elements.groupIntent.value = '';
-          form.elements.didCreateOrJoin.value = '';
-          form.elements.whyOrWhyNot.value = '';
-          form.elements.contactEmail.value = '';
-          form.elements.contactX.value = '';
-          form.elements.contactLinkedin.value = '';
-          form.elements.contactOther.value = '';
-        } else if (data.lookingForGroup === 'yes') {
-          form.elements.lookingForInstead.value = '';
-        }
+        return Boolean(data.whyOrWhyNot?.trim() || data.contactEmail || data.contactX || data.contactLinkedin || data.contactOther);
       };
       const save = async ({ completed = false, closing = false } = {}) => {
         refreshHidden();
-        clearBranchValues();
         completionInput.value = completed ? 'completed' : 'partial';
         closeField.value = closing ? 'true' : 'false';
         if (!answered()) return;
@@ -276,11 +158,12 @@ function feedbackScript() {
         if (completed || !answered()) return;
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
-          if (currentStep === 6 && form.elements.contactEmail.value && !form.elements.contactEmail.validity.valid) {
+          if (currentStep === 2 && form.elements.contactEmail.value && !form.elements.contactEmail.validity.valid) {
             return;
           }
-          save().catch(() => {
-            status.textContent = 'We could not save the latest change.';
+          save({ completed: feedbackSubmitted }).catch(() => {
+            const action = currentStep === 2 ? 'Send feedback' : 'Next';
+            status.textContent = 'We couldn’t save your latest changes. They’re still here—select ' + action + ' to try again.';
           });
         }, 700);
       };
@@ -290,12 +173,11 @@ function feedbackScript() {
       const closePanel = async () => {
         clearTimeout(saveTimer);
         if (!completed && (dirty || hasProgress || answered()) && !success.hidden) {
-          try { await save({ closing: true }); } catch { status.textContent = 'We could not save the latest change.'; }
+          try { await save({ completed: feedbackSubmitted, closing: true }); } catch {}
         } else if (!completed && (dirty || hasProgress || answered())) {
-          try { await save({ closing: true }); } catch {}
+          try { await save({ completed: feedbackSubmitted, closing: true }); } catch {}
         }
         panel.hidden = true;
-        sessionStorage.setItem(sessionDismissedKey, 'true');
         openButton.setAttribute('aria-expanded', 'false');
         document.body.classList.remove('feedback-open');
         openButton.focus();
@@ -308,7 +190,7 @@ function feedbackScript() {
           success.hidden = false;
           setTimeout(() => { closePanel(); }, 1200);
         } catch {
-          status.textContent = 'We could not save that yet. Please try again.';
+          status.textContent = 'We couldn’t save your feedback. Your response is still here—select Send feedback to try again.';
         }
       };
       closeButton.addEventListener('click', closePanel);
@@ -320,18 +202,20 @@ function feedbackScript() {
           status.textContent = validationMessage;
           return;
         }
-        if (currentStep === 2 || currentStep === 6) {
+        if (currentStep === 2) {
           await completeAndClose();
           return;
         }
         try {
-          await save();
-          showStep(nextStep());
+          await save({ completed: true });
+          feedbackSubmitted = true;
+          showStep(2);
+          status.textContent = 'Feedback sent. Contact details are optional.';
         } catch {
-          status.textContent = 'We could not save that yet. Please try again.';
+          status.textContent = 'We couldn’t save your feedback. Your response is still here—select Next to try again.';
         }
       });
-      back.addEventListener('click', () => showStep(previousStep()));
+      back.addEventListener('click', () => showStep(1));
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         await completeAndClose();

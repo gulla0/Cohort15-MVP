@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-L003-T01",
       "title": "Lock the click-only two-page feedback contract",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Update the canonical feedback interaction contract and verify that the simplified payload fits existing private persistence without a migration.",
       "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/feedback-widget.mjs", "src/services/feedback.mjs", "src/persistence/repositories.mjs"],
@@ -18,12 +18,13 @@
       "area": "feedback interaction contract",
       "risk": "medium",
       "shared_dependencies": ["docs/cohort15-piece-of-pie-mvp-spec.md", "src/services/feedback.mjs"],
-      "stop_condition": "Stop when the two-page behavior and migration-free compatibility are proven or an exact schema blocker is documented."
+      "stop_condition": "Stop when the two-page behavior and migration-free compatibility are proven or an exact schema blocker is documented.",
+      "evidence": "Locked the click-only, exactly-two-page contract in the canonical product specification. Verified the general response maps to the existing optional whyOrWhyNot field, removed survey fields remain nullable, local and Supabase mappings remain compatible, and existing rows require no rewrite or migration."
     },
     {
       "id": "ISSUE-L003-T02",
       "title": "Implement intentional two-page feedback",
-      "status": "not_started",
+      "status": "done",
       "dependencies": ["ISSUE-L003-T01"],
       "objective": "Replace the auto-opening branched survey with the approved click-only two-page dialog while preserving private saves and contact options.",
       "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/feedback-widget.mjs", "src/ui/styles.css", "src/services/feedback.mjs", "tests/feedback.test.mjs"],
@@ -35,7 +36,8 @@
       "area": "feedback UI",
       "risk": "medium",
       "shared_dependencies": ["src/ui/styles.css", "tests/feedback.test.mjs"],
-      "stop_condition": "Stop when feedback is voluntary, exactly two pages, privately saved, accessible, and verified without destructive schema work."
+      "stop_condition": "Stop when feedback is voluntary, exactly two pages, privately saved, accessible, and verified without destructive schema work.",
+      "evidence": "Replaced the auto-opening branched survey with a click-only general-feedback and founder/contact flow. Next completes the feedback before the optional contact page; later contact saves update the same completed response. Retained draft autosave and close-to-save behavior, added explicit recovery copy, and preserved private route/security controls. Six focused tests, desktop submission at 1280x720, and mobile full-screen layout at 390x844 passed."
     }
   ]
 }

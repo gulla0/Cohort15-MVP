@@ -6,9 +6,9 @@ Make feedback voluntary and reduce it to general text plus the existing founder/
 
 ## Tasks
 
-- ISSUE-L003-T01 Lock the click-only two-page feedback contract
+- ISSUE-L003-T01 Lock the click-only two-page feedback contract — done
   - Depends on: none
-- ISSUE-L003-T02 Implement intentional two-page feedback
+- ISSUE-L003-T02 Implement intentional two-page feedback — done
   - Depends on: ISSUE-L003-T01
 
 ## Dependency Order
@@ -26,4 +26,4 @@ ISSUE-L003-T01 -> ISSUE-L003-T02
 
 ## Next Unblocked Tasks
 
-- ISSUE-L003-T01
+- None; the issue graph is complete.
