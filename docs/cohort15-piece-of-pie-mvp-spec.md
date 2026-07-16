@@ -193,6 +193,38 @@ Local in-memory repositories must implement equivalent observable behavior for t
 - No full account dashboard is required. The header balance and payment/action pages are sufficient.
 - Existing responsive behavior, accessible labels, keyboard focus, semantic notices, and HTML escaping remain.
 
+### Portable cohort request contract
+
+Every public cohort card and cohort detail page exposes the same `Copy cohort request` action. The copied value is plain text, is anonymous, is useful without surrounding Cohort15 UI, and contains the cohort's canonical absolute public detail URL. The complete clipboard value, including separators, newlines, the ellipsis character, and URL, is at most 280 Unicode code points. A newline counts as one code point. The URL is copied verbatim and is never shortened or truncated.
+
+The payload has up to four non-empty lines, in this order:
+
+```text
+Cohort request: {title}
+{purpose}
+{schedule and formation context}
+{public URL}
+```
+
+Portable text is derived only from the public title, public description, structured public schedule/lifecycle fields, and canonical public URL. It must never read creator or participant names, emails, account identifiers, notification data, or any other identity field. It must never read or copy `meetingLink`, even after quorum. As defense in depth, URL-shaped and email-address-shaped tokens in title or description are removed before those fields are used; thus the canonical public detail URL is the only URL in the payload. Removal is followed by whitespace normalization. This action does not include clipboard attribution, the signed-in user's identity, or personalized query parameters.
+
+Generation is deterministic:
+
+1. Sanitize title and description by splitting on Unicode whitespace and removing any token classified as a URL or email, then join retained tokens with one ASCII space and trim. For classification only, discard leading `(`, `[`, `{`, `"`, or `'` and trailing `.`, `,`, `;`, `:`, `!`, `?`, `)`, `]`, `}`, `"`, or `'` from the token. A URL token, compared case-insensitively, starts with `http://`, `https://`, or `www.`, or matches `(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[/:?#].*)?`. An email token matches `[^@\s]+@[^@\s]+\.[^@\s]+`. Both matches must cover the entire classification token. Code-point operations below operate on Unicode scalar values, not UTF-16 code units.
+2. Shorten the normalized title to at most 60 code points and the normalized description to at most 70 code points with the shortening rule below. The title line is `Cohort request: {title}`. A title that is empty after sanitization uses `Untitled cohort`. A description that is empty after sanitization uses `Small online cohort seeking participants.`
+3. Produce the schedule from three human-readable atoms joined with ` · `: `MMM D, YYYY at h:mm AM/PM UTC`, the title-cased recurrence label, and `{meeting count} meeting(s) × {duration} min`. Use the fixed English UTC month abbreviations `Jan` through `Dec`, omit a leading zero from day and hour, always include two minute digits, and use `12` rather than `0` for midnight. A non-recurring cohort uses `One time`; recurring labels are `Daily`, `Weekly`, `Biweekly`, and `Monthly`. Use singular `meeting` only when the count is one and `meetings` otherwise. Meeting count and duration are base-10 integers.
+4. Produce exactly one formation atom: `{interest count} of {minimum quorum} interested` while collection is active below quorum; `Quorum met ({interest count} of {minimum quorum} interested)` from quorum until the final meeting ends; or `Collection closed` after a below-quorum expiry or after the final meeting ends. Counts are base-10 integers.
+5. Join schedule and formation atoms with ` · ` to make the context line. Assemble all four lines with one `\n` between adjacent lines and no trailing newline.
+6. If the result exceeds 280 code points, remove the formation atom and its separator. If it still exceeds 280, remove the entire context line. If it still exceeds 280, shorten the purpose to the largest code-point limit that makes the payload fit; omit the purpose line when fewer than two code points are available for it. If it still exceeds 280, shorten the title in the same way, retaining at least one title code point. The prefix, public URL, and remaining newlines are never shortened. This order makes the fixed prefix and recognizable title highest-priority descriptive content, then purpose, then schedule/formation context; the usable public URL is mandatory regardless of priority.
+
+To shorten text to a limit `N`, return it unchanged when it is at most `N` code points. Otherwise reserve one code point for `…`, take the first `N - 1` code points, trim trailing whitespace, and, when that prefix contains whitespace with non-whitespace before it, remove the final partial word at the last whitespace boundary. Append `…`. For `N = 1`, the result is `…`; a limit of zero omits the field and its line. No other punctuation is added during shortening.
+
+The canonical URL must be an absolute `https` production URL (an `http` loopback URL is allowed only in local development), contain no credentials or query/fragment component, and be no more than 260 code points. This maximum guarantees that the fixed 16-code-point `Cohort request: ` prefix, the minimum allowed three-code-point title, one newline, and URL fit within 280. Generation fails closed rather than copying a partial or unusable URL if this invariant is violated.
+
+The copy action is a button and does not navigate, open a share sheet, post externally, or emit the payload to analytics. Its accessible name is `Copy request` on listing cards and `Copy cohort request` on detail pages. A successful clipboard write changes adjacent status text to `Cohort request copied.`; a failed or unavailable write reports `Could not copy the cohort request. Select and copy it manually.` and makes the generated plain text selectable. Success is announced only after the clipboard write completes, failure never displays success, and repeated activation regenerates the same payload from the same cohort state. Listing and detail actions for the same cohort state and canonical URL copy byte-for-byte identical UTF-8 text.
+
+On public listing cards, the title and explicit `View cohort details →` link remain ordinary links to the cohort request page. Progressive enhancement also makes non-interactive card content and whitespace open that same page, while clicks within the copy control, links, form controls, editable content, or a non-empty text selection never trigger card navigation. Larger views place the explicit details link and compact `Copy request` control at opposite ends of the action row; narrow views stack copy below details with at least 16 pixels of separation.
+
 ## HTTP And Error Policy
 
 - Protected HTML GET routes use `303` to the sign-in page when authentication is required.

@@ -203,7 +203,11 @@ article p:last-child {
 .filter-link { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); font-weight: 800; text-decoration: none; }
 .filter-link.selected { border-color: var(--green); background: var(--green); color: #fff; }
 .cohort-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.cohort-card { display: flex; flex-direction: column; min-height: 100%; }
+.cohort-card { display: flex; flex-direction: column; min-height: 100%; cursor: pointer; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.cohort-card:hover { border-color: #9fc9b7; box-shadow: 0 12px 30px rgba(23, 33, 28, .1); transform: translateY(-2px); }
+.cohort-card a, .cohort-card button { cursor: pointer; }
+.cohort-card .portable-request { cursor: default; }
+.cohort-card textarea, .cohort-card input { cursor: text; }
 .card-heading, .progress-copy { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .card-heading .status-pill { min-height: 26px; padding: 0 9px; }
 .status-pill.expired { border-color: var(--line); background: #eeeae1; color: var(--muted); }
@@ -224,7 +228,15 @@ article p:last-child {
 .cohort-card-summary .formatted-text ol { padding-left: 1.2rem; }
 .cohort-card-summary .formatted-text li + li { margin-top: 6px; }
 .summary-note { margin: 12px 0 0; color: var(--green); font-size: .9rem; font-weight: 800; }
-.cohort-card > .text-link { margin-top: auto; padding-top: 20px; }
+.cohort-card-actions { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-top: auto; padding-top: 24px; }
+.cohort-card-actions > .text-link { display: inline-flex; align-items: center; flex: 0 0 auto; min-height: 36px; }
+.portable-request { display: grid; justify-items: start; gap: 8px; margin-top: 20px; }
+.cohort-card-actions .portable-request { flex: 0 1 220px; min-width: 0; margin-top: 0; }
+.card-portable-request .button-link { min-height: 36px; padding: 0 12px; border-color: var(--line); color: var(--muted); font-size: .86rem; }
+.card-portable-request .button-link:hover { border-color: var(--green); color: var(--green); }
+.card-copy-icon { width: 15px; height: 15px; margin-right: 7px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+.portable-request-status { min-height: 1.35em; margin: 0; color: var(--muted); font-size: .85rem; }
+.portable-request-text { width: min(100%, 680px); min-height: 132px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font: inherit; resize: vertical; }
 .cohort-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 4px 0 20px; }
 .cohort-facts div { min-width: 0; }
 .cohort-facts dt { color: var(--muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
@@ -778,6 +790,9 @@ body.preview-open { overflow: hidden; }
   .site-nav { align-items: flex-end; flex-direction: column; gap: 8px; text-align: right; }
   .section-heading { align-items: start; flex-direction: column; }
   .cohort-facts { grid-template-columns: 1fr; }
+  .cohort-card-actions { flex-direction: column; gap: 16px; }
+  .cohort-card-actions .portable-request { flex: none; width: 100%; }
+  .cohort-card-actions .button-link { width: auto; }
 
   .cohort-form { grid-template-columns: 1fr; padding: 18px; }
   .cohort-form .full, .field-note.full { grid-column: auto; }

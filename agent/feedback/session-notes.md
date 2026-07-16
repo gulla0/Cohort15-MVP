@@ -65,3 +65,34 @@ Artifacts Updated:
 - `tests/foundation.test.mjs`
 - `agent/feedback/issues/ISSUE-L001-landing-credit-messaging/`
 - `agent/feedback/issue-index.md`
+
+### 2026-07-15 22:57 EDT
+
+User Feedback:
+- Start the resolution manager and resolve the first available issue, then request consent before committing.
+
+Issue Mapping:
+- Resolved `ISSUE-L002` as the first `not_started` issue in the canonical index.
+
+Reasoning:
+- The issue-local tasks remained sequential: the precise 280-code-point and privacy contract had to be canonical before the shared generator and controls could be tested.
+- One shared generator keeps listing and detail payloads identical and keeps the meeting link and private identity outside every copied lifecycle state.
+- Commit is intentionally deferred until explicit user consent, overriding the manager's normal automatic closeout commit.
+
+Artifacts Updated:
+- `docs/cohort15-piece-of-pie-mvp-spec.md`
+- `src/server/app.mjs`
+- `src/ui/cohorts.mjs`
+- `src/ui/home.mjs`
+- `src/ui/styles.css`
+- `tests/event-browsing.test.mjs`
+- `agent/feedback/issues/ISSUE-L002-portable-cohort-requests/`
+- `agent/feedback/issue-index.md`
+
+Follow-up Review:
+- The user approved the overall card but found the compact schedule/status line difficult to read.
+- Replaced the ISO/semicolon/shorthand presentation with a human-readable UTC date and ` · `-separated facts while preserving the 280-code-point ceiling and included cohort URL.
+- The user then identified visual crowding between the card's details link and copy action.
+- Rebalanced the card action row so navigation remains primary and the compact copy action is visibly secondary, with responsive stacking on narrow screens.
+- Removed the details-link arrow after the refreshed preview showed that it visually connected the link to the adjacent copy button.
+- Final review retained the arrow as an explicit second-page cue, preserved opposite-end desktop and stacked mobile action placement, and made non-interactive card clicks open the request page without intercepting copy or text selection.

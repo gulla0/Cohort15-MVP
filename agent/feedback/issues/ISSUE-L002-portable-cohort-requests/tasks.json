@@ -6,7 +6,7 @@
     {
       "id": "ISSUE-L002-T01",
       "title": "Define the 280-character portable request contract",
-      "status": "not_started",
+      "status": "done",
       "dependencies": [],
       "objective": "Specify the field priority, formatting, length accounting, truncation, privacy, and copy-interaction behavior for portable cohort requests.",
       "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/cohorts.mjs", "src/ui/social-image.mjs"],
@@ -18,12 +18,13 @@
       "area": "sharing contract",
       "risk": "medium",
       "shared_dependencies": ["docs/cohort15-piece-of-pie-mvp-spec.md"],
-      "stop_condition": "Stop when the format and length/privacy rules are precise enough for deterministic tests."
+      "stop_condition": "Stop when the format and length/privacy rules are precise enough for deterministic tests.",
+      "evidence": "Added the canonical four-line portable-request contract with Unicode code-point accounting, deterministic sanitization and truncation, mandatory canonical URL preservation, explicit private-identity and meeting-link exclusion, accessible copy/fallback behavior, and a fixed human-readable UTC schedule format. Boundary exercises include maximum-field and 260-code-point URL cases at no more than 280 code points."
     },
     {
       "id": "ISSUE-L002-T02",
       "title": "Implement portable request copy controls",
-      "status": "not_started",
+      "status": "done",
       "dependencies": ["ISSUE-L002-T01"],
       "objective": "Generate and copy the approved compact request from every public cohort card and detail page.",
       "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/cohorts.mjs", "src/ui/home.mjs", "src/ui/styles.css"],
@@ -35,7 +36,8 @@
       "area": "public cohort sharing",
       "risk": "medium",
       "shared_dependencies": ["src/ui/cohorts.mjs", "src/ui/styles.css", "tests/event-browsing.test.mjs"],
-      "stop_condition": "Stop when both public views produce a tested, private-safe payload within 280 characters."
+      "stop_condition": "Stop when both public views produce a tested, private-safe payload within 280 characters.",
+      "evidence": "Added one shared portable-text generator and anonymous copy control to listing cards and detail pages, canonical app-URL plumbing, readable context, accessible Clipboard API success/fallback behavior, and focused length/privacy/DOM-script tests. User preview review refined cards to retain `View cohort details →`, place the quieter icon-labeled `Copy request` control at the opposite end on larger views and below it on mobile, and make non-interactive card clicks open the request page without disrupting copy controls or text selection."
     }
   ]
 }

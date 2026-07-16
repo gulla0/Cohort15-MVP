@@ -92,6 +92,171 @@ function absoluteUrl(appUrl, path) {
   return `${base}${path}`;
 }
 
+function codePointLength(value) {
+  return Array.from(value).length;
+}
+
+function sanitizePortableText(value) {
+  return String(value ?? '').split(/\s+/u).filter((token) => {
+    const candidate = token
+      .replace(/^[([{"']+/u, '')
+      .replace(/[.,;:!?\])}"']+$/u, '');
+    const isUrl = /^(?:https?:\/\/|www\.)/iu.test(candidate)
+      || /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[/:?#].*)?$/iu.test(candidate);
+    const isEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(candidate);
+    return token && !isUrl && !isEmail;
+  }).join(' ').trim();
+}
+
+function shortenPortableText(value, maximumLength) {
+  const characters = Array.from(value);
+  if (characters.length <= maximumLength) return value;
+  if (maximumLength === 1) return '…';
+  if (maximumLength <= 0) return '';
+  let clipped = characters.slice(0, maximumLength - 1).join('').trimEnd();
+  const boundary = clipped.lastIndexOf(' ');
+  if (boundary > 0) clipped = clipped.slice(0, boundary);
+  return `${clipped}…`;
+}
+
+function portableSchedule(cohort) {
+  const instant = new Date(cohort.firstMeetingAt);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const hours = instant.getUTCHours();
+  const hour = hours % 12 || 12;
+  const minutes = String(instant.getUTCMinutes()).padStart(2, '0');
+  const meridiem = hours < 12 ? 'AM' : 'PM';
+  const date = `${months[instant.getUTCMonth()]} ${instant.getUTCDate()}, ${instant.getUTCFullYear()} at ${hour}:${minutes} ${meridiem} UTC`;
+  const recurrence = {
+    none: 'One time', daily: 'Daily', weekly: 'Weekly', biweekly: 'Biweekly', monthly: 'Monthly',
+  }[cohort.recurrence];
+  const meetings = cohort.meetingCount === 1 ? 'meeting' : 'meetings';
+  return `${date} · ${recurrence} · ${cohort.meetingCount} ${meetings} × ${cohort.meetingDurationMinutes} min`;
+}
+
+function portableFormation(cohort, now) {
+  if (cohort.collectionStatus === 'active' && cohort.quorumStatus === 'gathering') {
+    return `${cohort.interestCount} of ${cohort.minQuorum} interested`;
+  }
+  if (cohort.quorumStatus === 'met' && new Date(now) < new Date(cohort.finalMeetingEndsAt)) {
+    return `Quorum met (${cohort.interestCount} of ${cohort.minQuorum} interested)`;
+  }
+  return 'Collection closed';
+}
+
+function canonicalCohortUrl(cohort, appUrl) {
+  const url = new URL(`/cohorts/${encodeURIComponent(cohort.id)}`, appUrl);
+  const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  if ((url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback))
+    || url.username || url.password || url.search || url.hash || codePointLength(url.href) > 260) {
+    throw new TypeError('Cohort public URL is not portable');
+  }
+  return url.href;
+}
+
+export function portableCohortRequest(cohort, {
+  appUrl = 'http://localhost:3000', now = new Date(),
+} = {}) {
+  let title = shortenPortableText(sanitizePortableText(cohort.title) || 'Untitled cohort', 60);
+  let purpose = shortenPortableText(
+    sanitizePortableText(cohort.description) || 'Small online cohort seeking participants.',
+    70,
+  );
+  const schedule = portableSchedule(cohort);
+  const formation = portableFormation(cohort, now);
+  const url = canonicalCohortUrl(cohort, appUrl);
+  let context = `${schedule} · ${formation}`;
+  const assemble = () => [`Cohort request: ${title}`, purpose, context, url].filter(Boolean).join('\n');
+  let payload = assemble();
+
+  if (codePointLength(payload) > 280) {
+    context = schedule;
+    payload = assemble();
+  }
+  if (codePointLength(payload) > 280) {
+    context = '';
+    payload = assemble();
+  }
+  if (codePointLength(payload) > 280) {
+    const originalPurpose = purpose;
+    purpose = '';
+    for (let limit = codePointLength(originalPurpose) - 1; limit >= 2; limit -= 1) {
+      purpose = shortenPortableText(originalPurpose, limit);
+      if (codePointLength(assemble()) <= 280) break;
+      purpose = '';
+    }
+    payload = assemble();
+  }
+  if (codePointLength(payload) > 280) {
+    const originalTitle = title;
+    for (let limit = codePointLength(originalTitle) - 1; limit >= 1; limit -= 1) {
+      title = shortenPortableText(originalTitle, limit);
+      if (codePointLength(assemble()) <= 280) break;
+    }
+    payload = assemble();
+  }
+  if (codePointLength(payload) > 280) throw new RangeError('Cohort request exceeds 280 code points');
+  return payload;
+}
+
+function copyIcon() {
+  return '<svg class="card-copy-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="5" y="2" width="8" height="9" rx="1"></rect><path d="M3 5v8h7"></path></svg>';
+}
+
+function renderPortableRequest(cohort, options, { card = false } = {}) {
+  const actionLabel = card ? 'Copy request' : 'Copy cohort request';
+  const icon = card ? copyIcon() : '';
+  const cardClass = card ? ' card-portable-request' : '';
+  let payload;
+  try {
+    payload = portableCohortRequest(cohort, options);
+  } catch {
+    return `<div class="portable-request${cardClass}"><button class="button-link secondary compact" type="button" disabled>${icon}${actionLabel}</button><p class="portable-request-status" role="status">Could not copy the cohort request. Select and copy it manually.</p></div>`;
+  }
+  return `<div class="portable-request${cardClass}" data-portable-request><button class="button-link secondary compact" type="button" data-portable-request-button>${icon}${actionLabel}</button><p class="portable-request-status" aria-live="polite" data-portable-request-status></p><textarea class="portable-request-text" aria-label="Portable cohort request" readonly data-portable-request-text>${escapeHtml(payload)}</textarea></div>`;
+}
+
+export function portableRequestScript() {
+  return `<script>
+    (() => {
+      document.querySelectorAll('[data-portable-request]').forEach((control) => {
+        const button = control.querySelector('[data-portable-request-button]');
+        const status = control.querySelector('[data-portable-request-status]');
+        const fallback = control.querySelector('[data-portable-request-text]');
+        fallback.hidden = Boolean(globalThis.navigator?.clipboard?.writeText);
+        button.addEventListener('click', async () => {
+          try {
+            if (!globalThis.navigator?.clipboard?.writeText) throw new Error('Clipboard unavailable');
+            await globalThis.navigator.clipboard.writeText(fallback.value);
+            fallback.hidden = true;
+            status.textContent = 'Cohort request copied.';
+          } catch {
+            fallback.hidden = false;
+            fallback.focus();
+            fallback.select();
+            status.textContent = 'Could not copy the cohort request. Select and copy it manually.';
+          }
+        });
+      });
+    })();
+  </script>`;
+}
+
+export function cohortCardScript() {
+  return `<script>
+    (() => {
+      document.querySelectorAll('[data-cohort-card]').forEach((card) => {
+        card.addEventListener('click', (event) => {
+          const interactive = event.target.closest?.('a, button, textarea, input, select, label, form, [contenteditable], [data-portable-request]');
+          const selection = globalThis.getSelection?.();
+          if (event.defaultPrevented || interactive || (selection && !selection.isCollapsed && String(selection).length)) return;
+          globalThis.location.assign(card.dataset.cohortHref);
+        });
+      });
+    })();
+  </script>`;
+}
+
 function metaTag(name, content, { property = false } = {}) {
   const attribute = property ? 'property' : 'name';
   return `<meta ${attribute}="${escapeHtml(name)}" content="${escapeHtml(content)}">`;
@@ -162,14 +327,15 @@ function progress(cohort) {
   </div>`;
 }
 
-export function renderCohortCard(cohort) {
-  return `<article class="cohort-card">
+export function renderCohortCard(cohort, options = {}) {
+  const path = `/cohorts/${encodeURIComponent(cohort.id)}`;
+  return `<article class="cohort-card" data-cohort-card data-cohort-href="${path}">
     <div class="card-heading"><span class="status-pill ${cohort.collectionStatus}">${label(cohort.collectionStatus)}</span><span class="category">${escapeHtml(label(cohort.category))}</span></div>
-    <h3><a href="/cohorts/${encodeURIComponent(cohort.id)}">${escapeHtml(cohort.title)}</a></h3>
+    <h3><a href="${path}">${escapeHtml(cohort.title)}</a></h3>
     <div class="cohort-card-summary">${renderFormattedSummary(cohort.description)}</div>
     ${schedule(cohort)}
     ${progress(cohort)}
-    <a class="text-link" href="/cohorts/${encodeURIComponent(cohort.id)}">View cohort details →</a>
+    <div class="cohort-card-actions"><a class="text-link" href="${path}">View cohort details →</a>${renderPortableRequest(cohort, options, { card: true })}</div>
   </article>`;
 }
 
@@ -240,6 +406,7 @@ export function renderCohortDetailPage(cohort, options = {}) {
     <a class="text-link" href="/#cohorts">← Browse all cohorts</a>
     <div class="detail-heading"><div><p class="eyebrow">${escapeHtml(label(cohort.category))} · ${escapeHtml(cohort.collectionStatus)}</p><h1>${escapeHtml(cohort.title)}</h1><p class="lede">${escapeHtml(cohort.topic)} · ${escapeHtml(label(cohort.targetSkillLevel))} · ${sessionLabel}</p></div>${meetingAccess}</div>
     ${progress(cohort)}
+    ${renderPortableRequest(cohort, options)}
     ${errorNotice}
     ${interestForm(cohort, options)}
     <section class="detail-content" aria-label="Cohort details">
@@ -248,5 +415,5 @@ export function renderCohortDetailPage(cohort, options = {}) {
       <div class="detail-section"><h2>Who it’s for</h2><dl class="cohort-facts"><div><dt>Topic</dt><dd>${escapeHtml(cohort.topic)}</dd></div><div><dt>Skill level</dt><dd>${escapeHtml(label(cohort.targetSkillLevel))}</dd></div></dl>${renderFormattedText(cohort.targetAudience)}</div>
       ${cohort.additionalDetails ? `<div class="detail-section detail-section-main"><h2>Additional details</h2>${renderFormattedText(cohort.additionalDetails)}</div>` : ''}
     </section>
-  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}${localTimeScript()}${acceptsInterest ? interestFormScript() : ''}</body></html>`;
+  </main><footer><div class="shell">Cohort15 — small, high-intent online groups.</div></footer>${renderFeedbackWidget()}${localTimeScript()}${portableRequestScript()}${acceptsInterest ? interestFormScript() : ''}</body></html>`;
 }

@@ -427,6 +427,7 @@ export function createRequestHandler(options = {}) {
     if (method === 'GET' && url.pathname === '/') {
       const listing = await eventBrowsing.list({ status: url.searchParams.get('status') ?? 'all' });
       send(res, 200, 'text/html; charset=utf-8', renderHomePage({
+        appUrl: config.appUrl,
         googleAnalyticsId: config.googleAnalyticsId,
         cohorts: listing.cohorts,
         status: listing.status,

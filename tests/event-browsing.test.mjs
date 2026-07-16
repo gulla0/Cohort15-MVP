@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 
 import { createLofiStore } from '../src/persistence/store.mjs';
 import { createLocalRepositories } from '../src/persistence/repositories.mjs';
 import { createRequestHandler } from '../src/server/app.mjs';
 import { createEventBrowsingService } from '../src/services/event-browsing.mjs';
-import { renderCohortCard, renderCohortDetailPage } from '../src/ui/cohorts.mjs';
+import {
+  cohortCardScript, portableCohortRequest, portableRequestScript, renderCohortCard,
+  renderCohortDetailPage,
+} from '../src/ui/cohorts.mjs';
 
 const NOW = new Date('2026-06-18T12:00:00.000Z');
 const config = Object.freeze({ appEnv: 'test', appUrl: 'http://localhost:3000', googleAnalyticsId: 'G-LF22TLDSBV' });
@@ -47,6 +51,18 @@ function metaContent(html, selector) {
   return propertyPattern.exec(html)?.[1] ?? namePattern.exec(html)?.[1] ?? '';
 }
 
+function portableTextMarkup(html) {
+  return /<textarea class="portable-request-text"[^>]*>([\s\S]*?)<\/textarea>/u.exec(html)?.[1] ?? '';
+}
+
+function portableScriptSource() {
+  return portableRequestScript().replace(/^<script>|<\/script>$/gu, '');
+}
+
+function cardScriptSource() {
+  return cohortCardScript().replace(/^<script>|<\/script>$/gu, '');
+}
+
 async function fixture() {
   const repositories = createLocalRepositories({ store: createLofiStore(), now: () => NOW, randomUUID: () => 'unused' });
   await repositories.createCohort(cohort({ title: 'Older active <test>' }), { id: 'b-active', now: new Date('2026-06-17T12:00:00.000Z') });
@@ -77,6 +93,10 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.match(home.body, /timeZoneName: 'long'/);
   assert.doesNotMatch(home.body, /dateStyle|timeStyle/);
   assert.match(home.body, /3 more needed/);
+  assert.match(home.body, /class="cohort-card-actions"[\s\S]*class="card-copy-icon"[\s\S]*>Copy request<\/button>/u);
+  assert.match(home.body, /data-cohort-card data-cohort-href="\/cohorts\/b-active"/u);
+  assert.match(home.body, /document\.querySelectorAll\('\[data-cohort-card\]'\)/u);
+  assert.match(home.body, /http:\/\/localhost:3000\/cohorts\/b-active/u);
   assert.doesNotMatch(home.body, /private@example\.com|meet\.google\.com/);
   assert.ok(home.body.indexOf('Newer active') < home.body.indexOf('Older active'));
   assert.doesNotMatch(home.body, /href="\/cohorts\/expired"/);
@@ -92,6 +112,8 @@ test('home and detail routes render public lifecycle data, local-time hooks, and
   assert.match(detail.body, /Older active &lt;test&gt;/);
   assert.match(detail.body, /Times are converted by your browser and shown in your local timezone/);
   assert.match(detail.body, /Duration<\/dt><dd>60 minutes/);
+  assert.match(detail.body, />Copy cohort request<\/button>/u);
+  assert.doesNotMatch(detail.body, /card-copy-icon/u);
   assert.doesNotMatch(detail.body, /private@example\.com|meet\.google\.com/);
 
   const socialImage = await invoke(handler, '/cohorts/b-active/social-image.png');
@@ -224,4 +246,146 @@ Before joining, self-qualify honestly:
   assert.match(html, /<ul><li>Technical builders<\/li><li>Growth operators<\/li><\/ul>/);
   assert.match(html, /&lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt;/);
   assert.doesNotMatch(html, /<script>alert/);
+});
+
+test('portable cohort requests are deterministic, private-safe, and at most 280 code points', () => {
+  const publicCohort = {
+    ...cohort({
+      id: 'portable-max',
+      title: `${'😀'.repeat(120)} private@example.com`,
+      description: `${'A focused purpose '.repeat(260)} https://meet.google.com/secret-room www.example.com`,
+      minQuorum: 15,
+      meetingDurationMinutes: 480,
+      recurrence: 'biweekly',
+      meetingCount: 52,
+    }),
+    firstMeetingAt: '2026-12-31T23:59:00.000Z',
+    createdAt: NOW.toISOString(),
+    updatedAt: NOW.toISOString(),
+    expiresAt: '2026-06-25T12:00:00.000Z',
+    interestCount: 14,
+    collectionStatus: 'active',
+    quorumStatus: 'gathering',
+    quorumMetAt: null,
+    finalMeetingEndsAt: '2028-12-31T23:59:00.000Z',
+  };
+  const options = { appUrl: 'https://cohort15.com', now: NOW };
+  const payload = portableCohortRequest(publicCohort, options);
+  const card = renderCohortCard(publicCohort, options);
+  const detail = renderCohortDetailPage(publicCohort, options);
+
+  assert.ok(Array.from(payload).length <= 280);
+  assert.match(payload, /^Cohort request: /u);
+  assert.match(payload, /https:\/\/cohort15\.com\/cohorts\/portable-max$/u);
+  assert.doesNotMatch(payload, /private@example\.com|meet\.google\.com|www\.example\.com/u);
+  assert.match(card, /class="portable-request card-portable-request"/u);
+  assert.match(card, /<a class="text-link" href="\/cohorts\/portable-max">View cohort details →<\/a>/u);
+  assert.match(card, /<svg class="card-copy-icon"[^>]*aria-hidden="true"[^>]*focusable="false"/u);
+  assert.match(card, />Copy request<\/button>/u);
+  assert.match(detail, />Copy cohort request<\/button>/u);
+  assert.equal(portableTextMarkup(card), portableTextMarkup(detail));
+  assert.equal(portableTextMarkup(card), payload);
+  assert.doesNotMatch(portableTextMarkup(card), /private@example\.com|meet\.google\.com/u);
+});
+
+test('portable cohort requests express schedule and lifecycle context in readable UTC text', () => {
+  const base = {
+    ...cohort({ id: 'readable', recurrence: 'weekly', meetingCount: 2 }),
+    firstMeetingAt: '2026-07-24T22:00:00.000Z',
+    interestCount: 2,
+    minQuorum: 3,
+    collectionStatus: 'active',
+    quorumStatus: 'gathering',
+    finalMeetingEndsAt: '2026-07-31T23:00:00.000Z',
+  };
+  const options = { appUrl: 'https://cohort15.com', now: NOW };
+  const forming = portableCohortRequest(base, options);
+  assert.match(forming, /Jul 24, 2026 at 10:00 PM UTC · Weekly · 2 meetings × 60 min · 2 of 3 interested/u);
+
+  const oneTime = portableCohortRequest({
+    ...base,
+    id: 'one-time',
+    firstMeetingAt: '2026-01-02T00:05:00.000Z',
+    recurrence: 'none',
+    meetingCount: 1,
+  }, options);
+  assert.match(oneTime, /Jan 2, 2026 at 12:05 AM UTC · One time · 1 meeting × 60 min/u);
+
+  const met = portableCohortRequest({ ...base, collectionStatus: 'expired', quorumStatus: 'met', interestCount: 3 }, options);
+  assert.match(met, /Quorum met \(3 of 3 interested\)/u);
+  const closed = portableCohortRequest({ ...base, collectionStatus: 'expired', quorumStatus: 'gathering' }, options);
+  assert.match(closed, /Collection closed/u);
+});
+
+test('whole cohort cards navigate except for interactions and selected text', () => {
+  function cardHarness({ matchingAncestor = '', selection = '', defaultPrevented = false } = {}) {
+    let click;
+    let navigatedTo = '';
+    const card = {
+      dataset: { cohortHref: '/cohorts/encoded-id' },
+      addEventListener(type, listener) { if (type === 'click') click = listener; },
+    };
+    vm.runInNewContext(cardScriptSource(), {
+      document: { querySelectorAll() { return [card]; } },
+      getSelection() { return { isCollapsed: !selection, toString() { return selection; } }; },
+      location: { assign(value) { navigatedTo = value; } },
+    });
+    const event = {
+      defaultPrevented,
+      target: { closest(selector) {
+        return selector.split(', ').includes(matchingAncestor) ? {} : null;
+      } },
+    };
+    click(event);
+    return navigatedTo;
+  }
+
+  assert.equal(cardHarness(), '/cohorts/encoded-id');
+  for (const interactive of [
+    'a', 'button', 'textarea', 'input', 'select', 'label', 'form', '[contenteditable]', '[data-portable-request]',
+  ]) {
+    assert.equal(cardHarness({ matchingAncestor: interactive }), '');
+  }
+  assert.equal(cardHarness({ selection: 'selected card text' }), '');
+  assert.equal(cardHarness({ defaultPrevented: true }), '');
+});
+
+test('portable request controls report clipboard success and expose selectable fallback on failure', async () => {
+  function browserHarness(clipboard) {
+    let click;
+    const button = { addEventListener(type, listener) { if (type === 'click') click = listener; } };
+    const status = { textContent: '' };
+    const fallback = {
+      value: 'Cohort request: Test\nhttps://cohort15.com/cohorts/test',
+      hidden: true,
+      focused: false,
+      selected: false,
+      focus() { this.focused = true; },
+      select() { this.selected = true; },
+    };
+    const control = { querySelector(selector) {
+      if (selector === '[data-portable-request-button]') return button;
+      if (selector === '[data-portable-request-status]') return status;
+      return fallback;
+    } };
+    vm.runInNewContext(portableScriptSource(), {
+      document: { querySelectorAll() { return [control]; } },
+      navigator: clipboard === undefined ? {} : { clipboard },
+    });
+    return { click, fallback, status };
+  }
+
+  let copied = '';
+  const success = browserHarness({ async writeText(value) { copied = value; } });
+  await success.click();
+  assert.equal(copied, success.fallback.value);
+  assert.equal(success.status.textContent, 'Cohort request copied.');
+  assert.equal(success.fallback.hidden, true);
+
+  const failure = browserHarness(undefined);
+  await failure.click();
+  assert.equal(failure.status.textContent, 'Could not copy the cohort request. Select and copy it manually.');
+  assert.equal(failure.fallback.hidden, false);
+  assert.equal(failure.fallback.focused, true);
+  assert.equal(failure.fallback.selected, true);
 });
