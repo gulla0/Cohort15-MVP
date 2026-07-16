@@ -21,3 +21,12 @@ Append-only.
 - Browse cohorts and Create a cohort now share primary emphasis; Research remains visible with quieter treatment on every page.
 - Anonymous visitors see Sign in. Signed-in visitors always see settled available credits and can open Buy credits followed by CSRF-protected Sign out.
 - Focused tests, the full 111-test repository check, and anonymous desktop/mobile browser smoke passed without horizontal overflow or console errors.
+
+## 2026-07-16 - Styling follow-up
+
+- Reopened the issue after review found that outlined destination controls and full-width mobile buttons felt alien to the existing site.
+- Approved direction: quiet text navigation, restrained current-page treatment, compact mobile wrapping, and the credit summary as the only pill-shaped account control.
+- Commit and issue closeout are deferred until the revised local browser view is shown and approved.
+- Replaced outlined destination controls and filled current states with editorial text links and a restrained underline.
+- Changed mobile navigation from full-width stacked controls to compact wrapping links while preserving 44-pixel touch height.
+- The user approved the running desktop result after automated and responsive browser verification.

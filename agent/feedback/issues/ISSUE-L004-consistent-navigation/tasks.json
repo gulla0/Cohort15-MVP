@@ -38,6 +38,24 @@
       "shared_dependencies": ["src/ui/styles.css", "src/ui/auth.mjs", "multiple UI regression tests"],
       "stop_condition": "Stop when every page uses one verified, responsive, accessible header without changing product routes or account mechanics.",
       "evidence": "Added one shared renderer used by every full page, canonical route-family current states, anonymous Sign in, and a visible-credit native account disclosure containing Buy credits and CSRF-protected Sign out. Added focused structural, keyboard, privacy, and responsive coverage. Manager verification passed 42 focused tests and npm run check with 111 tests; anonymous browser smoke passed at 1280x720 and 390x844 without overflow or console errors on 2026-07-16 EDT."
+    },
+    {
+      "id": "ISSUE-L004-T03",
+      "title": "Simplify the shared navigation styling",
+      "status": "done",
+      "dependencies": ["ISSUE-L004-T02"],
+      "objective": "Bring the shared header back into Cohort15's quiet editorial visual language without losing its consistent structure or accessible account behavior.",
+      "inputs": ["issue.md", "docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/navigation.mjs", "src/ui/styles.css", "tests/navigation.test.mjs"],
+      "write_scope": ["canonical shared-navigation visual guidance", "shared navigation and account styles", "focused navigation style assertions"],
+      "authority": ["Use simple text navigation instead of multiple button-like destination variants.", "Keep Browse cohorts and Create a cohort slightly stronger than the visibly quieter Research link.", "Use a restrained current-page cue and preserve the credit summary as the only pill-shaped account control.", "Keep the existing shared renderer, route order, native disclosure, CSRF sign-out, focus treatment, and 44-pixel touch targets."],
+      "acceptance_criteria": ["The header feels native to the existing editorial site rather than like a separate control panel.", "Desktop uses a quiet text-link rhythm with a restrained current state.", "Mobile uses compact wrapping or two-row navigation rather than three full-width button-like controls.", "Navigation remains consistent, keyboard accessible, responsive, and free of horizontal overflow."],
+      "verification": ["Run focused navigation tests.", "Run npm run check.", "Review desktop and mobile in the local browser before commit."],
+      "files_expected": ["docs/cohort15-piece-of-pie-mvp-spec.md", "src/ui/styles.css", "tests/navigation.test.mjs"],
+      "area": "shared navigation styling",
+      "risk": "medium",
+      "shared_dependencies": ["src/ui/styles.css", "tests/navigation.test.mjs"],
+      "stop_condition": "Stop with the local server open for user review before committing or closing the issue.",
+      "evidence": "Replaced outlined and filled destination variants with editorial text links, a restrained underline current state, simple Sign in treatment, and compact mobile wrapping while retaining the credit disclosure pill. Focused navigation tests and npm run check passed with 111 tests; desktop and 390x844 browser review had no overflow or console errors, and the user approved the visible result on 2026-07-16 EDT."
     }
   ]
 }

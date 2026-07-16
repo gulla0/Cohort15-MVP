@@ -146,3 +146,9 @@ Artifacts Updated:
 - `tests/navigation.test.mjs`
 - `agent/feedback/issues/ISSUE-L004-consistent-navigation/`
 - `agent/feedback/issue-index.md`
+
+Follow-up Review:
+- The user found the first shared-navigation styling alien to the site's existing visual language and asked for a simpler, consistent treatment.
+- Reopened ISSUE-L004 with T03, removed outlined and filled destination variants, retained stronger Browse/Create typography and quieter Research, and used a restrained underline for current state.
+- Kept the credit disclosure as the only pill-shaped header control and changed narrow layouts to compact wrapping text links rather than full-width stacked buttons.
+- The user approved the running local result before commit and final issue closeout.

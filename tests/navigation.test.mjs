@@ -114,6 +114,10 @@ test('navigation enhancement and responsive styles preserve native keyboard and 
   assert.match(styles, /\.account-disclosure > summary[\s\S]*?min-height: 44px/u);
   assert.match(styles, /\.account-navigation > \.button-link\.compact[\s\S]*?min-height: 44px/u);
   assert.match(styles, /\.account-panel[\s\S]*?max-width: min\(280px, calc\(100vw - 24px\)\)/u);
-  assert.match(styles, /@media \(max-width: 520px\)[\s\S]*?\.site-nav \{ align-items: stretch; flex-direction: column;/u);
+  assert.match(styles, /\.nav-link\[aria-current="page"\][\s\S]*?text-decoration: underline;[\s\S]*?text-underline-offset: 7px/u);
+  assert.doesNotMatch(styles, /\.nav-primary\s*\{\s*border:/u);
+  assert.doesNotMatch(styles, /\.nav-link\[aria-current="page"\][^}]*background:/u);
+  assert.match(styles, /@media \(max-width: 520px\)[\s\S]*?\.site-nav \{ align-items: center; flex-direction: row; flex-wrap: wrap;/u);
+  assert.match(styles, /@media \(max-width: 520px\)[\s\S]*?\.nav-link \{ justify-content: flex-start; width: auto;/u);
   assert.match(styles, /summary:focus-visible/u);
 });
